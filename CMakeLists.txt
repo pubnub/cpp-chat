@@ -27,7 +27,7 @@ include_directories(${c-core_SOURCE_DIR}/posix)
 include_directories(${c-core_SOURCE_DIR}/core)
 include_directories(${c-core_SOURCE_DIR})
 
-add_library(pubnub-chat STATIC src/lib.cpp)
+add_library(pubnub-chat SHARED src/lib.cpp)
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
