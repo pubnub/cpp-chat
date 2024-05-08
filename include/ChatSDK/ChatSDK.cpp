@@ -15,5 +15,18 @@ void ChatSDK::Init()
 
 void ChatSDK::PublishMessage(std::string Channel, std::string Message)
 {
+    std::cout << "Publish message\n";
 
+    //pubnub_publish(ctx_pub, Channel.c_str(), Message.c_str())
+
+    std::cout << "Message published\n";
+}
+
+void ChatSDK::Deinit()
+{
+    std::cout << "Deinit Chat SDK\n";
+
+    //pubnub_free(ctx_pub);
+
+    std::cout << "Chat SDK deinitialized\n";
 }

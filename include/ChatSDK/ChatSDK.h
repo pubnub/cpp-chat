@@ -9,6 +9,7 @@ class ChatSDK
 
     void Init();
     void PublishMessage(std::string Channel, std::string Message);
+    void Deinit();
 
     private:
     //pubnub_t *ctx_pub;
