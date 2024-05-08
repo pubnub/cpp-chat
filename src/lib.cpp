@@ -29,3 +29,13 @@ int Library::publish(std::string channel, std::string message) {
 
     return res == PNR_OK ? 0 : -1;
 }
+
+int publish_fn(std::string channel, std::string message) {
+    Library lib;
+    return lib.publish(channel, message);
+}
+
+int publish_simple_fn() {
+    Library lib;
+    return lib.publish("my_channel", "\"Hello, world!\"");
+}
