@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "ChatSDK.h"
+#include "chat.h"
 
-void ChatSDK::Init()
+void Chat::init()
 {
     std::cout << "Init Chat SDK\n";
     
@@ -13,7 +13,7 @@ void ChatSDK::Init()
     std::cout << "Chat SDK Initialized\n";
 }
 
-void ChatSDK::PublishMessage(std::string Channel, std::string Message)
+void Chat::publish_message(std::string Channel, std::string Message)
 {
     std::cout << "Publish message\n";
 
@@ -22,7 +22,7 @@ void ChatSDK::PublishMessage(std::string Channel, std::string Message)
     std::cout << "Message published\n";
 }
 
-void ChatSDK::Deinit()
+void Chat::deinit()
 {
     std::cout << "Deinit Chat SDK\n";
 
