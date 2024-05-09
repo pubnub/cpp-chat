@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CHAT_H
+#define CHAT_H
+
 #include <string>
 #include "export.hpp"
 
@@ -20,3 +22,5 @@ class Chat
     const char* subscribe_key = "sub-c-2b4db8f2-c025-4a76-9e23-326123298667";
     std::string user_id = "TestUser";
 };
+
+#endif /* CHAT_H */
