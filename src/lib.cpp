@@ -7,7 +7,7 @@ extern "C" {
 #include "core/pubnub_ntf_sync.h"
 }
 
-int Library::publish(std::string channel, std::string message) {
+int Library::publish(const char* channel, const char* message) {
     pubnub_t *ctx = pubnub_alloc();
     if (NULL == ctx) {
         std::cout << "Failed to allocate Pubnub context" << std::endl;
@@ -17,7 +17,7 @@ int Library::publish(std::string channel, std::string message) {
     pubnub_init(ctx, "demo", "demo");
     pubnub_set_user_id(ctx, "my_unique_user_id");
 
-    pubnub_publish(ctx, channel.c_str(), message.c_str());
+    pubnub_publish(ctx, channel, message);
     auto res = pubnub_await(ctx);
 
     if (res != PNR_OK) {
@@ -30,7 +30,7 @@ int Library::publish(std::string channel, std::string message) {
     return res == PNR_OK ? 0 : -1;
 }
 
-int publish_fn(std::string channel, std::string message) {
+int publish_fn(const char* channel, const char* message) {
     Library lib;
     return lib.publish(channel, message);
 }
@@ -38,4 +38,25 @@ int publish_fn(std::string channel, std::string message) {
 int publish_simple_fn() {
     Library lib;
     return lib.publish("my_channel", "\"Hello, world!\"");
+}
+
+Library* library_create() {
+    return new Library();
+}
+
+void library_destroy(Library* lib) {
+    if (lib != nullptr)
+    {
+        delete lib;
+        lib = nullptr;
+    }
+}
+
+int library_publish(Library* lib, const char* channel, const char* message) {
+    if (lib != nullptr)
+    {
+        return lib->publish(channel, message);
+    }
+
+    return -1;
 }
