@@ -48,7 +48,26 @@
         "xlocmes": "cpp",
         "xlocmon": "cpp",
         "xlocnum": "cpp",
-        "xloctime": "cpp"
+        "xloctime": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "forward_list": "cpp",
+        "functional": "cpp",
+        "iomanip": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "mutex": "cpp",
+        "optional": "cpp",
+        "ratio": "cpp",
+        "regex": "cpp",
+        "sstream": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp"
     },
     "cmake.configureOnOpen": true
 }
