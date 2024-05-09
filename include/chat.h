@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "export.hpp"
 
 extern "C" {
     #include "core/pubnub_api_types.h"
@@ -9,9 +10,9 @@ class Chat
 {
     public:
 
-    void init();
-    void publish_message(std::string channel, std::string message);
-    void deinit();
+    DLL_EXPORT void init();
+    DLL_EXPORT void publish_message(std::string channel, std::string message);
+    DLL_EXPORT void deinit();
 
     private:
     pubnub_t *ctx_pub;
