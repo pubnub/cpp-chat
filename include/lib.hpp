@@ -6,11 +6,11 @@
 
 class Library {
     public:
-        DLL_EXPORT int publish(std::string channel, std::string message);
+        PN_CHAT_EXPORT int publish(std::string channel, std::string message);
 };
 
-DLL_EXPORT int publish_fn(std::string channel, std::string message);
+PN_CHAT_EXPORT int publish_fn(std::string channel, std::string message);
 
-DLL_EXPORT int publish_simple_fn();
+PN_CHAT_EXPORT int publish_simple_fn();
 
 #endif /* LIB_HPP */

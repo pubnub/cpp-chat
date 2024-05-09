@@ -12,9 +12,9 @@ class Chat
 {
     public:
 
-    DLL_EXPORT void init();
-    DLL_EXPORT void publish_message(std::string channel, std::string message);
-    DLL_EXPORT void deinit();
+    PN_CHAT_EXPORT void init();
+    PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
+    PN_CHAT_EXPORT void deinit();
 
     private:
     pubnub_t *ctx_pub;
