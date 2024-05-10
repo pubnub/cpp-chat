@@ -12,11 +12,10 @@ include(FetchContent)
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG f800ebeddfd24b6c838976a851c1ff6a88915a14
+  GIT_TAG master
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
-  OPTIONS "WITH_CPP ON"
 )
 
 FetchContent_MakeAvailable(pubnub)
