@@ -58,7 +58,7 @@ void Chat::publish_message(const char* channel, const char*message)
     std::cout << "Message published\n";
 }
 
-Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, pubnub_chat_channel_data channel_data)
+Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, chat_channel_data channel_data)
 {
     if(channel_id.empty())
     {

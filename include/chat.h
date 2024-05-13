@@ -30,7 +30,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
         PN_CHAT_EXPORT void publish_message(const char* channel, const char* message);
 
-        Pubnub::Channel* create_public_conversation(std::string channel_id, pubnub_chat_channel_data channel_data);
+        Pubnub::Channel* create_public_conversation(std::string channel_id, chat_channel_data channel_data);
 
 
         private:
