@@ -9,16 +9,38 @@ extern "C" {
 
 using namespace Pubnub;
 
-void Chat::init()
+void Chat::init(std::string in_publish_key, std::string in_subscribe_key, std::string in_user_id)
 {
-    std::cout << "Init Chat SDK\n";
-    
+    init(in_publish_key.c_str(), in_subscribe_key.c_str(), in_user_id.c_str());
+}
+
+void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id)
+{
+    publish_key = in_publish_key;
+    subscribe_key = in_subscribe_key;
+    user_id = in_user_id;
     ctx_pub = pubnub_alloc();
+
+    if (NULL == ctx_pub) 
+    {
+        std::cout << "Failed to allocate Pubnub context" << std::endl;
+        return;
+    }
+
     pubnub_init(ctx_pub, publish_key, subscribe_key);
     pubnub_set_user_id(ctx_pub, user_id);
 
-    std::cout << "Chat SDK Initialized\n";
 }
+
+void Chat::deinit()
+{
+    std::cout << "Deinit Chat SDK\n";
+
+    pubnub_free(ctx_pub);
+
+    std::cout << "Chat SDK deinitialized\n";
+}
+
 
 void Chat::publish_message(std::string channel, std::string message)
 {
@@ -36,11 +58,16 @@ void Chat::publish_message(const char* channel, const char*message)
     std::cout << "Message published\n";
 }
 
-void Chat::deinit()
+Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, pubnub_chat_channel_data channel_data)
 {
-    std::cout << "Deinit Chat SDK\n";
+    if(channel_id.empty())
+    {
+        std::cout << "Failed to create public conversation, channel_id is empty" << std::endl;
+        return;
+    }
 
-    pubnub_free(ctx_pub);
+    Channel* channel_ptr = new Channel;
+    channel_ptr->init(channel_id, channel_data);
 
-    std::cout << "Chat SDK deinitialized\n";
+    return channel_ptr;
 }
