@@ -14,7 +14,7 @@ extern "C" {
 
 namespace Pubnub
 {
-    PN_CHAT_EXPORT class Chat
+    class Chat
     {
         public:
 
@@ -30,7 +30,11 @@ namespace Pubnub
         PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
         PN_CHAT_EXPORT void publish_message(const char* channel, const char* message);
 
-        Pubnub::Channel* create_public_conversation(std::string channel_id, chat_channel_data channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(std::string channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data);
+
+        PN_CHAT_EXPORT Pubnub::Channel* update_channel(std::string channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel* update_channel(const char* channel_id, ChatChannelDataChar channel_data);
 
 
         private:
@@ -38,6 +42,8 @@ namespace Pubnub
         const char* publish_key;
         const char* subscribe_key;
         const char* user_id;
+
+        const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
     };
 }
 #endif /* CHAT_H */

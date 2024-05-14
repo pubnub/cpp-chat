@@ -20,13 +20,27 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+  GIT_SHALLOW TRUE
+  GIT_PROGRESS ON
+  SYSTEM
+)
+
+FetchContent_MakeAvailable(json)
+
 include_directories(${CURRENT_SOURCE_DIR}/include)
 
 include_directories(${c-core_SOURCE_DIR}/posix)
 include_directories(${c-core_SOURCE_DIR}/core)
 include_directories(${c-core_SOURCE_DIR})
 
-add_library(pubnub-chat SHARED src/lib.cpp)
+include_directories(${json_SOURCE_DIR})
+include_directories(${json_SOURCE_DIR}/include)
+
+add_library(pubnub-chat SHARED src/lib.cpp src/chat.cpp)
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 

@@ -8,7 +8,7 @@
 namespace Pubnub
 {
 
-    PN_CHAT_EXPORT struct chat_channel_data
+    struct ChatChannelData
     {
         std::string channel_name;
         std::string description;
@@ -18,7 +18,7 @@ namespace Pubnub
         std::string type;
     };
 
-        PN_CHAT_EXPORT struct chat_channel_data_c
+    struct ChatChannelDataChar
     {
         const char* channel_name;
         const char* description;
@@ -27,9 +27,9 @@ namespace Pubnub
         const char* status;
         const char* type;
 
-        chat_channel_data_c(){};
+        ChatChannelDataChar(){};
 
-        chat_channel_data_c(chat_channel_data in_channel_data)
+        ChatChannelDataChar(ChatChannelData in_channel_data)
         {
             channel_name = in_channel_data.channel_name.c_str();
             description = in_channel_data.description.c_str();
@@ -41,22 +41,24 @@ namespace Pubnub
     };
 
 
-    PN_CHAT_EXPORT class Channel
+    class Channel
     {
         public:
 
-        void init(std::string in_channel_id, chat_channel_data in_additional_channel_data);
-        void init(const char* in_channel_id, chat_channel_data_c in_additional_channel_data);
+        PN_CHAT_EXPORT void init(std::string in_channel_id, ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT void init(const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
 
-        void update(chat_channel_data in_additional_channel_data);
-        void update(chat_channel_data_c in_additional_channel_data);
+        PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT void update(ChatChannelDataChar in_additional_channel_data);
+
+        PN_CHAT_EXPORT void Connect();
+        PN_CHAT_EXPORT void Disconnect();
 
         private:
 
         bool is_initialized = false;
         const char* channel_id;
-        chat_channel_data_c channel_data;
-
+        ChatChannelDataChar channel_data;
 
     };
 }

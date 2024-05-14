@@ -6,7 +6,7 @@
 
 namespace Pubnub
 {
-    PN_CHAT_EXPORT class Message
+    class Message
     {
         public:
 
