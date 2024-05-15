@@ -2,6 +2,8 @@
 #define CHAT_H
 
 #include <string>
+#include <future>
+
 #include "export.hpp"
 #include "chat/user.h"
 #include "chat/channel.h"
@@ -36,6 +38,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Channel* update_channel(std::string channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Pubnub::Channel* update_channel(const char* channel_id, ChatChannelDataChar channel_data);
 
+        PN_CHAT_EXPORT Pubnub::Channel* get_channel(std::string channel_id);
+        PN_CHAT_EXPORT Pubnub::Channel* get_channel(const char* channel_id);
 
         private:
         pubnub_t *ctx_pub;
@@ -44,6 +48,7 @@ namespace Pubnub
         const char* user_id;
 
         const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
+        std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
     };
 }
 #endif /* CHAT_H */

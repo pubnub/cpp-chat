@@ -47,6 +47,8 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void init(std::string in_channel_id, ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void init(const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
+        PN_CHAT_EXPORT void init_from_json(std::string in_channel_id, std::string channel_data_json);
+        PN_CHAT_EXPORT void init_from_json(const char* in_channel_id, const char* channel_data_json);
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void update(ChatChannelDataChar in_additional_channel_data);
@@ -59,6 +61,8 @@ namespace Pubnub
         bool is_initialized = false;
         const char* channel_id;
         ChatChannelDataChar channel_data;
+
+        ChatChannelDataChar channel_data_from_json_char(const char* json_char);
 
     };
 }

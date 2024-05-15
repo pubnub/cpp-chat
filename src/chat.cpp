@@ -26,7 +26,7 @@ void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const 
 
     if (NULL == ctx_pub) 
     {
-        std::cout << "Failed to allocate Pubnub context" << std::endl;
+        std::cout << "Failed to allocate Pubnub context\n" << std::endl;
         return;
     }
 
@@ -68,9 +68,9 @@ Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, ChatCh
 
 Pubnub::Channel* Chat::create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data)
 {
-    if(channel_id)
+    if(*channel_id == 0)
     {
-        std::cout << "Failed to create public conversation, channel_id is empty" << std::endl;
+        std::cout << "Failed to create public conversation, channel_id is empty\n" << std::endl;
         return nullptr;
     }
 
@@ -91,6 +91,35 @@ Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataCha
 
     Channel* channel_ptr = new Channel;
     //channel_ptr->init(channel_id, channel_data);
+
+    return channel_ptr;
+}
+
+PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(std::string channel_id)
+{
+    return get_channel(channel_id.c_str());
+}
+
+PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id)
+{
+    if(channel_id == 0)
+    {
+        std::cout << "Failed to get channel, channel_id is empty\n" << std::endl;
+        return nullptr;
+    }
+
+    auto future_response = get_channel_metadata_async(channel_id);
+    pubnub_res Res = future_response.get();
+    if(Res != PNR_OK)
+    {
+        std::cout << "Failed to get channel response error\n" << std::endl;
+        return nullptr;
+    }
+
+    const char* channel_response = pubnub_get(ctx_pub);
+
+    Channel* channel_ptr = new Channel;
+    //channel_ptr->init_from_json(channel_id, channel_response);
 
     return channel_ptr;
 }
@@ -126,4 +155,13 @@ const char* Chat::channel_data_to_json_char(const char* channel_id, ChatChannelD
     }
 
     return channel_data_json.dump().c_str();
+}
+
+std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)
+{
+    return std::async(std::launch::async, [=](){
+        pubnub_get_channelmetadata(ctx_pub, NULL, channel_id);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
 }
