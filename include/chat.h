@@ -47,7 +47,6 @@ namespace Pubnub
         const char* subscribe_key;
         const char* user_id;
 
-        const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
     };
 }

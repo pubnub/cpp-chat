@@ -4,6 +4,10 @@
 #include <string>
 #include "export.hpp"
 
+extern "C" {
+    #include "core/pubnub_api_types.h"
+}
+
 
 namespace Pubnub
 {
@@ -45,10 +49,10 @@ namespace Pubnub
     {
         public:
 
-        PN_CHAT_EXPORT void init(std::string in_channel_id, ChatChannelData in_additional_channel_data);
-        PN_CHAT_EXPORT void init(const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
-        PN_CHAT_EXPORT void init_from_json(std::string in_channel_id, std::string channel_data_json);
-        PN_CHAT_EXPORT void init_from_json(const char* in_channel_id, const char* channel_data_json);
+        PN_CHAT_EXPORT void init(pubnub_t* in_ctx, std::string in_channel_id, ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT void init(pubnub_t* in_ctx, const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
+        PN_CHAT_EXPORT void init_from_json(pubnub_t* in_ctx, std::string in_channel_id, std::string channel_data_json);
+        PN_CHAT_EXPORT void init_from_json(pubnub_t* in_ctx, const char* in_channel_id, const char* channel_data_json);
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void update(ChatChannelDataChar in_additional_channel_data);
@@ -59,10 +63,12 @@ namespace Pubnub
         private:
 
         bool is_initialized = false;
+        pubnub_t *ctx_pub;
         const char* channel_id;
         ChatChannelDataChar channel_data;
 
         ChatChannelDataChar channel_data_from_json_char(const char* json_char);
+        const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
 
     };
 }
