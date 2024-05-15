@@ -1,5 +1,5 @@
 #include <iostream>
-#include "channel.h"
+#include "chat/channel.h"
 #include "nlohmann/json.hpp"
 
 extern "C" {

@@ -40,7 +40,7 @@ include_directories(${c-core_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
 
-add_library(pubnub-chat SHARED src/lib.cpp src/chat.cpp)
+add_library(pubnub-chat SHARED src/lib.cpp src/chat.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp)
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 

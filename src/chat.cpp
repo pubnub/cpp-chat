@@ -90,7 +90,7 @@ Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataCha
     pubnub_set_channelmetadata(ctx_pub, channel_id, NULL, channel_data_to_json_char(channel_id, channel_data));
 
     Channel* channel_ptr = new Channel;
-    //channel_ptr->init(channel_id, channel_data);
+    channel_ptr->init(channel_id, channel_data);
 
     return channel_ptr;
 }
@@ -119,7 +119,7 @@ PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id
     const char* channel_response = pubnub_get(ctx_pub);
 
     Channel* channel_ptr = new Channel;
-    //channel_ptr->init_from_json(channel_id, channel_response);
+    channel_ptr->init_from_json(channel_id, channel_response);
 
     return channel_ptr;
 }
