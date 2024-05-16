@@ -19,6 +19,7 @@ void Chat::init(std::string in_publish_key, std::string in_subscribe_key, std::s
 
 void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id)
 {
+    printf("Init Chat SDK");
     publish_key = in_publish_key;
     subscribe_key = in_subscribe_key;
     user_id = in_user_id;
@@ -52,7 +53,7 @@ void Chat::publish_message(std::string channel, std::string message)
 
 void Chat::publish_message(const char* channel, const char*message)
 {
-    std::cout << "Publish message\n";
+    printf("publish message");
 
     pubnub_publish(ctx_pub, channel, message);
 
@@ -100,6 +101,7 @@ PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(std::string channel_id
 
 PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id)
 {
+    printf("Start get channel");
     if(channel_id == 0)
     {
         std::cout << "Failed to get channel, channel_id is empty\n" << std::endl;
@@ -107,6 +109,7 @@ PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id
     }
 
     auto future_response = get_channel_metadata_async(channel_id);
+    future_response.wait();
     pubnub_res Res = future_response.get();
     if(Res != PNR_OK)
     {
@@ -118,7 +121,7 @@ PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id
 
     Channel* channel_ptr = new Channel;
     channel_ptr->init_from_json(ctx_pub, channel_id, channel_response);
-
+    printf("get channel response: %s", channel_response);
     return channel_ptr;
 }
 
