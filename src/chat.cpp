@@ -94,35 +94,34 @@ Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataCha
     return channel_ptr;
 }
 
-PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(std::string channel_id)
-{
-    return get_channel(channel_id.c_str());
-}
-
-PN_CHAT_EXPORT Pubnub::Channel *Pubnub::Chat::get_channel(const char *channel_id)
+PN_CHAT_EXPORT Channel Pubnub::Chat::get_channel(std::string channel_id)
 {
     printf("Start get channel");
-    if(channel_id == 0)
+    if(channel_id.empty())
     {
-        std::cout << "Failed to get channel, channel_id is empty\n" << std::endl;
-        return nullptr;
+        throw std::invalid_argument("Failed to get channel, channel_id is empty");
     }
 
-    auto future_response = get_channel_metadata_async(channel_id);
+    auto future_response = get_channel_metadata_async(channel_id.c_str());
     future_response.wait();
     pubnub_res Res = future_response.get();
     if(Res != PNR_OK)
     {
-        std::cout << "Failed to get channel response error\n" << std::endl;
-        return nullptr;
+        throw std::invalid_argument("Failed to get response from server");
     }
 
-    const char* channel_response = pubnub_get(ctx_pub);
+    std::string channel_response = pubnub_get(ctx_pub);
 
-    Channel* channel_ptr = new Channel;
-    channel_ptr->init_from_json(ctx_pub, channel_id, channel_response);
-    printf("get channel response: %s", channel_response);
-    return channel_ptr;
+    Channel channel_obj;
+    channel_obj.init_from_json(ctx_pub, channel_id, channel_response);
+
+    return channel_obj;
+}
+
+PN_CHAT_EXPORT Channel Pubnub::Chat::get_channel(const char *channel_id)
+{
+    std::string channel_id_string = channel_id;
+    return get_channel(channel_id_string);
 }
 
 std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)

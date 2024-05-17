@@ -38,8 +38,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Channel* update_channel(std::string channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Pubnub::Channel* update_channel(const char* channel_id, ChatChannelDataChar channel_data);
 
-        PN_CHAT_EXPORT Pubnub::Channel* get_channel(std::string channel_id);
-        PN_CHAT_EXPORT Pubnub::Channel* get_channel(const char* channel_id);
+        PN_CHAT_EXPORT Channel get_channel(std::string channel_id);
+        PN_CHAT_EXPORT Channel get_channel(const char* channel_id);
 
         private:
         pubnub_t *ctx_pub;
