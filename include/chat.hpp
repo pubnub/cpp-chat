@@ -5,9 +5,9 @@
 #include <future>
 
 #include "export.hpp"
-#include "chat/user.h"
-#include "chat/channel.h"
-#include "chat/message.h"
+#include "chat/user.hpp"
+#include "chat/channel.hpp"
+#include "chat/message.hpp"
 
 
 extern "C" {

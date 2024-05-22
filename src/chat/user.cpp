@@ -1,5 +1,5 @@
 #include <iostream>
-#include "chat/user.h"
+#include "chat/user.hpp"
 
 
 using namespace Pubnub;
