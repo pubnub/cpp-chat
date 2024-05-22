@@ -1,3 +1,8 @@
 build/
 .vs/
 .vscode/
+.DS_Store
+justfile
+.cache
+compile_commands.json
+
