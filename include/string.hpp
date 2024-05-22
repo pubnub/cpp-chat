@@ -274,7 +274,7 @@ namespace Pubnub {
      * @param rhs The right hand side String to append.
      * @return The String that is the result of the append operation.
      */
-    String operator+(const String& lhs, const String& rhs);
+    PN_CHAT_EXPORT String operator+(const String& lhs, const String& rhs);
 
     /**
      * Add operator that appends a String with a const char* string.
@@ -283,7 +283,7 @@ namespace Pubnub {
      * @param rhs The right hand side const char* string to append.
      * @return The String that is the result of the append operation.
      */
-    String operator+(const String& lhs, const char* rhs);
+    PN_CHAT_EXPORT    String operator+(const String& lhs, const char* rhs);
 
     /**
      * Add operator that appends a String with a std::string.
@@ -292,7 +292,7 @@ namespace Pubnub {
      * @param rhs The right hand side std::string to append.
      * @return The String that is the result of the append operation.
      */
-    String operator+(const String& lhs, std::string rhs);
+    PN_CHAT_EXPORT    String operator+(const String& lhs, std::string rhs);
 
     /**
      * Equality operator that compares two Strings over their values.
@@ -301,7 +301,7 @@ namespace Pubnub {
      * @param rhs The right hand side String to compare.
      * @return True if the String values are equal (ptr do not need to be the same), false otherwise.
      */
-    bool operator==(const String& lhs, const String& rhs);
+    PN_CHAT_EXPORT    bool operator==(const String& lhs, const String& rhs);
 
     /**
      * Inequality operator that compares two Strings over their values.
@@ -310,7 +310,7 @@ namespace Pubnub {
      * @param rhs The right hand side String to compare.
      * @return True if the String values are not equal, false otherwise.
      */
-    bool operator!=(const String& lhs, const String& rhs);
+    PN_CHAT_EXPORT    bool operator!=(const String& lhs, const String& rhs);
 }
 
 #endif /* PN_STRING_H */
