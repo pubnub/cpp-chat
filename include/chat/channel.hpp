@@ -11,6 +11,8 @@ extern "C" {
 
 namespace Pubnub
 {
+    class Chat;
+
     struct ChatChannelDataBase
     {
         std::string channel_name;
@@ -64,20 +66,20 @@ namespace Pubnub
     {
         public:
 
-        PN_CHAT_EXPORT void init(pubnub_t* in_ctx, std::string in_channel_id, ChatChannelData in_additional_channel_data);
-        PN_CHAT_EXPORT void init(pubnub_t* in_ctx, const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
-        PN_CHAT_EXPORT void init_from_json(pubnub_t* in_ctx, std::string in_channel_id, std::string channel_data_json);
-        PN_CHAT_EXPORT void init_from_json(pubnub_t* in_ctx, const char* in_channel_id, const char* channel_data_json);
+        PN_CHAT_EXPORT void init(Pubnub::Chat *InChat, std::string in_channel_id, ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT void init(Pubnub::Chat *InChat, const char* in_channel_id, ChatChannelDataChar in_additional_channel_data);
+        PN_CHAT_EXPORT void init_from_json(Pubnub::Chat *InChat, std::string in_channel_id, std::string channel_data_json);
+        PN_CHAT_EXPORT void init_from_json(Pubnub::Chat *InChat, const char* in_channel_id, const char* channel_data_json);
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void update(ChatChannelDataChar in_additional_channel_data);
 
-        PN_CHAT_EXPORT void Connect();
-        PN_CHAT_EXPORT void Disconnect();
+        PN_CHAT_EXPORT void connect();
+        PN_CHAT_EXPORT void disconnect();
 
-        PN_CHAT_EXPORT void Join(std::string additional_params);
+        PN_CHAT_EXPORT void join(std::string additional_params);
         PN_CHAT_EXPORT void Join(const char* additional_params);
-        PN_CHAT_EXPORT void Leave();
+        PN_CHAT_EXPORT void leave();
 
 
         PN_CHAT_EXPORT std::string get_channel_id(){return channel_id;};
@@ -86,14 +88,18 @@ namespace Pubnub
         ChatChannelData channel_data;
 
         private:
+
         std::string channel_id;
         bool is_initialized = false;
-        pubnub_t *ctx_pub;
+        Pubnub::Chat *chat_obj;
 
         ChatChannelDataChar channel_data_from_json_char(const char* json_char);
         const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
         ChatChannelData channel_data_from_json(std::string json_string);
         std::string channel_data_to_json(std::string in_channel_id, ChatChannelData in_channel_data);
+
+        //Use this to get pubnub publish context from chat_obj.
+        pubnub_t* get_ctx_pub();
 
     };
 }

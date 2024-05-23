@@ -19,7 +19,6 @@ void Chat::init(std::string in_publish_key, std::string in_subscribe_key, std::s
 
 void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id)
 {
-    printf("Init Chat SDK");
     publish_key = in_publish_key;
     subscribe_key = in_subscribe_key;
     user_id = in_user_id;
@@ -69,14 +68,13 @@ Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, ChatCh
 
 Pubnub::Channel* Chat::create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data)
 {
-    if(*channel_id == 0)
+    if(channel_id != NULL && *channel_id == 0)
     {
-        std::cout << "Failed to create public conversation, channel_id is empty\n" << std::endl;
-        return nullptr;
+        throw std::invalid_argument("Failed to create public conversation, channel_id is empty");
     }
 
     Channel* channel_ptr = new Channel;
-    channel_ptr->init(ctx_pub, channel_id, channel_data);
+    channel_ptr->init(this, channel_id, channel_data);
 
     return channel_ptr;
 }
@@ -89,7 +87,7 @@ Pubnub::Channel* Chat::update_channel(std::string channel_id, ChatChannelData ch
     }
 
     Channel* channel_ptr = new Channel;
-    channel_ptr->init(ctx_pub, channel_id, channel_data);
+    channel_ptr->init(this, channel_id, channel_data);
 
     return channel_ptr;
 }
@@ -119,7 +117,7 @@ Channel Pubnub::Chat::get_channel(std::string channel_id)
     std::string channel_response = pubnub_get(ctx_pub);
 
     Channel channel_obj;
-    channel_obj.init_from_json(ctx_pub, channel_id, channel_response);
+    channel_obj.init_from_json(this, channel_id, channel_response);
 
     return channel_obj;
 }

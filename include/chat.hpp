@@ -49,6 +49,12 @@ namespace Pubnub
         PN_CHAT_EXPORT void delete_channel(std::string channel_id);
         PN_CHAT_EXPORT void delete_channel(const char* channel_id);
 
+        pubnub_t* get_pubnub_context(){return ctx_pub;};
+
+        //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
+        void subscribe_to_channel(const char* channel_id);
+        void unsubscribe_from_channel(const char* channel_id);
+
         private:
         pubnub_t *ctx_pub;
         const char* publish_key;
@@ -56,8 +62,6 @@ namespace Pubnub
         const char* user_id;
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
-        void subscribe_to_channel(const char* channel_id);
-        void unsubscribe_from_channel(const char* channel_id);
     };
 }
 #endif /* CHAT_H */
