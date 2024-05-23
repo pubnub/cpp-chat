@@ -4,6 +4,7 @@
 
 extern "C" {
 #include "core/pubnub_objects_api.h"
+#include "core/pubnub_pubsubapi.h"
 }
 
 using namespace Pubnub;
@@ -15,7 +16,7 @@ void Channel::init(pubnub_t* in_ctx, std::string in_channel_id, ChatChannelData 
     channel_id = in_channel_id;
     channel_data = in_additional_channel_data;
 
-    //pubnub_set_channelmetadata(ctx_pub, channel_id.c_str(), NULL, channel_data_to_json(channel_id, channel_data).c_str());
+    pubnub_set_channelmetadata(ctx_pub, channel_id.c_str(), NULL, channel_data_to_json(channel_id, channel_data).c_str());
 
     //now channel is fully initialized
     is_initialized = true;
@@ -27,12 +28,12 @@ void Channel::init(pubnub_t* in_ctx, const char* in_channel_id, ChatChannelDataC
     init(in_ctx, channel_id_string, ChatChannelData(in_additional_channel_data));
 }
 
-PN_CHAT_EXPORT void Channel::init_from_json(pubnub_t* in_ctx, std::string in_channel_id, std::string channel_data_json)
+void Channel::init_from_json(pubnub_t* in_ctx, std::string in_channel_id, std::string channel_data_json)
 {
     init(in_ctx, in_channel_id, channel_data_from_json(channel_data_json));
 }
 
-PN_CHAT_EXPORT void Channel::init_from_json(pubnub_t* in_ctx, const char *in_channel_id, const char *channel_data_json)
+void Channel::init_from_json(pubnub_t* in_ctx, const char *in_channel_id, const char *channel_data_json)
 {
     std::string channel_id_string = in_channel_id;
     std::string channel_data_json_string = channel_data_json;
@@ -48,6 +49,37 @@ void Channel::update(ChatChannelData in_additional_channel_data)
 void Channel::update(ChatChannelDataChar in_additional_channel_data)
 {
     update(ChatChannelData(in_additional_channel_data));
+}
+
+void Pubnub::Channel::Connect()
+{
+
+}
+
+void Pubnub::Channel::Disconnect()
+{
+
+}
+
+void Pubnub::Channel::Join(std::string additional_params)
+{
+    std::string include_string = "totalCount,customFields,channelFields,customChannelFields";
+    std::string custom_parameter_string;
+    additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
+    std::string set_object_string = std::string("[{\"channel\": {\"id\": \"") + channel_id +  std::string("\"}, \"custom\": ") + additional_params + std::string("}]");
+    pubnub_set_memberships(ctx_pub, pubnub_user_id_get(ctx_pub), include_string.c_str(), set_object_string.c_str());
+
+    Connect();
+}
+
+void Pubnub::Channel::Join(const char *additional_params)
+{
+    std::string additional_params_string = additional_params;
+    Join(additional_params_string);
+}
+
+void Pubnub::Channel::Leave()
+{
 }
 
 ChatChannelData Channel::channel_data_from_json(std::string json_string)

@@ -75,14 +75,18 @@ namespace Pubnub
         PN_CHAT_EXPORT void Connect();
         PN_CHAT_EXPORT void Disconnect();
 
+        PN_CHAT_EXPORT void Join(std::string additional_params);
+        PN_CHAT_EXPORT void Join(const char* additional_params);
+        PN_CHAT_EXPORT void Leave();
+
+
         PN_CHAT_EXPORT std::string get_channel_id(){return channel_id;};
 
-        std::string channel_id;
+        
         ChatChannelData channel_data;
-        int testint = 3;
 
         private:
-
+        std::string channel_id;
         bool is_initialized = false;
         pubnub_t *ctx_pub;
 

@@ -38,11 +38,11 @@ void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const 
 
 void Chat::deinit()
 {
-    std::cout << "Deinit Chat SDK\n";
+    if(!ctx_pub)
+    {return;}
 
     pubnub_free(ctx_pub);
-
-    std::cout << "Chat SDK deinitialized\n";
+    ctx_pub = nullptr;
 }
 
 
@@ -83,20 +83,26 @@ Pubnub::Channel* Chat::create_public_conversation(const char* channel_id, ChatCh
 
 Pubnub::Channel* Chat::update_channel(std::string channel_id, ChatChannelData channel_data)
 {
-    return update_channel(channel_id.c_str(), ChatChannelDataChar(channel_data));
-}
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to update channel, channel_id is empty");
+    }
 
-Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataChar channel_data)
-{
     Channel* channel_ptr = new Channel;
     channel_ptr->init(ctx_pub, channel_id, channel_data);
 
     return channel_ptr;
 }
 
-PN_CHAT_EXPORT Channel Pubnub::Chat::get_channel(std::string channel_id)
+Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataChar channel_data)
 {
-    printf("Start get channel");
+    std::string channel_id_string = channel_id;
+
+    return update_channel(channel_id_string, ChatChannelData(channel_data));
+}
+
+Channel Pubnub::Chat::get_channel(std::string channel_id)
+{
     if(channel_id.empty())
     {
         throw std::invalid_argument("Failed to get channel, channel_id is empty");
@@ -118,10 +124,26 @@ PN_CHAT_EXPORT Channel Pubnub::Chat::get_channel(std::string channel_id)
     return channel_obj;
 }
 
-PN_CHAT_EXPORT Channel Pubnub::Chat::get_channel(const char *channel_id)
+Channel Pubnub::Chat::get_channel(const char *channel_id)
 {
     std::string channel_id_string = channel_id;
     return get_channel(channel_id_string);
+}
+
+void Pubnub::Chat::delete_channel(std::string channel_id)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to delete channel, channel_id is empty");
+    }
+
+    pubnub_remove_channelmetadata(ctx_pub, channel_id.c_str());
+}
+
+void Pubnub::Chat::delete_channel(const char *channel_id)
+{
+    std::string channel_id_string = channel_id;
+    delete_channel(channel_id_string);
 }
 
 std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)
@@ -131,4 +153,12 @@ std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *cha
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });
+}
+
+void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
+{
+}
+
+void Pubnub::Chat::unsubscribe_from_channel(const char *channel_id)
+{
 }

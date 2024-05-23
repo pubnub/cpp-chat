@@ -20,17 +20,22 @@ namespace Pubnub
     {
         public:
 
+        //TO DELETE, just for testing
+        PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
+        PN_CHAT_EXPORT void publish_message(const char* channel, const char* message);
+
         Chat(){};
-        ~Chat(){};
+        ~Chat()
+        {
+            deinit();
+        };
 
         PN_CHAT_EXPORT void init(std::string in_publish_key, std::string in_subscribe_key, std::string in_user_id);
         PN_CHAT_EXPORT void init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id);
         
         PN_CHAT_EXPORT void deinit();
 
-        //TO DELETE, just for testing
-        PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
-        PN_CHAT_EXPORT void publish_message(const char* channel, const char* message);
+        /* CHANNELS*/
 
         PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(std::string channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data);
@@ -41,6 +46,9 @@ namespace Pubnub
         PN_CHAT_EXPORT Channel get_channel(std::string channel_id);
         PN_CHAT_EXPORT Channel get_channel(const char* channel_id);
 
+        PN_CHAT_EXPORT void delete_channel(std::string channel_id);
+        PN_CHAT_EXPORT void delete_channel(const char* channel_id);
+
         private:
         pubnub_t *ctx_pub;
         const char* publish_key;
@@ -48,6 +56,8 @@ namespace Pubnub
         const char* user_id;
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
+        void subscribe_to_channel(const char* channel_id);
+        void unsubscribe_from_channel(const char* channel_id);
     };
 }
 #endif /* CHAT_H */
