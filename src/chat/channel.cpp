@@ -1,5 +1,4 @@
 #include <iostream>
-#include "chat/channel.hpp"
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
 
@@ -7,6 +6,8 @@ extern "C" {
 #include "core/pubnub_objects_api.h"
 #include "core/pubnub_pubsubapi.h"
 }
+
+#include "chat/channel.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -95,6 +96,32 @@ void Pubnub::Channel::leave()
     pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string.c_str());
 
 	disconnect();
+}
+
+void Pubnub::Channel::delete_channel()
+{
+    if(!chat_obj)
+    {
+        throw std::invalid_argument("Failed to delete channel, chat_obj is invalid");
+    }
+
+    chat_obj->delete_channel(channel_id);
+}
+
+void Pubnub::Channel::set_restrictions(std::string in_user_id, bool ban_user, bool mute_user, std::string reason)
+{
+    if(!chat_obj)
+    {
+        throw std::invalid_argument("Failed to set restrictions, chat_obj is invalid");
+    }
+
+    chat_obj->set_restrictions(in_user_id, channel_id, ban_user, mute_user, reason);
+}
+void Pubnub::Channel::set_restrictions(const char *in_user_id, bool ban_user, bool mute_user, const char *reason)
+{
+    std::string in_user_id_string = in_user_id;
+    std::string reason_string = reason;
+    set_restrictions(in_user_id_string, ban_user, mute_user, reason_string);
 }
 
 ChatChannelData Channel::channel_data_from_json(std::string json_string)

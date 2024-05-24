@@ -80,16 +80,20 @@ namespace Pubnub
         PN_CHAT_EXPORT void join(std::string additional_params);
         PN_CHAT_EXPORT void Join(const char* additional_params);
         PN_CHAT_EXPORT void leave();
+        PN_CHAT_EXPORT void delete_channel();
+
+        PN_CHAT_EXPORT void set_restrictions(std::string in_user_id, bool ban_user, bool mute_user, std::string reason = "");
+        PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, bool ban_user, bool mute_user, const char* reason = NULL);
+
 
 
         PN_CHAT_EXPORT std::string get_channel_id(){return channel_id;};
-
-        
-        ChatChannelData channel_data;
+        PN_CHAT_EXPORT ChatChannelData get_channel_data(){return channel_data;};
 
         private:
 
         std::string channel_id;
+        ChatChannelData channel_data;
         bool is_initialized = false;
         Pubnub::Chat *chat_obj;
 

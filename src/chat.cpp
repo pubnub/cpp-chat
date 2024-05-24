@@ -144,6 +144,58 @@ void Pubnub::Chat::delete_channel(const char *channel_id)
     delete_channel(channel_id_string);
 }
 
+void Pubnub::Chat::set_restrictions(std::string in_user_id, std::string in_channel_id, bool ban_user, bool mute_user, std::string reason)
+{
+
+    if(in_user_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, user_id is empty");
+    }
+    if(in_channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, channel_id is empty");
+    }
+
+
+	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
+	std::string restrictions_channel = internal_moderation_prefix + in_channel_id;
+
+	//Lift restrictions
+	if(!ban_user && !mute_user)
+	{
+		std::string remove_member_string = std::string("[{\"uuid\": {\"id\": \"") + in_user_id + std::string("\"}}]");
+        pubnub_remove_members(ctx_pub, restrictions_channel.c_str(), NULL, remove_member_string.c_str());
+		std::string event_payload_string = std::string("{\"channelId\": \"") + restrictions_channel + std::string("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + std::string("\"}");
+        emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
+		return;
+	}
+
+	//Ban or mute the user
+	std::string params_string = std::string("{\"ban\": ") + bool_to_string(ban_user) + std::string(", \"mute\": ") + bool_to_string(mute_user) + std::string(", \"reason\": \"") + reason + std::string("\"}");
+	std::string set_members_string = std::string("[{\"uuid\": {\"id\": \"") + user_id + std::string("\"}, \"custom\": ") + params_string + std::string("}]");
+    pubnub_set_members(ctx_pub, restrictions_channel.c_str(), NULL, set_members_string.c_str());
+    std::string restriction_text;
+    ban_user ? restriction_text = "banned" : "muted";
+	std::string event_payload_string = std::string("{\"channelId\": \"") + restrictions_channel + std::string("\", \"restriction\": \"lifted") + restriction_text + std::string("\", \"reason\": \"") + reason + std::string("\"}");
+    emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
+}
+
+void Pubnub::Chat::set_restrictions(const char *in_user_id, const char* in_channel_id, bool ban_user, bool mute_user, const char *reason)
+{
+    std::string in_user_id_string = in_user_id;
+    std::string in_channel_id_string = in_channel_id;
+    std::string reason_string = reason;
+    set_restrictions(in_user_id_string, in_channel_id_string, ban_user, mute_user, reason_string);
+}
+
+void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
+{
+}
+
+void Pubnub::Chat::unsubscribe_from_channel(const char *channel_id)
+{
+}
+
 std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)
 {
     return std::async(std::launch::async, [=](){
@@ -153,10 +205,34 @@ std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *cha
     });
 }
 
-void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
+void Pubnub::Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, std::string channel_id, std::string payload)
 {
+    //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
+	std::string payload_parameters = payload;
+    payload_parameters.erase(0, 1);
+	payload_parameters.erase(payload_parameters.size() - 1);
+	std::string event_message = std::string("{") + payload_parameters + std::string(", \"type\": \"") + get_string_from_event_type(chat_event_type) = std::string("\"}");
+    pubnub_publish(ctx_pub, channel_id.c_str(), event_message.c_str());
 }
 
-void Pubnub::Chat::unsubscribe_from_channel(const char *channel_id)
+std::string Pubnub::Chat::get_string_from_event_type(pubnub_chat_event_type chat_event_type)
 {
+    switch(chat_event_type)
+	{
+	case pubnub_chat_event_type::PCET_TYPING:
+		return "typing";
+	case pubnub_chat_event_type::PCET_REPORT:
+		return "report";
+	case pubnub_chat_event_type::PCET_RECEPIT:
+		return "receipt";
+	case pubnub_chat_event_type::PCET_MENTION:
+		return "mention";
+	case pubnub_chat_event_type::PCET_INVITE:
+		return "invite";
+	case pubnub_chat_event_type::PCET_CUSTOM:
+		return "custom";
+	case pubnub_chat_event_type::PCET_MODERATION:
+		return "moderation";
+	}
+	return "custom";
 }

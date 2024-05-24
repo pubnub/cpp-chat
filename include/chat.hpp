@@ -16,6 +16,17 @@ extern "C" {
 
 namespace Pubnub
 {
+    enum pubnub_chat_event_type
+    {
+        PCET_TYPING,
+        PCET_REPORT,
+        PCET_RECEPIT,
+        PCET_MENTION,
+        PCET_INVITE,
+        PCET_CUSTOM,
+        PCET_MODERATION
+    };
+
     class Chat
     {
         public:
@@ -49,19 +60,38 @@ namespace Pubnub
         PN_CHAT_EXPORT void delete_channel(std::string channel_id);
         PN_CHAT_EXPORT void delete_channel(const char* channel_id);
 
+        PN_CHAT_EXPORT void set_restrictions(std::string in_user_id, std::string in_channel_id, bool ban_user, bool mute_user, std::string reason = "");
+        PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, const char* in_channel_id, bool ban_user, bool mute_user, const char* reason = NULL);
+
+
+
         pubnub_t* get_pubnub_context(){return ctx_pub;};
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
         void subscribe_to_channel(const char* channel_id);
         void unsubscribe_from_channel(const char* channel_id);
 
+        const std::string internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
+
         private:
+
         pubnub_t *ctx_pub;
         const char* publish_key;
         const char* subscribe_key;
         const char* user_id;
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
+
+        void emit_chat_event(pubnub_chat_event_type chat_event_type, std::string channel_id, std::string payload);
+
+        /* HELPERS */
+
+        std::string get_string_from_event_type(pubnub_chat_event_type chat_event_type);
+        inline std::string const bool_to_string(bool b)
+        {
+            return b ? "true" : "false";
+        }
+
     };
 }
 #endif /* CHAT_H */
