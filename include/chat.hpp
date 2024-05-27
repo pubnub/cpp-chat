@@ -16,7 +16,7 @@ extern "C" {
 
 namespace Pubnub
 {
-    enum pubnub_chat_event_type
+    enum pubnub_chat_event_type : uint8_t
     {
         PCET_TYPING,
         PCET_REPORT,
@@ -27,7 +27,7 @@ namespace Pubnub
         PCET_MODERATION
     };
 
-    enum pubnub_chat_message_type
+    enum pubnub_chat_message_type : uint8_t
     {
         PCMT_TEXT
     };

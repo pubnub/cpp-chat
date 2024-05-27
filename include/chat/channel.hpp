@@ -12,7 +12,7 @@ extern "C" {
 namespace Pubnub
 {
     class Chat;
-    enum pubnub_chat_message_type;
+    enum pubnub_chat_message_type : uint8_t;
 
     struct ChatChannelDataBase
     {
