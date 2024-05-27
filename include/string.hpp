@@ -30,50 +30,50 @@ namespace Pubnub {
         /**
          * Default constructor that leaves the string empty.
          */
-        String() = default;
-        ~String();
+        PN_CHAT_EXPORT String() = default;
+        PN_CHAT_EXPORT ~String();
 
         /**
          * Constructor that initializes the string with a const char* string.
          * 
          * @param string The const char* string to initialize the String with.
          */
-        String(const char* string);
+        PN_CHAT_EXPORT String(const char* string);
 
         /**
          * Constructor that initializes the string with a std::string.
          * 
          * @param string The char* to initialize the String with.
          */
-        String(char* string);
+        PN_CHAT_EXPORT String(char* string);
 
         /**
          * Constructor that initializes the string with a std::string.
          * 
          * @param string The std::string to initialize the String with.
          */
-        String(std::string string);
+        PN_CHAT_EXPORT String(std::string string);
 
         /**
          * Copy constructor that initializes the string with another String.
          * 
          * @param string The std::string const reference to initialize the String with.
          */
-        String(const String& string);
+        PN_CHAT_EXPORT String(const String& string);
 
         /**
          * Move constructor that initializes the string with another String.
          * 
          * @param string The std::string rvalue reference to initialize the String with.
          */
-        String(String&& string);
+        PN_CHAT_EXPORT String(String&& string);
 
         /**
          * Implicit conversion operator that converts the String to a std::string.
          * 
          * @return The std::string string.
          */
-        operator std::string() const;
+        PN_CHAT_EXPORT operator std::string() const;
 
         /**
          * Implicit conversion operator that converts the String to a const char*.
@@ -82,35 +82,35 @@ namespace Pubnub {
          * 
          * @return The const char* string.
          */
-        operator const char*() const;
+        PN_CHAT_EXPORT operator const char*() const;
 
         /**
          * Copy assignment operator that assigns the string with another String.
          * 
          * @param string The std::string const reference to assign the String with.
          */
-        String& operator=(const String& string) = default;
+        PN_CHAT_EXPORT String& operator=(const String& string) = default;
 
         /**
          * Move assignment operator that assigns the string with another String.
          * 
          * @param string The std::string rvalue reference to assign the String with.
          */
-        String& operator=(String&& string) = default;
+        PN_CHAT_EXPORT String& operator=(String&& string) = default;
 
         /**
          * Copy assignment operator that assigns the string with a const char* string.
          * 
          * @param string The const char* to assign the String with.
          */
-        String& operator=(const char* string);
+        PN_CHAT_EXPORT String& operator=(const char* string);
 
         /**
          * Copy assignment operator that assigns the string with a char* string.
          * 
          * @param string The char* to assign the String with.
          */
-        String& operator=(char* string);
+        PN_CHAT_EXPORT String& operator=(char* string);
 
         /**
          * Add assignment operator that appends the string with another String.
@@ -132,7 +132,7 @@ namespace Pubnub {
          *  
          *  // String { "Hello, World!" } 
          */
-        String& operator+=(const String& string);
+        PN_CHAT_EXPORT String& operator+=(const String& string);
 
         /**
          * Add assignment operator that appends the string with another String.
@@ -154,7 +154,7 @@ namespace Pubnub {
          *
          *  // String { "Hello, World!" }
          */
-        String& operator+=(String& string);
+        PN_CHAT_EXPORT String& operator+=(String& string);
 
         /**
          * Add assignment operator that appends the string with a const char* string.
@@ -175,7 +175,7 @@ namespace Pubnub {
          *
          *  // String { "Hello, World!" }
          */
-        String& operator+=(const char* string);
+        PN_CHAT_EXPORT String& operator+=(const char* string);
 
         /**
          * Add assignment operator that appends the string with a std::string.
@@ -197,14 +197,14 @@ namespace Pubnub {
          *
          *  // String { "Hello, World!" }
          */
-        String& operator+=(std::string string);
+        PN_CHAT_EXPORT String& operator+=(std::string string);
 
         /**
          * Copy assignment operator that assigns the string with a std::string.
          * 
          * @param string The std::string to assign the String with.
          */
-        String& operator=(std::string string);
+        PN_CHAT_EXPORT String& operator=(std::string string);
 
         /**
          * Returns raw const char* pointer to the string that the String holds.
@@ -213,21 +213,21 @@ namespace Pubnub {
          *
          * @return The const char* string.
          */
-       const char* c_str() const;
+       PN_CHAT_EXPORT const char* c_str() const;
 
         /**
          * Returns std version of the string that the String holds.
          *
          * @return The std::string string.
          */
-       std::string to_std_string() const;
+       PN_CHAT_EXPORT std::string to_std_string() const;
 
         /**
          * Returns the length of the string that the String holds.
          *
          * @return The length of the string.
          */
-       std::size_t length() const;
+       PN_CHAT_EXPORT std::size_t length() const;
 
         /**
          * Returns the capacity of the string that the String holds.
@@ -241,14 +241,14 @@ namespace Pubnub {
          *
          * @return The capacity of the string.
          */
-       std::size_t capacity() const;
+       PN_CHAT_EXPORT std::size_t capacity() const;
 
        /**
         * Checks if the string is empty.
         *
         * @return True if the string is empty, false otherwise.
         */
-       bool empty() const;
+       PN_CHAT_EXPORT bool empty() const;
 
        /**
         * Clears the string.
@@ -261,7 +261,7 @@ namespace Pubnub {
         *
         * @see erase
         */
-       void clear();
+       PN_CHAT_EXPORT void clear();
 
        /**
         * Erases the character(s) at the specified position.
@@ -280,7 +280,7 @@ namespace Pubnub {
         *
         *   // String { "Hello!" }
         */
-       void erase(std::size_t pos, std::size_t count = 1);
+       PN_CHAT_EXPORT void erase(std::size_t pos, std::size_t count = 1);
 
        /**
         * Inserts the character at the specified position.
@@ -301,7 +301,7 @@ namespace Pubnub {
         *
         * // String { "Hello!, World!" }
         */
-       void insert(std::size_t pos, char character);
+       PN_CHAT_EXPORT void insert(std::size_t pos, char character);
 
        /**
         * Shrinks the capacity of the string to fit its length.
@@ -320,7 +320,7 @@ namespace Pubnub {
         *
         *  // String { string: "Hello, World!", capacity: 13 }
         */
-       void shrink();
+       PN_CHAT_EXPORT void shrink();
 
        /**
         * Finds the first occurrence of the character or sequence of characters in the string.
@@ -339,7 +339,7 @@ namespace Pubnub {
         *
         *  // 7
         */
-       std::size_t find(const char* string, std::size_t pos = 0) const;
+       PN_CHAT_EXPORT std::size_t find(const char* string, std::size_t pos = 0) const;
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters.
@@ -362,7 +362,7 @@ namespace Pubnub {
         *
         *  // String { "Hello, Universe!" }
         */
-       void replace(std::size_t pos, std::size_t count, const char* string);
+       PN_CHAT_EXPORT void replace(std::size_t pos, std::size_t count, const char* string);
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters.
@@ -386,7 +386,7 @@ namespace Pubnub {
         *
         *  // String { "Hello, Universe!" }
         */
-       void replace(std::size_t pos, std::size_t count, const std::string string);
+       PN_CHAT_EXPORT void replace(std::size_t pos, std::size_t count, const std::string string);
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters. 
@@ -410,7 +410,7 @@ namespace Pubnub {
         *
         *  // String { "Hello, Universe!" }
         */
-       void replace(std::size_t pos, std::size_t count, const String& string);
+       PN_CHAT_EXPORT void replace(std::size_t pos, std::size_t count, const String& string);
 
        /**
         * Substring method that returns the substring of the string.
@@ -429,7 +429,7 @@ namespace Pubnub {
         *
         *  // String { "World!" }
         */
-       String substring(std::size_t pos, std::size_t count) const;
+       PN_CHAT_EXPORT String substring(std::size_t pos, std::size_t count) const;
 
         // TODO: reconsider the iterator design
        /**
@@ -437,56 +437,56 @@ namespace Pubnub {
         *
         * @return The const char* pointer to the beginning of the string.
         */
-       const char* begin() const;
+       PN_CHAT_EXPORT const char* begin() const;
 
        /**
         * Ends the read-only iteration over the string.
         *
         * @return The const char* pointer to the end of the string.
         */
-       const char* end() const;
+       PN_CHAT_EXPORT const char* end() const;
 
        /**
         * Begins the read-write iteration over the string.
         *
         * @return The char* pointer to the beginning of the string.
         */
-       char* begin();
+       PN_CHAT_EXPORT char* begin();
 
        /**
         * Ends the read-write iteration over the string.
         *
         * @return The char* pointer to the end of the string.
         */
-       char* end();
+       PN_CHAT_EXPORT char* end();
 
        /**
         * Returns the first character of the string.
         *
         * @return The first character of the string.
         */
-       const char& front() const;
+       PN_CHAT_EXPORT const char& front() const;
 
        /**
         * Returns the last character of the string.
         *
         * @return The last character of the string.
         */
-       const char& back() const;
+       PN_CHAT_EXPORT const char& back() const;
 
        /**
         * Returns the first character of the string.
         *
         * @return The first character of the string.
         */
-       char& front();
+       PN_CHAT_EXPORT char& front();
 
        /**
         * Returns the last character of the string.
         *
         * @return The last character of the string.
         */
-       char& back();
+       PN_CHAT_EXPORT char& back();
 
        /**
         * Returns the const char* pointer to the string and invalidates the String.
@@ -508,7 +508,7 @@ namespace Pubnub {
         *  // c_str is valid 
         *  // string is invalid and should not be used anymore
         */
-       const char* into_c_str();
+       PN_CHAT_EXPORT const char* into_c_str();
 
        /**
         * Allocates the memory for the string.
@@ -534,7 +534,7 @@ namespace Pubnub {
         *   // ...
         *   // The memory for the string is allocated only once and the append operation is done in the allocated memory.
         */
-       void reserve(std::size_t size);
+       PN_CHAT_EXPORT void reserve(std::size_t size);
 
        /**
         * The constant that represents the position that is not found.
@@ -557,12 +557,12 @@ namespace Pubnub {
        // TODO: think about rust-like iterators
 
     private:
-        friend bool operator==(const String& lhs, const String& rhs);
-        friend bool operator!=(const String& lhs, const String& rhs);
-        friend String operator+(const String& lhs, const String& rhs);
-        friend String operator+(const String& lhs, const char* rhs);
-        friend String operator+(const String& lhs, std::string rhs);
-        friend std::ostream& operator<<(std::ostream& os, const String& string);
+        PN_CHAT_EXPORT friend bool operator==(const String& lhs, const String& rhs);
+        PN_CHAT_EXPORT friend bool operator!=(const String& lhs, const String& rhs);
+        PN_CHAT_EXPORT friend String operator+(const String& lhs, const String& rhs);
+        PN_CHAT_EXPORT friend String operator+(const String& lhs, const char* rhs);
+        PN_CHAT_EXPORT friend String operator+(const String& lhs, std::string rhs);
+        PN_CHAT_EXPORT friend std::ostream& operator<<(std::ostream& os, const String& string);
 
         std::size_t calculate_capacity(std::size_t size) const;
         void grow_if_needed(std::size_t size);
