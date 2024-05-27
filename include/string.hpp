@@ -3,6 +3,7 @@
 
 #include "export.hpp"
 #include <cstddef>
+#include <ostream>
 #include <string>
 
 namespace Pubnub {
@@ -11,6 +12,16 @@ namespace Pubnub {
      *
      * It wraps the const char* string and provides methods to manipulate it 
      * without the need to worry about memory management and dll boundaries.
+     *
+     * The String is designed to be used as a value type and it is not meant to be used as a pointer.
+     *
+     * Example:
+     *  String string = "Hello, World!";
+     *  string += " How are you?";
+     *
+     *  std::cout << string << std::endl;
+     *
+     *  // Output: Hello, World! How are you?
      */
     class PN_CHAT_EXPORT String 
     {
@@ -66,6 +77,8 @@ namespace Pubnub {
 
         /**
          * Implicit conversion operator that converts the String to a const char*.
+         *
+         * Keep in mind that the pointer is only valid as long as the String is not modified.
          * 
          * @return The const char* string.
          */
@@ -93,23 +106,96 @@ namespace Pubnub {
         String& operator=(const char* string);
 
         /**
+         * Copy assignment operator that assigns the string with a char* string.
+         * 
+         * @param string The char* to assign the String with.
+         */
+        String& operator=(char* string);
+
+        /**
          * Add assignment operator that appends the string with another String.
          *
+         * Usage of this operator means that the String is considered as a mutable object
+         * and the memory management expects that the operation will be done more than once.
+         * That means that the String will allocate more memory than it needs to store the string 
+         * to avoid reallocation on every append operation.
+         *
+         * @see capacity
+         * @see reserve
+         *
          * @param string The std::string const reference to append the String with.
+         *
+         * Example:
+         *  String string = "Hello, ";
+         *  String world = "World!";
+         *  string += world;
+         *  
+         *  // String { "Hello, World!" } 
          */
         String& operator+=(const String& string);
 
         /**
+         * Add assignment operator that appends the string with another String.
+         *
+         * Usage of this operator means that the String is considered as a mutable object
+         * and the memory management expects that the operation will be done more than once.
+         * That means that the String will allocate more memory than it needs to store the string 
+         * to avoid reallocation on every append operation.
+         *
+         * @see capacity 
+         * @see reserve
+         *
+         * @param string The std::string const reference to append the String with.
+         *
+         * Example:
+         *  String string = "Hello, ";
+         *  String world = "World!";
+         *  string += world;
+         *
+         *  // String { "Hello, World!" }
+         */
+        String& operator+=(String& string);
+
+        /**
          * Add assignment operator that appends the string with a const char* string.
          *
+         * Usage of this operator means that the String is considered as a mutable object
+         * and the memory management expects that the operation will be done more than once.
+         * That means that the String will allocate more memory than it needs to store the string 
+         * to avoid reallocation on every append operation.
+         *
+         * @see capacity 
+         * @see reserve
+         *
          * @param string The const char* to append the String with.
+         *
+         * Example:
+         *  String string = "Hello, ";
+         *  string += "World!";
+         *
+         *  // String { "Hello, World!" }
          */
         String& operator+=(const char* string);
 
         /**
          * Add assignment operator that appends the string with a std::string.
          *
+         * Usage of this operator means that the String is considered as a mutable object
+         * and the memory management expects that the operation will be done more than once.
+         * That means that the String will allocate more memory than it needs to store the string 
+         * to avoid reallocation on every append operation.
+         *
+         * @see capacity 
+         * @see reserve
+         *
          * @param string The std::string to append the String with.
+         *
+         * Example:
+         *  String string = "Hello, ";
+         *  std::string world = "World!";
+         *  string += world;
+         *
+         *  // String { "Hello, World!" }
          */
         String& operator+=(std::string string);
 
@@ -122,6 +208,8 @@ namespace Pubnub {
 
         /**
          * Returns raw const char* pointer to the string that the String holds.
+         *
+         * Keep in mind that the pointer is only valid as long as the String is not modified.
          *
          * @return The const char* string.
          */
@@ -146,6 +234,11 @@ namespace Pubnub {
          * 
          * Capacity is the size of the allocated storage for the string, a value that is at least as large as length.
          *
+         * It is a good practice to reserve the memory for the string if the append operation is expected to be done
+         * more than once. The memory will be reallocated only if the capacity is not enough to store the new character.
+         *
+         * @see reserve
+         *
          * @return The capacity of the string.
          */
        std::size_t capacity() const;
@@ -159,24 +252,75 @@ namespace Pubnub {
 
        /**
         * Clears the string.
+        *
+        * This method will not reallocate the memory.
+        * It is used to clear the content of the string and set the length of the string to zero
+        * without freeing the memory. It is useful when the memory is needed to be reused.
+        *
+        * To completely free the memory, the String should be destroyed or `erase` method should be used.
+        *
+        * @see erase
         */
        void clear();
 
        /**
         * Erases the character(s) at the specified position.
         *
-        * @param pos The position of the character to erase.
+        * This method will not reallocate the memory.
+        * The memory will be freed only if the length of the string is zero.
+        *
+        * @see capacity 
+        *
+        * @param pos The position of the character to erase. When the position is out of bounds, the method will do nothing.
         * @param count The number of characters to erase.
+        *
+        * Example:
+        *   String string = "Hello, World!";
+        *   string.erase(5, 8);
+        *
+        *   // String { "Hello!" }
         */
        void erase(std::size_t pos, std::size_t count = 1);
 
        /**
         * Inserts the character at the specified position.
         *
-        * @param pos The position to insert the character at.
+        * This method will reallocate the memory if the capacity is not enough to store the new character.
+        * The memory will be reallocated to the new size that is the length of the string plus one.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * @see capacity
+        * @see reserve
+        *
+        * @param pos The position to insert the character at. When the position is out of bounds, the method will do nothing.
         * @param character The character to insert.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  string.insert(5, '!');
+        *
+        * // String { "Hello!, World!" }
         */
        void insert(std::size_t pos, char character);
+
+       /**
+        * Shrinks the capacity of the string to fit its length.
+        *
+        * This method will reallocate the memory to the size of the length of the string.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * @see capacity 
+        *
+        * Example:
+        *  String string;
+        *  string.reserve(100);
+        *  string += "Hello, ";
+        *  string += "World!";
+        *  string.shrink();
+        *
+        *  // String { string: "Hello, World!", capacity: 13 }
+        */
+       void shrink();
 
        /**
         * Finds the first occurrence of the character or sequence of characters in the string.
@@ -184,47 +328,110 @@ namespace Pubnub {
         * @param string The character or sequence of characters to find.
         * @param std::size_t The position to start the search from.
         *
-        * @return The position of the first occurrence of the character or sequence of characters.
+        * @return The position of the first occurrence of the character or sequence of characters
+        * or String::npos if the character or sequence of characters is not found.
+        *
+        * @see String::npos
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  auto pos = string.find("World!");
+        *
+        *  // 7
         */
        std::size_t find(const char* string, std::size_t pos = 0) const;
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters.
         *
+        * This method will reallocate the memory if the capacity is not enough to store the new character
+        * or sequence of characters. The memory will be reallocated to the new size that is the length
+        * of the string plus the length of the new character or sequence of characters.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * @see capacity
+        * @see reserve
+        *
         * @param pos The position to start the replacement from.
         * @param count The number of characters to replace.
         * @param strign The character or sequence of characters to replace with.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  string.replace(7, 6, "Universe!");
+        *
+        *  // String { "Hello, Universe!" }
         */
        void replace(std::size_t pos, std::size_t count, const char* string);
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters.
         *
+        * This method will reallocate the memory if the capacity is not enough to store the new character 
+        * or sequence of characters. The memory will be reallocated to the new size that is the length
+        * of the string plus the length of the new character or sequence of characters.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * @see capacity
+        * @see reserve
+        *
         * @param pos The position to start the replacement from.
         * @param count The number of characters to replace.
         * @param string The character or sequence of characters to replace with.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  std::string universe = "Universe!";
+        *  string.replace(7, 6, universe);
+        *
+        *  // String { "Hello, Universe!" }
         */
        void replace(std::size_t pos, std::size_t count, const std::string string);
 
        /**
         * Replaces the character or sequence of characters with another character or sequence of characters. 
         *
+        * This method will reallocate the memory if the capacity is not enough to store the new character 
+        * or sequence of characters. The memory will be reallocated to the new size that is the length
+        * of the string plus the length of the new character or sequence of characters.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * @see capacity 
+        * @see reserve
+        *
         * @param pos The position to start the replacement from.
         * @param count The number of characters to replace.
         * @param string The character or sequence of characters to replace with.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  String universe = "Universe!";
+        *  string.replace(7, 6, universe);
+        *
+        *  // String { "Hello, Universe!" }
         */
        void replace(std::size_t pos, std::size_t count, const String& string);
 
        /**
         * Substring method that returns the substring of the string.
         *
+        * This function creates a new String object that holds the substring of the string.
+        * The memory for the new String object is allocated and the content of the substring is copied to the new memory.
+        *
         * @param pos The position to start the substring from.
         * @param count The number of characters to include in the substring.
         *
         * @return The substring of the string.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  auto substring = string.substring(7, 6);
+        *
+        *  // String { "World!" }
         */
        String substring(std::size_t pos, std::size_t count) const;
 
+        // TODO: reconsider the iterator design
        /**
         * Begins the read-only iteration over the string.
         *
@@ -253,6 +460,100 @@ namespace Pubnub {
         */
        char* end();
 
+       /**
+        * Returns the first character of the string.
+        *
+        * @return The first character of the string.
+        */
+       const char& front() const;
+
+       /**
+        * Returns the last character of the string.
+        *
+        * @return The last character of the string.
+        */
+       const char& back() const;
+
+       /**
+        * Returns the first character of the string.
+        *
+        * @return The first character of the string.
+        */
+       char& front();
+
+       /**
+        * Returns the last character of the string.
+        *
+        * @return The last character of the string.
+        */
+       char& back();
+
+       /**
+        * Returns the const char* pointer to the string and invalidates the String.
+        * It is meant to be used when the String is passed to a function that takes const char*
+        * and the String is not needed anymore or the existence of the String can apply undefined behavior
+        * e.g. when the String is passed through a dll boundary over the C ABI.
+        *
+        * This function will return the pointer to the string and set the internal pointer to nullptr
+        * so the memory is not freed when the String is destroyed.
+        *
+        * @return The const char* pointer to the string.
+        *
+        * @see c_str
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  auto c_str = string.into_c_str();
+        *
+        *  // c_str is valid 
+        *  // string is invalid and should not be used anymore
+        */
+       const char* into_c_str();
+
+       /**
+        * Allocates the memory for the string.
+        *
+        * It can be used to preallocate the memory for the string to avoid reallocation on every append operation.
+        * The capacity of the string will be set to the given size and the memory will be reallocated to the new size.
+        * The previous content of the string will be copied to the new memory.
+        *
+        * If the given size is smaller than the current length of the string, the extra characters will shrinked!
+        *
+        * @see shrink
+        *
+        * The need to reserve memory should be considered when the String is used as a mutable object and the append operation
+        * is expected to be done more than once.
+        *
+        * @param size The size of the memory to allocate.
+        *
+        * Example:
+        *   String string;
+        *   string.reserve(100);
+        *   string += "Hello, ";
+        *   string += "World!";
+        *   // ...
+        *   // The memory for the string is allocated only once and the append operation is done in the allocated memory.
+        */
+       void reserve(std::size_t size);
+
+       /**
+        * The constant that represents the position that is not found.
+        *
+        * @see find 
+        *
+        * @note The value is set to -1 whereat the std::size_t is an unsigned integer so depending on the compiler
+        * can be different. In most cases, the value is the maximum value of the std::size_t.
+        *
+        * Example:
+        *  String string = "Hello, World!";
+        *  auto pos = string.find("Universe!");
+        *
+        *  if (pos == String::npos) {
+        *    // The string is not found
+        *  }
+        */
+       static const std::size_t npos = -1;
+
        // TODO: think about rust-like iterators
 
     private:
@@ -261,36 +562,72 @@ namespace Pubnub {
         friend String operator+(const String& lhs, const String& rhs);
         friend String operator+(const String& lhs, const char* rhs);
         friend String operator+(const String& lhs, std::string rhs);
+        friend std::ostream& operator<<(std::ostream& os, const String& string);
 
-        char* m_string = nullptr;
-        unsigned int m_length = 0;
-        unsigned int m_capacity = 0;
+        std::size_t calculate_capacity(std::size_t size) const;
+        void grow_if_needed(std::size_t size);
+
+        char* string = nullptr;
+        unsigned int len = 0;
+        unsigned int cap = 0;
     };
 
     /**
      * Add operator that appends two Strings.
      *
+     * This operator creates a new String object that holds the result of the append operation.
+     * The memory for the new String object is allocated and the content of the append operation
+     * is copied to the new memory.
+     *
      * @param lhs The left hand side String to append.
      * @param rhs The right hand side String to append.
      * @return The String that is the result of the append operation.
+     *
+     * Example:
+     *  String string = "Hello, ";
+     *  String world = "World!";
+     *  auto result = string + world;
+     *
+     *  // String { "Hello, World!" }
      */
     PN_CHAT_EXPORT String operator+(const String& lhs, const String& rhs);
 
     /**
      * Add operator that appends a String with a const char* string.
      *
+     * This operator creates a new String object that holds the result of the append operation.
+     * The memory for the new String object is allocated and the content of the append operation
+     * is copied to the new memory.
+     *
      * @param lhs The left hand side String to append.
      * @param rhs The right hand side const char* string to append.
      * @return The String that is the result of the append operation.
+     *
+     * Example:
+     *  String string = "Hello, ";
+     *  auto result = string + "World!";
+     *
+     *  // String { "Hello, World!" }
      */
     PN_CHAT_EXPORT String operator+(const String& lhs, const char* rhs);
 
     /**
      * Add operator that appends a String with a std::string.
      *
+     * This operator creates a new String object that holds the result of the append operation.
+     * The memory for the new String object is allocated and the content of the append operation
+     * is copied to the new memory.
+     *
      * @param lhs The left hand side String to append.
      * @param rhs The right hand side std::string to append.
      * @return The String that is the result of the append operation.
+     *
+     * Example:
+     *  String string = "Hello, ";
+     *  std::string world = "World!";
+     *  auto result = string + world;
+     *
+     *  // String { "Hello, World!" }
      */
     PN_CHAT_EXPORT String operator+(const String& lhs, std::string rhs);
 
@@ -311,6 +648,24 @@ namespace Pubnub {
      * @return True if the String values are not equal, false otherwise.
      */
     PN_CHAT_EXPORT bool operator!=(const String& lhs, const String& rhs);
+
+    /**
+     * Stream operator that writes the String to the output stream.
+     *
+     * Keep in mind that it passes the pointer to the string so the String should not be modified
+     * after the stream operator is used.
+     * 
+     * @param os The output stream to write the String to.
+     * @param string The String to write to the output stream.
+     * @return The output stream.
+     *
+     * Example:
+     *  String string = "Hello, World!";
+     *  std::cout << string << std::endl;
+     *
+     *  // Output: Hello, World!
+     */
+    PN_CHAT_EXPORT std::ostream& operator<<(std::ostream& os, const String& string);
 }
 
 #endif /* PN_STRING_H */
