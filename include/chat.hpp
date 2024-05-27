@@ -81,6 +81,7 @@ namespace Pubnub
         private:
 
         pubnub_t *ctx_pub;
+        pubnub_t *ctx_sub;
         const char* publish_key;
         const char* subscribe_key;
         const char* user_id;

@@ -7,6 +7,7 @@ extern "C" {
 #include "core/pubnub_pubsubapi.h"
 #include "core/pubnub_ntf_sync.h"
 #include "core/pubnub_objects_api.h"
+#include "core/pubnub_coreapi.h"
 }
 
 using namespace Pubnub;
@@ -23,6 +24,7 @@ void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const 
     subscribe_key = in_subscribe_key;
     user_id = in_user_id;
     ctx_pub = pubnub_alloc();
+    ctx_sub = pubnub_alloc();
 
     if (NULL == ctx_pub) 
     {
@@ -31,17 +33,25 @@ void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const 
     }
 
     pubnub_init(ctx_pub, publish_key, subscribe_key);
+    pubnub_init(ctx_sub, publish_key, subscribe_key);
     pubnub_set_user_id(ctx_pub, user_id);
+    pubnub_set_user_id(ctx_sub, user_id);
 
 }
 
 void Chat::deinit()
 {
-    if(!ctx_pub)
-    {return;}
+    if(ctx_pub)
+    {
+        pubnub_free(ctx_pub);
+        ctx_pub = nullptr;
+    }
 
-    pubnub_free(ctx_pub);
-    ctx_pub = nullptr;
+    if(ctx_sub)
+    {
+        pubnub_free(ctx_sub);
+        ctx_sub = nullptr;
+    }
 }
 
 
@@ -190,10 +200,13 @@ void Pubnub::Chat::set_restrictions(const char *in_user_id, const char* in_chann
 
 void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
 {
+    pubnub_subscribe(ctx_sub, channel_id, NULL);
 }
 
 void Pubnub::Chat::unsubscribe_from_channel(const char *channel_id)
 {
+    pubnub_leave(ctx_pub, channel_id, NULL);
+    pubnub_cancel(ctx_sub);
 }
 
 std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)

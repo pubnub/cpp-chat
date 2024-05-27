@@ -10,6 +10,7 @@ extern "C" {
 
 #include "chat/channel.hpp"
 
+
 using namespace Pubnub;
 using json = nlohmann::json;
 
@@ -141,6 +142,13 @@ void Pubnub::Channel::send_text(std::string message, pubnub_chat_message_type me
         throw std::exception("Failed to publish message");
     }
 
+}
+
+void Pubnub::Channel::send_text(const char *message, pubnub_chat_message_type message_type, const char *meta_data)
+{
+    std::string message_string = message;
+    std::string meta_data_string = meta_data;
+    send_text(message_string, message_type, meta_data_string);
 }
 
 ChatChannelData Channel::channel_data_from_json(std::string json_string)

@@ -87,6 +87,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, bool ban_user, bool mute_user, const char* reason = NULL);
 
         PN_CHAT_EXPORT void send_text(std::string message, pubnub_chat_message_type message_type, std::string meta_data);
+        PN_CHAT_EXPORT void send_text(const char* message, pubnub_chat_message_type message_type, const char* meta_data);
 
         PN_CHAT_EXPORT std::string get_channel_id(){return channel_id;};
         PN_CHAT_EXPORT ChatChannelData get_channel_data(){return channel_data;};
