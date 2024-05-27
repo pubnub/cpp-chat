@@ -4,6 +4,7 @@
 
 extern "C" {
 #include "core/pubnub_objects_api.h"
+#include "core/pubnub_ntf_sync.h"
 #include "core/pubnub_pubsubapi.h"
 }
 
@@ -124,6 +125,24 @@ void Pubnub::Channel::set_restrictions(const char *in_user_id, bool ban_user, bo
     set_restrictions(in_user_id_string, ban_user, mute_user, reason_string);
 }
 
+void Pubnub::Channel::send_text(std::string message, pubnub_chat_message_type message_type, std::string meta_data)
+{
+    if(message.empty())
+    {
+        throw std::invalid_argument("Failed to send text, message is empty");
+    }
+
+    pubnub_publish(get_ctx_pub(), channel_id.c_str(), chat_message_to_publish_string(message, message_type).c_str());
+
+    pubnub_res publish_response =  pubnub_await(get_ctx_pub());
+
+    if(publish_response != PNR_OK)
+    {
+        throw std::exception("Failed to publish message");
+    }
+
+}
+
 ChatChannelData Channel::channel_data_from_json(std::string json_string)
 {
     json response_json = json::parse(json_string);
@@ -196,6 +215,27 @@ std::string Channel::channel_data_to_json(std::string in_channel_id, ChatChannel
 
     return channel_data_json.dump();
 }
+
+std::string Channel::chat_message_to_publish_string(std::string message, pubnub_chat_message_type message_type)
+{
+    json message_json;
+	
+	std::string message_type_string;
+    //For now there is only one type, but we might want to add more types in the future
+	switch (message_type)
+	{
+	case pubnub_chat_message_type::PCMT_TEXT:
+		message_type_string = "text";
+		break;
+	}
+	message_json["type"] = message_type_string;
+    message_json["text"] = message;
+
+
+	//Convert constructed Json to FString
+	return message_json.dump();
+}
+
 
 pubnub_t* Channel::get_ctx_pub()
 {

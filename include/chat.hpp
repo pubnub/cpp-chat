@@ -27,6 +27,11 @@ namespace Pubnub
         PCET_MODERATION
     };
 
+    enum pubnub_chat_message_type
+    {
+        PCMT_TEXT
+    };
+
     class Chat
     {
         public:

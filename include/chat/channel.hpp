@@ -12,6 +12,7 @@ extern "C" {
 namespace Pubnub
 {
     class Chat;
+    enum pubnub_chat_message_type;
 
     struct ChatChannelDataBase
     {
@@ -85,7 +86,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void set_restrictions(std::string in_user_id, bool ban_user, bool mute_user, std::string reason = "");
         PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, bool ban_user, bool mute_user, const char* reason = NULL);
 
-
+        PN_CHAT_EXPORT void send_text(std::string message, pubnub_chat_message_type message_type, std::string meta_data);
 
         PN_CHAT_EXPORT std::string get_channel_id(){return channel_id;};
         PN_CHAT_EXPORT ChatChannelData get_channel_data(){return channel_data;};
@@ -101,6 +102,7 @@ namespace Pubnub
         const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
         ChatChannelData channel_data_from_json(std::string json_string);
         std::string channel_data_to_json(std::string in_channel_id, ChatChannelData in_channel_data);
+        std::string chat_message_to_publish_string(std::string message, pubnub_chat_message_type message_type);
 
         //Use this to get pubnub publish context from chat_obj.
         pubnub_t* get_ctx_pub();
