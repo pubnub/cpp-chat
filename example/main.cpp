@@ -1,11 +1,17 @@
 #include "lib.hpp"
+#include "c_functions/c_chat.hpp"
+#include "string.hpp"
+#include <iostream>
 
 int main() {
-    Library lib;
-    lib.publish("my_channel", "\"Hello world!\"");
+    auto chat = pn_chat_new("demo", "demo", "user");
 
-    publish_simple_fn();
+    pn_chat_send_message(chat, "Hello, World!");
 
-    library_publish(&lib, "my_channel", "\"Hello world!\"");
-    return 0;
+    pn_chat_delete(chat);
+
+
+    Pubnub::String string = "Hello, World!";
+
+    std::cout << string.to_std_string() << std::endl;
 }

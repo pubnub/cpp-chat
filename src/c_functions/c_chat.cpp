@@ -18,7 +18,7 @@ void pn_chat_delete(Pubnub::Chat* chat) {
 void pn_chat_send_message(
         Pubnub::Chat* chat,
         const char* message) {
-    chat->publish_message("channel", message);
+    throw std::runtime_error("Not implemented");
 }
 
 

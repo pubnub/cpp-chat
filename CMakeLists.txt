@@ -5,6 +5,12 @@ project(pubnub-chat VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+if(${ENABLE_ASAN})
+    message(STATUS "Enabling AddressSanitizer")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fsanitize=address")
+endif()
+
 option(COMPILE_COMMANDS "Generate compile_commands.json" OFF)
 if(${COMPILE_COMMANDS})
     message(STATUS "Generating compile_commands.json")
