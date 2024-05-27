@@ -23,7 +23,7 @@ namespace Pubnub {
      *
      *  // Output: Hello, World! How are you?
      */
-    class PN_CHAT_EXPORT String 
+    PN_CHAT_EXPORT class String 
     {
         //TODO: check FString from Unreal Engine
     public:
