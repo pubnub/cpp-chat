@@ -5,6 +5,12 @@ project(pubnub-chat VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(COMPILE_COMMANDS "Generate compile_commands.json" OFF)
+if(${COMPILE_COMMANDS})
+    message(STATUS "Generating compile_commands.json")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(FetchContent)
