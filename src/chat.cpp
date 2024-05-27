@@ -126,16 +126,64 @@ Channel Pubnub::Chat::get_channel(std::string channel_id)
 
     std::string channel_response = pubnub_get(ctx_pub);
 
+    json response_json = json::parse(channel_response);
+
+    if(response_json.is_null())
+    {
+        return Channel();
+    }
+
+    std::string channel_data_string = response_json["Data"];
     Channel channel_obj;
-    channel_obj.init_from_json(this, channel_id, channel_response);
+    channel_obj.init_from_json(this, channel_id, channel_data_string);
 
     return channel_obj;
 }
 
-Channel Pubnub::Chat::get_channel(const char *channel_id)
+Channel Chat::get_channel(const char *channel_id)
 {
     std::string channel_id_string = channel_id;
     return get_channel(channel_id_string);
+}
+
+std::vector<Channel> Chat::get_channels(std::string include, int limit, std::string start, std::string end)
+{
+    auto future_response = get_all_channels_metadata_async(include.c_str(), limit, start.c_str(), end.c_str());
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    std::string channels_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(channels_response);
+
+    if(response_json.is_null())
+    {
+        throw std::exception("can't get channels, response is incorrect") ;
+    }
+
+    json channel_data_array_json = response_json["Data"];
+    std::vector<Channel> Channels;
+   
+   for (auto& element : channel_data_array_json)
+   {
+        Channel channel_obj;
+        channel_obj.init_from_json(this, element["id"], element);
+        Channels.push_back(channel_obj);
+   }
+
+    return Channels;
+}
+
+std::vector<Channel> Chat::get_channels(const char* include, int limit, const char* start, const char* end)
+{
+    std::string include_string = include;
+    std::string start_string = start;
+    std::string end_string = end;
+    return get_channels(include_string, limit, start_string, end_string);
 }
 
 void Pubnub::Chat::delete_channel(std::string channel_id)
@@ -213,6 +261,15 @@ std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *cha
 {
     return std::async(std::launch::async, [=](){
         pubnub_get_channelmetadata(ctx_pub, NULL, channel_id);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Pubnub::Chat::get_all_channels_metadata_async(const char *include, int limit, const char *start, const char *end)
+{
+    return std::async(std::launch::async, [=](){
+        pubnub_getall_channelmetadata(ctx_pub, include, limit, start, end, pubnub_tribool::pbccFalse);
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });

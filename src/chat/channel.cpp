@@ -151,16 +151,15 @@ void Pubnub::Channel::send_text(const char *message, pubnub_chat_message_type me
     send_text(message_string, message_type, meta_data_string);
 }
 
-ChatChannelData Channel::channel_data_from_json(std::string json_string)
+ChatChannelData Channel::channel_data_from_json(std::string data_json_string)
 {
-    json response_json = json::parse(json_string);
+    json channel_data_json = json::parse(data_json_string);;
 
-    if(response_json.is_null())
+    if(channel_data_json.is_null())
     {
         return ChatChannelData();
     }
 
-    json channel_data_json = response_json["data"];
     ChatChannelData channel_data;
 
     if(channel_data_json.contains("name") )

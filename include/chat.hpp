@@ -62,6 +62,9 @@ namespace Pubnub
         PN_CHAT_EXPORT Channel get_channel(std::string channel_id);
         PN_CHAT_EXPORT Channel get_channel(const char* channel_id);
 
+        PN_CHAT_EXPORT std::vector<Channel> get_channels(std::string include, int limit, std::string start, std::string end);
+        PN_CHAT_EXPORT std::vector<Channel> get_channels(const char* include, int limit, const char* start, const char* end);
+
         PN_CHAT_EXPORT void delete_channel(std::string channel_id);
         PN_CHAT_EXPORT void delete_channel(const char* channel_id);
 
@@ -87,6 +90,7 @@ namespace Pubnub
         const char* user_id;
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
+        std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
 
         void emit_chat_event(pubnub_chat_event_type chat_event_type, std::string channel_id, std::string payload);
 
