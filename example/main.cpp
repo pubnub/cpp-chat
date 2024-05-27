@@ -4,14 +4,14 @@
 #include <iostream>
 
 int main() {
-    auto chat = pn_chat_new("demo", "demo", "user");
-
-    pn_chat_send_message(chat, "Hello, World!");
-
-    pn_chat_delete(chat);
-
-
+    std::cout << "Hello, World!" << std::endl;
+    Pubnub::String kekw("KEKW");
     Pubnub::String string = "Hello, World!";
 
+    std::cout << kekw << std::endl;
+    std::cout << kekw.c_str() << std::endl;
+    std::cout << kekw.to_std_string() << std::endl;
+    std::cout << string << std::endl;
+    std::cout << string.c_str() << std::endl;
     std::cout << string.to_std_string() << std::endl;
 }

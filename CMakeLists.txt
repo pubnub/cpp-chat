@@ -17,6 +17,12 @@ if(${COMPILE_COMMANDS})
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 endif()
 
+option(DEBUG "Enable debugging" OFF)
+if(${DEBUG})
+    message(STATUS "Enabling debugging")
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(FetchContent)

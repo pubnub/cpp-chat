@@ -16,9 +16,9 @@ String::~String() {
 
 String::String(const char* string) {
     auto lenght = strlen(string);
-    this->string = new char[len + 1];
-    strcpy(this->string, string);
-    this->string[len] = '\0';
+    this->string = new char[lenght + 1];
+    memcpy(this->string, string, lenght);
+    this->string[lenght] = '\0';
 
     this->len = lenght;
     this->cap = lenght;
@@ -57,9 +57,9 @@ String& String::operator=(const char* string) {
         delete[] this->string;
     }
 
-    this->string = new char[len + 1];
-    strcpy(this->string, string);
-    this->string[len] = '\0';
+    this->string = new char[lenght + 1];
+    memcpy(this->string, string, lenght);
+    this->string[lenght] = '\0';
 
     this->len = lenght;
     this->cap = lenght;
@@ -167,7 +167,7 @@ void String::insert(std::size_t pos, char character) {
 void String::shrink() {
     auto new_cap = this->len;
     auto new_string = new char[new_cap + 1];
-    strcpy(new_string, this->string);
+    memcpy(new_string, this->string, new_cap);
 
     delete[] this->string;
     this->string = new_string;
@@ -268,7 +268,8 @@ void String::grow_if_needed(std::size_t new_len) {
         auto new_cap = this->calculate_capacity(new_len);
 
         auto new_string = new char[new_cap + 1];
-        strcpy(new_string, this->string);
+        memcpy(new_string, this->string, new_cap);
+        new_string[new_cap] = '\0';
 
         delete[] this->string;
         this->string = new_string;
@@ -320,7 +321,8 @@ const char* String::into_c_str() {
 void String::reserve(std::size_t new_cap) {
     if (new_cap > this->cap) {
         auto new_string = new char[new_cap + 1];
-        strcpy(new_string, this->string);
+        memcpy(new_string, this->string, new_cap);
+        new_string[new_cap] = '\0';
 
         delete[] this->string;
         this->string = new_string;
@@ -374,7 +376,3 @@ bool operator!=(const String& lhs, const String& rhs) {
     return strcmp(lhs.c_str(), rhs.c_str()) != 0;
 }
 
-std::ostream& operator<<(std::ostream& os, const String& string) {
-    os << string.c_str();
-    return os;
-}

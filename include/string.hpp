@@ -562,7 +562,6 @@ namespace Pubnub {
         PN_CHAT_EXPORT friend String operator+(const String& lhs, const String& rhs);
         PN_CHAT_EXPORT friend String operator+(const String& lhs, const char* rhs);
         PN_CHAT_EXPORT friend String operator+(const String& lhs, std::string rhs);
-        PN_CHAT_EXPORT friend std::ostream& operator<<(std::ostream& os, const String& string);
 
         std::size_t calculate_capacity(std::size_t size) const;
         void grow_if_needed(std::size_t size);
@@ -648,24 +647,6 @@ namespace Pubnub {
      * @return True if the String values are not equal, false otherwise.
      */
     PN_CHAT_EXPORT bool operator!=(const String& lhs, const String& rhs);
-
-    /**
-     * Stream operator that writes the String to the output stream.
-     *
-     * Keep in mind that it passes the pointer to the string so the String should not be modified
-     * after the stream operator is used.
-     * 
-     * @param os The output stream to write the String to.
-     * @param string The String to write to the output stream.
-     * @return The output stream.
-     *
-     * Example:
-     *  String string = "Hello, World!";
-     *  std::cout << string << std::endl;
-     *
-     *  // Output: Hello, World!
-     */
-    PN_CHAT_EXPORT std::ostream& operator<<(std::ostream& os, const String& string);
 }
 
 #endif /* PN_STRING_H */
