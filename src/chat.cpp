@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
 
@@ -162,7 +163,7 @@ std::vector<Channel> Chat::get_channels(std::string include, int limit, std::str
 
     if(response_json.is_null())
     {
-        throw std::exception("can't get channels, response is incorrect") ;
+        throw std::runtime_error("can't get channels, response is incorrect") ;
     }
 
     json channel_data_array_json = response_json["Data"];

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
 
@@ -139,7 +140,7 @@ void Pubnub::Channel::send_text(std::string message, pubnub_chat_message_type me
 
     if(publish_response != PNR_OK)
     {
-        throw std::exception("Failed to publish message");
+        throw std::runtime_error("Failed to publish message");
     }
 
 }
