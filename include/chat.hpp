@@ -52,8 +52,8 @@ namespace Pubnub
 
         /* CHANNELS*/
 
-        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
-        PN_CHAT_EXPORT Pubnub::Channel* update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Channel get_channel(Pubnub::String channel_id);
         PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
         PN_CHAT_EXPORT void delete_channel(Pubnub::String channel_id);
@@ -63,6 +63,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id, ChatUserData user_data);
         PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
+        PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, ChatUserData user_data);
 
 
         //Just to test new string

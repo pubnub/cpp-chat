@@ -21,8 +21,6 @@ void Channel::init(Chat *InChat, String in_channel_id, ChatChannelData in_additi
     channel_id = in_channel_id;
     channel_data = in_additional_channel_data;
 
-    pubnub_set_channelmetadata(get_ctx_pub(), channel_id.c_str(), NULL, channel_data_to_json(channel_id, channel_data).c_str());
-
     //now channel is fully initialized
     is_initialized = true;
 }
@@ -35,7 +33,7 @@ void Channel::init_from_json(Chat *InChat, String in_channel_id, String channel_
 void Channel::update(ChatChannelData in_additional_channel_data)
 {
     channel_data = in_additional_channel_data;
-    pubnub_set_channelmetadata(get_ctx_pub(), channel_id.c_str(), NULL, channel_data_to_json(channel_id, channel_data).c_str());
+    pubnub_set_channelmetadata(get_ctx_pub(), channel_id, NULL, channel_data_to_json(channel_id, channel_data));
 }
 
 void Channel::connect()
@@ -45,7 +43,7 @@ void Channel::connect()
         throw std::invalid_argument("Failed to connect to channel, chat_obj is invalid");
     }
 
-    chat_obj->subscribe_to_channel(channel_id.c_str());
+    chat_obj->subscribe_to_channel(channel_id);
 }
 
 void Channel::disconnect()
@@ -55,7 +53,7 @@ void Channel::disconnect()
         throw std::invalid_argument("Failed to disconnect from channel, chat_obj is invalid");
     }
 
-    chat_obj->unsubscribe_from_channel(channel_id.c_str());
+    chat_obj->unsubscribe_from_channel(channel_id);
 }
 
 void Channel::join(String additional_params)
@@ -65,7 +63,7 @@ void Channel::join(String additional_params)
     String custom_parameter_string;
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
     String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + additional_params + String("}]");
-    pubnub_set_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), include_string.c_str(), set_object_string.c_str());
+    pubnub_set_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), include_string, set_object_string);
 
     connect();
     */
@@ -75,7 +73,7 @@ void Channel::leave()
 {
     /*
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
-    pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string.c_str());
+    pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string);
 
 	disconnect();
     */
@@ -108,7 +106,7 @@ void Channel::send_text(String message, pubnub_chat_message_type message_type, S
         throw std::invalid_argument("Failed to send text, message is empty");
     }
 
-    pubnub_publish(get_ctx_pub(), channel_id.c_str(), chat_message_to_publish_string(message, message_type).c_str());
+    pubnub_publish(get_ctx_pub(), channel_id, chat_message_to_publish_string(message, message_type));
 
     pubnub_res publish_response =  pubnub_await(get_ctx_pub());
 

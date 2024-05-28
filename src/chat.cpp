@@ -54,30 +54,32 @@ void Chat::publish_message(String channel, String message)
     publish_message(channel, message);
 }
 
-Channel* Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
+Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
 {
     if(channel_id != NULL && *channel_id == 0)
     {
         throw std::invalid_argument("Failed to create public conversation, channel_id is empty");
     }
 
-    Channel* channel_ptr = new Channel;
-    channel_ptr->init(this, channel_id, channel_data);
+    Channel channel_obj;
+    channel_obj.init(this, channel_id, channel_data);
+    pubnub_set_channelmetadata(ctx_pub, channel_id, NULL, channel_obj.channel_data_to_json(channel_id, channel_data));
 
-    return channel_ptr;
+    return channel_obj;
 }
 
-Channel* Chat::update_channel(String channel_id, ChatChannelData channel_data)
+Channel Chat::update_channel(String channel_id, ChatChannelData channel_data)
 {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Failed to update channel, channel_id is empty");
     }
 
-    Channel* channel_ptr = new Channel;
-    channel_ptr->init(this, channel_id, channel_data);
+    Channel channel_obj;
+    channel_obj.init(this, channel_id, channel_data);
+    channel_obj.update(channel_data);
 
-    return channel_ptr;
+    return channel_obj;
 }
 
 Channel Chat::get_channel(String channel_id)
@@ -197,6 +199,7 @@ User Chat::create_user(String user_id, ChatUserData user_data)
 
     User created_user;
     created_user.init(this, user_id, user_data);
+    pubnub_set_uuidmetadata(ctx_pub, user_id, NULL, created_user.user_data_to_json(user_id, user_data));
 
     return created_user;
 }
@@ -232,6 +235,19 @@ User Chat::get_user(String user_id)
     return user_obj;
 }
 
+User Chat::update_user(String user_id, ChatUserData user_data)
+{
+    if(user_id.empty())
+    {
+        throw std::invalid_argument("Failed to update user, user_id is empty");
+    }
+
+    User user_obj;
+    user_obj.init(this, user_id, user_data);
+    user_obj.update(user_data);
+
+    return user_obj;
+}
 
 Message Chat::get_message(String MessageTest)
 {

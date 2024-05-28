@@ -49,15 +49,17 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::String get_channel_id(){return channel_id;};
         PN_CHAT_EXPORT ChatChannelData get_channel_data(){return channel_data;};
 
+
+        ChatChannelData channel_data_from_json(Pubnub::String json_string);
+        Pubnub::String channel_data_to_json(Pubnub::String in_channel_id, ChatChannelData in_channel_data);
+
+    
         private:
 
         Pubnub::String channel_id;
         ChatChannelData channel_data;
         bool is_initialized = false;
         Pubnub::Chat *chat_obj;
-
-        ChatChannelData channel_data_from_json(Pubnub::String json_string);
-        Pubnub::String channel_data_to_json(Pubnub::String in_channel_id, ChatChannelData in_channel_data);
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
 
         //Use this to get pubnub publish context from chat_obj.

@@ -17,8 +17,6 @@ void User::init(Chat *InChat, String in_user_id, ChatUserData in_additional_user
     user_id = in_user_id;
     user_data = in_additional_user_data;
 
-    pubnub_set_uuidmetadata(get_ctx_pub(), in_user_id.c_str(), NULL, user_data_to_json(user_id, user_data).c_str());
-
     //now channel is fully initialized
     is_initialized = true;
 }
@@ -26,6 +24,12 @@ void User::init(Chat *InChat, String in_user_id, ChatUserData in_additional_user
 void User::init_from_json(Chat *InChat, String in_user_id, String user_data_json)
 {
     init(InChat, in_user_id, user_data_from_json(user_data_json));
+}
+
+void User::update(ChatUserData in_user_data)
+{
+    user_data = in_user_data;
+    pubnub_set_uuidmetadata(get_ctx_pub(), user_id, NULL, user_data_to_json(user_id, user_data));
 }
 
 ChatUserData User::user_data_from_json(String data_json_string)
