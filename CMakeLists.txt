@@ -23,6 +23,11 @@ if(${DEBUG})
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+option(ENABLE_C_ABI "Enable C ABI" OFF)
+if(${ENABLE_C_ABI})
+    message(STATUS "Enabling C ABI functions")
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(FetchContent)
@@ -58,16 +63,22 @@ include_directories(${c-core_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
 
-add_library(pubnub-chat
-    SHARED
+set(SOURCES
     src/lib.cpp
     src/chat.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
-    # TODO: compile flag for c_functions
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp)
+
+if(${ENABLE_C_ABI})
+    set(SOURCES
+        ${SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp)
+endif()
+
+
+add_library(pubnub-chat SHARED ${SOURCES})
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
