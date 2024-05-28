@@ -82,6 +82,9 @@ namespace Pubnub
         bool is_initialized = false;
         Pubnub::Chat *chat_obj;
 
+        ChatUserData user_data_from_json(std::string data_json_string);
+        std::string user_data_to_json(std::string in_user_id, ChatUserData in_user_data);
+
         //Use this to get pubnub publish context from chat_obj.
         pubnub_t* get_ctx_pub();
 

@@ -8,7 +8,6 @@ extern "C" {
     #include "core/pubnub_api_types.h"
 }
 
-
 namespace Pubnub
 {
     class Chat;
@@ -99,8 +98,6 @@ namespace Pubnub
         bool is_initialized = false;
         Pubnub::Chat *chat_obj;
 
-        ChatChannelDataChar channel_data_from_json_char(const char* json_char);
-        const char* channel_data_to_json_char(const char* channel_id, ChatChannelDataChar channel_data);
         ChatChannelData channel_data_from_json(std::string json_string);
         std::string channel_data_to_json(std::string in_channel_id, ChatChannelData in_channel_data);
         std::string chat_message_to_publish_string(std::string message, pubnub_chat_message_type message_type);

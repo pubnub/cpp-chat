@@ -4,6 +4,7 @@
 #include <string>
 #include <future>
 
+#include "string.hpp"
 #include "export.hpp"
 #include "chat/user.hpp"
 #include "chat/channel.hpp"
@@ -71,7 +72,8 @@ namespace Pubnub
         PN_CHAT_EXPORT void set_restrictions(std::string in_user_id, std::string in_channel_id, bool ban_user, bool mute_user, std::string reason = "");
         PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, const char* in_channel_id, bool ban_user, bool mute_user, const char* reason = NULL);
 
-
+        //Just to test new string
+        PN_CHAT_EXPORT Pubnub::Message get_message(String MessageTest);
 
         pubnub_t* get_pubnub_context(){return ctx_pub;};
 

@@ -247,6 +247,14 @@ void Pubnub::Chat::set_restrictions(const char *in_user_id, const char* in_chann
     set_restrictions(in_user_id_string, in_channel_id_string, ban_user, mute_user, reason_string);
 }
 
+Message Chat::get_message(String MessageTest)
+{
+    Message new_message;
+    new_message.message_id = MessageTest;
+    //new_message.message_text = MessageTest;
+    return new_message;
+}
+
 void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
 {
     pubnub_subscribe(ctx_sub, channel_id, NULL);
