@@ -33,7 +33,6 @@ namespace Pubnub
         PN_CHAT_EXPORT void init(Pubnub::Chat *InChat, Pubnub::String in_user_id, ChatUserData in_additional_user_data);
         PN_CHAT_EXPORT void init_from_json(Pubnub::Chat *InChat, Pubnub::String in_user_id, Pubnub::String user_data_json);
 
-
         private:
 
         Pubnub::String user_id;

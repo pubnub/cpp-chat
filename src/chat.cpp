@@ -191,9 +191,46 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_us
 }
 
 
-User Chat::create_user(String user_id)
+User Chat::create_user(String user_id, ChatUserData user_data)
 {
-    return User();
+    //Make sure user with this ID doesn't exist
+    get_user(user_id);
+
+    User created_user;
+    created_user.init(this, user_id, user_data);
+
+    return created_user;
+}
+
+User Chat::get_user(String user_id)
+{
+    if(user_id.empty())
+    {
+        throw std::invalid_argument("Failed to get user, user_id is empty");
+    }
+
+    auto future_response = get_uuid_metadata_async(user_id);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+    if(Res != PNR_OK)
+    {
+        throw std::runtime_error("Failed to get user, incorrect response from server");
+    }
+
+    String channel_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(channel_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("Failed to get user, response json can't be parsed");
+    }
+
+    String user_data_string = response_json["Data"];
+    User user_obj;
+    user_obj.init_from_json(this, user_id, user_data_string);
+
+    return user_obj;
 }
 
 
@@ -229,6 +266,15 @@ std::future<pubnub_res> Chat::get_all_channels_metadata_async(const char *includ
 {
     return std::async(std::launch::async, [=](){
         pubnub_getall_channelmetadata(ctx_pub, include, limit, start, end, pubnub_tribool::pbccFalse);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Chat::get_uuid_metadata_async(const char *user_id)
+{
+    return std::async(std::launch::async, [=](){
+        pubnub_get_uuidmetadata(ctx_pub, NULL, user_id);
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });

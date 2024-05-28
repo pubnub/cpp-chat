@@ -62,6 +62,7 @@ namespace Pubnub
         /* USERS */
 
         PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id);
+        PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
 
 
         //Just to test new string
@@ -85,6 +86,7 @@ namespace Pubnub
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
+        std::future<pubnub_res> get_uuid_metadata_async(const char* user_id);
 
         void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
