@@ -28,7 +28,10 @@ if(${ENABLE_C_ABI})
     message(STATUS "Enabling C ABI functions")
 endif()
 
+option(RUN_TESTS "Run tests" OFF)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
 
 include(FetchContent)
 
@@ -78,6 +81,12 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_channel.cpp)
 endif()
 
+if(NOT ${RUN_TESTS})
+    set(SOURCES
+        ${SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
+endif()
+
 
 add_library(pubnub-chat SHARED ${SOURCES})
 
@@ -87,7 +96,6 @@ add_executable(pubnub-chat-example example/main.cpp)
 
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
-option(RUN_TESTS "Run tests" OFF)
 if(${RUN_TESTS})
     message(STATUS "Running tests")
 

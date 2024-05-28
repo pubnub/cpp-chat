@@ -557,11 +557,6 @@ namespace Pubnub {
        // TODO: think about rust-like iterators
 
     private:
-        PN_CHAT_EXPORT friend bool operator==(const String& lhs, const String& rhs);
-        PN_CHAT_EXPORT friend bool operator!=(const String& lhs, const String& rhs);
-        PN_CHAT_EXPORT friend String operator+(const String& lhs, const char* rhs);
-        PN_CHAT_EXPORT friend String operator+(const String& lhs, std::string rhs);
-
         std::size_t calculate_capacity(std::size_t size) const;
         void grow_if_needed(std::size_t size);
 
@@ -569,86 +564,84 @@ namespace Pubnub {
         unsigned int len = 0;
         unsigned int cap = 0;
     };
-
-
 }
 
-    /**
-     * Add operator that appends two Strings.
-     *
-     * This operator creates a new String object that holds the result of the append operation.
-     * The memory for the new String object is allocated and the content of the append operation
-     * is copied to the new memory.
-     *
-     * @param lhs The left hand side String to append.
-     * @param rhs The right hand side String to append.
-     * @return The String that is the result of the append operation.
-     *
-     * Example:
-     *  String string = "Hello, ";
-     *  String world = "World!";
-     *  auto result = string + world;
-     *
-     *  // String { "Hello, World!" }
-     */
-    PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const Pubnub::String& rhs);
+/**
+ * Add operator that appends two Strings.
+ *
+ * This operator creates a new String object that holds the result of the append operation.
+ * The memory for the new String object is allocated and the content of the append operation
+ * is copied to the new memory.
+ *
+ * @param lhs The left hand side String to append.
+ * @param rhs The right hand side String to append.
+ * @return The String that is the result of the append operation.
+ *
+ * Example:
+ *  String string = "Hello, ";
+ *  String world = "World!";
+ *  auto result = string + world;
+ *
+ *  // String { "Hello, World!" }
+ */
+PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const Pubnub::String& rhs);
 
 
-    /**
-     * Add operator that appends a String with a const char* string.
-     *
-     * This operator creates a new String object that holds the result of the append operation.
-     * The memory for the new String object is allocated and the content of the append operation
-     * is copied to the new memory.
-     *
-     * @param lhs The left hand side String to append.
-     * @param rhs The right hand side const char* string to append.
-     * @return The String that is the result of the append operation.
-     *
-     * Example:
-     *  String string = "Hello, ";
-     *  auto result = string + "World!";
-     *
-     *  // String { "Hello, World!" }
-     */
-    //PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const char* rhs);
+/**
+ * Add operator that appends a String with a const char* string.
+ *
+ * This operator creates a new String object that holds the result of the append operation.
+ * The memory for the new String object is allocated and the content of the append operation
+ * is copied to the new memory.
+ *
+ * @param lhs The left hand side String to append.
+ * @param rhs The right hand side const char* string to append.
+ * @return The String that is the result of the append operation.
+ *
+ * Example:
+ *  String string = "Hello, ";
+ *  auto result = string + "World!";
+ *
+ *  // String { "Hello, World!" }
+ */
+//PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const char* rhs);
 
-    /**
-     * Add operator that appends a String with a std::string.
-     *
-     * This operator creates a new String object that holds the result of the append operation.
-     * The memory for the new String object is allocated and the content of the append operation
-     * is copied to the new memory.
-     *
-     * @param lhs The left hand side String to append.
-     * @param rhs The right hand side std::string to append.
-     * @return The String that is the result of the append operation.
-     *
-     * Example:
-     *  String string = "Hello, ";
-     *  std::string world = "World!";
-     *  auto result = string + world;
-     *
-     *  // String { "Hello, World!" }
-     */
-    //PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, std::string rhs);
+/**
+ * Add operator that appends a String with a std::string.
+ *
+ * This operator creates a new String object that holds the result of the append operation.
+ * The memory for the new String object is allocated and the content of the append operation
+ * is copied to the new memory.
+ *
+ * @param lhs The left hand side String to append.
+ * @param rhs The right hand side std::string to append.
+ * @return The String that is the result of the append operation.
+ *
+ * Example:
+ *  String string = "Hello, ";
+ *  std::string world = "World!";
+ *  auto result = string + world;
+ *
+ *  // String { "Hello, World!" }
+ */
+//PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, std::string rhs);
 
-    /**
-     * Equality operator that compares two Strings over their values.
-     * 
-     * @param lhs The left hand side String to compare.
-     * @param rhs The right hand side String to compare.
-     * @return True if the String values are equal (ptr do not need to be the same), false otherwise.
-     */
-    PN_CHAT_EXPORT bool operator==(const Pubnub::String& lhs, const Pubnub::String& rhs);
+/**
+ * Equality operator that compares two Strings over their values.
+ * 
+ * @param lhs The left hand side String to compare.
+ * @param rhs The right hand side String to compare.
+ * @return True if the String values are equal (ptr do not need to be the same), false otherwise.
+ */
+PN_CHAT_EXPORT bool operator==(const Pubnub::String& lhs, const Pubnub::String& rhs);
 
-    /**
-     * Inequality operator that compares two Strings over their values.
-     * 
-     * @param lhs The left hand side String to compare.
-     * @param rhs The right hand side String to compare.
-     * @return True if the String values are not equal, false otherwise.
-     */
-    PN_CHAT_EXPORT bool operator!=(const Pubnub::String& lhs, const Pubnub::String& rhs);
+/**
+ * Inequality operator that compares two Strings over their values.
+ * 
+ * @param lhs The left hand side String to compare.
+ * @param rhs The right hand side String to compare.
+ * @return True if the String values are not equal, false otherwise.
+ */
+PN_CHAT_EXPORT bool operator!=(const Pubnub::String& lhs, const Pubnub::String& rhs);
 
 #endif /* PN_STRING_H */

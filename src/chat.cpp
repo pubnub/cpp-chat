@@ -9,6 +9,7 @@ extern "C" {
 #include "core/pubnub_ntf_sync.h"
 #include "core/pubnub_objects_api.h"
 #include "core/pubnub_coreapi.h"
+#include "core/pubnub_objects_api.h"
 }
 
 using namespace Pubnub;

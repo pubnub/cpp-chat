@@ -272,8 +272,10 @@ void String::grow_if_needed(std::size_t new_len) {
         auto new_cap = this->calculate_capacity(new_len);
 
         auto new_string = new char[new_cap + 1];
-        memcpy(new_string, this->string, new_cap);
-        new_string[new_cap] = '\0';
+        memset(new_string, 0, new_cap + 1);
+        if (this->string != nullptr) {
+            memcpy(new_string, this->string, new_cap);
+        }
 
         delete[] this->string;
         this->string = new_string;

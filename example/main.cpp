@@ -1,28 +1,20 @@
-#include "lib.hpp"
-#include "c_functions/c_chat.hpp"
-#include "string.hpp"
+#include "infra/pubnub.hpp"
 #include <iostream>
+#include <thread>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    Pubnub::String kekw("KEKW");
-    Pubnub::String string = "Hello, World!";
+    PubNub pn("demo", "demo", "demo");
 
-    Pubnub::String chuj;
+    pn.publish("my_channel", "\"Hello, world!\"");
 
+    pn.subscribe_to_channel("my_channel");
 
-    chuj = string;
+    for (auto i = 0; i < 10; i++) {
+        auto messages = pn.fetch_messages();
+        for (const auto& message : messages) {
+            std::cout << message.payload.ptr << std::endl;
+        }
 
-    auto xyz = Pubnub::String("abc") + Pubnub::String("def");
-
-    std::cout << kekw << std::endl;
-    std::cout << kekw.c_str() << std::endl;
-    std::cout << kekw.to_std_string() << std::endl;
-    std::cout << string << std::endl;
-    std::cout << string.c_str() << std::endl;
-    std::cout << string.to_std_string() << std::endl;
-    std::cout << chuj << std::endl;
-    std::cout << chuj.c_str() << std::endl;
-    std::cout << chuj.to_std_string() << std::endl;
-    std::cout << xyz << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
