@@ -190,7 +190,6 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_us
 */
 }
 
-
 User Chat::create_user(String user_id, ChatUserData user_data)
 {
     //Make sure user with this ID doesn't exist
