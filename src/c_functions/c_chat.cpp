@@ -20,20 +20,20 @@ Pubnub::Channel* pn_chat_create_public_conversation(
         Pubnub::Chat* chat,
         const char* channel_id,
         Pubnub::ChatChannelData channel_data) {
-    return chat->create_public_conversation((const char*)channel_id, channel_data);
+    return new Pubnub::Channel(chat->create_public_conversation((const char*)channel_id, channel_data));
 }
 
 Pubnub::Channel* pn_chat_update_channel(
         Pubnub::Chat* chat,
         const char* channel_id,
         Pubnub::ChatChannelData channel_data) {
-    return chat->update_channel(channel_id, channel_data);
+    return new Pubnub::Channel(chat->update_channel(channel_id, channel_data));
 }
 
 Pubnub::Channel* pn_chat_get_channel(
         Pubnub::Chat* chat,
         const char* channel_id) {
-    return chat->get_channel(channel_id);
+    return new Pubnub::Channel(chat->get_channel(channel_id));
 }
 
 

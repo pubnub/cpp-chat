@@ -74,7 +74,8 @@ set(SOURCES
 if(${ENABLE_C_ABI})
     set(SOURCES
         ${SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_channel.cpp)
 endif()
 
 

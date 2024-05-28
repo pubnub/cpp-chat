@@ -3,6 +3,7 @@
 
 #include <string>
 #include "export.hpp"
+#include "string.hpp"
 
 extern "C" {
     #include "core/pubnub_api_types.h"
