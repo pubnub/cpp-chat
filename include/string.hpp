@@ -89,7 +89,7 @@ namespace Pubnub {
          * 
          * @param string The std::string const reference to assign the String with.
          */
-        PN_CHAT_EXPORT String& operator=(const String& string) = default;
+        PN_CHAT_EXPORT String& operator=(const String& string);
 
         /**
          * Move assignment operator that assigns the string with another String.

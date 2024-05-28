@@ -75,6 +75,10 @@ String& String::operator=(std::string string) {
     return this->operator=(string.c_str());
 }
 
+String& String::operator=(const String& string) {
+    return this->operator=(string.string);
+}
+
 String& String::operator+=(const char* string) {
     auto lenght = strlen(string);
 
