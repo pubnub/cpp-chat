@@ -56,7 +56,7 @@ void Chat::publish_message(String channel, String message)
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
 {
-    if(channel_id != NULL && *channel_id == 0)
+    if(channel_id.empty())
     {
         throw std::invalid_argument("Failed to create public conversation, channel_id is empty");
     }
@@ -106,7 +106,7 @@ Channel Chat::get_channel(String channel_id)
         return Channel();
     }
 
-    String channel_data_string = response_json["Data"];
+    String channel_data_string = static_cast<Pubnub::String>(response_json["Data"]);
     Channel channel_obj;
     channel_obj.init_from_json(this, channel_id, channel_data_string);
 
@@ -228,7 +228,7 @@ User Chat::get_user(String user_id)
         throw std::runtime_error("Failed to get user, response json can't be parsed");
     }
 
-    String user_data_string = response_json["Data"];
+    String user_data_string = static_cast<Pubnub::String>(response_json["Data"]);
     User user_obj;
     user_obj.init_from_json(this, user_id, user_data_string);
 
