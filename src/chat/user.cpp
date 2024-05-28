@@ -11,7 +11,7 @@ extern "C" {
 using namespace Pubnub;
 using json = nlohmann::json;
 
-void User::init(Pubnub::Chat *InChat, std::string in_user_id, ChatUserData in_additional_user_data)
+void User::init(Chat *InChat, String in_user_id, ChatUserData in_additional_user_data)
 {
     chat_obj = InChat;
     user_id = in_user_id;
@@ -23,25 +23,12 @@ void User::init(Pubnub::Chat *InChat, std::string in_user_id, ChatUserData in_ad
     is_initialized = true;
 }
 
-void User::init(Pubnub::Chat *InChat, const char *in_user_id, ChatUserDataChar in_additional_user_data)
-{
-    std::string user_id_string = in_user_id;
-    init(InChat, user_id_string, ChatUserData(in_additional_user_data));
-}
-
-void User::init_from_json(Pubnub::Chat *InChat, std::string in_user_id, std::string user_data_json)
+void User::init_from_json(Chat *InChat, String in_user_id, String user_data_json)
 {
     init(InChat, in_user_id, user_data_from_json(user_data_json));
 }
 
-void User::init_from_json(Pubnub::Chat *InChat, const char *in_user_id, const char *user_data_json)
-{
-    std::string user_id_string = in_user_id;
-    std::string user_data_json_string = user_data_json;
-    init_from_json(InChat, user_id_string, user_data_json_string);
-}
-
-ChatUserData Pubnub::User::user_data_from_json(std::string data_json_string)
+ChatUserData User::user_data_from_json(String data_json_string)
 {
     json user_data_json = json::parse(data_json_string);
 
@@ -83,7 +70,7 @@ ChatUserData Pubnub::User::user_data_from_json(std::string data_json_string)
 
     return user_data;
 }
-std::string Pubnub::User::user_data_to_json(std::string in_user_id, ChatUserData in_user_data)
+String User::user_data_to_json(String in_user_id, ChatUserData in_user_data)
 {
     json user_data_json;
 

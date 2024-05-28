@@ -17,12 +17,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_send_message(
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversation(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::ChatChannelDataChar channel_data);
+        Pubnub::ChatChannelData channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel(
         Pubnub::Chat* chat,
         std::string channel_id,
-        Pubnub::ChatChannelDataChar channel_data);
+        Pubnub::ChatChannelData channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_channel(
         Pubnub::Chat* chat,

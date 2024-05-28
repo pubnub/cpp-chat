@@ -38,8 +38,7 @@ namespace Pubnub
         public:
 
         //TO DELETE, just for testing
-        PN_CHAT_EXPORT void publish_message(std::string channel, std::string message);
-        PN_CHAT_EXPORT void publish_message(const char* channel, const char* message);
+        PN_CHAT_EXPORT void publish_message(Pubnub::String channel, Pubnub::String message);
 
         Chat(){};
         ~Chat()
@@ -47,30 +46,23 @@ namespace Pubnub
             deinit();
         };
 
-        PN_CHAT_EXPORT void init(std::string in_publish_key, std::string in_subscribe_key, std::string in_user_id);
-        PN_CHAT_EXPORT void init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id);
+        PN_CHAT_EXPORT void init(Pubnub::String in_publish_key, Pubnub::String in_subscribe_key, Pubnub::String in_user_id);
         
         PN_CHAT_EXPORT void deinit();
 
         /* CHANNELS*/
 
-        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(std::string channel_id, ChatChannelData channel_data);
-        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel* create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel* update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
+        PN_CHAT_EXPORT Channel get_channel(Pubnub::String channel_id);
+        PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
+        PN_CHAT_EXPORT void delete_channel(Pubnub::String channel_id);
+        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
 
-        PN_CHAT_EXPORT Pubnub::Channel* update_channel(std::string channel_id, ChatChannelData channel_data);
-        PN_CHAT_EXPORT Pubnub::Channel* update_channel(const char* channel_id, ChatChannelDataChar channel_data);
+        /* USERS */
 
-        PN_CHAT_EXPORT Channel get_channel(std::string channel_id);
-        PN_CHAT_EXPORT Channel get_channel(const char* channel_id);
+        PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id);
 
-        PN_CHAT_EXPORT std::vector<Channel> get_channels(std::string include, int limit, std::string start, std::string end);
-        PN_CHAT_EXPORT std::vector<Channel> get_channels(const char* include, int limit, const char* start, const char* end);
-
-        PN_CHAT_EXPORT void delete_channel(std::string channel_id);
-        PN_CHAT_EXPORT void delete_channel(const char* channel_id);
-
-        PN_CHAT_EXPORT void set_restrictions(std::string in_user_id, std::string in_channel_id, bool ban_user, bool mute_user, std::string reason = "");
-        PN_CHAT_EXPORT void set_restrictions(const char* in_user_id, const char* in_channel_id, bool ban_user, bool mute_user, const char* reason = NULL);
 
         //Just to test new string
         PN_CHAT_EXPORT Pubnub::Message get_message(String MessageTest);
@@ -78,10 +70,10 @@ namespace Pubnub
         pubnub_t* get_pubnub_context(){return ctx_pub;};
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
-        void subscribe_to_channel(const char* channel_id);
-        void unsubscribe_from_channel(const char* channel_id);
+        void subscribe_to_channel(Pubnub::String channel_id);
+        void unsubscribe_from_channel(Pubnub::String channel_id);
 
-        const std::string internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
+        const Pubnub::String internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
 
         private:
 
@@ -94,12 +86,12 @@ namespace Pubnub
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
 
-        void emit_chat_event(pubnub_chat_event_type chat_event_type, std::string channel_id, std::string payload);
+        void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
         /* HELPERS */
 
-        std::string get_string_from_event_type(pubnub_chat_event_type chat_event_type);
-        inline std::string const bool_to_string(bool b)
+        Pubnub::String get_string_from_event_type(pubnub_chat_event_type chat_event_type);
+        inline Pubnub::String const bool_to_string(bool b)
         {
             return b ? "true" : "false";
         }

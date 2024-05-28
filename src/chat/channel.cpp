@@ -15,7 +15,7 @@ extern "C" {
 using namespace Pubnub;
 using json = nlohmann::json;
 
-void Channel::init(Pubnub::Chat *InChat, std::string in_channel_id, ChatChannelData in_additional_channel_data)
+void Channel::init(Chat *InChat, String in_channel_id, ChatChannelData in_additional_channel_data)
 {
     chat_obj = InChat;
     channel_id = in_channel_id;
@@ -27,22 +27,9 @@ void Channel::init(Pubnub::Chat *InChat, std::string in_channel_id, ChatChannelD
     is_initialized = true;
 }
 
-void Channel::init(Pubnub::Chat *InChat, const char* in_channel_id, ChatChannelDataChar in_additional_channel_data)
-{
-    std::string channel_id_string = in_channel_id;
-    init(InChat, channel_id_string, ChatChannelData(in_additional_channel_data));
-}
-
-void Channel::init_from_json(Pubnub::Chat *InChat, std::string in_channel_id, std::string channel_data_json)
+void Channel::init_from_json(Chat *InChat, String in_channel_id, String channel_data_json)
 {
     init(InChat, in_channel_id, channel_data_from_json(channel_data_json));
-}
-
-void Channel::init_from_json(Pubnub::Chat *InChat, const char *in_channel_id, const char *channel_data_json)
-{
-    std::string channel_id_string = in_channel_id;
-    std::string channel_data_json_string = channel_data_json;
-    init_from_json(InChat, channel_id_string, channel_data_json_string);
 }
 
 void Channel::update(ChatChannelData in_additional_channel_data)
@@ -51,12 +38,7 @@ void Channel::update(ChatChannelData in_additional_channel_data)
     pubnub_set_channelmetadata(get_ctx_pub(), channel_id.c_str(), NULL, channel_data_to_json(channel_id, channel_data).c_str());
 }
 
-void Channel::update(ChatChannelDataChar in_additional_channel_data)
-{
-    update(ChatChannelData(in_additional_channel_data));
-}
-
-void Pubnub::Channel::connect()
+void Channel::connect()
 {
     if(!chat_obj)
     {
@@ -66,7 +48,7 @@ void Pubnub::Channel::connect()
     chat_obj->subscribe_to_channel(channel_id.c_str());
 }
 
-void Pubnub::Channel::disconnect()
+void Channel::disconnect()
 {
     if(!chat_obj)
     {
@@ -76,32 +58,30 @@ void Pubnub::Channel::disconnect()
     chat_obj->unsubscribe_from_channel(channel_id.c_str());
 }
 
-void Pubnub::Channel::join(std::string additional_params)
+void Channel::join(String additional_params)
 {
-    std::string include_string = "totalCount,customFields,channelFields,customChannelFields";
-    std::string custom_parameter_string;
+    /*
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String custom_parameter_string;
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
-    std::string set_object_string = std::string("[{\"channel\": {\"id\": \"") + channel_id +  std::string("\"}, \"custom\": ") + additional_params + std::string("}]");
+    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + additional_params + String("}]");
     pubnub_set_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), include_string.c_str(), set_object_string.c_str());
 
     connect();
+    */
 }
 
-void Pubnub::Channel::Join(const char *additional_params)
+void Channel::leave()
 {
-    std::string additional_params_string = additional_params;
-    join(additional_params_string);
-}
-
-void Pubnub::Channel::leave()
-{
-    std::string remove_object_string = std::string("[{\"channel\": {\"id\": \"") + channel_id + std::string("\"}}]");
+    /*
+    String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
     pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string.c_str());
 
 	disconnect();
+    */
 }
 
-void Pubnub::Channel::delete_channel()
+void Channel::delete_channel()
 {
     if(!chat_obj)
     {
@@ -111,7 +91,7 @@ void Pubnub::Channel::delete_channel()
     chat_obj->delete_channel(channel_id);
 }
 
-void Pubnub::Channel::set_restrictions(std::string in_user_id, bool ban_user, bool mute_user, std::string reason)
+void Channel::set_restrictions(String in_user_id, bool ban_user, bool mute_user, String reason)
 {
     if(!chat_obj)
     {
@@ -120,14 +100,8 @@ void Pubnub::Channel::set_restrictions(std::string in_user_id, bool ban_user, bo
 
     chat_obj->set_restrictions(in_user_id, channel_id, ban_user, mute_user, reason);
 }
-void Pubnub::Channel::set_restrictions(const char *in_user_id, bool ban_user, bool mute_user, const char *reason)
-{
-    std::string in_user_id_string = in_user_id;
-    std::string reason_string = reason;
-    set_restrictions(in_user_id_string, ban_user, mute_user, reason_string);
-}
 
-void Pubnub::Channel::send_text(std::string message, pubnub_chat_message_type message_type, std::string meta_data)
+void Channel::send_text(String message, pubnub_chat_message_type message_type, String meta_data)
 {
     if(message.empty())
     {
@@ -145,14 +119,7 @@ void Pubnub::Channel::send_text(std::string message, pubnub_chat_message_type me
 
 }
 
-void Pubnub::Channel::send_text(const char *message, pubnub_chat_message_type message_type, const char *meta_data)
-{
-    std::string message_string = message;
-    std::string meta_data_string = meta_data;
-    send_text(message_string, message_type, meta_data_string);
-}
-
-ChatChannelData Channel::channel_data_from_json(std::string data_json_string)
+ChatChannelData Channel::channel_data_from_json(String data_json_string)
 {
     json channel_data_json = json::parse(data_json_string);;
 
@@ -191,7 +158,7 @@ ChatChannelData Channel::channel_data_from_json(std::string data_json_string)
     return channel_data;
 }
 
-std::string Channel::channel_data_to_json(std::string in_channel_id, ChatChannelData in_channel_data)
+String Channel::channel_data_to_json(String in_channel_id, ChatChannelData in_channel_data)
 {
     json channel_data_json;
 
@@ -224,11 +191,11 @@ std::string Channel::channel_data_to_json(std::string in_channel_id, ChatChannel
     return channel_data_json.dump();
 }
 
-std::string Channel::chat_message_to_publish_string(std::string message, pubnub_chat_message_type message_type)
+String Channel::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
 {
     json message_json;
 	
-	std::string message_type_string;
+	String message_type_string;
     //For now there is only one type, but we might want to add more types in the future
 	switch (message_type)
 	{

@@ -14,12 +14,7 @@ extern "C" {
 using namespace Pubnub;
 using json = nlohmann::json;
 
-void Chat::init(std::string in_publish_key, std::string in_subscribe_key, std::string in_user_id)
-{
-    init(in_publish_key.c_str(), in_subscribe_key.c_str(), in_user_id.c_str());
-}
-
-void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const char* in_user_id)
+void Chat::init(String in_publish_key, String in_subscribe_key, String in_user_id)
 {
     publish_key = in_publish_key;
     subscribe_key = in_subscribe_key;
@@ -37,7 +32,6 @@ void Chat::init(const char* in_publish_key, const char* in_subscribe_key, const 
     pubnub_init(ctx_sub, publish_key, subscribe_key);
     pubnub_set_user_id(ctx_pub, user_id);
     pubnub_set_user_id(ctx_sub, user_id);
-
 }
 
 void Chat::deinit()
@@ -55,29 +49,12 @@ void Chat::deinit()
     }
 }
 
-
-void Chat::publish_message(std::string channel, std::string message)
+void Chat::publish_message(String channel, String message)
 {
-    publish_message(channel.c_str(), message.c_str());
+    publish_message(channel, message);
 }
 
-void Chat::publish_message(const char* channel, const char*message)
-{
-    printf("publish message");
-
-    pubnub_publish(ctx_pub, channel, message);
-
-    pubnub_await(ctx_pub);
-
-    std::cout << "Message published\n";
-}
-
-Pubnub::Channel* Chat::create_public_conversation(std::string channel_id, ChatChannelData channel_data)
-{
-    return create_public_conversation(channel_id.c_str(), ChatChannelDataChar(channel_data));
-}
-
-Pubnub::Channel* Chat::create_public_conversation(const char* channel_id, ChatChannelDataChar channel_data)
+Channel* Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
 {
     if(channel_id != NULL && *channel_id == 0)
     {
@@ -90,7 +67,7 @@ Pubnub::Channel* Chat::create_public_conversation(const char* channel_id, ChatCh
     return channel_ptr;
 }
 
-Pubnub::Channel* Chat::update_channel(std::string channel_id, ChatChannelData channel_data)
+Channel* Chat::update_channel(String channel_id, ChatChannelData channel_data)
 {
     if(channel_id.empty())
     {
@@ -103,21 +80,14 @@ Pubnub::Channel* Chat::update_channel(std::string channel_id, ChatChannelData ch
     return channel_ptr;
 }
 
-Pubnub::Channel* Chat::update_channel(const char* channel_id, ChatChannelDataChar channel_data)
-{
-    std::string channel_id_string = channel_id;
-
-    return update_channel(channel_id_string, ChatChannelData(channel_data));
-}
-
-Channel Pubnub::Chat::get_channel(std::string channel_id)
+Channel Chat::get_channel(String channel_id)
 {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Failed to get channel, channel_id is empty");
     }
 
-    auto future_response = get_channel_metadata_async(channel_id.c_str());
+    auto future_response = get_channel_metadata_async(channel_id);
     future_response.wait();
     pubnub_res Res = future_response.get();
     if(Res != PNR_OK)
@@ -125,7 +95,7 @@ Channel Pubnub::Chat::get_channel(std::string channel_id)
         throw std::invalid_argument("Failed to get response from server");
     }
 
-    std::string channel_response = pubnub_get(ctx_pub);
+    String channel_response = pubnub_get(ctx_pub);
 
     json response_json = json::parse(channel_response);
 
@@ -134,22 +104,16 @@ Channel Pubnub::Chat::get_channel(std::string channel_id)
         return Channel();
     }
 
-    std::string channel_data_string = response_json["Data"];
+    String channel_data_string = response_json["Data"];
     Channel channel_obj;
     channel_obj.init_from_json(this, channel_id, channel_data_string);
 
     return channel_obj;
 }
 
-Channel Chat::get_channel(const char *channel_id)
+std::vector<Channel> Chat::get_channels(String include, int limit, String start, String end)
 {
-    std::string channel_id_string = channel_id;
-    return get_channel(channel_id_string);
-}
-
-std::vector<Channel> Chat::get_channels(std::string include, int limit, std::string start, std::string end)
-{
-    auto future_response = get_all_channels_metadata_async(include.c_str(), limit, start.c_str(), end.c_str());
+    auto future_response = get_all_channels_metadata_async(include, limit, start, end);
     future_response.wait();
     pubnub_res Res = future_response.get();
     if(Res != PNR_OK)
@@ -157,7 +121,7 @@ std::vector<Channel> Chat::get_channels(std::string include, int limit, std::str
         throw std::invalid_argument("Failed to get response from server");
     }
 
-    std::string channels_response = pubnub_get(ctx_pub);
+    String channels_response = pubnub_get(ctx_pub);
 
     json response_json = json::parse(channels_response);
 
@@ -172,40 +136,26 @@ std::vector<Channel> Chat::get_channels(std::string include, int limit, std::str
    for (auto& element : channel_data_array_json)
    {
         Channel channel_obj;
-        channel_obj.init_from_json(this, element["id"], element);
+        channel_obj.init_from_json(this, String(element["id"]), String(element));
         Channels.push_back(channel_obj);
    }
 
     return Channels;
 }
 
-std::vector<Channel> Chat::get_channels(const char* include, int limit, const char* start, const char* end)
-{
-    std::string include_string = include;
-    std::string start_string = start;
-    std::string end_string = end;
-    return get_channels(include_string, limit, start_string, end_string);
-}
-
-void Pubnub::Chat::delete_channel(std::string channel_id)
+void Chat::delete_channel(String channel_id)
 {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Failed to delete channel, channel_id is empty");
     }
 
-    pubnub_remove_channelmetadata(ctx_pub, channel_id.c_str());
+    pubnub_remove_channelmetadata(ctx_pub, channel_id);
 }
 
-void Pubnub::Chat::delete_channel(const char *channel_id)
+void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_user, bool mute_user, String reason)
 {
-    std::string channel_id_string = channel_id;
-    delete_channel(channel_id_string);
-}
-
-void Pubnub::Chat::set_restrictions(std::string in_user_id, std::string in_channel_id, bool ban_user, bool mute_user, std::string reason)
-{
-
+/*
     if(in_user_id.empty())
     {
         throw std::invalid_argument("Failed to set restrictions, user_id is empty");
@@ -217,35 +167,35 @@ void Pubnub::Chat::set_restrictions(std::string in_user_id, std::string in_chann
 
 
 	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
-	std::string restrictions_channel = internal_moderation_prefix + in_channel_id;
+	String restrictions_channel = internal_moderation_prefix + in_channel_id;
 
 	//Lift restrictions
 	if(!ban_user && !mute_user)
 	{
-		std::string remove_member_string = std::string("[{\"uuid\": {\"id\": \"") + in_user_id + std::string("\"}}]");
+		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}}]");
         pubnub_remove_members(ctx_pub, restrictions_channel.c_str(), NULL, remove_member_string.c_str());
-		std::string event_payload_string = std::string("{\"channelId\": \"") + restrictions_channel + std::string("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + std::string("\"}");
+		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + String("\"}");
         emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 		return;
 	}
 
 	//Ban or mute the user
-	std::string params_string = std::string("{\"ban\": ") + bool_to_string(ban_user) + std::string(", \"mute\": ") + bool_to_string(mute_user) + std::string(", \"reason\": \"") + reason + std::string("\"}");
-	std::string set_members_string = std::string("[{\"uuid\": {\"id\": \"") + user_id + std::string("\"}, \"custom\": ") + params_string + std::string("}]");
+	String params_string = String("{\"ban\": ") + bool_to_string(ban_user) + String(", \"mute\": ") + bool_to_string(mute_user) + String(", \"reason\": \"") + reason + String("\"}");
+	String set_members_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}, \"custom\": ") + params_string + String("}]");
     pubnub_set_members(ctx_pub, restrictions_channel.c_str(), NULL, set_members_string.c_str());
-    std::string restriction_text;
+    String restriction_text;
     ban_user ? restriction_text = "banned" : "muted";
-	std::string event_payload_string = std::string("{\"channelId\": \"") + restrictions_channel + std::string("\", \"restriction\": \"lifted") + restriction_text + std::string("\", \"reason\": \"") + reason + std::string("\"}");
+	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + reason + String("\"}");
     emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
+*/
 }
 
-void Pubnub::Chat::set_restrictions(const char *in_user_id, const char* in_channel_id, bool ban_user, bool mute_user, const char *reason)
+
+User Chat::create_user(String user_id)
 {
-    std::string in_user_id_string = in_user_id;
-    std::string in_channel_id_string = in_channel_id;
-    std::string reason_string = reason;
-    set_restrictions(in_user_id_string, in_channel_id_string, ban_user, mute_user, reason_string);
+    return User();
 }
+
 
 Message Chat::get_message(String MessageTest)
 {
@@ -255,18 +205,18 @@ Message Chat::get_message(String MessageTest)
     return new_message;
 }
 
-void Pubnub::Chat::subscribe_to_channel(const char *channel_id)
+void Chat::subscribe_to_channel(String channel_id)
 {
     pubnub_subscribe(ctx_sub, channel_id, NULL);
 }
 
-void Pubnub::Chat::unsubscribe_from_channel(const char *channel_id)
+void Chat::unsubscribe_from_channel(String channel_id)
 {
     pubnub_leave(ctx_pub, channel_id, NULL);
     pubnub_cancel(ctx_sub);
 }
 
-std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *channel_id)
+std::future<pubnub_res> Chat::get_channel_metadata_async(const char *channel_id)
 {
     return std::async(std::launch::async, [=](){
         pubnub_get_channelmetadata(ctx_pub, NULL, channel_id);
@@ -275,7 +225,7 @@ std::future<pubnub_res> Pubnub::Chat::get_channel_metadata_async(const char *cha
     });
 }
 
-std::future<pubnub_res> Pubnub::Chat::get_all_channels_metadata_async(const char *include, int limit, const char *start, const char *end)
+std::future<pubnub_res> Chat::get_all_channels_metadata_async(const char *include, int limit, const char *start, const char *end)
 {
     return std::async(std::launch::async, [=](){
         pubnub_getall_channelmetadata(ctx_pub, include, limit, start, end, pubnub_tribool::pbccFalse);
@@ -284,17 +234,19 @@ std::future<pubnub_res> Pubnub::Chat::get_all_channels_metadata_async(const char
     });
 }
 
-void Pubnub::Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, std::string channel_id, std::string payload)
+void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
 {
+    /*
     //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
-	std::string payload_parameters = payload;
+	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
-	payload_parameters.erase(payload_parameters.size() - 1);
-	std::string event_message = std::string("{") + payload_parameters + std::string(", \"type\": \"") + get_string_from_event_type(chat_event_type) = std::string("\"}");
-    pubnub_publish(ctx_pub, channel_id.c_str(), event_message.c_str());
+	payload_parameters.erase(payload_parameters.length() - 1);
+	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + get_string_from_event_type(chat_event_type) = String("\"}");
+    pubnub_publish(ctx_pub, channel_id, event_message);
+    */
 }
 
-std::string Pubnub::Chat::get_string_from_event_type(pubnub_chat_event_type chat_event_type)
+String Chat::get_string_from_event_type(pubnub_chat_event_type chat_event_type)
 {
     switch(chat_event_type)
 	{
