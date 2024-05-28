@@ -325,8 +325,11 @@ const char* String::into_c_str() {
 void String::reserve(std::size_t new_cap) {
     if (new_cap > this->cap) {
         auto new_string = new char[new_cap + 1];
-        memcpy(new_string, this->string, new_cap);
-        new_string[new_cap] = '\0';
+        memset(new_string, 0, new_cap + 1);
+
+        if (string != nullptr) {
+            memcpy(new_string, this->string, new_cap);
+        } 
 
         delete[] this->string;
         this->string = new_string;
@@ -345,25 +348,11 @@ std::size_t String::calculate_capacity(std::size_t len) const {
     return doubled_capacity > len ? doubled_capacity : len;
 }
 
+//#define add_impl(lhs, rhs) do { \
+//        
+//} while(0)
+
 String operator+(const String& lhs, const String& rhs) {
-    String new_string;
-    new_string.reserve(lhs.length() + rhs.length());
-    new_string += lhs;
-    new_string += rhs;
-
-    return new_string;
-}
-
-String operator+(const String& lhs, const char* rhs) {
-    String new_string;
-    new_string.reserve(lhs.length() + strlen(rhs));
-    new_string += lhs;
-    new_string += rhs;
-
-    return new_string;
-}
-
-String operator+(const String& lhs, std::string rhs) {
     String new_string;
     new_string.reserve(lhs.length() + rhs.length());
     new_string += lhs;

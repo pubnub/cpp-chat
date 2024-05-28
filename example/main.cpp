@@ -13,6 +13,8 @@ int main() {
 
     chuj = string;
 
+    auto xyz = Pubnub::String("abc") + Pubnub::String("def");
+
     std::cout << kekw << std::endl;
     std::cout << kekw.c_str() << std::endl;
     std::cout << kekw.to_std_string() << std::endl;
@@ -22,4 +24,5 @@ int main() {
     std::cout << chuj << std::endl;
     std::cout << chuj.c_str() << std::endl;
     std::cout << chuj.to_std_string() << std::endl;
+    std::cout << xyz << std::endl;
 }

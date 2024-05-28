@@ -559,7 +559,6 @@ namespace Pubnub {
     private:
         PN_CHAT_EXPORT friend bool operator==(const String& lhs, const String& rhs);
         PN_CHAT_EXPORT friend bool operator!=(const String& lhs, const String& rhs);
-        PN_CHAT_EXPORT friend String operator+(const String& lhs, const String& rhs);
         PN_CHAT_EXPORT friend String operator+(const String& lhs, const char* rhs);
         PN_CHAT_EXPORT friend String operator+(const String& lhs, std::string rhs);
 
@@ -570,6 +569,9 @@ namespace Pubnub {
         unsigned int len = 0;
         unsigned int cap = 0;
     };
+
+
+}
 
     /**
      * Add operator that appends two Strings.
@@ -589,7 +591,8 @@ namespace Pubnub {
      *
      *  // String { "Hello, World!" }
      */
-    PN_CHAT_EXPORT String operator+(const String& lhs, const String& rhs);
+    PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const Pubnub::String& rhs);
+
 
     /**
      * Add operator that appends a String with a const char* string.
@@ -608,7 +611,7 @@ namespace Pubnub {
      *
      *  // String { "Hello, World!" }
      */
-    PN_CHAT_EXPORT String operator+(const String& lhs, const char* rhs);
+    //PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, const char* rhs);
 
     /**
      * Add operator that appends a String with a std::string.
@@ -628,7 +631,7 @@ namespace Pubnub {
      *
      *  // String { "Hello, World!" }
      */
-    PN_CHAT_EXPORT String operator+(const String& lhs, std::string rhs);
+    //PN_CHAT_EXPORT Pubnub::String operator+(const Pubnub::String& lhs, std::string rhs);
 
     /**
      * Equality operator that compares two Strings over their values.
@@ -637,7 +640,7 @@ namespace Pubnub {
      * @param rhs The right hand side String to compare.
      * @return True if the String values are equal (ptr do not need to be the same), false otherwise.
      */
-    PN_CHAT_EXPORT bool operator==(const String& lhs, const String& rhs);
+    PN_CHAT_EXPORT bool operator==(const Pubnub::String& lhs, const Pubnub::String& rhs);
 
     /**
      * Inequality operator that compares two Strings over their values.
@@ -646,7 +649,6 @@ namespace Pubnub {
      * @param rhs The right hand side String to compare.
      * @return True if the String values are not equal, false otherwise.
      */
-    PN_CHAT_EXPORT bool operator!=(const String& lhs, const String& rhs);
-}
+    PN_CHAT_EXPORT bool operator!=(const Pubnub::String& lhs, const Pubnub::String& rhs);
 
 #endif /* PN_STRING_H */
