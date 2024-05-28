@@ -19,14 +19,14 @@ void pn_chat_delete(Pubnub::Chat* chat) {
 Pubnub::Channel* pn_chat_create_public_conversation(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::ChatChannelDataChar channel_data) {
+        Pubnub::ChatChannelData channel_data) {
     return chat->create_public_conversation((const char*)channel_id, channel_data);
 }
 
 Pubnub::Channel* pn_chat_update_channel(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::ChatChannelDataChar channel_data) {
+        Pubnub::ChatChannelData channel_data) {
     return chat->update_channel(channel_id, channel_data);
 }
 
