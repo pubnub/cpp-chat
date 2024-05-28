@@ -64,6 +64,9 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id, ChatUserData user_data);
         PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
         PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, ChatUserData user_data);
+        PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
+
+
 
 
         //Just to test new string

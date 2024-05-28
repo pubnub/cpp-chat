@@ -249,6 +249,16 @@ User Chat::update_user(String user_id, ChatUserData user_data)
     return user_obj;
 }
 
+void Chat::delete_user(String user_id)
+{
+    if(user_id.empty())
+    {
+        throw std::invalid_argument("Failed to delete channel, channel_id is empty");
+    }
+
+    pubnub_remove_uuidmetadata(ctx_pub, user_id);
+}
+
 Message Chat::get_message(String MessageTest)
 {
     Message new_message;

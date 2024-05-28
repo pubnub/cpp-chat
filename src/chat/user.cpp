@@ -32,6 +32,16 @@ void User::update(ChatUserData in_user_data)
     pubnub_set_uuidmetadata(get_ctx_pub(), user_id, NULL, user_data_to_json(user_id, user_data));
 }
 
+void User::delete_user()
+{
+    if(!chat_obj)
+    {
+        throw std::runtime_error("Failed to delete user, chat_obj is invalid");
+    }
+
+    chat_obj->delete_user(user_id);
+}
+
 ChatUserData User::user_data_from_json(String data_json_string)
 {
     json user_data_json = json::parse(data_json_string);
