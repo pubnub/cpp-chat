@@ -5,6 +5,7 @@
 #include "export.hpp"
 #include "extern.hpp"
 #include "chat/channel.hpp"
+#include "c_functions/c_channel.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* publish,
@@ -20,12 +21,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_send_message(
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversation(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::ChatChannelData channel_data);
+        ChatChannelDataHelper channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel(
         Pubnub::Chat* chat,
         std::string channel_id,
-        Pubnub::ChatChannelData channel_data);
+        ChatChannelDataHelper channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_channel(
         Pubnub::Chat* chat,
