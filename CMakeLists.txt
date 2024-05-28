@@ -28,30 +28,6 @@ if(${ENABLE_C_ABI})
     message(STATUS "Enabling C ABI functions")
 endif()
 
-option(RUN_TESTS "Run tests" OFF)
-if(${RUN_TESTS})
-    find_package(cgreen REQUIRED)
-
-    if(NOT cgreen_FOUND)
-        message(STATUS "cgreen not found, fetching it")
-        FetchContent_Declare(
-            cgreen
-            GIT_REPOSITORY
-            GIT_TAG master
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS ON
-            SYSTEM
-        )
-        FetchContent_MakeAvailable(cgreen)
-        find_package(cgreen REQUIRED)
-    endif()
-
-    message(STATUS "Enabling tests")
-    enable_testing()
-
-    add_test(NAME pubnub-test-string COMMAND ${CGREEN_EXECUTABLE} pubnub-test-string)
-endif()
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(FetchContent)
@@ -111,3 +87,17 @@ add_executable(pubnub-chat-example example/main.cpp)
 
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
+option(RUN_TESTS "Run tests" OFF)
+if(${RUN_TESTS})
+    message(STATUS "Running tests")
+
+    find_package(cgreen REQUIRED)
+    enable_testing()
+
+    include_directories(${CGREEN_INCLUDE_DIRS})
+
+    add_library(pubnub-test-string SHARED test/string_unit.c)
+    target_link_libraries(pubnub-test-string PRIVATE pubnub-chat ${CGREEN_LIBRARIES})
+
+    add_test(NAME pubnub-test-string COMMAND ${CGREEN_EXECUTABLE} pubnub-test-string)
+endif()
