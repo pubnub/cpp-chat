@@ -42,6 +42,16 @@ void User::delete_user()
     chat_obj->delete_user(user_id);
 }
 
+void User::set_restrictions(String in_channel_id, bool ban_user, bool mute_user, String reason)
+{
+    if(!chat_obj)
+    {
+        throw std::invalid_argument("Failed to set restrictions, chat_obj is invalid");
+    }
+
+    chat_obj->set_restrictions(user_id, in_channel_id, ban_user, mute_user, reason);
+}
+
 ChatUserData User::user_data_from_json(String data_json_string)
 {
     json user_data_json = json::parse(data_json_string);
