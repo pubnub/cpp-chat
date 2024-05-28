@@ -117,6 +117,15 @@ void Channel::send_text(String message, pubnub_chat_message_type message_type, S
 
 }
 
+Pubnub::String Channel::get_channel_id()
+{
+    return channel_id;
+}
+
+ChatChannelData Channel::get_channel_data(){
+    return channel_data;
+}
+
 ChatChannelData Channel::channel_data_from_json(String data_json_string)
 {
     json channel_data_json = json::parse(data_json_string);;

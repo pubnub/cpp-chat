@@ -46,8 +46,8 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
 
-        PN_CHAT_EXPORT Pubnub::String get_channel_id(){return channel_id;};
-        PN_CHAT_EXPORT ChatChannelData get_channel_data(){return channel_data;};
+        PN_CHAT_EXPORT Pubnub::String get_channel_id();
+        PN_CHAT_EXPORT ChatChannelData get_channel_data();
 
 
         ChatChannelData channel_data_from_json(Pubnub::String json_string);
