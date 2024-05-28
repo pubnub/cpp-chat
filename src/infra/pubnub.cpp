@@ -32,9 +32,9 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
 
 void PubNub::publish(const Pubnub::String channel, const Pubnub::String message)
 {
-    pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
+    auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
 
-    this->await_and_handle_error();
+    this->await_and_handle_error(result);
 }
 
 void PubNub::subscribe_to_channel(const Pubnub::String channel)
@@ -86,21 +86,115 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
 
 void PubNub::set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata)
 {
-    pubnub_set_channelmetadata(
+    auto result = pubnub_set_channelmetadata(
             this->main_context.get(),
             channel,
             NULL,
             metadata
     );
 
-    this->await_and_handle_error();
+    this->await_and_handle_error(result);
 }
 
-void PubNub::await_and_handle_error()
+void PubNub::remove_channel_metadata(const Pubnub::String channel)
 {
-    pubnub_res result = pubnub_await(main_context.get());
-    if (result != PNR_OK) {
+    auto result = pubnub_remove_channelmetadata(
+            this->main_context.get(),
+            channel
+    );
+
+    this->await_and_handle_error(result);
+}
+
+Pubnub::String PubNub::get_channel_metadata(const Pubnub::String channel)
+{
+    auto result = pubnub_get_channelmetadata(
+            this->main_context.get(),
+            channel,
+            NULL
+    );
+
+    this->await_and_handle_error(result);
+
+    return pubnub_get(this->main_context.get());
+}
+
+std::vector<Pubnub::String> PubNub::get_all_channels_metadata()
+{
+    // TODO: Implement
+    return {};
+}
+
+void PubNub::remove_members(const Pubnub::String channel, const Pubnub::String members_object)
+{
+    auto result = pubnub_remove_members(
+            this->main_context.get(),
+            channel,
+            NULL,
+            members_object
+    );
+
+    this->await_and_handle_error(result);
+}
+
+void PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object)
+{
+    auto result = pubnub_set_members(
+            this->main_context.get(),
+            channel,
+            NULL,
+            members_object
+    );
+
+    this->await_and_handle_error(result);
+}
+
+void PubNub::set_user_metadata(const Pubnub::String user_id, const Pubnub::String metadata)
+{
+    auto result = pubnub_set_uuidmetadata(
+            this->main_context.get(),
+            user_id,
+            NULL,
+            metadata
+    );
+
+    this->await_and_handle_error(result);
+}
+
+Pubnub::String PubNub::get_user_metadata(const Pubnub::String user_id)
+{
+    auto result = pubnub_get_uuidmetadata(
+            this->main_context.get(),
+            user_id,
+            NULL
+    );
+
+    this->await_and_handle_error(result);
+
+    return pubnub_get(this->main_context.get());
+}
+
+void PubNub::remove_user_metadata(const Pubnub::String user_id)
+{
+    auto result = pubnub_remove_uuidmetadata(
+            this->main_context.get(),
+            user_id
+    );
+
+    this->await_and_handle_error(result);
+}
+
+void PubNub::await_and_handle_error(pubnub_res result)
+{
+    if (PNR_OK != result && PNR_STARTED != result) {
         throw std::runtime_error(pubnub_res_2_string(result));
+    }
+
+    if (PNR_STARTED == result) {
+        pubnub_res await_result = pubnub_await(main_context.get());
+        if (PNR_OK != await_result) {
+            throw std::runtime_error(pubnub_res_2_string(result));
+        }
     }
 }
 
@@ -130,6 +224,7 @@ void PubNub::cancel_previous_subscription()
     for (const auto& channel : this->subscribed_channels) {
         current_channels += channel + ",";
     }
+    current_channels.erase(current_channels.length() - 1, 1);
 
     auto result = pubnub_leave(this->long_poll_context.get(), current_channels, NULL);
     if (PNR_OK != result) {
@@ -150,14 +245,13 @@ void PubNub::call_subscribe()
     for (const auto& channel : this->subscribed_channels) {
         current_channels += channel + ",";
     }
+    current_channels.erase(current_channels.length() - 1, 1);
 
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), current_channels, pubnub_subscribe_v2_defopts());
     if (PNR_OK != result && PNR_STARTED != result) {
         throw std::runtime_error(
                 std::string("Failed to subscribe to channel: ")
-                + pubnub_res_2_string(
-                    pubnub_last_result(this->long_poll_context.get())
-                    )
-                );
+                + pubnub_res_2_string(result)
+            );
     }
 }

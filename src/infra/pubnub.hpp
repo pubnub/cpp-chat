@@ -18,9 +18,18 @@ public:
     void subscribe_to_channel(const Pubnub::String channel);
     std::vector<pubnub_v2_message> fetch_messages();
     void set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata);
+    void remove_channel_metadata(const Pubnub::String channel);
+    Pubnub::String get_channel_metadata(const Pubnub::String channel);
+    std::vector<Pubnub::String> get_all_channels_metadata();
+    void remove_members(const Pubnub::String channel, const Pubnub::String members_object);
+    void set_members(const Pubnub::String channel, const Pubnub::String members_object);
+    void set_user_metadata(const Pubnub::String user_id, const Pubnub::String metadata);
+    Pubnub::String get_user_metadata(const Pubnub::String user_id);
+    void remove_user_metadata(const Pubnub::String user_id);
+
 
 private:
-    void await_and_handle_error();
+    void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
     void cancel_previous_subscription();
     void call_subscribe();
