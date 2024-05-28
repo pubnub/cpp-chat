@@ -51,12 +51,9 @@ void PubNub::subscribe_to_channel(const Pubnub::String channel)
     this->call_subscribe();
 }
 
-#include <iostream>
-
 std::vector<pubnub_v2_message> PubNub::fetch_messages()
 {
     auto result = pubnub_last_result(this->long_poll_context.get());
-    std::cout << "Result: " << result << std::endl;
     if (PNR_OK != result && PNR_STARTED != result && PNR_TIMEOUT != result) {
         throw std::runtime_error(
                 std::string("Failed to fetch messages: ")
