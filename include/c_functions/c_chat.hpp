@@ -1,3 +1,6 @@
+#ifndef PN_CHAT_C_CHAT_HPP
+#define PN_CHAT_C_CHAT_HPP
+
 #include "chat.hpp"
 #include "export.hpp"
 #include "extern.hpp"
@@ -42,3 +45,5 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_set_restrictions(
         bool mute_user,
         const char* reason);
 
+
+#endif // PN_CHAT_C_CHAT_HPP
