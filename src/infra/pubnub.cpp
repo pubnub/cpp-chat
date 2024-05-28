@@ -57,17 +57,20 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
 {
     auto result = pubnub_last_result(this->long_poll_context.get());
     std::cout << "Result: " << result << std::endl;
-    if (PNR_OK != result && PNR_STARTED != result) {
+    if (PNR_OK != result && PNR_STARTED != result && PNR_TIMEOUT != result) {
         throw std::runtime_error(
                 std::string("Failed to fetch messages: ")
                 + pubnub_res_2_string(result)
                 );
     }
 
-    if (PNR_STARTED == result) {
+    if (PNR_STARTED == result || PNR_TIMEOUT == result) {
+        if (PNR_TIMEOUT == result) {
+            this->call_subscribe();
+        }
         return {};
     }
-
+    
     std::vector<pubnub_v2_message> messages;
 
     for (
