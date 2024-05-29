@@ -79,6 +79,9 @@ namespace Pubnub
         void unsubscribe_from_channel(Pubnub::String channel_id);
 
         const Pubnub::String internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
+        const Pubnub::String internal_admin_channel = "PUBNUB_INTERNAL_ADMIN_CHANNEL";
+
+        void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
         private:
 
@@ -91,8 +94,6 @@ namespace Pubnub
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
         std::future<pubnub_res> get_uuid_metadata_async(const char* user_id);
-
-        void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
         /* HELPERS */
 

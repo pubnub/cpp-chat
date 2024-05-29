@@ -35,7 +35,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_channel_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
-
+        PN_CHAT_EXPORT void report(Pubnub::String reason);
 
         ChatUserData user_data_from_json(Pubnub::String data_json_string);
         Pubnub::String user_data_to_json(Pubnub::String in_user_id, ChatUserData in_user_data);
