@@ -23,7 +23,7 @@ int main() {
         std::cout << message.payload.ptr << std::endl;
     }
     pn.subscribe_to_channel("my_channel2");
-    std::cout << "Subscribed to my_channel2" << std::endl;
+    std::cout << "Subscribed to my_channel and my_channel2" << std::endl;
 
     for (auto i = 0; i < 10; i++) {
         auto messages = pn.fetch_messages();
