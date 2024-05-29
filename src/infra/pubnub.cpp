@@ -43,12 +43,15 @@ void PubNub::subscribe_to_channel(const Pubnub::String channel)
         return;
     }
 
-    if (!subscribed_channels.empty()) {
-        this->cancel_previous_subscription();
-    } 
+    if (this->is_subscribed) {
+        throw std::runtime_error("Cannot has multiple subscriptions at the same time.\
+                Please, pause the current subscription before subscribing to additional channel.");
+    }
 
     this->subscribed_channels.push_back(channel);
     this->call_subscribe();
+
+    this->is_subscribed = true;
 }
 
 std::vector<pubnub_v2_message> PubNub::fetch_messages()
@@ -82,6 +85,29 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
 
     return messages;
     
+}
+
+std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_last_messages()
+{
+    if (this->subscribed_channels.empty() || !this->is_subscribed) {
+        return {};
+    }
+
+    this->cancel_previous_subscription();
+
+    std::vector<pubnub_v2_message> messages;
+
+    for (
+            pubnub_v2_message message = pubnub_get_v2(this->long_poll_context.get());
+            message.payload.ptr != NULL;
+            message = pubnub_get_v2(this->long_poll_context.get())
+        ) {
+        messages.push_back(message);
+    };
+
+    this->is_subscribed = false;
+
+    return messages;
 }
 
 void PubNub::set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata)

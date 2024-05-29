@@ -350,10 +350,6 @@ std::size_t String::calculate_capacity(std::size_t len) const {
     return doubled_capacity > len ? doubled_capacity : len;
 }
 
-//#define add_impl(lhs, rhs) do { \
-//        
-//} while(0)
-
 String operator+(const String& lhs, const String& rhs) {
     String new_string;
     new_string.reserve(lhs.length() + rhs.length());

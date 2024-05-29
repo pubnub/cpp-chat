@@ -18,6 +18,10 @@ int main() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
+    auto messages = pn.pause_subscription_and_get_last_messages();
+    for (const auto& message : messages) {
+        std::cout << message.payload.ptr << std::endl;
+    }
     pn.subscribe_to_channel("my_channel2");
     std::cout << "Subscribed to my_channel2" << std::endl;
 
