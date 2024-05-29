@@ -274,7 +274,7 @@ void String::grow_if_needed(std::size_t new_len) {
         auto new_string = new char[new_cap + 1];
         memset(new_string, 0, new_cap + 1);
         if (this->string != nullptr) {
-            memcpy(new_string, this->string, new_cap);
+            memcpy(new_string, this->string, this->len + 1);
         }
 
         delete[] this->string;
