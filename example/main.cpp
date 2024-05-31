@@ -3,7 +3,6 @@
 #include <thread>
 
 int main() {
-    /*
     PubNub pn("demo", "demo", "demo");
 
     pn.publish("my_channel", "\"Hello, world!\"");
@@ -33,5 +32,5 @@ int main() {
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
-    }*/
+    }
 }
