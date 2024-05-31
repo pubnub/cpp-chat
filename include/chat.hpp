@@ -63,6 +63,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id, ChatUserData user_data);
         PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
+        PN_CHAT_EXPORT std::vector<User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
         PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, ChatUserData user_data);
         PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
 
@@ -94,6 +95,7 @@ namespace Pubnub
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
         std::future<pubnub_res> get_uuid_metadata_async(const char* user_id);
+        std::future<pubnub_res> get_all_uuid_metadata_async(const char* include, int limit, const char* start, const char* end);
 
         /* HELPERS */
 

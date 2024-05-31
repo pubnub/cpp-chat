@@ -234,6 +234,38 @@ User Chat::get_user(String user_id)
     return user_obj;
 }
 
+std::vector<User> Chat::get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end)
+{
+    auto future_response = get_all_uuid_metadata_async(include, limit, start, end);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String users_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(users_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channels, response is incorrect") ;
+    }
+
+    json user_data_array_json = response_json["Data"];
+    std::vector<User> users;
+   
+   for (auto& element : user_data_array_json)
+   {
+        User user_obj;
+        user_obj.init_from_json(this, String(element["id"]), String(element));
+        users.push_back(user_obj);
+   }
+
+    return users;
+}
+
 User Chat::update_user(String user_id, ChatUserData user_data)
 {
     if(user_id.empty())
@@ -299,6 +331,15 @@ std::future<pubnub_res> Chat::get_uuid_metadata_async(const char *user_id)
 {
     return std::async(std::launch::async, [=](){
         pubnub_get_uuidmetadata(ctx_pub, NULL, user_id);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Chat::get_all_uuid_metadata_async(const char *include, int limit, const char *start, const char *end)
+{
+    return std::async(std::launch::async, [=](){
+        pubnub_getall_uuidmetadata(ctx_pub, include, limit, start, end, pubnub_tribool::pbccFalse);
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });
