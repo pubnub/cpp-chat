@@ -158,7 +158,6 @@ void Chat::delete_channel(String channel_id)
 
 void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_user, bool mute_user, String reason)
 {
-/*
     if(in_user_id.empty())
     {
         throw std::invalid_argument("Failed to set restrictions, user_id is empty");
@@ -190,7 +189,6 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_us
     ban_user ? restriction_text = "banned" : "muted";
 	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + reason + String("\"}");
     emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
-*/
 }
 
 User Chat::create_user(String user_id, ChatUserData user_data)
@@ -308,14 +306,12 @@ std::future<pubnub_res> Chat::get_uuid_metadata_async(const char *user_id)
 
 void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
 {
-    /*
     //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
 	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
 	payload_parameters.erase(payload_parameters.length() - 1);
 	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + get_string_from_event_type(chat_event_type) = String("\"}");
     pubnub_publish(ctx_pub, channel_id, event_message);
-    */
 }
 
 String Chat::get_string_from_event_type(pubnub_chat_event_type chat_event_type)

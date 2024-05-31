@@ -54,10 +54,8 @@ void User::set_restrictions(String in_channel_id, bool ban_user, bool mute_user,
 
 void User::report(String reason)
 {
-    /*
-    String payload = "{" + reason + String(", reportedUserId: ") + user_id + String("}");
+    String payload = String("{") + reason + String(", reportedUserId: ") + user_id + String("}");
     chat_obj->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, chat_obj->internal_admin_channel, payload);
-    */
 }
 
 ChatUserData User::user_data_from_json(String data_json_string)

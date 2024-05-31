@@ -58,7 +58,6 @@ void Channel::disconnect()
 
 void Channel::join(String additional_params)
 {
-    /*
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String custom_parameter_string;
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
@@ -66,17 +65,14 @@ void Channel::join(String additional_params)
     pubnub_set_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), include_string, set_object_string);
 
     connect();
-    */
 }
 
 void Channel::leave()
 {
-    /*
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
     pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string);
 
 	disconnect();
-    */
 }
 
 void Channel::delete_channel()
