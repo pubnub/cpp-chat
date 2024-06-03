@@ -290,6 +290,39 @@ void Chat::delete_user(String user_id)
     pubnub_remove_uuidmetadata(ctx_pub, user_id);
 }
 
+std::vector<String> Chat::where_present(String user_id)
+{
+    auto future_response = where_now_async(user_id);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String users_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(users_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channels, response is incorrect") ;
+    }
+
+    json response_payload_json = response_json["payload"];
+    json channels_array_json = response_json["channels"];
+
+    std::vector<String> channel_ids;
+   
+    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
+    {
+        channel_ids.push_back(static_cast<String>(*it));
+    }
+    
+    return channel_ids;
+}
+
 Message Chat::get_message(String MessageTest)
 {
     Message new_message;
@@ -340,6 +373,15 @@ std::future<pubnub_res> Chat::get_all_uuid_metadata_async(const char *include, i
 {
     return std::async(std::launch::async, [=](){
         pubnub_getall_uuidmetadata(ctx_pub, include, limit, start, end, pubnub_tribool::pbccFalse);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Chat::where_now_async(const char *user_id)
+{
+        return std::async(std::launch::async, [=](){
+        pubnub_where_now(ctx_pub, user_id);
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });

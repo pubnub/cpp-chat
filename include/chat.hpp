@@ -67,7 +67,9 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, ChatUserData user_data);
         PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
 
+        /* PRESENCE */
 
+        PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(Pubnub::String user_id);
 
 
         //Just to test new string
@@ -92,10 +94,13 @@ namespace Pubnub
         const char* subscribe_key;
         const char* user_id;
 
+
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
         std::future<pubnub_res> get_uuid_metadata_async(const char* user_id);
         std::future<pubnub_res> get_all_uuid_metadata_async(const char* include, int limit, const char* start, const char* end);
+        std::future<pubnub_res> where_now_async(const char* user_id);
+
 
         /* HELPERS */
 
