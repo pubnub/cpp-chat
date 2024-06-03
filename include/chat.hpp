@@ -70,6 +70,7 @@ namespace Pubnub
         /* PRESENCE */
 
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(Pubnub::String user_id);
+        PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
 
@@ -101,6 +102,7 @@ namespace Pubnub
         std::future<pubnub_res> get_uuid_metadata_async(const char* user_id);
         std::future<pubnub_res> get_all_uuid_metadata_async(const char* include, int limit, const char* start, const char* end);
         std::future<pubnub_res> where_now_async(const char* user_id);
+        std::future<pubnub_res> here_now_async(const char* channel_id);
 
 
         /* HELPERS */

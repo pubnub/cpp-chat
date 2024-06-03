@@ -301,17 +301,17 @@ std::vector<String> Chat::where_present(String user_id)
         throw std::invalid_argument("Failed to get response from server");
     }
 
-    String users_response = pubnub_get(ctx_pub);
+    String where_now_response = pubnub_get(ctx_pub);
 
-    json response_json = json::parse(users_response);
+    json response_json = json::parse(where_now_response);
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get channels, response is incorrect") ;
+        throw std::runtime_error("can't get where present, response is incorrect") ;
     }
 
     json response_payload_json = response_json["payload"];
-    json channels_array_json = response_json["channels"];
+    json channels_array_json = response_payload_json["channels"];
 
     std::vector<String> channel_ids;
    
@@ -321,6 +321,38 @@ std::vector<String> Chat::where_present(String user_id)
     }
     
     return channel_ids;
+}
+
+std::vector<String> Chat::who_is_present(String channel_id)
+{
+    auto future_response = here_now_async(channel_id);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String here_now_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(here_now_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get who is present, response is incorrect") ;
+    }
+
+    json uuids_array_json = response_json["uuids"];
+
+    std::vector<String> user_ids;
+   
+    for (json::iterator it = uuids_array_json.begin(); it != uuids_array_json.end(); ++it) 
+    {
+        user_ids.push_back(static_cast<String>(*it));
+    }
+    
+    return user_ids;
 }
 
 bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
@@ -389,6 +421,15 @@ std::future<pubnub_res> Chat::where_now_async(const char *user_id)
 {
         return std::async(std::launch::async, [=](){
         pubnub_where_now(ctx_pub, user_id);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Chat::here_now_async(const char *channel_id)
+{
+        return std::async(std::launch::async, [=](){
+        pubnub_here_now(ctx_pub, channel_id, NULL);
         pubnub_res response = pubnub_await(ctx_pub);
         return response; 
     });

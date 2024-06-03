@@ -113,16 +113,26 @@ void Channel::send_text(String message, pubnub_chat_message_type message_type, S
 
 }
 
+std::vector<Pubnub::String> Channel::who_is_present()
+{
+    if(!chat_obj)
+    {
+        throw std::invalid_argument("Failed to get who is present, chat_obj is invalid");
+    }
+
+    return chat_obj->who_is_present(channel_id);
+}
+
 bool Channel::is_present(Pubnub::String user_id)
 {
     if(user_id.empty())
     {
-        throw std::invalid_argument("Failed to get is present on, channel_id is empty");
+        throw std::invalid_argument("Failed to get is present, channel_id is empty");
     }
 
     if(!chat_obj)
     {
-        throw std::invalid_argument("Failed to get is present on, chat_obj is invalid");
+        throw std::invalid_argument("Failed to get is present, chat_obj is invalid");
     }
 
     return chat_obj->is_present(user_id, channel_id);

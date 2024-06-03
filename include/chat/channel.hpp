@@ -41,6 +41,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void delete_channel();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
         PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
+        PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present();
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
 
 
