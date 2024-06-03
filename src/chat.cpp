@@ -130,7 +130,7 @@ std::vector<Channel> Chat::get_channels(String include, int limit, String start,
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get channels, response is incorrect") ;
+        throw std::runtime_error("can't get channels, response is incorrect");
     }
 
     json channel_data_array_json = response_json["Data"];
@@ -154,41 +154,6 @@ void Chat::delete_channel(String channel_id)
     }
 
     pubnub_remove_channelmetadata(ctx_pub, channel_id);
-}
-
-void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_user, bool mute_user, String reason)
-{
-    if(in_user_id.empty())
-    {
-        throw std::invalid_argument("Failed to set restrictions, user_id is empty");
-    }
-    if(in_channel_id.empty())
-    {
-        throw std::invalid_argument("Failed to set restrictions, channel_id is empty");
-    }
-
-
-	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
-	String restrictions_channel = internal_moderation_prefix + in_channel_id;
-
-	//Lift restrictions
-	if(!ban_user && !mute_user)
-	{
-		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}}]");
-        pubnub_remove_members(ctx_pub, restrictions_channel.c_str(), NULL, remove_member_string.c_str());
-		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + String("\"}");
-        emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
-		return;
-	}
-
-	//Ban or mute the user
-	String params_string = String("{\"ban\": ") + bool_to_string(ban_user) + String(", \"mute\": ") + bool_to_string(mute_user) + String(", \"reason\": \"") + reason + String("\"}");
-	String set_members_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}, \"custom\": ") + params_string + String("}]");
-    pubnub_set_members(ctx_pub, restrictions_channel.c_str(), NULL, set_members_string.c_str());
-    String restriction_text;
-    ban_user ? restriction_text = "banned" : "muted";
-	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + reason + String("\"}");
-    emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 }
 
 User Chat::create_user(String user_id, ChatUserData user_data)
@@ -250,7 +215,7 @@ std::vector<User> Chat::get_users(Pubnub::String include, int limit, Pubnub::Str
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get channels, response is incorrect") ;
+        throw std::runtime_error("can't get channels, response is incorrect");
     }
 
     json user_data_array_json = response_json["Data"];
@@ -290,6 +255,131 @@ void Chat::delete_user(String user_id)
     pubnub_remove_uuidmetadata(ctx_pub, user_id);
 }
 
+void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_user, bool mute_user, String reason)
+{
+    if(in_user_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, user_id is empty");
+    }
+    if(in_channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, channel_id is empty");
+    }
+
+
+	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
+	String restrictions_channel = internal_moderation_prefix + in_channel_id;
+
+	//Lift restrictions
+	if(!ban_user && !mute_user)
+	{
+		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}}]");
+        pubnub_remove_members(ctx_pub, restrictions_channel.c_str(), NULL, remove_member_string.c_str());
+		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + String("\"}");
+        emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
+		return;
+	}
+
+	//Ban or mute the user
+	String params_string = String("{\"ban\": ") + bool_to_string(ban_user) + String(", \"mute\": ") + bool_to_string(mute_user) + String(", \"reason\": \"") + reason + String("\"}");
+	String set_members_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}, \"custom\": ") + params_string + String("}]");
+    pubnub_set_members(ctx_pub, restrictions_channel.c_str(), NULL, set_members_string.c_str());
+    String restriction_text;
+    ban_user ? restriction_text = "banned" : "muted";
+	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + reason + String("\"}");
+    emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
+}
+
+PubnubRestrictionsData Chat::get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
+{
+    auto future_response = get_memberships_async(in_user_id, "totalCount,custom", limit, start, end);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String get_restrictions_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get user restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    String full_channel_id = internal_moderation_prefix + in_channel_id;
+    PubnubRestrictionsData FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["channel"]["id"]) == full_channel_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}
+
+PubnubRestrictionsData Chat::get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
+{
+    String full_channel_id = internal_moderation_prefix + in_channel_id;
+    auto future_response = get_channel_members_async(full_channel_id, "totalCount,custom", limit, start, end);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String get_restrictions_response = pubnub_get(ctx_pub);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channel restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    PubnubRestrictionsData FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["uuid"]["id"]) == in_user_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}
+
 std::vector<String> Chat::where_present(String user_id)
 {
     auto future_response = where_now_async(user_id);
@@ -307,7 +397,7 @@ std::vector<String> Chat::where_present(String user_id)
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get where present, response is incorrect") ;
+        throw std::runtime_error("can't get where present, response is incorrect");
     }
 
     json response_payload_json = response_json["payload"];
@@ -340,7 +430,7 @@ std::vector<String> Chat::who_is_present(String channel_id)
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get who is present, response is incorrect") ;
+        throw std::runtime_error("can't get who is present, response is incorrect");
     }
 
     json uuids_array_json = response_json["uuids"];
@@ -434,6 +524,25 @@ std::future<pubnub_res> Chat::here_now_async(const char *channel_id)
         return response; 
     });
 }
+
+std::future<pubnub_res> Chat::get_memberships_async(const char* user_id, const char* include, int limit, const char* start, const char* end)
+{
+        return std::async(std::launch::async, [=](){
+        pubnub_get_memberships(ctx_pub, user_id, "totalCount,customFields", limit, start, end, pubnub_tribool::pbccFalse);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
+std::future<pubnub_res> Chat::get_channel_members_async(const char* channel_id, const char* include, int limit, const char* start, const char* end)
+{
+        return std::async(std::launch::async, [=](){
+        pubnub_get_members(ctx_pub, channel_id, "totalCount,customFields", limit, start, end, pubnub_tribool::pbccFalse);
+        pubnub_res response = pubnub_await(ctx_pub);
+        return response; 
+    });
+}
+
 
 void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
 {
