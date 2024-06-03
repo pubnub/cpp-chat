@@ -7,9 +7,12 @@ extern "C" {
 #include "core/pubnub_objects_api.h"
 #include "core/pubnub_ntf_sync.h"
 #include "core/pubnub_pubsubapi.h"
+#include "core/pubnub_memory_block.h"  // required to include pubnub_fetch_history.h without errors
+#include "core/pubnub_fetch_history.h"
 }
 
 #include "chat/channel.hpp"
+#include "chat/message.hpp"
 
 
 using namespace Pubnub;
@@ -138,6 +141,57 @@ bool Channel::is_present(Pubnub::String user_id)
     return chat_obj->is_present(user_id, channel_id);
 }
 
+std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count)
+{
+    auto future_response = fetch_history_async(count, start_timetoken, end_timetoken);
+    future_response.wait();
+    pubnub_res Res = future_response.get();
+
+    if(Res != PNR_OK)
+    {
+        throw std::invalid_argument("Failed to get response from server");
+    }
+
+    String fetch_history_response = pubnub_get(get_ctx_pub());
+
+    json response_json = json::parse(fetch_history_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get history, response is incorrect");
+    }
+
+    json messages_array_json = response_json["channels"][channel_id];
+
+
+    std::vector<Message> messages;
+
+    for (auto& element : messages_array_json)
+    {
+        //Just tmp, I will add init from Json here
+        Message message_obj;
+        message_obj.timetoken = String(element["timetoken"]);
+        message_obj.channel_id = channel_id;
+        message_obj.text = String(element["message"]);
+        messages.push_back(message_obj);
+    }
+
+    return messages;
+}
+
+Message Channel::get_message(Pubnub::String timetoken)
+{
+    int64_t start_timetoken_int = std::stoll(timetoken) + 1;
+    String start_timetoken = std::to_string(start_timetoken_int);
+    std::vector<Message> messages = get_history(start_timetoken, timetoken, 1);
+    if(messages.size() == 0)
+    {
+        throw std::runtime_error("can't get message, there is no message with this timestamp");
+    }
+
+    return messages[0];
+}
+
 Pubnub::String Channel::get_channel_id()
 {
     return channel_id;
@@ -239,6 +293,20 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 	return message_json.dump();
 }
 
+std::future<pubnub_res> Channel::fetch_history_async(int limit, const char* start, const char* end)
+{
+    return std::async(std::launch::async, [=](){
+        pubnub_fetch_history_options fetch_history_options = pubnub_fetch_history_defopts();
+        fetch_history_options.max_per_channel = limit;
+        fetch_history_options.start = start;
+        fetch_history_options.end = end;
+        fetch_history_options.include_message_actions = true;
+        fetch_history_options.include_meta = true;
+        pubnub_fetch_history(get_ctx_pub(), channel_id, fetch_history_options);
+        pubnub_res response = pubnub_await(get_ctx_pub());
+        return response; 
+    });
+}
 
 pubnub_t* Channel::get_ctx_pub()
 {

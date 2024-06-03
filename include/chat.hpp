@@ -87,9 +87,6 @@ namespace Pubnub
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
 
-        //Just to test new string
-        PN_CHAT_EXPORT Pubnub::Message get_message(String MessageTest);
-
         pubnub_t* get_pubnub_context(){return ctx_pub;};
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"

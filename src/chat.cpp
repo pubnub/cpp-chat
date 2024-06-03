@@ -452,14 +452,6 @@ bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
     return count > 0;
 }
 
-Message Chat::get_message(String MessageTest)
-{
-    Message new_message;
-    new_message.message_id = MessageTest;
-    //new_message.message_text = MessageTest;
-    return new_message;
-}
-
 void Chat::subscribe_to_channel(String channel_id)
 {
     pubnub_subscribe(ctx_sub, channel_id, NULL);

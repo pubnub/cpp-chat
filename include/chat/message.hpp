@@ -11,10 +11,11 @@ namespace Pubnub
     {
         public:
 
-        Pubnub::String message_text = "initial message text";
-        int test_int = 1500;
-        Pubnub::String message_id;
-        int test_int2 = 88888;
+        Pubnub::String timetoken;
+        Pubnub::String text;
+        Pubnub::String channel_id;
+        Pubnub::String user_id;
+
     };
 }
 #endif /* MESSAGE_H */

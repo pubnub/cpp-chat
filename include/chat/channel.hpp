@@ -12,6 +12,7 @@ extern "C" {
 namespace Pubnub
 {
     class Chat;
+    class Message;
     enum pubnub_chat_message_type : uint8_t;
 
     struct ChatChannelData
@@ -43,6 +44,8 @@ namespace Pubnub
         PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
         PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present();
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
+        PN_CHAT_EXPORT std::vector<Pubnub::Message> get_history(Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
+        PN_CHAT_EXPORT Pubnub::Message get_message(Pubnub::String timetoken);
 
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
@@ -60,6 +63,8 @@ namespace Pubnub
         bool is_initialized = false;
         Pubnub::Chat *chat_obj;
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
+
+        std::future<pubnub_res> fetch_history_async(int limit, const char* start, const char* end);
 
         //Use this to get pubnub publish context from chat_obj.
         pubnub_t* get_ctx_pub();
