@@ -33,19 +33,16 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void init(Pubnub::Chat *InChat, Pubnub::String in_channel_id, ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void init_from_json(Pubnub::Chat *InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
-
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
-
         PN_CHAT_EXPORT void connect();
         PN_CHAT_EXPORT void disconnect();
-
         PN_CHAT_EXPORT void join(Pubnub::String additional_params);
         PN_CHAT_EXPORT void leave();
         PN_CHAT_EXPORT void delete_channel();
-
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
-
         PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
+        PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
+
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
         PN_CHAT_EXPORT ChatChannelData get_channel_data();

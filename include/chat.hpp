@@ -70,6 +70,7 @@ namespace Pubnub
         /* PRESENCE */
 
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(Pubnub::String user_id);
+        PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
 
         //Just to test new string

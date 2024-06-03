@@ -323,6 +323,13 @@ std::vector<String> Chat::where_present(String user_id)
     return channel_ids;
 }
 
+bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
+{
+    std::vector<String> channels = where_present(user_id);
+    int count = std::count(channels.begin(), channels.end(), channel_id);
+    return count > 0;
+}
+
 Message Chat::get_message(String MessageTest)
 {
     Message new_message;

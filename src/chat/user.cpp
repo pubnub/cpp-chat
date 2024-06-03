@@ -68,6 +68,21 @@ std::vector<Pubnub::String> User::where_present()
     return chat_obj->where_present(user_id);
 }
 
+bool User::is_present_on(Pubnub::String channel_id)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to get is present on, channel_id is empty");
+    }
+
+    if(!chat_obj)
+    {
+        throw std::invalid_argument("Failed to get is present on, chat_obj is invalid");
+    }
+
+    return chat_obj->is_present(user_id, channel_id);
+}
+
 ChatUserData User::user_data_from_json(String data_json_string)
 {
     json user_data_json = json::parse(data_json_string);
