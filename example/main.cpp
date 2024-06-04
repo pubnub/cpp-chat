@@ -1,36 +1,27 @@
+#include "chat.hpp"
+#include "chat/message.hpp"
 #include "infra/pubnub.hpp"
 #include <iostream>
 #include <thread>
 
 int main() {
-    PubNub pn("demo", "demo", "demo");
+    std::string pub_key = "demo";
+    std::string sub_key = "demo";
+    std::string user = "hehehe";
 
-    pn.publish("my_channel", "\"Hello, world!\"");
+    Pubnub::Chat chat;
+    chat.init(pub_key, sub_key, user);
 
-    pn.subscribe_to_channel("my_channel");
+    Pubnub::ChatChannelData channel_data;
+    channel_data.channel_name = "iksde2";
+    channel_data.description = "Wha";
+    channel_data.status = 1;
+    channel_data.type = "hm";
+    channel_data.updated = "true";
+    channel_data.custom_data_json = "{}";
 
-    for (auto i = 0; i < 10; i++) {
-        auto messages = pn.fetch_messages();
-        for (const auto& message : messages) {
-            std::cout << message.payload.ptr << std::endl;
-        }
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
-    auto messages = pn.pause_subscription_and_get_last_messages();
-    for (const auto& message : messages) {
-        std::cout << message.payload.ptr << std::endl;
-    }
-    pn.subscribe_to_channel("my_channel2");
-    std::cout << "Subscribed to my_channel and my_channel2" << std::endl;
-
-    for (auto i = 0; i < 10; i++) {
-        auto messages = pn.fetch_messages();
-        for (const auto& message : messages) {
-            std::cout << message.payload.ptr << std::endl;
-        }
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    Pubnub::Channel channel = chat.create_public_conversation("iksdeedski", channel_data );
+    channel.join("");
+    channel.send_text("ARE YOU HEARING ME YOU BASTARDS?", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
 }
+
