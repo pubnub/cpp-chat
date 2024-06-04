@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
 
@@ -18,45 +19,36 @@ extern "C" {
 using namespace Pubnub;
 using json = nlohmann::json;
 
-void Channel::init(Chat *InChat, String in_channel_id, ChatChannelData in_additional_channel_data)
+Channel::Channel(Chat& InChat, String in_channel_id, ChatChannelData in_additional_channel_data) :
+    chat_obj(InChat),
+    channel_id(in_channel_id),
+    channel_data(in_additional_channel_data)
 {
-    chat_obj = InChat;
-    channel_id = in_channel_id;
-    channel_data = in_additional_channel_data;
-
-    //now channel is fully initialized
+    // TODO: is this necessary?
     is_initialized = true;
 }
 
-void Channel::init_from_json(Chat *InChat, String in_channel_id, String channel_data_json)
-{
-    init(InChat, in_channel_id, channel_data_from_json(channel_data_json));
-}
+Channel::Channel(Chat& InChat, String in_channel_id, String channel_data_json) :
+    Channel(InChat, in_channel_id, channel_data_from_json(channel_data_json)) {}
 
 void Channel::update(ChatChannelData in_additional_channel_data)
 {
+    // TODO: transactional update
     channel_data = in_additional_channel_data;
-    pubnub_set_channelmetadata(get_ctx_pub(), channel_id, NULL, channel_data_to_json(channel_id, channel_data));
+
+    this->chat_obj
+        .get_pubnub_context()
+        .set_channel_metadata(channel_id, channel_data_to_json(channel_id, channel_data));
 }
 
 void Channel::connect()
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to connect to channel, chat_obj is invalid");
-    }
-
-    chat_obj->subscribe_to_channel(channel_id);
+    this->chat_obj.subscribe_to_channel(channel_id);
 }
 
 void Channel::disconnect()
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to disconnect from channel, chat_obj is invalid");
-    }
-
-    chat_obj->unsubscribe_from_channel(channel_id);
+    this->chat_obj.unsubscribe_from_channel(channel_id);
 }
 
 void Channel::join(String additional_params)
@@ -65,7 +57,10 @@ void Channel::join(String additional_params)
     String custom_parameter_string;
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
     String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + additional_params + String("}]");
-    pubnub_set_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), include_string, set_object_string);
+
+    this->chat_obj
+        .get_pubnub_context()
+        .set_memberships(channel_id, custom_parameter_string);
 
     connect();
 }
@@ -73,57 +68,33 @@ void Channel::join(String additional_params)
 void Channel::leave()
 {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
-    pubnub_remove_memberships(get_ctx_pub(), pubnub_user_id_get(get_ctx_pub()), NULL, remove_object_string);
+
+    auto& pubnub_context = this->chat_obj.get_pubnub_context();
+    pubnub_context.remove_memberships(pubnub_context.get_user_id(), remove_object_string);
 
 	disconnect();
 }
 
 void Channel::delete_channel()
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to delete channel, chat_obj is invalid");
-    }
-
-    chat_obj->delete_channel(channel_id);
+    this->chat_obj.delete_channel(channel_id);
 }
 
 void Channel::set_restrictions(String in_user_id, bool ban_user, bool mute_user, String reason)
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to set restrictions, chat_obj is invalid");
-    }
-
-    chat_obj->set_restrictions(in_user_id, channel_id, ban_user, mute_user, reason);
+    this->chat_obj.set_restrictions(in_user_id, channel_id, ban_user, mute_user, reason);
 }
 
 void Channel::send_text(String message, pubnub_chat_message_type message_type, String meta_data)
 {
-    if(message.empty())
-    {
-        throw std::invalid_argument("Failed to send text, message is empty");
-    }
-
-    pubnub_publish(get_ctx_pub(), channel_id, chat_message_to_publish_string(message, message_type));
-
-    pubnub_res publish_response =  pubnub_await(get_ctx_pub());
-
-    if(publish_response != PNR_OK)
-    {
-        throw std::runtime_error("Failed to publish message");
-    }
-
+    this->chat_obj
+        .get_pubnub_context()
+        .publish(channel_id, chat_message_to_publish_string(message, message_type));
 }
 
 std::vector<Pubnub::String> Channel::who_is_present()
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to get who is present, chat_obj is invalid");
-    }
-
-    return chat_obj->who_is_present(channel_id);
+    return this->chat_obj.who_is_present(channel_id);
 }
 
 bool Channel::is_present(Pubnub::String user_id)
@@ -133,26 +104,14 @@ bool Channel::is_present(Pubnub::String user_id)
         throw std::invalid_argument("Failed to get is present, channel_id is empty");
     }
 
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to get is present, chat_obj is invalid");
-    }
-
-    return chat_obj->is_present(user_id, channel_id);
+    return this->chat_obj.is_present(user_id, channel_id);
 }
 
 std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count)
 {
-    auto future_response = fetch_history_async(count, start_timetoken, end_timetoken);
-    future_response.wait();
-    pubnub_res Res = future_response.get();
-
-    if(Res != PNR_OK)
-    {
-        throw std::invalid_argument("Failed to get response from server");
-    }
-
-    String fetch_history_response = pubnub_get(get_ctx_pub());
+    String fetch_history_response = this->chat_obj
+        .get_pubnub_context()
+        .fetch_history(channel_id, start_timetoken, end_timetoken, count);
 
     json response_json = json::parse(fetch_history_response);
 
@@ -289,25 +248,18 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 	return message_json.dump();
 }
 
-std::future<pubnub_res> Channel::fetch_history_async(int limit, const char* start, const char* end)
-{
-    return std::async(std::launch::async, [=](){
-        pubnub_fetch_history_options fetch_history_options = pubnub_fetch_history_defopts();
-        fetch_history_options.max_per_channel = limit;
-        fetch_history_options.start = start;
-        fetch_history_options.end = end;
-        fetch_history_options.include_message_actions = true;
-        fetch_history_options.include_meta = true;
-        pubnub_fetch_history(get_ctx_pub(), channel_id, fetch_history_options);
-        pubnub_res response = pubnub_await(get_ctx_pub());
-        return response; 
-    });
-}
+//std::future<pubnub_res> Channel::fetch_history_async(int limit, const char* start, const char* end)
+//{
+//    return std::async(std::launch::async, [=](){
+//        pubnub_fetch_history_options fetch_history_options = pubnub_fetch_history_defopts();
+//        fetch_history_options.max_per_channel = limit;
+//        fetch_history_options.start = start;
+//        fetch_history_options.end = end;
+//        fetch_history_options.include_message_actions = true;
+//        fetch_history_options.include_meta = true;
+//        pubnub_fetch_history(get_ctx_pub(), channel_id, fetch_history_options);
+//        pubnub_res response = pubnub_await(get_ctx_pub());
+//        return response; 
+//    });
+//}
 
-pubnub_t* Channel::get_ctx_pub()
-{
-    if(!chat_obj)
-    //TODO: throw exception, error or sth
-    {return nullptr;}
-    return chat_obj->get_pubnub_context();
-}

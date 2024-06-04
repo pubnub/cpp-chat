@@ -41,17 +41,13 @@ namespace Pubnub
 
     class Chat
     {
-        public:
+    public:
+        Chat(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
 
-        //TO DELETE, just for testing
+       //TO DELETE, just for testing
         PN_CHAT_EXPORT void publish_message(Pubnub::String channel, Pubnub::String message);
 
-        Chat(){};
-        ~Chat()
-        {
-            deinit();
-        };
-
+        // TODO: Remove this function and use the constructor instead - keep it for now for compatibility
         PN_CHAT_EXPORT void init(Pubnub::String in_publish_key, Pubnub::String in_subscribe_key, Pubnub::String in_user_id);
         
         PN_CHAT_EXPORT void deinit();
@@ -86,7 +82,8 @@ namespace Pubnub
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
 
-        pubnub_t* get_pubnub_context(){return ctx_pub;};
+        // TODO: I'm totally sure that we should handle need for pubnub context in a different way
+        PubNub& get_pubnub_context(){return this->pubnub;};
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
         void subscribe_to_channel(Pubnub::String channel_id);
@@ -97,13 +94,8 @@ namespace Pubnub
 
         void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
-        private:
-
-        pubnub_t *ctx_pub;
-        pubnub_t *ctx_sub;
-        const char* publish_key;
-        const char* subscribe_key;
-        const char* user_id;
+    private:
+        PubNub pubnub;
 
         Channel create_channel(String channel_id, ChatChannelData channel_data);
 
@@ -119,6 +111,7 @@ namespace Pubnub
 
         /* HELPERS */
 
+        Chat(PubNub pubnub);
         Pubnub::String get_string_from_event_type(pubnub_chat_event_type chat_event_type);
         inline Pubnub::String const bool_to_string(bool b)
         {

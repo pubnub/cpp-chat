@@ -11,61 +11,47 @@ extern "C" {
 using namespace Pubnub;
 using json = nlohmann::json;
 
-void User::init(Chat *InChat, String in_user_id, ChatUserData in_additional_user_data)
+User::User(Chat& chat, String user_id, ChatUserData additional_user_data) :
+    chat_obj(chat),
+    user_id(user_id),
+    user_data(additional_user_data)
 {
-    chat_obj = InChat;
-    user_id = in_user_id;
-    user_data = in_additional_user_data;
-
     //now channel is fully initialized
-    is_initialized = true;
+    this->is_initialized = true;
 }
 
-void User::init_from_json(Chat *InChat, String in_user_id, String user_data_json)
-{
-    init(InChat, in_user_id, user_data_from_json(user_data_json));
-}
+User::User(Chat& chat, String user_id, String user_data_json) :
+    User(chat, user_id, user_data_from_json(user_data_json)) {}
 
 void User::update(ChatUserData in_user_data)
 {
-    user_data = in_user_data;
-    pubnub_set_uuidmetadata(get_ctx_pub(), user_id, NULL, user_data_to_json(user_id, user_data));
+    this->chat_obj
+        .get_pubnub_context()
+        .set_user_metadata(user_id, user_data_to_json(user_id, in_user_data));
+
+    this->user_data = in_user_data;
 }
 
 void User::delete_user()
 {
-    if(!chat_obj)
-    {
-        throw std::runtime_error("Failed to delete user, chat_obj is invalid");
-    }
-
-    chat_obj->delete_user(user_id);
+    this->chat_obj.delete_user(user_id);
 }
 
 void User::set_restrictions(String in_channel_id, bool ban_user, bool mute_user, String reason)
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to set restrictions, chat_obj is invalid");
-    }
-
-    chat_obj->set_restrictions(user_id, in_channel_id, ban_user, mute_user, reason);
+    this->chat_obj.set_restrictions(user_id, in_channel_id, ban_user, mute_user, reason);
 }
 
 void User::report(String reason)
 {
     String payload = String("{") + reason + String(", reportedUserId: ") + user_id + String("}");
-    chat_obj->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, chat_obj->internal_admin_channel, payload);
+    this->chat_obj
+        .emit_chat_event(pubnub_chat_event_type::PCET_REPORT, this->chat_obj.internal_admin_channel, payload);
 }
 
 std::vector<Pubnub::String> User::where_present()
 {
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to get where present, chat_obj is invalid");
-    }
-
-    return chat_obj->where_present(user_id);
+    return this->chat_obj.where_present(user_id);
 }
 
 bool User::is_present_on(Pubnub::String channel_id)
@@ -75,12 +61,7 @@ bool User::is_present_on(Pubnub::String channel_id)
         throw std::invalid_argument("Failed to get is present on, channel_id is empty");
     }
 
-    if(!chat_obj)
-    {
-        throw std::invalid_argument("Failed to get is present on, chat_obj is invalid");
-    }
-
-    return chat_obj->is_present(user_id, channel_id);
+    return this->chat_obj.is_present(user_id, channel_id);
 }
 
 ChatUserData User::user_data_from_json(String data_json_string)
@@ -163,10 +144,3 @@ String User::user_data_to_json(String in_user_id, ChatUserData in_user_data)
     return user_data_json.dump();
 }
 
-pubnub_t *User::get_ctx_pub()
-{
-    if(!chat_obj)
-    //TODO: throw exception, error or sth
-    {return nullptr;}
-    return chat_obj->get_pubnub_context();
-}

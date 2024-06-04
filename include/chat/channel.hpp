@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "export.hpp"
+#include "infra/pubnub.hpp"
 #include "string.hpp"
 
 extern "C" {
@@ -33,8 +34,9 @@ namespace Pubnub
     {
         public:
 
-        PN_CHAT_EXPORT void init(Pubnub::Chat *InChat, Pubnub::String in_channel_id, ChatChannelData in_additional_channel_data);
-        PN_CHAT_EXPORT void init_from_json(Pubnub::Chat *InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
+        PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
+
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect();
         PN_CHAT_EXPORT void disconnect();
@@ -62,14 +64,10 @@ namespace Pubnub
         Pubnub::String channel_id;
         ChatChannelData channel_data;
         bool is_initialized = false;
-        Pubnub::Chat *chat_obj;
+        Pubnub::Chat& chat_obj;
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
 
         std::future<pubnub_res> fetch_history_async(int limit, const char* start, const char* end);
-
-        //Use this to get pubnub publish context from chat_obj.
-        pubnub_t* get_ctx_pub();
-
     };
 }
 #endif /* CHANNEL_H */
