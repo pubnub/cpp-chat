@@ -2,6 +2,7 @@
 #define CHAT_H
 
 #include <string>
+#include <vector>
 #include <future>
 
 #include "string.hpp"
@@ -9,11 +10,14 @@
 #include "chat/user.hpp"
 #include "chat/channel.hpp"
 #include "chat/message.hpp"
+#include "infra/pubnub.hpp"
 
 
 extern "C" {
     #include "core/pubnub_api_types.h"
 }
+
+class PubNub;
 
 namespace Pubnub
 {
@@ -26,11 +30,6 @@ namespace Pubnub
         PCET_INVITE,
         PCET_CUSTOM,
         PCET_MODERATION
-    };
-
-    enum pubnub_chat_message_type : uint8_t
-    {
-        PCMT_TEXT
     };
 
     struct PubnubRestrictionsData

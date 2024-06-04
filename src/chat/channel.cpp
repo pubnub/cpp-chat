@@ -168,11 +168,7 @@ std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub
 
     for (auto& element : messages_array_json)
     {
-        //Just tmp, I will add init from Json here
-        Message message_obj;
-        message_obj.timetoken = String(element["timetoken"]);
-        message_obj.channel_id = channel_id;
-        message_obj.text = String(element["message"]);
+        Message message_obj(channel_id, element.dump());
         messages.push_back(message_obj);
     }
 

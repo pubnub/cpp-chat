@@ -2,6 +2,7 @@
 #define CHANNEL_H
 
 #include <string>
+#include <vector>
 #include "export.hpp"
 #include "string.hpp"
 
