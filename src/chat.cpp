@@ -57,16 +57,8 @@ void Chat::publish_message(String channel, String message)
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
 {
-    if(channel_id.empty())
-    {
-        throw std::invalid_argument("Failed to create public conversation, channel_id is empty");
-    }
-
-    Channel channel_obj;
-    channel_obj.init(this, channel_id, channel_data);
-    pubnub_set_channelmetadata(ctx_pub, channel_id, NULL, channel_obj.channel_data_to_json(channel_id, channel_data));
-
-    return channel_obj;
+    channel_data.type = "public";
+    return create_channel(channel_id, channel_data);
 }
 
 Channel Chat::update_channel(String channel_id, ChatChannelData channel_data)
@@ -461,6 +453,20 @@ void Chat::unsubscribe_from_channel(String channel_id)
 {
     pubnub_leave(ctx_pub, channel_id, NULL);
     pubnub_cancel(ctx_sub);
+}
+
+Channel Chat::create_channel(String channel_id, ChatChannelData channel_data)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to create channel, channel_id is empty");
+    }
+
+    Channel channel_obj;
+    channel_obj.init(this, channel_id, channel_data);
+    pubnub_set_channelmetadata(ctx_pub, channel_id, NULL, channel_obj.channel_data_to_json(channel_id, channel_data));
+    
+    return channel_obj;
 }
 
 std::future<pubnub_res> Chat::get_channel_metadata_async(const char *channel_id)

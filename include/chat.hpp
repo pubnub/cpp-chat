@@ -106,6 +106,7 @@ namespace Pubnub
         const char* subscribe_key;
         const char* user_id;
 
+        Channel create_channel(String channel_id, ChatChannelData channel_data);
 
         std::future<pubnub_res> get_channel_metadata_async(const char* channel_id);
         std::future<pubnub_res> get_all_channels_metadata_async(const char* include, int limit, const char* start, const char* end);
