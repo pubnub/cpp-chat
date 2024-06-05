@@ -23,7 +23,7 @@ namespace Pubnub
         Pubnub::String description;
         Pubnub::String custom_data_json;
         Pubnub::String updated;
-        int status;
+        Pubnub::String status;
         Pubnub::String type;
 
         ChatChannelData(){};

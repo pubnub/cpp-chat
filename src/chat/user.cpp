@@ -110,35 +110,35 @@ String User::user_data_to_json(String in_user_id, ChatUserData in_user_data)
 {
     json user_data_json;
 
-    user_data_json["id"] = in_user_id;
+    user_data_json["id"] = in_user_id.c_str();
 
-    if(in_user_data.user_name.empty())
+    if(!in_user_data.user_name.empty())
     {
-        user_data_json["name"] = in_user_data.user_name;
+        user_data_json["name"] = in_user_data.user_name.c_str();
     }
-    if(in_user_data.external_id.empty())
+    if(!in_user_data.external_id.empty())
     {
-        user_data_json["externalId"] = in_user_data.external_id;
+        user_data_json["externalId"] = in_user_data.external_id.c_str();
     }
-    if(in_user_data.profile_url.empty())
+    if(!in_user_data.profile_url.empty())
     {
-        user_data_json["profileUrl"] = in_user_data.profile_url;
+        user_data_json["profileUrl"] = in_user_data.profile_url.c_str();
     }
-    if(in_user_data.email.empty())
+    if(!in_user_data.email.empty())
     {
-        user_data_json["email"] = in_user_data.email;
+        user_data_json["email"] = in_user_data.email.c_str();
     }
-    if(in_user_data.custom_data_json.empty())
+    if(!in_user_data.custom_data_json.empty())
     {
-        user_data_json["custom"] = in_user_data.custom_data_json;
+        user_data_json["custom"] = in_user_data.custom_data_json.c_str();
     }
-    if(in_user_data.status != 0 )
+    if(!in_user_data.status.empty())
     {
-        user_data_json["status"] = in_user_data.status;
+        user_data_json["status"] = in_user_data.status.c_str();
     }
-    if(in_user_data.type.empty())
+    if(!in_user_data.type.empty())
     {
-        user_data_json["type"] = in_user_data.type;
+        user_data_json["type"] = in_user_data.type.c_str();
     }
 
     return user_data_json.dump();

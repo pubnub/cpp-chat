@@ -15,6 +15,8 @@ String::~String() {
 }
 
 String::String(const char* string) {
+    if(string == nullptr)
+    {return;}
     auto lenght = strlen(string);
     this->string = new char[lenght + 1];
     memcpy(this->string, string, lenght);

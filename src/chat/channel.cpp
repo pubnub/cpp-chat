@@ -56,11 +56,11 @@ void Channel::join(String additional_params)
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String custom_parameter_string;
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
-    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + additional_params + String("}]");
+    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
 
     this->chat_obj
         .get_pubnub_context()
-        .set_memberships(channel_id, custom_parameter_string);
+        .set_memberships(channel_id, set_object_string);
 
     connect();
 }
@@ -199,30 +199,31 @@ String Channel::channel_data_to_json(String in_channel_id, ChatChannelData in_ch
 {
     json channel_data_json;
 
-    channel_data_json["id"] = in_channel_id;
-    if(in_channel_data.channel_name.empty())
+    channel_data_json["id"] = in_channel_id.c_str();
+    if(!in_channel_data.channel_name.empty())
     {
-        channel_data_json["name"] = in_channel_data.channel_name;
+        channel_data_json["name"] = in_channel_data.channel_name.c_str();
     }
-    if(in_channel_data.description.empty())
+    if(!in_channel_data.description.empty())
     {
-        channel_data_json["description"] = in_channel_data.description;
+        channel_data_json["description"] = in_channel_data.description.c_str();
     }
-    if(in_channel_data.custom_data_json.empty())
+    if(!in_channel_data.custom_data_json.empty())
     {
-        channel_data_json["custom"] = in_channel_data.custom_data_json;
+        json custom_json = json::parse(in_channel_data.custom_data_json);
+        channel_data_json["custom"] = custom_json;
     }
-    if(in_channel_data.updated.empty())
+    if(!in_channel_data.updated.empty())
     {
-        channel_data_json["updated"] = in_channel_data.updated;
+        channel_data_json["updated"] = in_channel_data.updated.c_str();
     }
-    if(in_channel_data.status != 0 )
+    if(!in_channel_data.status.empty())
     {
-        channel_data_json["status"] = in_channel_data.status;
+        channel_data_json["status"] = in_channel_data.status.c_str();
     }
-    if(in_channel_data.type.empty())
+    if(!in_channel_data.type.empty())
     {
-        channel_data_json["type"] = in_channel_data.type;
+        channel_data_json["type"] = in_channel_data.type.c_str();
     }
 
     return channel_data_json.dump();
@@ -240,8 +241,8 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 		message_type_string = "text";
 		break;
 	}
-	message_json["type"] = message_type_string;
-    message_json["text"] = message;
+	message_json["type"] = message_type_string.c_str();
+    message_json["text"] = message.c_str();
 
 
 	//Convert constructed Json to FString

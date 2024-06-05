@@ -20,7 +20,7 @@ namespace Pubnub
         Pubnub::String profile_url;
         Pubnub::String email;
         Pubnub::String custom_data_json;
-        int status;
+        Pubnub::String status;
         Pubnub::String type;
 
         ChatUserData(){};
