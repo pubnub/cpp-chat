@@ -43,18 +43,15 @@ void Channel::update(ChatChannelData in_additional_channel_data)
         .set_channel_metadata(channel_id, channel_data_to_json(channel_id, channel_data));
 }
 
-void Channel::connect() {
-    this->chat_obj.subscribe_to_channel(channel_id);
-}
-
 void Channel::connect(std::function<void(Message)> message_callback) {
     this->chat_obj.subscribe_to_channel(channel_id);
+    this->chat_obj.get_pubnub_context().register_message_callback(channel_id, message_callback);
 }
 
-void Channel::connect(CallbackFunction message_callback)
+void Channel::connect(CallbackStringFunction string_callback)
 {
-    auto callback = [message_callback](Pubnub::Message message) {
-        message_callback(message.to_string().c_str());
+    auto callback = [string_callback](Pubnub::Message message) {
+        string_callback(message.to_string().c_str());
     };
 
     this->connect(callback);
@@ -63,9 +60,10 @@ void Channel::connect(CallbackFunction message_callback)
 void Channel::disconnect()
 {
     this->chat_obj.unsubscribe_from_channel(channel_id);
+    this->chat_obj.get_pubnub_context().remove_message_callback(channel_id);
 }
 
-void Channel::join(String additional_params)
+void Channel::join(std::function<void(Message)> message_callback, Pubnub::String additional_params)
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String custom_parameter_string;
@@ -76,7 +74,16 @@ void Channel::join(String additional_params)
         .get_pubnub_context()
         .set_memberships(channel_id, set_object_string);
 
-    connect();
+    connect(message_callback);
+}
+
+void Channel::join(CallbackStringFunction string_callback, Pubnub::String additional_params)
+{
+    auto callback = [string_callback](Pubnub::Message message) {
+        string_callback(message.to_string().c_str());
+    };
+
+    join(callback, additional_params);
 }
 
 void Channel::leave()

@@ -2,7 +2,10 @@
 #define PN_CHAT_INFRA_PUBNUB_HPP
 
 #include "string.hpp"
+#include "chat/message.hpp"
 #include <vector>
+#include <map>
+#include <functional>
 
 extern "C" {
 #include <pubnub_api_types.h>
@@ -40,6 +43,9 @@ public:
     Pubnub::String get_user_id();
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
 
+    void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
+    void remove_message_callback(Pubnub::String channel_id);
+
 private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
@@ -54,6 +60,7 @@ private:
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
 
     std::vector<Pubnub::String> subscribed_channels;
+    std::map<Pubnub::String, std::function<void(Pubnub::Message)>> message_callbacks_map;
 
     bool is_subscribed = false;
 };

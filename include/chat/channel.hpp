@@ -5,13 +5,14 @@
 #include <vector>
 #include "export.hpp"
 #include "infra/pubnub.hpp"
+#include "chat.hpp"
 #include "string.hpp"
+#include "callbacks.hpp"
 
 extern "C" {
     #include "core/pubnub_api_types.h"
 }
 
-typedef void (*CallbackFunction)(const char* message);
 
 namespace Pubnub
 {
@@ -40,11 +41,11 @@ namespace Pubnub
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
-        PN_CHAT_EXPORT void connect();
         PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
-        PN_CHAT_EXPORT void connect(CallbackFunction message_callback);
+        PN_CHAT_EXPORT void connect(CallbackStringFunction string_callback);
         PN_CHAT_EXPORT void disconnect();
-        PN_CHAT_EXPORT void join(Pubnub::String additional_params);
+        PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, Pubnub::String additional_params = "");
+        PN_CHAT_EXPORT void join(CallbackStringFunction string_callback, Pubnub::String additional_params = "");
         PN_CHAT_EXPORT void leave();
         PN_CHAT_EXPORT void delete_channel();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
@@ -61,7 +62,8 @@ namespace Pubnub
 
         ChatChannelData channel_data_from_json(Pubnub::String json_string);
         Pubnub::String channel_data_to_json(Pubnub::String in_channel_id, ChatChannelData in_channel_data);
-
+        
+        PN_CHAT_EXPORT void test_callback(std::function<void(Pubnub::Message)> message_callback);
     
         private:
 

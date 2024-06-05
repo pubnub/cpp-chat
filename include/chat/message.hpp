@@ -30,12 +30,14 @@ namespace Pubnub
     {
         public:
         PN_CHAT_EXPORT Message(Pubnub::String in_timetoken, ChatMessageData in_message_data);
-        PN_CHAT_EXPORT Message(Pubnub::String in_timetoken, Pubnub::String in_message_data_json);
-        PN_CHAT_EXPORT Message(Pubnub::String json);
+        PN_CHAT_EXPORT Message(Pubnub::String in_channel_id, Pubnub::String in_message_data_json);
 
         ~Message() = default;
 
         Pubnub::String to_string();
+
+        PN_CHAT_EXPORT Pubnub::String get_timetoken();
+        PN_CHAT_EXPORT ChatMessageData get_message_data();
 
         private:
 

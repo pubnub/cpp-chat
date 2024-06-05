@@ -51,3 +51,12 @@ String Message::to_string() {
     return String("test");
 }
 
+Pubnub::String Message::get_timetoken()
+{
+    return timetoken;
+}
+
+ChatMessageData Message::get_message_data()
+{
+    return message_data;
+}
