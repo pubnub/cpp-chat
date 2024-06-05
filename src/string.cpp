@@ -54,6 +54,9 @@ String::operator const char*() const {
 }
 
 String& String::operator=(const char* string) {
+    if(string == nullptr)
+    {return String("");}
+    
     auto lenght = strlen(string);
     if (this->string != nullptr) {
         delete[] this->string;
