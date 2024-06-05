@@ -8,19 +8,6 @@
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_delete(Pubnub::Channel* channel);
 
-struct ChatChannelDataHelper {
-    char* channel_name;
-    char* description;
-    char* custom_data_json;
-    char* updated;
-    int status;
-    char* type;
-};
-
-Pubnub::ChatChannelData chat_channel_data_from_helper(ChatChannelDataHelper helper);
-
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_new(Pubnub::Chat* chat, const char* channel_id, ChatChannelDataHelper channel_data);
-
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_new_dirty(
         Pubnub::Chat* chat,
         const char* channel_id,
@@ -28,12 +15,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_new_dirty(
         char* channel_description,
         char* channel_custom_data_json,
         char* channel_updated,
-        int channel_status,
+        char* channel_status,
         char* channel_type);
-
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update(
-        Pubnub::Channel* channel,
-        ChatChannelDataHelper channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update_dirty(
         Pubnub::Channel* channel,
@@ -41,7 +24,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update_dirty(
         char* channel_description,
         char* channel_custom_data_json,
         char* channel_updated,
-        int channel_status,
+        char* channel_status,
         char* channel_type);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_connect(Pubnub::Channel* channel);

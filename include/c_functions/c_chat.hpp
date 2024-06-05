@@ -14,11 +14,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete(Pubnub::Chat* chat);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversation(
-        Pubnub::Chat* chat,
-        const char* channel_id,
-        ChatChannelDataHelper channel_data);
-
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversation_dirty(
         Pubnub::Chat* chat,
         const char* channel_id,
@@ -26,13 +21,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversatio
         char* channel_description,
         char* channel_custom_data_json,
         char* channel_updated,
-        int channel_status,
+        char* channel_status,
         char* channel_type);
-
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel(
-        Pubnub::Chat* chat,
-        std::string channel_id,
-        ChatChannelDataHelper channel_data);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel_dirty(
         Pubnub::Chat* chat,
@@ -41,7 +31,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel_dirty(
         char* channel_description,
         char* channel_custom_data_json,
         char* channel_updated,
-        int channel_status,
+        char* channel_status,
         char* channel_type);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_channel(
