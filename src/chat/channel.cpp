@@ -25,10 +25,7 @@ Channel::Channel(Chat& InChat, String in_channel_id, ChatChannelData in_addition
     chat_obj(InChat),
     channel_id(in_channel_id),
     channel_data(in_additional_channel_data)
-{
-    // TODO: is this necessary?
-    is_initialized = true;
-}
+{}
 
 Channel::Channel(Chat& InChat, String in_channel_id, String channel_data_json) :
     Channel(InChat, in_channel_id, channel_data_from_json(channel_data_json)) {}
@@ -269,19 +266,4 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 	//Convert constructed Json to FString
 	return message_json.dump();
 }
-
-//std::future<pubnub_res> Channel::fetch_history_async(int limit, const char* start, const char* end)
-//{
-//    return std::async(std::launch::async, [=](){
-//        pubnub_fetch_history_options fetch_history_options = pubnub_fetch_history_defopts();
-//        fetch_history_options.max_per_channel = limit;
-//        fetch_history_options.start = start;
-//        fetch_history_options.end = end;
-//        fetch_history_options.include_message_actions = true;
-//        fetch_history_options.include_meta = true;
-//        pubnub_fetch_history(get_ctx_pub(), channel_id, fetch_history_options);
-//        pubnub_res response = pubnub_await(get_ctx_pub());
-//        return response; 
-//    });
-//}
 

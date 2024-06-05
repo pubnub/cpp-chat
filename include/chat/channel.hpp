@@ -69,11 +69,8 @@ namespace Pubnub
 
         Pubnub::String channel_id;
         ChatChannelData channel_data;
-        bool is_initialized = false;
         Pubnub::Chat& chat_obj;
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
-
-        std::future<pubnub_res> fetch_history_async(int limit, const char* start, const char* end);
     };
 }
 #endif /* CHANNEL_H */
