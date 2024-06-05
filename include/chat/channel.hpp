@@ -11,6 +11,8 @@ extern "C" {
     #include "core/pubnub_api_types.h"
 }
 
+typedef void (*CallbackFunction)(const char* message);
+
 namespace Pubnub
 {
     class Chat;
@@ -39,6 +41,8 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect();
+        PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
+        PN_CHAT_EXPORT void connect(CallbackFunction message_callback);
         PN_CHAT_EXPORT void disconnect();
         PN_CHAT_EXPORT void join(Pubnub::String additional_params);
         PN_CHAT_EXPORT void leave();

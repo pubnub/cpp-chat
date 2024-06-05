@@ -1,5 +1,7 @@
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
@@ -41,9 +43,21 @@ void Channel::update(ChatChannelData in_additional_channel_data)
         .set_channel_metadata(channel_id, channel_data_to_json(channel_id, channel_data));
 }
 
-void Channel::connect()
-{
+void Channel::connect() {
     this->chat_obj.subscribe_to_channel(channel_id);
+}
+
+void Channel::connect(std::function<void(Message)> message_callback) {
+    this->chat_obj.subscribe_to_channel(channel_id);
+}
+
+void Channel::connect(CallbackFunction message_callback)
+{
+    auto callback = [message_callback](Pubnub::Message message) {
+        message_callback(message.to_string().c_str());
+    };
+
+    this->connect(callback);
 }
 
 void Channel::disconnect()

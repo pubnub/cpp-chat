@@ -1,6 +1,7 @@
 #include <iostream>
 #include "chat/message.hpp"
 #include "nlohmann/json.hpp"
+#include "string.hpp"
 
 
 using namespace Pubnub;
@@ -44,5 +45,9 @@ Message::Message(String in_channel_id, Pubnub::String in_message_data_json)
             message_data.message_actions.push_back(element.dump());
         }
     }
+}
+
+String Message::to_string() {
+    return String("test");
 }
 
