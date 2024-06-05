@@ -42,7 +42,7 @@ namespace Pubnub
     class Chat
     {
     public:
-        Chat(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
+        PN_CHAT_EXPORT Chat(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
 
        //TO DELETE, just for testing
         PN_CHAT_EXPORT void publish_message(Pubnub::String channel, Pubnub::String message);

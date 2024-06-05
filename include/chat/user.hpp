@@ -29,8 +29,8 @@ namespace Pubnub
     PN_CHAT_EXPORT class User
     {
     public:
-        User(Pubnub::Chat& chat, Pubnub::String user_id, ChatUserData additional_user_data);
-        User(Pubnub::Chat& chat, Pubnub::String user_id, Pubnub::String user_data_json);
+        PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_id, ChatUserData additional_user_data);
+        PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_id, Pubnub::String user_data_json);
 
         PN_CHAT_EXPORT void update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
