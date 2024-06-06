@@ -3,6 +3,7 @@
 #include "chat.hpp"
 
 #include "chat/user.hpp"
+#include "chat/membership.hpp"
 
 extern "C" {
 #include "core/pubnub_objects_api.h"
@@ -65,6 +66,32 @@ bool User::is_present_on(Pubnub::String channel_id)
     }
 
     return this->chat_obj.is_present(user_id, channel_id);
+}
+
+std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken)
+{
+    String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
+    String get_memberships_response = chat_obj.get_pubnub_context().get_memberships(user_id, include_string, limit, start_timetoken, end_timetoken);
+
+    json response_json = json::parse(get_memberships_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get memberships, response is incorrect");
+    }
+
+    json channels_array_json = response_json["data"];
+
+
+    std::vector<Membership> memberships;
+
+    for (auto& element : channels_array_json)
+    {
+        Membership membership_obj(chat_obj, *this, String(element["channel"]));
+        memberships.push_back(membership_obj);
+    }
+
+    return memberships;
 }
 
 ChatUserData User::user_data_from_json(String data_json_string)
@@ -167,3 +194,12 @@ String User::user_data_to_json(String in_user_id, ChatUserData in_user_data)
     return user_data_json.dump();
 }
 
+Pubnub::String User::get_user_id()
+{
+    return user_id;
+}
+
+ChatUserData User::get_user_data()
+{
+    return user_data;
+}

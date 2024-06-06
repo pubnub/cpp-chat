@@ -12,6 +12,7 @@ namespace Pubnub
 {
     struct PubnubRestrictionsData;
     class Chat;
+    class Membership;
 
     struct ChatUserData
     {
@@ -40,10 +41,14 @@ namespace Pubnub
         PN_CHAT_EXPORT void report(Pubnub::String reason);
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
         PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
+        PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
 
         ChatUserData user_data_from_json(Pubnub::String data_json_string);
         Pubnub::String user_id_from_json(Pubnub::String data_json_string);
         Pubnub::String user_data_to_json(Pubnub::String in_user_id, ChatUserData in_user_data);
+
+        Pubnub::String get_user_id();
+        ChatUserData get_user_data();
 
     private:
 

@@ -24,6 +24,8 @@ namespace Pubnub
 
         ~Membership() = default;
 
+        Membership update(Pubnub::String in_custom_object_json);
+
         private:
         Pubnub::Chat& chat_obj;
         Pubnub::String custom_data_json;
