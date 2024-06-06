@@ -52,7 +52,8 @@ void Channel::connect(std::function<void(Message)> message_callback) {
 void Channel::connect(CallbackStringFunction string_callback)
 {
     auto callback = [string_callback](Pubnub::Message message) {
-        string_callback(message.to_string().c_str());
+        auto string = message.to_string();
+        string_callback(string.c_str());
     };
 
     this->connect(callback);

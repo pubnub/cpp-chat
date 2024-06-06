@@ -56,9 +56,8 @@ void pn_channel_disconnect(Pubnub::Channel* channel) {
     channel->disconnect();
 }
 
-void pn_channel_join(Pubnub::Channel* channel, const char* additional_params) {
-    // TODO: add real callback
-    channel->join([](const char*){}, additional_params);
+void pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
+    channel->join(callback);
 }
 
 void pn_channel_leave(Pubnub::Channel* channel) {
