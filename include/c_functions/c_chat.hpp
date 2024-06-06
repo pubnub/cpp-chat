@@ -5,7 +5,7 @@
 #include "export.hpp"
 #include "extern.hpp"
 #include "chat/channel.hpp"
-#include "c_functions/c_channel.hpp"
+#include "chat/user.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* publish,
@@ -52,5 +52,42 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_set_restrictions(
         bool mute_user,
         const char* reason);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_create_user_dirty(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* user_name,
+        const char* external_id,
+        const char* profile_url,
+        const char* email,
+        const char* custom_data_json,
+        const char* status,
+        const char* type);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_get_user(
+        Pubnub::Chat* chat,
+        const char* user_id);
+
+// TODO: serialize or memory pointer?
+//PN_CHAT_EXTERN PN_CHAT_EXPORT std::vector<PubNub::User>* pn_chat_get_users(
+//        Pubnub::Chat* chat,
+//        const char* include,
+//        const int limit,
+//        const char* start,
+//        const char* end);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_update_user_dirty(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* user_name,
+        const char* external_id,
+        const char* profile_url,
+        const char* email,
+        const char* custom_data_json,
+        const char* status,
+        const char* type);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete_user(
+        Pubnub::Chat* chat,
+        const char* user_id);
 
 #endif // PN_CHAT_C_CHAT_HPP

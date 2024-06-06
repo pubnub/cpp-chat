@@ -78,3 +78,69 @@ void pn_chat_set_restrictions(
     chat->set_restrictions(user_id, channel_id, ban_user, mute_user, reason);
 }
 
+Pubnub::User* pn_chat_create_user_dirty(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* user_name,
+        const char* external_id,
+        const char* profile_url,
+        const char* email,
+        const char* custom_data_json,
+        const char* status,
+        const char* type) {
+    Pubnub::ChatUserData converted_data; 
+    converted_data.user_name = user_name;
+    converted_data.external_id = external_id;
+    converted_data.profile_url = profile_url;
+    converted_data.email = email;
+    converted_data.custom_data_json = custom_data_json;
+    converted_data.status = status;
+    converted_data.type = type;
+    
+    return new Pubnub::User(chat->create_user(user_id, converted_data));
+}
+
+Pubnub::User* pn_chat_get_user(
+        Pubnub::Chat* chat,
+        const char* user_id) {
+    return new Pubnub::User(chat->get_user(user_id));
+}
+
+//std::vector<Pubnub::User>* pn_chat_get_users(
+//        Pubnub::Chat* chat,
+//        const char* include,
+//        const int limit,
+//        const char* start,
+//        const char* end) {
+//    return ->get_users(include, limit, start, end);
+//}
+
+Pubnub::User* pn_chat_update_user_dirty(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* user_name,
+        const char* external_id,
+        const char* profile_url,
+        const char* email,
+        const char* custom_data_json,
+        const char* status,
+        const char* type) {
+    Pubnub::ChatUserData converted_data; 
+    converted_data.user_name = user_name;
+    converted_data.external_id = external_id;
+    converted_data.profile_url = profile_url;
+    converted_data.email = email;
+    converted_data.custom_data_json = custom_data_json;
+    converted_data.status = status;
+    converted_data.type = type;
+    
+    return new Pubnub::User(chat->update_user(user_id, converted_data));
+}
+
+void pn_chat_delete_user(
+        Pubnub::Chat* chat,
+        const char* user_id) {
+    chat->delete_user(user_id);
+}
+
+
