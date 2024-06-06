@@ -16,6 +16,7 @@ extern "C" {
 
 #include "chat/channel.hpp"
 #include "chat/message.hpp"
+#include "chat/membership.hpp"
 
 
 using namespace Pubnub;
@@ -206,6 +207,31 @@ PubnubRestrictionsData Channel::get_user_restrictions(Pubnub::String in_user_id,
    return FinalRestrictionsData;
 }
 
+std::vector<Pubnub::Membership> Channel::get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken)
+{
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String get_channel_members_response = chat_obj.get_pubnub_context().get_channel_members(channel_id, include_string, limit, start_timetoken, end_timetoken);
+
+    json response_json = json::parse(get_channel_members_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get members, response is incorrect");
+    }
+
+    json users_array_json = response_json["data"];
+
+
+    std::vector<Membership> memberships;
+
+    for (auto& element : users_array_json)
+    {
+        Membership membership_obj(chat_obj, *this, String(element["uuid"]));
+        memberships.push_back(membership_obj);
+    }
+
+    return memberships;
+}
 
 Pubnub::String Channel::get_channel_id()
 {

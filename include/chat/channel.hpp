@@ -18,6 +18,7 @@ namespace Pubnub
 {
     class Chat;
     class Message;
+    class Membership;
     struct PubnubRestrictionsData;
     enum pubnub_chat_message_type : uint8_t;
 
@@ -58,6 +59,7 @@ namespace Pubnub
         PN_CHAT_EXPORT std::vector<Pubnub::Message> get_history(Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
         PN_CHAT_EXPORT Pubnub::Message get_message(Pubnub::String timetoken);
         PN_CHAT_EXPORT Pubnub::PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
+        PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
         PN_CHAT_EXPORT ChatChannelData get_channel_data();
@@ -67,14 +69,11 @@ namespace Pubnub
         Pubnub::String channel_id_from_json(Pubnub::String json_string);
         Pubnub::String channel_data_to_json(Pubnub::String in_channel_id, ChatChannelData in_channel_data);
 
-        
-        PN_CHAT_EXPORT void test_callback(std::function<void(Pubnub::Message)> message_callback);
-    
         private:
-
+        Pubnub::Chat& chat_obj;
         Pubnub::String channel_id;
         ChatChannelData channel_data;
-        Pubnub::Chat& chat_obj;
+
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
     };
 }

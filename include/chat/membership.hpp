@@ -12,22 +12,24 @@ namespace Pubnub
 {
     class User;
     class Channel;
+    class Chat;
 
-    PN_CHAT_EXPORT class Memebership
+    PN_CHAT_EXPORT class Membership
     {
         public:
         //From user membership
-        PN_CHAT_EXPORT Memebership(Pubnub::Chat& in_chat, Pubnub::User& in_user, Pubnub::String in_membership_json);
+        PN_CHAT_EXPORT Membership(Pubnub::Chat& in_chat, Pubnub::User in_user, Pubnub::String in_membership_json);
         //From channel member
-        PN_CHAT_EXPORT Memebership(Pubnub::Chat& in_chat, Pubnub::Channel& in_channel, Pubnub::String in_member_json);
+        PN_CHAT_EXPORT Membership(Pubnub::Chat& in_chat, Pubnub::Channel in_channel, Pubnub::String in_member_json);
 
-        ~Memebership() = default;
+        ~Membership() = default;
 
         private:
         Pubnub::Chat& chat_obj;
-        Pubnub::User& user;
-        Pubnub::Channel& channel;
         Pubnub::String custom_data_json;
+        
+        Pubnub::User user;
+        Pubnub::Channel channel;
 
 
     };
