@@ -57,7 +57,9 @@ void Channel::connect(CallbackStringFunction string_callback)
 void Channel::disconnect()
 {
     this->chat_obj.unsubscribe_from_channel(channel_id);
-    this->chat_obj.get_pubnub_context().remove_message_callback(channel_id);
+    this->chat_obj
+        .get_pubnub_context()
+        .remove_message_callback(channel_id);
 }
 
 void Channel::join(std::function<void(Message)> message_callback, Pubnub::String additional_params)

@@ -391,12 +391,12 @@ Pubnub::String PubNub::fetch_history(
 
 void PubNub::register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback)
 {
-    message_callbacks_map[channel_id] = message_callback;
+    this->message_callbacks_map[channel_id] = message_callback;
 }
 
 void PubNub::remove_message_callback(Pubnub::String channel_id)
 {
-    message_callbacks_map.erase(channel_id);
+    this->message_callbacks_map.erase(channel_id);
 }
 
 void PubNub::await_and_handle_error(pubnub_res result)
