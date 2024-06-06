@@ -15,8 +15,14 @@ String::~String() {
 }
 
 String::String(const char* string) {
-    if(string == nullptr)
-    {return;}
+    if(string == nullptr) {
+        this->string = nullptr;
+        this->len = 0;
+        this->cap = 0;
+
+        return;
+    }
+
     auto lenght = strlen(string);
     this->string = new char[lenght + 1];
     memcpy(this->string, string, lenght);
@@ -54,8 +60,16 @@ String::operator const char*() const {
 }
 
 String& String::operator=(const char* string) {
-    if(string == nullptr)
-    {return String("");}
+    if(string == nullptr) {
+        if (this->string != nullptr) {
+            delete[] this->string;
+        }
+        this->string = nullptr;
+        this->len = 0;
+        this->cap = 0;
+        
+        return *this;
+    }
     
     auto lenght = strlen(string);
     if (this->string != nullptr) {

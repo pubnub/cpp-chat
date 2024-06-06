@@ -17,7 +17,7 @@ int main() {
     channel_data.custom_data_json = "{}";
 
     Pubnub::Channel channel = chat.create_public_conversation("iksdeedski", channel_data );
-    channel.join("");
+//    channel.join("");
     channel.send_text("ARE YOU HEARING ME YOU BASTARDS?", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
 }
 

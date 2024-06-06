@@ -46,7 +46,8 @@ void pn_channel_update_dirty(
 }
 
 void pn_channel_connect(Pubnub::Channel* channel) {
-    channel->connect();
+    // TODO: add real callback
+    channel->connect([](const char*){});
 }
 
 void pn_channel_disconnect(Pubnub::Channel* channel) {
@@ -54,7 +55,8 @@ void pn_channel_disconnect(Pubnub::Channel* channel) {
 }
 
 void pn_channel_join(Pubnub::Channel* channel, const char* additional_params) {
-    channel->join(additional_params);
+    // TODO: add real callback
+    channel->join([](const char*){}, additional_params);
 }
 
 void pn_channel_leave(Pubnub::Channel* channel) {
