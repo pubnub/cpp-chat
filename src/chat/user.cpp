@@ -37,9 +37,9 @@ void User::delete_user()
     this->chat_obj.delete_user(user_id);
 }
 
-void User::set_restrictions(String in_channel_id, bool ban_user, bool mute_user, String reason)
+void User::set_restrictions(String in_channel_id, PubnubRestrictionsData restrictions)
 {
-    this->chat_obj.set_restrictions(user_id, in_channel_id, ban_user, mute_user, reason);
+    this->chat_obj.set_restrictions(user_id, in_channel_id, restrictions);
 }
 
 void User::report(String reason)

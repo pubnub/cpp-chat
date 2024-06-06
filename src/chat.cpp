@@ -170,7 +170,7 @@ void Chat::delete_user(String user_id)
     this->pubnub.remove_user_metadata(user_id);
 }
 
-void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_user, bool mute_user, String reason)
+void Chat::set_restrictions(String in_user_id, String in_channel_id, PubnubRestrictionsData restrictions)
 {
     if(in_user_id.empty())
     {
@@ -185,60 +185,25 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, bool ban_us
 	String restrictions_channel = internal_moderation_prefix + in_channel_id;
 
 	//Lift restrictions
-	if(!ban_user && !mute_user)
+	if(!restrictions.ban && !restrictions.mute)
 	{
 		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}}]");
         this->pubnub.remove_members(restrictions_channel, in_user_id);
-		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + reason + String("\"}");
+		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + restrictions.reason + String("\"}");
         emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 		return;
 	}
 
 	//Ban or mute the user
-	String params_string = String("{\"ban\": ") + bool_to_string(ban_user) + String(", \"mute\": ") + bool_to_string(mute_user) + String(", \"reason\": \"") + reason + String("\"}");
+	String params_string = String("{\"ban\": ") + bool_to_string(restrictions.ban) + String(", \"mute\": ") + bool_to_string(restrictions.mute) + String(", \"reason\": \"") + restrictions.reason + String("\"}");
 	String set_members_string = String("[{\"uuid\": {\"id\": \"") + this->pubnub.get_user_id() + String("\"}, \"custom\": ") + params_string + String("}]");
     this->pubnub.set_members(restrictions_channel, set_members_string);
     String restriction_text;
-    ban_user ? restriction_text = "banned" : "muted";
-	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + reason + String("\"}");
+    restrictions.ban ? restriction_text = "banned" : "muted";
+	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + restrictions.reason + String("\"}");
     emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 }
 
-PubnubRestrictionsData Chat::get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
-{
-    String get_restrictions_response = this->pubnub.get_memberships(in_user_id, "totalCount,custom", limit, start, end);
-
-    json response_json = json::parse(get_restrictions_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get user restrictions, response is incorrect");
-    }
-
-    json response_data_json = response_json["data"];
-    String full_channel_id = internal_moderation_prefix + in_channel_id;
-    PubnubRestrictionsData FinalRestrictionsData;
-
-   for (auto& element : response_data_json)
-   {
-        //Find restrictions data for requested channel
-        if(String(element["channel"]["id"]) == full_channel_id)
-        {
-            if(element["custom"]["ban"] == true)
-            {
-                FinalRestrictionsData.ban = true;
-            }
-            if(element["custom"]["mute"] == true)
-            {
-                FinalRestrictionsData.mute = true;
-            }
-            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
-            break;
-        }
-   }
-
-   return FinalRestrictionsData;
-}
 
 PubnubRestrictionsData Chat::get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
 {

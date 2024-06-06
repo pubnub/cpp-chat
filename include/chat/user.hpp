@@ -10,7 +10,7 @@ extern "C" {
 
 namespace Pubnub
 {
-
+    struct PubnubRestrictionsData;
     class Chat;
 
     struct ChatUserData
@@ -34,7 +34,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
-        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_channel_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
+        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_channel_id, Pubnub::PubnubRestrictionsData restrictions);
         PN_CHAT_EXPORT void report(Pubnub::String reason);
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
         PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);

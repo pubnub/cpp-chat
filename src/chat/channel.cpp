@@ -100,9 +100,9 @@ void Channel::delete_channel()
     this->chat_obj.delete_channel(channel_id);
 }
 
-void Channel::set_restrictions(String in_user_id, bool ban_user, bool mute_user, String reason)
+void Channel::set_restrictions(String in_user_id, PubnubRestrictionsData restrictions)
 {
-    this->chat_obj.set_restrictions(in_user_id, channel_id, ban_user, mute_user, reason);
+    this->chat_obj.set_restrictions(in_user_id, channel_id, restrictions);
 }
 
 void Channel::send_text(String message, pubnub_chat_message_type message_type, String meta_data)
@@ -166,6 +166,43 @@ Message Channel::get_message(Pubnub::String timetoken)
 
     return messages[0];
 }
+
+PubnubRestrictionsData Channel::get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
+{
+    String get_restrictions_response = chat_obj.get_pubnub_context().get_memberships(in_user_id, "totalCount,custom", limit, start, end);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get user restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    String full_channel_id = chat_obj.internal_moderation_prefix + in_channel_id;
+    PubnubRestrictionsData FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["channel"]["id"]) == full_channel_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}
+
 
 Pubnub::String Channel::get_channel_id()
 {

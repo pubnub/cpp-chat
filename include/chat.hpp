@@ -70,9 +70,7 @@ namespace Pubnub
 
         /* MODERATION */
 
-        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
-        //Internal use only
-        PN_CHAT_EXPORT PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
+        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, Pubnub::PubnubRestrictionsData restrictions);
         PN_CHAT_EXPORT PubnubRestrictionsData get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
 
         /* PRESENCE */

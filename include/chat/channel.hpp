@@ -18,6 +18,7 @@ namespace Pubnub
 {
     class Chat;
     class Message;
+    struct PubnubRestrictionsData;
     enum pubnub_chat_message_type : uint8_t;
 
     struct ChatChannelData
@@ -48,13 +49,13 @@ namespace Pubnub
         PN_CHAT_EXPORT void join(CallbackStringFunction string_callback, Pubnub::String additional_params = "");
         PN_CHAT_EXPORT void leave();
         PN_CHAT_EXPORT void delete_channel();
-        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, bool ban_user, bool mute_user, Pubnub::String reason = "");
+        PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, Pubnub::PubnubRestrictionsData restrictions);
         PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
         PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present();
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
         PN_CHAT_EXPORT std::vector<Pubnub::Message> get_history(Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
         PN_CHAT_EXPORT Pubnub::Message get_message(Pubnub::String timetoken);
-
+        PN_CHAT_EXPORT Pubnub::PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
         PN_CHAT_EXPORT ChatChannelData get_channel_data();
