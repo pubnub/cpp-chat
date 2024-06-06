@@ -23,6 +23,9 @@ User::User(Chat& chat, String user_id, ChatUserData additional_user_data) :
 User::User(Chat& chat, String user_id, String user_data_json) :
     User(chat, user_id, user_data_from_json(user_data_json)) {}
 
+User::User(Pubnub::Chat& chat, String user_data_json) :
+    User(chat, user_id_from_json(user_data_json), user_data_from_json(user_data_json)) {}
+
 void User::update(ChatUserData in_user_data)
 {
     this->chat_obj
@@ -106,6 +109,26 @@ ChatUserData User::user_data_from_json(String data_json_string)
 
     return user_data;
 }
+
+String User::user_id_from_json(String data_json_string)
+{
+    json user_data_json = json::parse(data_json_string);
+
+    if(user_data_json.is_null())
+    {
+        return "";
+    }
+
+    ChatUserData user_data;
+
+    if(user_data_json.contains("id") )
+    {
+        return user_data_json["id"];
+    }
+
+    return "";
+}
+
 String User::user_data_to_json(String in_user_id, ChatUserData in_user_data)
 {
     json user_data_json;

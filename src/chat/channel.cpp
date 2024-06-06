@@ -30,6 +30,9 @@ Channel::Channel(Chat& InChat, String in_channel_id, ChatChannelData in_addition
 Channel::Channel(Chat& InChat, String in_channel_id, String channel_data_json) :
     Channel(InChat, in_channel_id, channel_data_from_json(channel_data_json)) {}
 
+Channel::Channel(Pubnub::Chat& InChat, String channel_data_json) :
+    Channel(InChat, channel_id_from_json(channel_data_json), channel_data_from_json(channel_data_json)) {}
+
 void Channel::update(ChatChannelData in_additional_channel_data)
 {
     // TODO: transactional update
@@ -250,6 +253,23 @@ ChatChannelData Channel::channel_data_from_json(String data_json_string)
     }
 
     return channel_data;
+}
+
+String Channel::channel_id_from_json(String data_json_string)
+{
+    json channel_data_json = json::parse(data_json_string);;
+
+    if(channel_data_json.is_null())
+    {
+        return "";
+    }
+
+    if(channel_data_json.contains("id") )
+    {
+        return channel_data_json["id"];
+    }
+
+    return "";
 }
 
 String Channel::channel_data_to_json(String in_channel_id, ChatChannelData in_channel_data)

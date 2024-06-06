@@ -31,6 +31,8 @@ namespace Pubnub
     public:
         PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_id, ChatUserData additional_user_data);
         PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_id, Pubnub::String user_data_json);
+        //From channel member json
+        PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_data_json);
 
         PN_CHAT_EXPORT void update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
@@ -40,6 +42,7 @@ namespace Pubnub
         PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
 
         ChatUserData user_data_from_json(Pubnub::String data_json_string);
+        Pubnub::String user_id_from_json(Pubnub::String data_json_string);
         Pubnub::String user_data_to_json(Pubnub::String in_user_id, ChatUserData in_user_data);
 
     private:

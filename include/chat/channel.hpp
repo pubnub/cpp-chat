@@ -40,6 +40,8 @@ namespace Pubnub
 
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
+        //From user membership Json
+        PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String channel_data_json);
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
@@ -62,7 +64,9 @@ namespace Pubnub
 
 
         ChatChannelData channel_data_from_json(Pubnub::String json_string);
+        Pubnub::String channel_id_from_json(Pubnub::String json_string);
         Pubnub::String channel_data_to_json(Pubnub::String in_channel_id, ChatChannelData in_channel_data);
+
         
         PN_CHAT_EXPORT void test_callback(std::function<void(Pubnub::Message)> message_callback);
     
