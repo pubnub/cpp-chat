@@ -27,7 +27,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update_dirty(
         char* channel_status,
         char* channel_type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_connect(Pubnub::Channel* channel);
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_connect(
+        Pubnub::Channel* channel,
+        CallbackStringFunction callback);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_disconnect(Pubnub::Channel* channel);
 

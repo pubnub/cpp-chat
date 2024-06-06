@@ -1,4 +1,6 @@
 #include "c_functions/c_channel.hpp"
+#include "callbacks.hpp"
+#include "chat/message.hpp"
 
 void pn_channel_delete(Pubnub::Channel* channel) {
     delete channel;
@@ -45,9 +47,8 @@ void pn_channel_update_dirty(
     return channel->update(converted_data);
 }
 
-void pn_channel_connect(Pubnub::Channel* channel) {
-    // TODO: add real callback
-    channel->connect([](const char*){});
+void pn_channel_connect(Pubnub::Channel* channel, CallbackStringFunction callback) {
+    channel->connect(callback);
 }
 
 void pn_channel_disconnect(Pubnub::Channel* channel) {
