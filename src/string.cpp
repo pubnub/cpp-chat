@@ -1,4 +1,5 @@
 #include "string.hpp"
+#include <iostream>
 #include <string>
 
 using namespace Pubnub;
@@ -14,7 +15,7 @@ String::~String() {
     }
 }
 
-String::String(const char* string) {
+String::String(const char* string, std::size_t lenght) {
     if(string == nullptr) {
         this->string = nullptr;
         this->len = 0;
@@ -23,7 +24,6 @@ String::String(const char* string) {
         return;
     }
 
-    auto lenght = strlen(string);
     this->string = new char[lenght + 1];
     memcpy(this->string, string, lenght);
     this->string[lenght] = '\0';
@@ -31,6 +31,9 @@ String::String(const char* string) {
     this->len = lenght;
     this->cap = lenght;
 }
+
+String::String(const char* string):
+    String(string, strlen(string)) {}
 
 String::String(char* string):
     String(static_cast<const char*> (string)) {}
@@ -379,6 +382,8 @@ String operator+(const String& lhs, const String& rhs) {
 }
 
 bool operator==(const String& lhs, const String& rhs) {
+    std::cout << "Comparing: " << lhs.c_str() << " and " << rhs.c_str() << std::endl;
+    std::cout << "result: " << strcmp(lhs.c_str(), rhs.c_str()) << std::endl;
     return strcmp(lhs.c_str(), rhs.c_str()) == 0;
 }
 

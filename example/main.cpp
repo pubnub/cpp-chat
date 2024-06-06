@@ -1,9 +1,10 @@
 #include "chat.hpp"
 #include "chat/message.hpp"
+#include <iostream>
 
 int main() {
-    std::string pub_key = "demo";
-    std::string sub_key = "demo";
+    std::string pub_key = "pub-c-2451c2cf-9f04-446b-8f85-e06564095e55";
+    std::string sub_key = "sub-c-d16ff59f-b415-4ef9-8c29-ddda64fa2b43";
     std::string user = "hehehe";
 
     Pubnub::Chat chat(pub_key, sub_key, user);
@@ -17,7 +18,11 @@ int main() {
     channel_data.custom_data_json = "{}";
 
     Pubnub::Channel channel = chat.create_public_conversation("iksdeedski", channel_data );
-//    channel.join("");
+    channel.connect([](Pubnub::Message message) {
+        std::cout << message.get_message_data().text << std::endl;
+    });
     channel.send_text("ARE YOU HEARING ME YOU BASTARDS?", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
+
+    std::this_thread::sleep_for(std::chrono::seconds(30));
 }
 

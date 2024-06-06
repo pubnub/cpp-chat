@@ -48,6 +48,15 @@ namespace Pubnub {
         PN_CHAT_EXPORT String(char* string);
 
         /**
+         * Constructor that initializes the string with a const char* string 
+         * and the length of the string.
+         *
+         * @param string The const char* string to initialize the String with.
+         * @param length The length of the string.
+         */
+        PN_CHAT_EXPORT String(const char* string, std::size_t length);
+
+        /**
          * Constructor that initializes the string with a std::string.
          * 
          * @param string The std::string to initialize the String with.
@@ -563,6 +572,14 @@ namespace Pubnub {
         char* string = nullptr;
         unsigned int len = 0;
         unsigned int cap = 0;
+    };
+
+    struct StringComparer
+    {
+        bool operator()(const String& lhs, const String& rhs) const
+        {
+            return lhs == rhs;
+        }
     };
 }
 

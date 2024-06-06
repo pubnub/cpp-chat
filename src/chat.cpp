@@ -303,11 +303,7 @@ void Chat::subscribe_to_channel(String channel_id)
 
 void Chat::unsubscribe_from_channel(String channel_id)
 {
-    auto messages = this->pubnub.unsubscribe_from_channel_and_get_last_messages(channel_id);
-    for(auto message : messages)
-    {
-        // TODO: callbacks
-    }
+    this->pubnub.unsubscribe_from_channel(channel_id);
 }
 
 Channel Chat::create_channel(String channel_id, ChatChannelData channel_data)
