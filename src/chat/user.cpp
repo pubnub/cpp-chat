@@ -150,7 +150,7 @@ String User::user_id_from_json(String data_json_string)
 
     if(user_data_json.contains("id") )
     {
-        return user_data_json["id"];
+        return user_data_json["id"].dump();
     }
 
     return "";

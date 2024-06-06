@@ -42,8 +42,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_delete_channel(Pubnub::Channel* ch
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_set_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
-        bool ban_user,
-        bool mute_user,
+        bool ban,
+        bool mute,
         const char* reason);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_send_text(

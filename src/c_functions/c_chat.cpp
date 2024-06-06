@@ -72,10 +72,15 @@ void pn_chat_set_restrictions(
         Pubnub::Chat* chat,
         const char* user_id,
         const char* channel_id,
-        bool ban_user, 
-        bool mute_user,
+        bool ban, 
+        bool mute,
         const char* reason) {
-    chat->set_restrictions(user_id, channel_id, ban_user, mute_user, reason);
+    Pubnub::PubnubRestrictionsData restrictions;
+    restrictions.ban = ban;
+    restrictions.mute= mute;
+    restrictions.reason = reason;
+
+    chat->set_restrictions(user_id, channel_id, restrictions);
 }
 
 Pubnub::User* pn_chat_create_user_dirty(

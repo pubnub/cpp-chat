@@ -1,5 +1,6 @@
 #include "c_functions/c_channel.hpp"
 #include "callbacks.hpp"
+#include "chat.hpp"
 #include "chat/message.hpp"
 
 void pn_channel_delete(Pubnub::Channel* channel) {
@@ -71,10 +72,16 @@ void pn_channel_delete_channel(Pubnub::Channel* channel) {
 void pn_channel_set_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
-        bool ban_user,
-        bool mute_user
+        bool ban,
+        bool mute,
+        const char* reason
         ) {
-    channel->set_restrictions(user_id, ban_user, mute_user);
+    Pubnub::PubnubRestrictionsData restrictions;
+    restrictions.ban = ban;
+    restrictions.mute = mute;
+    restrictions.reason = reason;
+
+    channel->set_restrictions(user_id, restrictions);
 }
 
 void pn_channel_send_text(

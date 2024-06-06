@@ -292,7 +292,7 @@ String Channel::channel_id_from_json(String data_json_string)
 
     if(channel_data_json.contains("id") )
     {
-        return channel_data_json["id"];
+        return channel_data_json["id"].dump();
     }
 
     return "";
