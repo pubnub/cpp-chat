@@ -21,7 +21,7 @@ int main() {
     channel.connect([](Pubnub::Message message) {
         std::cout << message.get_message_data().text << std::endl;
     });
-    channel.send_text("ARE YOU HEARING ME YOU BASTARDS?", pubnub_chat_message_type::PCMT_TEXT, "");
+    channel.send_text("ARE YOU HEARING ME YOU BASTARDS?", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
 
     std::this_thread::sleep_for(std::chrono::seconds(30));
 }

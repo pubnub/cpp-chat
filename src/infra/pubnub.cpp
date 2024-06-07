@@ -493,7 +493,7 @@ Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
             chat_obj,
             to_pn_string(pn_message.tt),
             Pubnub::ChatMessageData{
-                pubnub_chat_message_type::PCMT_TEXT,
+                Pubnub::pubnub_chat_message_type::PCMT_TEXT,
                 to_pn_string(pn_message.payload),
                 to_pn_string(pn_message.channel),
                 to_pn_string(pn_message.publisher),

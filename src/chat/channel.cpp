@@ -337,7 +337,7 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 {
     json message_json;
 	
-	message_json["type"] = chat_message_type_to_string(message_type).c_str();
+	message_json["type"] = Pubnub::chat_message_type_to_string(message_type).c_str();
     message_json["text"] = message.c_str();
 
 	//Convert constructed Json to FString

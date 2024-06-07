@@ -3,6 +3,8 @@
 
 #include "string.hpp"
 
+namespace Pubnub
+{
 enum pubnub_message_action_type : uint8_t
 {
     PMAT_Reaction,
@@ -58,6 +60,7 @@ static inline Pubnub::String chat_message_type_to_string(pubnub_chat_message_typ
         return "text";
     }
     return "incorrect_chat_message_type";
+}
 }
 
 #endif // PN_ENUMS_HPP

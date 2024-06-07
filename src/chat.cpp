@@ -328,7 +328,7 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channe
 	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
 	payload_parameters.erase(payload_parameters.length() - 1);
-	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + chat_event_type_to_string(chat_event_type) = String("\"}");
+	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + Pubnub::chat_event_type_to_string(chat_event_type) = String("\"}");
 
     this->pubnub.publish(channel_id, event_message);
 }
