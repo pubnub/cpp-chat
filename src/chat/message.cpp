@@ -7,13 +7,14 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-Message::Message(String in_timetoken, ChatMessageData in_message_data)
-{
-    timetoken = in_timetoken;
-    message_data = in_message_data;
-}
+Message::Message(Pubnub::Chat& in_chat, String in_timetoken, ChatMessageData in_message_data) :
+    chat_obj(in_chat),
+    timetoken(in_timetoken),
+    message_data(in_message_data)
+{}
 
-Message::Message(String in_channel_id, Pubnub::String in_message_data_json)
+Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_message_data_json) :
+    chat_obj(in_chat)
 {
     json message_data_json = json::parse(in_message_data_json);;
 
@@ -47,8 +48,14 @@ Message::Message(String in_channel_id, Pubnub::String in_message_data_json)
     }
 }
 
+Message Message::edit_text(Pubnub::String new_text)
+{
+    return *this;
+}
+
 String Message::to_string() {
-    return String("test");
+    //TODO: full conversion from message to json string
+    return message_data.text;
 }
 
 Pubnub::String Message::get_timetoken()

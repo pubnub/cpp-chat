@@ -15,7 +15,8 @@ extern "C" {
 #include <pubnub_fetch_history.h>
 }
 
-PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
+PubNub::PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
+    chat_obj(in_chat),
     publish_key(publish_key),
     subscribe_key(subscribe_key),
     user_id(secret_key),
@@ -489,6 +490,7 @@ Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
     };
 
     return Pubnub::Message(
+            chat_obj,
             to_pn_string(pn_message.tt),
             Pubnub::ChatMessageData{
                 Pubnub::pubnub_chat_message_type::PCMT_TEXT,

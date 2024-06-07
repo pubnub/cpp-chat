@@ -152,7 +152,7 @@ std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub
 
     for (auto& element : messages_array_json)
     {
-        Message message_obj(channel_id, element.dump());
+        Message message_obj(chat_obj, channel_id, element.dump());
         messages.push_back(message_obj);
     }
 

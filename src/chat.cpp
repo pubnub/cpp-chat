@@ -11,7 +11,7 @@ using namespace Pubnub;
 using json = nlohmann::json;
 
 Chat::Chat(const String publish_key, const String subscribe_key, const String user_id) : 
-    pubnub(publish_key, subscribe_key, user_id) {}
+    pubnub(*this, publish_key, subscribe_key, user_id) {}
 
 void Chat::publish_message(String channel, String message)
 {

@@ -8,6 +8,7 @@
 
 namespace Pubnub
 {
+    class Chat;
     enum pubnub_chat_message_type : uint8_t
     {
         PCMT_TEXT
@@ -29,10 +30,11 @@ namespace Pubnub
     PN_CHAT_EXPORT class Message
     {
         public:
-        PN_CHAT_EXPORT Message(Pubnub::String in_timetoken, ChatMessageData in_message_data);
-        PN_CHAT_EXPORT Message(Pubnub::String in_channel_id, Pubnub::String in_message_data_json);
-
+        PN_CHAT_EXPORT Message(Pubnub::Chat& in_chat, Pubnub::String in_timetoken, ChatMessageData in_message_data);
+        PN_CHAT_EXPORT Message(Pubnub::Chat& in_chat, Pubnub::String in_channel_id, Pubnub::String in_message_data_json);
         ~Message() = default;
+
+        PN_CHAT_EXPORT Message edit_text(Pubnub::String new_text);
 
         Pubnub::String to_string();
 
@@ -40,7 +42,7 @@ namespace Pubnub
         PN_CHAT_EXPORT ChatMessageData get_message_data();
 
         private:
-
+        Pubnub::Chat& chat_obj;
         Pubnub::String timetoken;
         ChatMessageData message_data;
     };

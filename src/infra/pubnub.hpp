@@ -20,7 +20,7 @@ extern "C" {
 // TODO: format file
 class PubNub {
 public:
-    PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
+    PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
     ~PubNub(){
         // TODO: synchronization might fail because of lack of any mutexes
         this->should_stop = true;
@@ -60,11 +60,12 @@ private:
     bool is_subscribed_to_channel(const Pubnub::String channel);
     void cancel_previous_subscription();
     void call_subscribe();
-    static Pubnub::Message pubnub_to_chat_message(pubnub_v2_message pn_message);
+    Pubnub::Message pubnub_to_chat_message(pubnub_v2_message pn_message);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
     Pubnub::String user_id;
+    Pubnub::Chat& chat_obj;
 
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> main_context;
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
