@@ -32,6 +32,7 @@ namespace Pubnub
         ~Message() = default;
 
         PN_CHAT_EXPORT Message edit_text(Pubnub::String new_text);
+        PN_CHAT_EXPORT Message delete_message();
 
         Pubnub::String to_string();
 

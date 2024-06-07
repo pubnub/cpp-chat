@@ -13,6 +13,7 @@ extern "C" {
 #include <pubnub_api_types.h>
 #include <pubnub_subscribe_v2.h>
 #include <pubnub_fetch_history.h>
+#include <pubnub_actions_api.h>
 }
 
 PubNub::PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
@@ -394,6 +395,16 @@ Pubnub::String PubNub::fetch_history(
     options.include_meta = true;
 
     auto result = pubnub_fetch_history(this->main_context.get(), channel, options);
+
+    this->await_and_handle_error(result);
+
+    return pubnub_get(this->main_context.get());
+}
+
+Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::pubnub_message_action_type message_action_type, const Pubnub::String value)
+{
+    pubnub_action_type action_type = static_cast<pubnub_action_type>(message_action_type);
+    auto result = pubnub_add_message_action(this->main_context.get(), channel, message_time_token, action_type, value);
 
     this->await_and_handle_error(result);
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "chat/message.hpp"
+#include "chat.hpp"
 #include "nlohmann/json.hpp"
 #include "string.hpp"
 
@@ -50,6 +51,22 @@ Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_
 
 Message Message::edit_text(Pubnub::String new_text)
 {
+    if(new_text.empty())
+    {
+        throw std::invalid_argument("Failed to edit text, new_text is empty");
+    }
+
+    String action_data = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, pubnub_message_action_type::PMAT_Edited, new_text);
+    message_data.text = new_text;
+    message_data.message_actions.push_back(action_data);
+    return *this;
+}
+
+Message Message::delete_message()
+{
+    String deleted_value = "\"deleted\"";
+    String action_data = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, pubnub_message_action_type::PMAT_Deleted, deleted_value);
+    message_data.message_actions.push_back(action_data);
     return *this;
 }
 
