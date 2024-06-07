@@ -21,7 +21,11 @@ extern "C" {
 class PubNub {
 public:
     PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
-    ~PubNub();
+    ~PubNub(){
+        // TODO: synchronization might fail because of lack of any mutexes
+        this->should_stop = true;
+        this->message_thread.join();
+    };
 
     void publish(const Pubnub::String channel, const Pubnub::String message);
     void subscribe_to_channel(const Pubnub::String channel);

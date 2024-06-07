@@ -39,13 +39,6 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     });
 }
 
-PubNub::~PubNub()
-{
-    // TODO: synchronization might fail because of lack of any mutexes
-    this->should_stop = true;
-    this->message_thread.join();
-}
-
 void PubNub::publish(const Pubnub::String channel, const Pubnub::String message)
 {
     auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
