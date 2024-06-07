@@ -67,7 +67,7 @@ char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
 }
 
 
-char* pn_channel_connect(Pubnub::Channel* channel, CallbackStringFunction callback) {
+char* pn_channel_connect(Pubnub::Channel* channel) {
     auto messages = channel->connect_and_get_messages();
 
     return jsonize_messages2(messages);
