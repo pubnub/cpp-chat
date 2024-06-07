@@ -302,9 +302,19 @@ void Chat::subscribe_to_channel(String channel_id)
     this->pubnub.subscribe_to_channel(channel_id);
 }
 
+std::vector<Message> Chat::subscribe_to_channel_and_get_last_messages(String channel_id)
+{
+    return this->pubnub.subscribe_to_channel_and_get_messages(channel_id);
+}
+
 void Chat::unsubscribe_from_channel(String channel_id)
 {
     this->pubnub.unsubscribe_from_channel(channel_id);
+}
+
+std::vector<Message> Chat::unsubscribe_from_channel_and_get_last_messages(String channel_id)
+{
+    return this->pubnub.subscribe_to_channel_and_get_messages(channel_id);
 }
 
 Channel Chat::create_channel(String channel_id, ChatChannelData channel_data)

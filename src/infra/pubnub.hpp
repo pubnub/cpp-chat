@@ -25,14 +25,19 @@ public:
     ~PubNub(){
         // TODO: synchronization might fail because of lack of any mutexes
         this->should_stop = true;
-        this->message_thread.join();
+        if (this->message_thread.joinable()) {
+            this->message_thread.join();
+        }
     };
 
     void publish(const Pubnub::String channel, const Pubnub::String message);
     void subscribe_to_channel(const Pubnub::String channel);
+    std::vector<Pubnub::Message> subscribe_to_channel_and_get_messages(const Pubnub::String channel);
     void resolve_messages();
-    void pause_subscription_and_resolve_messages();
+    std::vector<Pubnub::Message> fetch_messages();
+    std::vector<Pubnub::Message> pause_subscription_and_get_messages();
     void unsubscribe_from_channel(Pubnub::String channel);
+    std::vector<Pubnub::Message> unsubscribe_from_channel_and_get_messages(Pubnub::String channel);
     void resume_subscription();
     void set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata);
     void remove_channel_metadata(const Pubnub::String channel);
@@ -56,6 +61,9 @@ public:
 
     void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
     void remove_message_callback(Pubnub::String channel_id);
+
+    // TODO: not the greatest way but just for mvp...
+    void stop_resolving_callbacks();
 
 private:
     void await_and_handle_error(pubnub_res result);

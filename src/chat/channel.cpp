@@ -59,6 +59,11 @@ void Channel::connect(CallbackStringFunction string_callback)
     this->connect(callback);
 }
 
+std::vector<Message> Channel::connect_and_get_messages()
+{
+    return this->chat_obj.subscribe_to_channel_and_get_last_messages(this->channel_id);
+}
+
 void Channel::disconnect()
 {
     this->chat_obj.unsubscribe_from_channel(channel_id);

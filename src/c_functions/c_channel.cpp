@@ -48,8 +48,27 @@ void pn_channel_update_dirty(
     return channel->update(converted_data);
 }
 
-void pn_channel_connect(Pubnub::Channel* channel, CallbackStringFunction callback) {
-    channel->connect(callback);
+// TODO: dont copy code
+char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
+    Pubnub::String result = "[";
+    for (auto message : messages) {
+        result += message.to_string();
+    }   
+
+    result += "]";
+    
+    char* c_result = new char[result.length() + 1];
+
+    memcpy(c_result, result.c_str(), result.length() + 1);
+
+    return c_result;
+}
+
+
+char* pn_channel_connect(Pubnub::Channel* channel, CallbackStringFunction callback) {
+    auto messages = channel->connect_and_get_messages();
+
+    return jsonize_messages2(messages);
 }
 
 void pn_channel_disconnect(Pubnub::Channel* channel) {

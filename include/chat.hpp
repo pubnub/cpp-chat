@@ -75,7 +75,9 @@ namespace Pubnub
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
         void subscribe_to_channel(Pubnub::String channel_id);
+        std::vector<Pubnub::Message> subscribe_to_channel_and_get_last_messages(Pubnub::String channel_id);
         void unsubscribe_from_channel(Pubnub::String channel_id);
+        std::vector<Pubnub::Message> unsubscribe_from_channel_and_get_last_messages(Pubnub::String channel_id);
 
         const Pubnub::String internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
         const Pubnub::String internal_admin_channel = "PUBNUB_INTERNAL_ADMIN_CHANNEL";

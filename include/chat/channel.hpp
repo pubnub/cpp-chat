@@ -47,6 +47,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
         PN_CHAT_EXPORT void connect(CallbackStringFunction string_callback);
+        PN_CHAT_EXPORT std::vector<Pubnub::Message> connect_and_get_messages();
         PN_CHAT_EXPORT void disconnect();
         PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, Pubnub::String additional_params = "");
         PN_CHAT_EXPORT void join(CallbackStringFunction string_callback, Pubnub::String additional_params = "");
