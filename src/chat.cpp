@@ -2,6 +2,7 @@
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
 
+
 extern "C" {
 #include "core/pubnub_objects_api.h"
 #include "core/pubnub_objects_api.h"
@@ -327,29 +328,7 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channe
 	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
 	payload_parameters.erase(payload_parameters.length() - 1);
-	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + get_string_from_event_type(chat_event_type) = String("\"}");
+	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + chat_event_type_to_string(chat_event_type) = String("\"}");
 
     this->pubnub.publish(channel_id, event_message);
-}
-
-String Chat::get_string_from_event_type(pubnub_chat_event_type chat_event_type)
-{
-    switch(chat_event_type)
-	{
-	case pubnub_chat_event_type::PCET_TYPING:
-		return "typing";
-	case pubnub_chat_event_type::PCET_REPORT:
-		return "report";
-	case pubnub_chat_event_type::PCET_RECEPIT:
-		return "receipt";
-	case pubnub_chat_event_type::PCET_MENTION:
-		return "mention";
-	case pubnub_chat_event_type::PCET_INVITE:
-		return "invite";
-	case pubnub_chat_event_type::PCET_CUSTOM:
-		return "custom";
-	case pubnub_chat_event_type::PCET_MODERATION:
-		return "moderation";
-	}
-	return "custom";
 }

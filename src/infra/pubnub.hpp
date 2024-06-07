@@ -52,6 +52,7 @@ public:
     Pubnub::String get_user_id();
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
 
+
     void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
     void remove_message_callback(Pubnub::String channel_id);
 

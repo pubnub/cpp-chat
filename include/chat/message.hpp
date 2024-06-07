@@ -3,16 +3,13 @@
 
 #include <string>
 #include <vector>
+#include "enums.hpp"
 #include "string.hpp"
 #include "export.hpp"
 
 namespace Pubnub
 {
     class Chat;
-    enum pubnub_chat_message_type : uint8_t
-    {
-        PCMT_TEXT
-    };
 
     struct ChatMessageData
     {

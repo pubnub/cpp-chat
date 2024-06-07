@@ -7,6 +7,7 @@
 
 #include "string.hpp"
 #include "export.hpp"
+#include "enums.hpp"
 #include "chat/user.hpp"
 #include "chat/channel.hpp"
 #include "chat/message.hpp"
@@ -21,17 +22,6 @@ class PubNub;
 
 namespace Pubnub
 {
-    enum pubnub_chat_event_type : uint8_t
-    {
-        PCET_TYPING,
-        PCET_REPORT,
-        PCET_RECEPIT,
-        PCET_MENTION,
-        PCET_INVITE,
-        PCET_CUSTOM,
-        PCET_MODERATION
-    };
-
     struct PubnubRestrictionsData
     {
         bool ban;
@@ -100,7 +90,6 @@ namespace Pubnub
         /* HELPERS */
 
         Chat(PubNub pubnub);
-        Pubnub::String get_string_from_event_type(pubnub_chat_event_type chat_event_type);
         inline Pubnub::String const bool_to_string(bool b)
         {
             return b ? "true" : "false";

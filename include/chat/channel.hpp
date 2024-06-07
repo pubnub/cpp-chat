@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "export.hpp"
+#include "enums.hpp"
 #include "infra/pubnub.hpp"
 #include "chat.hpp"
 #include "string.hpp"
@@ -20,7 +21,6 @@ namespace Pubnub
     class Message;
     class Membership;
     struct PubnubRestrictionsData;
-    enum pubnub_chat_message_type : uint8_t;
 
     struct ChatChannelData
     {

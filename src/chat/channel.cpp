@@ -337,17 +337,8 @@ String Channel::chat_message_to_publish_string(String message, pubnub_chat_messa
 {
     json message_json;
 	
-	String message_type_string;
-    //For now there is only one type, but we might want to add more types in the future
-	switch (message_type)
-	{
-	case pubnub_chat_message_type::PCMT_TEXT:
-		message_type_string = "text";
-		break;
-	}
-	message_json["type"] = message_type_string.c_str();
+	message_json["type"] = chat_message_type_to_string(message_type).c_str();
     message_json["text"] = message.c_str();
-
 
 	//Convert constructed Json to FString
 	return message_json.dump();
