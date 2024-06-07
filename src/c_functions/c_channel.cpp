@@ -53,8 +53,10 @@ char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
     Pubnub::String result = "[";
     for (auto message : messages) {
         result += message.to_string();
+        result += ",";
     }   
 
+    result.erase(result.length() - 1);
     result += "]";
     
     char* c_result = new char[result.length() + 1];
