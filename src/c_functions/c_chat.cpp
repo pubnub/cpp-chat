@@ -148,7 +148,11 @@ void pn_chat_delete_user(
     chat->delete_user(user_id);
 }
 
-char* jsonize_messages(std::vector<Pubnub::Message> messages) {
+const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
+    if (messages.empty()) {
+        return "[]";
+    }
+
     Pubnub::String result = "[";
     for (auto message : messages) {
         result += message.to_string();
@@ -165,7 +169,7 @@ char* jsonize_messages(std::vector<Pubnub::Message> messages) {
     return c_result;
 }
 
-char* pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id) {
+const char* pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id) {
     auto messages = chat->get_pubnub_context().fetch_messages();
 
     return jsonize_messages(messages);

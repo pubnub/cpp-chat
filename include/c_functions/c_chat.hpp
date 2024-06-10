@@ -91,7 +91,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete_user(
         const char* user_id);
 
 // Hacky way to get the messages
-PN_CHAT_EXTERN PN_CHAT_EXPORT char* pn_chat_get_messages(
+PN_CHAT_EXTERN PN_CHAT_EXPORT const char* pn_chat_get_messages(
         Pubnub::Chat* chat,
         const char* channel_id);
 

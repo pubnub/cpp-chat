@@ -568,6 +568,7 @@ namespace Pubnub {
     private:
         std::size_t calculate_capacity(std::size_t size) const;
         void grow_if_needed(std::size_t size);
+        void init(const char* string, std::size_t length);
 
         char* string = nullptr;
         unsigned int len = 0;

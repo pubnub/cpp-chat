@@ -24,25 +24,20 @@ String::String(const char* string, std::size_t lenght) {
         return;
     }
 
-    this->string = new char[lenght + 1];
-    memcpy(this->string, string, lenght);
-    this->string[lenght] = '\0';
-
-    this->len = lenght;
-    this->cap = lenght;
+    init(string, lenght);
 }
 
-String::String(const char* string)
-    {
-        if(string == nullptr) {
+String::String(const char* string) {
+    if (string == nullptr) {
         this->string = nullptr;
         this->len = 0;
         this->cap = 0;
 
         return;
-        }
-    String(string, strlen(string));
     }
+
+    init(string, strlen(string));
+}
 
 String::String(char* string):
     String(static_cast<const char*> (string)) {}
@@ -370,6 +365,15 @@ void String::reserve(std::size_t new_cap) {
     } else {
         this->shrink();
     }
+}
+
+void String::init(const char* string, std::size_t lenght) {
+    this->string = new char[lenght + 1];
+    memcpy(this->string, string, lenght);
+    this->string[lenght] = '\0';
+
+    this->len = lenght;
+    this->cap = lenght;
 }
 
 std::size_t String::calculate_capacity(std::size_t len) const {

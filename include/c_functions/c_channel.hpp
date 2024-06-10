@@ -50,5 +50,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_send_text(
         Pubnub::pubnub_chat_message_type type,
         const char* metadata);
 
+
 #endif // PN_CHAT_C_CHANNEL_H
 

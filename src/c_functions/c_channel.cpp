@@ -50,6 +50,10 @@ void pn_channel_update_dirty(
 
 // TODO: dont copy code
 char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
+    if (messages.size() == 0) {
+        return "[]";
+    }
+    
     Pubnub::String result = "[";
     for (auto message : messages) {
         result += message.to_string();
