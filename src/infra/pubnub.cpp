@@ -447,7 +447,14 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
 
     this->await_and_handle_error(result);
 
-    return pubnub_get(this->main_context.get());
+    pubnub_chamebl_t add_action_response = pubnub_get_message_action_timetoken(this->main_context.get());
+    
+    if(!add_action_response.ptr)
+    {
+        return "";
+    }
+
+    return Pubnub::String(add_action_response.ptr);
 }
 
 void PubNub::register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback)

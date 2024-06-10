@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "enums.hpp"
 #include "string.hpp"
 #include "export.hpp"
@@ -20,7 +21,8 @@ namespace Pubnub
         Pubnub::String user_id;
         //meta doesn't work for now, because we don't get this info from pubnub_fetch_history
         Pubnub::String meta;
-        std::vector<Pubnub::String> message_actions;
+        //key - message action type, value - message action data in json format
+        std::map<Pubnub::String, Pubnub::String> message_actions;
     };
 
 
@@ -32,7 +34,10 @@ namespace Pubnub
         ~Message() = default;
 
         PN_CHAT_EXPORT Message edit_text(Pubnub::String new_text);
+        //TODO: I think this method should be called "get_text" - discuss it
+        PN_CHAT_EXPORT Pubnub::String text();
         PN_CHAT_EXPORT Message delete_message();
+        PN_CHAT_EXPORT bool deleted();
 
         Pubnub::String to_string();
 
@@ -43,6 +48,8 @@ namespace Pubnub
         Pubnub::Chat& chat_obj;
         Pubnub::String timetoken;
         ChatMessageData message_data;
+
+        void add_message_action_to_message_data(Pubnub::String action_timetoken, pubnub_message_action_type action_type, Pubnub::String value);
     };
 }
 #endif /* MESSAGE_H */

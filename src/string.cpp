@@ -32,8 +32,17 @@ String::String(const char* string, std::size_t lenght) {
     this->cap = lenght;
 }
 
-String::String(const char* string):
-    String(string, strlen(string)) {}
+String::String(const char* string)
+    {
+        if(string == nullptr) {
+        this->string = nullptr;
+        this->len = 0;
+        this->cap = 0;
+
+        return;
+        }
+    String(string, strlen(string));
+    }
 
 String::String(char* string):
     String(static_cast<const char*> (string)) {}

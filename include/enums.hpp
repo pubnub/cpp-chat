@@ -30,6 +30,24 @@ enum pubnub_chat_message_type : uint8_t
     PCMT_TEXT
 };
 
+static inline Pubnub::String message_action_type_to_string(pubnub_message_action_type message_action_type)
+{
+    switch(message_action_type)
+	{
+	case pubnub_message_action_type::PMAT_Reaction:
+		return "reaction";
+	case pubnub_message_action_type::PMAT_Receipt:
+		return "report";
+	case pubnub_message_action_type::PMAT_Custom:
+		return "custom";
+	case pubnub_message_action_type::PMAT_Edited:
+		return "edited";
+	case pubnub_message_action_type::PMAT_Deleted:
+		return "deleted";
+	}
+	return "incorrect_chat_event_type";
+};
+
 static inline Pubnub::String chat_event_type_to_string(pubnub_chat_event_type chat_event_type)
 {
     switch(chat_event_type)
@@ -61,6 +79,14 @@ static inline Pubnub::String chat_message_type_to_string(pubnub_chat_message_typ
     }
     return "incorrect_chat_message_type";
 }
+
+static inline pubnub_chat_message_type chat_message_type_from_string(Pubnub::String chat_message_type_string)
+{
+	if(chat_message_type_string == Pubnub::String("text")) return pubnub_chat_message_type::PCMT_TEXT;
+
+	throw std::invalid_argument("can't convert chat_message_type_string to pubnub_chat_message_type");
+}
+
 }
 
 #endif // PN_ENUMS_HPP
