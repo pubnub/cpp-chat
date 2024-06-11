@@ -10,7 +10,7 @@ typedef int PnCResult;
 #define PN_C_ERROR -1
 #define PN_C_ERROR_PTR nullptr
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_c_set_error_ptr(const char* ptr);
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_c_set_error_ptr(char* ptr);
 
 void pn_c_set_error_message(const char* message); 
 
