@@ -61,8 +61,10 @@ void Channel::connect(CallbackStringFunction string_callback)
     this->connect(callback);
 }
 
-std::vector<Message> Channel::connect_and_get_messages()
+std::vector<String> Channel::connect_and_get_messages()
 {
+    //TODO: this function in current state will return all published messages, not only those that we
+    //consider to be chat sdk messages, but also technical ones.
     return this->chat_obj.subscribe_to_channel_and_get_last_messages(this->channel_id);
 }
 
@@ -257,7 +259,7 @@ void Channel::stream_updates_on(std::vector<Pubnub::Channel> channels, std::func
 
     for(auto channel : channels)
     {
-        //chat_obj.get_pubnub_context().register_channel_callback(channel.channel_id, channel_callback);
+        chat_obj.get_pubnub_context().register_channel_callback(channel.channel_id, channel_callback);
         chat_obj.get_pubnub_context().subscribe_to_channel(channel.channel_id);
     }
 }

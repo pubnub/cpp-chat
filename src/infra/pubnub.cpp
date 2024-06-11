@@ -54,21 +54,19 @@ void PubNub::subscribe_to_channel(const Pubnub::String channel)
 {
     auto messages = this->subscribe_to_channel_and_get_messages(channel);
 
-    for (Pubnub::Message& message : messages) {
-        auto channel = message.get_message_data().channel_id;
-        if (this->message_callbacks_map.find(channel) != this->message_callbacks_map.end()) {
-            this->message_callbacks_map[channel](message);
-        }
+    for (pubnub_v2_message& message : messages)
+    {
+        broadcast_callbacks_from_message(message);
     }
 }
 
-std::vector<Pubnub::Message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
+std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
     if (this->is_subscribed_to_channel(channel)) {
         return {};
     }
 
-    std::vector<Pubnub::Message> messages;
+    std::vector<pubnub_v2_message> messages;
 
     if (this->is_subscribed) {
         messages = this->pause_subscription_and_get_messages();
@@ -82,7 +80,20 @@ std::vector<Pubnub::Message> PubNub::subscribe_to_channel_and_get_messages(const
     return messages;
 }
 
-std::vector<Pubnub::Message> PubNub::fetch_messages()
+std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel)
+{
+    std::vector<pubnub_v2_message> pubnub_messages = this->subscribe_to_channel_and_get_messages(channel);
+
+    std::vector<Pubnub::String> messages;
+    for(pubnub_v2_message& message : pubnub_messages)
+    {
+        messages.push_back(this->pubnub_message_to_string(message));
+    }
+
+    return messages;
+}
+
+std::vector<pubnub_v2_message> PubNub::fetch_messages()
 {
     if (!this->is_subscribed) {
         return {};
@@ -103,14 +114,14 @@ std::vector<Pubnub::Message> PubNub::fetch_messages()
         return {};
     }
 
-    std::vector<Pubnub::Message> messages;
+    std::vector<pubnub_v2_message> messages;
     
     for (
             pubnub_v2_message message = pubnub_get_v2(this->long_poll_context.get());
             message.payload.ptr != NULL;
             message = pubnub_get_v2(this->long_poll_context.get())
         ) {
-        messages.push_back(this->pubnub_to_chat_message(message));
+        messages.push_back(message);
    };
     
     this->call_subscribe();
@@ -118,18 +129,29 @@ std::vector<Pubnub::Message> PubNub::fetch_messages()
     return messages;
 }
 
+std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
+{
+    std::vector<pubnub_v2_message> pubnub_messages = this->fetch_messages();
+
+    std::vector<Pubnub::String> messages;
+    for(pubnub_v2_message& message : pubnub_messages)
+    {
+        messages.push_back(this->pubnub_message_to_string(message));
+    }
+
+    return messages;
+}
+
 void PubNub::resolve_messages() {
     auto messages = this->fetch_messages();
 
-    for (Pubnub::Message& message : messages) {
-        auto channel = message.get_message_data().channel_id;
-        if (this->message_callbacks_map.find(channel) != this->message_callbacks_map.end()) {
-            this->message_callbacks_map[channel](message);
-        } 
+    for (pubnub_v2_message& message : messages)
+    {
+        broadcast_callbacks_from_message(message);
     }
 }
 
-std::vector<Pubnub::Message> PubNub::pause_subscription_and_get_messages()
+std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
 {
     if (this->subscribed_channels.empty() || !this->is_subscribed) {
         return {};
@@ -137,14 +159,14 @@ std::vector<Pubnub::Message> PubNub::pause_subscription_and_get_messages()
 
     this->cancel_previous_subscription();
 
-    std::vector<Pubnub::Message> messages;
+    std::vector<pubnub_v2_message> messages;
 
     for (
             pubnub_v2_message message = pubnub_get_v2(this->long_poll_context.get());
             message.payload.ptr != NULL;
             message = pubnub_get_v2(this->long_poll_context.get())
         ) {
-        messages.push_back(this->pubnub_to_chat_message(message));
+        messages.push_back(message);
     };
 
     this->is_subscribed = false;
@@ -156,15 +178,13 @@ void PubNub::unsubscribe_from_channel(Pubnub::String channel)
 {
     auto messages = this->unsubscribe_from_channel_and_get_messages(channel);
 
-    for (Pubnub::Message& message : messages) {
-        auto channel = message.get_message_data().channel_id;
-        if (this->message_callbacks_map.find(channel) != this->message_callbacks_map.end()) {
-            this->message_callbacks_map.erase(channel);
-        }
+    for (pubnub_v2_message& message : messages) 
+    {
+        broadcast_callbacks_from_message(message);
     }
 }
 
-std::vector<Pubnub::Message> PubNub::unsubscribe_from_channel_and_get_messages(Pubnub::String channel) {
+std::vector<pubnub_v2_message> PubNub::unsubscribe_from_channel_and_get_messages(Pubnub::String channel) {
     auto messages = this->pause_subscription_and_get_messages();
     this->subscribed_channels.erase(
             std::remove(
@@ -554,6 +574,18 @@ void PubNub::call_subscribe()
     }
 }
 
+void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
+{
+
+/*
+    for (Pubnub::String& message : messages) {
+        auto channel = message.get_message_data().channel_id;
+        if (this->message_callbacks_map.find(channel) != this->message_callbacks_map.end()) {
+            this->message_callbacks_map[channel](message);
+        } 
+    }*/
+}
+
 Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
 {
     // TODO: implement message parsing properly
@@ -573,4 +605,9 @@ Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
                 {}
             }
         );
+}
+
+Pubnub::String PubNub::pubnub_message_to_string(pubnub_v2_message pn_message)
+{
+    return Pubnub::String(pn_message.payload.ptr, pn_message.payload.size);
 }

@@ -217,7 +217,7 @@ PnCResult pn_chat_delete_user(
     return PN_C_OK;
 }
 
-const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
+const char* jsonize_messages(std::vector<Pubnub::String> messages) {
     if (messages.size() == 0) {
         char* empty_result = new char[3];
         memcpy(empty_result, "[]\0", 3);
@@ -226,7 +226,7 @@ const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
 
     Pubnub::String result = "[";
     for (auto message : messages) {
-        result += message.to_string();
+        result += message;
         result += ",";
     }   
 
@@ -242,7 +242,7 @@ const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
 
 PnCResult pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id, char* messages_json) {
     try {
-        auto messages = chat->get_pubnub_context().fetch_messages();
+        auto messages = chat->get_pubnub_context().fetch_messages_as_strings();
         auto jsonised = jsonize_messages(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;

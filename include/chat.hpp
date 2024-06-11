@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <future>
+#include <functional>
 
 #include "string.hpp"
 #include "export.hpp"
@@ -69,20 +70,25 @@ namespace Pubnub
         PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
         PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
+        /* EVENTS */
+
+        PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
+        //PN_CHAT_EXPORT void listen_for_events(Pubnub::String channel_id, )
+
 
         // TODO: I'm totally sure that we should handle need for pubnub context in a different way
         PubNub& get_pubnub_context(){return this->pubnub;};
 
         //TODO: These functions shouldn't be used by end users. Maybe make them "friend"
         void subscribe_to_channel(Pubnub::String channel_id);
-        std::vector<Pubnub::Message> subscribe_to_channel_and_get_last_messages(Pubnub::String channel_id);
+        std::vector<Pubnub::String> subscribe_to_channel_and_get_last_messages(Pubnub::String channel_id);
         void unsubscribe_from_channel(Pubnub::String channel_id);
-        std::vector<Pubnub::Message> unsubscribe_from_channel_and_get_last_messages(Pubnub::String channel_id);
+        std::vector<Pubnub::String> unsubscribe_from_channel_and_get_last_messages(Pubnub::String channel_id);
 
         const Pubnub::String internal_moderation_prefix = "PUBNUB_INTERNAL_MODERATION_";
         const Pubnub::String internal_admin_channel = "PUBNUB_INTERNAL_ADMIN_CHANNEL";
 
-        void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
+    
 
     private:
         PubNub pubnub;

@@ -33,12 +33,14 @@ public:
 
     void publish(const Pubnub::String channel, const Pubnub::String message);
     void subscribe_to_channel(const Pubnub::String channel);
-    std::vector<Pubnub::Message> subscribe_to_channel_and_get_messages(const Pubnub::String channel);
+    std::vector<pubnub_v2_message> subscribe_to_channel_and_get_messages(const Pubnub::String channel);
+    std::vector<Pubnub::String> subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel);
     void resolve_messages();
-    std::vector<Pubnub::Message> fetch_messages();
-    std::vector<Pubnub::Message> pause_subscription_and_get_messages();
+    std::vector<pubnub_v2_message> fetch_messages();
+    std::vector<Pubnub::String> fetch_messages_as_strings();
+    std::vector<pubnub_v2_message> pause_subscription_and_get_messages();
     void unsubscribe_from_channel(Pubnub::String channel);
-    std::vector<Pubnub::Message> unsubscribe_from_channel_and_get_messages(Pubnub::String channel);
+    std::vector<pubnub_v2_message> unsubscribe_from_channel_and_get_messages(Pubnub::String channel);
     void resume_subscription();
     void set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata);
     void remove_channel_metadata(const Pubnub::String channel);
@@ -74,7 +76,9 @@ private:
     bool is_subscribed_to_channel(const Pubnub::String channel);
     void cancel_previous_subscription();
     void call_subscribe();
+    void broadcast_callbacks_from_message(pubnub_v2_message message);
     Pubnub::Message pubnub_to_chat_message(pubnub_v2_message pn_message);
+    Pubnub::String pubnub_message_to_string(pubnub_v2_message pn_message);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
