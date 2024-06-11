@@ -1,5 +1,5 @@
-#include <iostream>
 #include "chat/message.hpp"
+#include <iostream>
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
 #include "string.hpp"

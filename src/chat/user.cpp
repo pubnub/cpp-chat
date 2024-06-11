@@ -1,8 +1,9 @@
+#include "chat/user.hpp"
 #include <iostream>
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
 
-#include "chat/user.hpp"
+
 #include "chat/membership.hpp"
 
 extern "C" {

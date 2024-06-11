@@ -1,7 +1,8 @@
-#include <stdexcept>
 #include "chat.hpp"
-#include "nlohmann/json.hpp"
+#include <stdexcept>
 
+#include "nlohmann/json.hpp"
+#include "chat/channel.hpp"
 
 extern "C" {
 #include "core/pubnub_objects_api.h"

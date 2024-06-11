@@ -3,10 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include "export.hpp"
 #include "enums.hpp"
 #include "infra/pubnub.hpp"
-#include "chat.hpp"
 #include "string.hpp"
 #include "callbacks.hpp"
 
@@ -43,6 +43,7 @@ namespace Pubnub
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String in_channel_id, Pubnub::String channel_data_json);
         //From user membership Json
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String channel_data_json);
+        ~Channel() = default;
 
         PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
@@ -61,6 +62,10 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Message get_message(Pubnub::String timetoken);
         PN_CHAT_EXPORT Pubnub::PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+
+        PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
+        PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);
+
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
         PN_CHAT_EXPORT ChatChannelData get_channel_data();

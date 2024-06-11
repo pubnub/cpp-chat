@@ -1,5 +1,6 @@
 #include "infra/pubnub.hpp"
 #include "chat/message.hpp"
+#include "chat/channel.hpp"
 #include <thread>
 #include <vector>
 extern "C" {
@@ -466,6 +467,16 @@ void PubNub::remove_message_callback(Pubnub::String channel_id)
 {
     this->message_callbacks_map.erase(channel_id);
 }
+/*
+void PubNub::register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback)
+{
+    this->channel_callbacks_map[channel_id] = channel_callback;
+}
+
+void PubNub::remove_channel_callback(Pubnub::String channel_id)
+{
+    this->channel_callbacks_map.erase(channel_id);
+}*/
 
 void PubNub::stop_resolving_callbacks() {
     this->should_stop = true;

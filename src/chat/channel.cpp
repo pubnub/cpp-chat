@@ -1,3 +1,5 @@
+#include "chat/channel.hpp"
+
 #include <chrono>
 #include <iostream>
 #include <stdexcept>
@@ -14,7 +16,7 @@ extern "C" {
 #include "core/pubnub_fetch_history.h"
 }
 
-#include "chat/channel.hpp"
+
 #include "chat/message.hpp"
 #include "chat/membership.hpp"
 
@@ -237,6 +239,27 @@ std::vector<Pubnub::Membership> Channel::get_members(int limit, Pubnub::String s
     }
 
     return memberships;
+}
+
+void Channel::stream_updates(std::function<void(Channel)> channel_callback)
+{
+    std::vector<Pubnub::Channel> channels;
+    channels.push_back(*this);
+    stream_updates_on(channels, channel_callback);
+}
+
+void Channel::stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback)
+{
+    if(channels.empty())
+    {
+        throw std::invalid_argument("Cannot stream channel updates on an empty list");
+    }
+
+    for(auto channel : channels)
+    {
+        //chat_obj.get_pubnub_context().register_channel_callback(channel.channel_id, channel_callback);
+        chat_obj.get_pubnub_context().subscribe_to_channel(channel.channel_id);
+    }
 }
 
 Pubnub::String Channel::get_channel_id()
