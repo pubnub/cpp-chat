@@ -149,8 +149,10 @@ void pn_chat_delete_user(
 }
 
 const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
-    if (messages.empty()) {
-        return Pubnub::String("[]");
+    if (messages.size() == 0) {
+        char* empty_result = new char[3];
+        memcpy(empty_result, "[]\0", 3);
+        return empty_result;
     }
 
     Pubnub::String result = "[";
