@@ -74,30 +74,30 @@ const char* jsonize_messages2(std::vector<Pubnub::String> messages) {
 }
 
 
-PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
+void pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
     auto messages = channel->connect_and_get_messages();
     auto jsonised = jsonize_messages2(messages);
     strcpy(messages_json, jsonised);
     delete[] jsonised;
 }
 
-PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
+void pn_channel_disconnect(Pubnub::Channel* channel) {
     channel->disconnect();
 }
 
-PnCResult pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
+void pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
     channel->join(callback);
 }
 
-PnCResult pn_channel_leave(Pubnub::Channel* channel) {
+void pn_channel_leave(Pubnub::Channel* channel) {
     channel->leave();
 }
 
-PnCResult pn_channel_delete_channel(Pubnub::Channel* channel) {
+void pn_channel_delete_channel(Pubnub::Channel* channel) {
     channel->delete_channel();
 }
 
-PnCResult pn_channel_set_restrictions(
+void pn_channel_set_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
         bool ban,
@@ -112,7 +112,7 @@ PnCResult pn_channel_set_restrictions(
     channel->set_restrictions(user_id, restrictions);
 }
 
-PnCResult pn_channel_send_text(
+void pn_channel_send_text(
     Pubnub::Channel* channel,
     const char* message,
     Pubnub::pubnub_chat_message_type type,
