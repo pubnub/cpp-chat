@@ -78,6 +78,7 @@ private:
     void call_subscribe();
     void broadcast_callbacks_from_message(pubnub_v2_message message);
     Pubnub::Message pubnub_to_chat_message(pubnub_v2_message pn_message);
+    Pubnub::Channel pubnub_message_to_chat_channel(pubnub_v2_message pn_message);
     Pubnub::String pubnub_message_to_string(pubnub_v2_message pn_message);
 
     Pubnub::String publish_key;

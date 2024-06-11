@@ -592,11 +592,21 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle chat messages
-    if(message_json.contains("text"), message_json.contains("type"))
+    if(message_json.contains("text") && message_json.contains("type"))
     {
         if (this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
         {
             this->message_callbacks_map[message.channel.ptr](pubnub_to_chat_message(message));
+        }
+    }
+    
+    //Handle channel updates
+    if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
+        message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set")
+    {
+        if (this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
+        {
+            this->channel_callbacks_map[message.channel.ptr](pubnub_message_to_chat_channel(message));
         }
     }
 
@@ -621,6 +631,29 @@ Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
                 to_pn_string(pn_message.publisher),
                 to_pn_string(pn_message.metadata),
                 {}
+            }
+        );
+}
+
+Pubnub::Channel PubNub::pubnub_message_to_chat_channel(pubnub_v2_message pn_message)
+{
+    // TODO: implement message parsing properly
+    auto to_pn_string = [](struct pubnub_char_mem_block message) {
+        return Pubnub::String(message.ptr, message.size);
+    };
+
+    json message_json = json::parse(to_pn_string(pn_message.payload));
+
+    return Pubnub::Channel(
+            chat_obj,
+            Pubnub::String(message_json["id"]),
+            Pubnub::ChatChannelData{
+                Pubnub::String(message_json["name"]),
+                Pubnub::String(message_json["description"]),
+                Pubnub::String(message_json["custom"]),
+                Pubnub::String(message_json["updated"]),
+                Pubnub::String(message_json["status"]),
+                Pubnub::String(message_json["type"])
             }
         );
 }

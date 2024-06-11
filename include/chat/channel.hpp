@@ -29,8 +29,6 @@ namespace Pubnub
         Pubnub::String updated;
         Pubnub::String status;
         Pubnub::String type;
-
-        ChatChannelData(){};
     };
 
 
