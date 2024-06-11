@@ -6,7 +6,6 @@
 #include <functional>
 #include "export.hpp"
 #include "enums.hpp"
-#include "infra/pubnub.hpp"
 #include "string.hpp"
 #include "callbacks.hpp"
 
