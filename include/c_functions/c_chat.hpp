@@ -6,6 +6,7 @@
 #include "extern.hpp"
 #include "chat/channel.hpp"
 #include "chat/user.hpp"
+#include "c_functions/c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* publish,
@@ -40,11 +41,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_channel(
 
 // TODO: get channels...
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete_channel(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_delete_channel(
         Pubnub::Chat* chat,
         const char* channel_id);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_set_restrictions(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_set_restrictions(
         Pubnub::Chat* chat,
         const char* user_id,
         const char* channel_id,
@@ -86,12 +87,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_update_user_dirty(
         const char* status,
         const char* type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete_user(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_delete_user(
         Pubnub::Chat* chat,
         const char* user_id);
 
 // Hacky way to get the messages
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_get_messages(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_messages(
         Pubnub::Chat* chat,
         const char* channel_id,
         char* messages_json);

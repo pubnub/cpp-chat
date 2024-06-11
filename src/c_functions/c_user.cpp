@@ -63,7 +63,12 @@ void pn_user_set_restrictions(
         bool ban_user,
         bool mute_user,
         const char* reason) {
-    user->set_restrictions(channel_id, ban_user, mute_user, reason);
+    Pubnub::PubnubRestrictionsData restrictions;
+    restrictions.ban = ban_user;
+    restrictions.mute = mute_user;
+    restrictions.reason = reason;
+
+    user->set_restrictions(channel_id, restrictions);
 }
 
 void pn_user_report(

@@ -1,17 +1,26 @@
 #include "c_functions/c_chat.hpp"
 #include "c_functions/c_channel.hpp"
 #include "chat/channel.hpp"
+#include "c_functions/c_errors.hpp"
 
 Pubnub::Chat* pn_chat_new(
         const char* publish,
         const char* subscribe,
         const char* user_id) {
-    auto chat = new Pubnub::Chat(publish, subscribe, user_id);
 
-    return chat;
+    try {
+        return new Pubnub::Chat(publish, subscribe, user_id);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 void pn_chat_delete(Pubnub::Chat* chat) {
+    if (chat == nullptr) {
+        return;
+    }
     delete chat;
 }
 
@@ -33,7 +42,13 @@ Pubnub::Channel* pn_chat_create_public_conversation_dirty(
     converted_data.status = channel_status;
     converted_data.type = channel_type;
 
-    return new Pubnub::Channel(chat->create_public_conversation(channel_id, converted_data));
+    try {
+        return new Pubnub::Channel(chat->create_public_conversation(channel_id, converted_data));
+    } catch(std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 Pubnub::Channel* pn_chat_update_channel_dirty(
@@ -53,22 +68,42 @@ Pubnub::Channel* pn_chat_update_channel_dirty(
     converted_data.status = channel_status;
     converted_data.type = channel_type;
 
-    return new Pubnub::Channel(chat->update_channel(channel_id, converted_data));
+    try {
+        return new Pubnub::Channel(chat->update_channel(channel_id, converted_data));
+    } catch(std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 Pubnub::Channel* pn_chat_get_channel(
         Pubnub::Chat* chat,
         const char* channel_id) {
-    return new Pubnub::Channel(chat->get_channel(channel_id));
+    try {
+        return new Pubnub::Channel(chat->get_channel(channel_id));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
-void pn_chat_delete_channel(
+PnCResult pn_chat_delete_channel(
         Pubnub::Chat* chat,
         const char* channel_id) {
-    chat->delete_channel(channel_id);
+    try {
+        chat->delete_channel(channel_id);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_chat_set_restrictions(
+PnCResult pn_chat_set_restrictions(
         Pubnub::Chat* chat,
         const char* user_id,
         const char* channel_id,
@@ -80,7 +115,15 @@ void pn_chat_set_restrictions(
     restrictions.mute= mute;
     restrictions.reason = reason;
 
-    chat->set_restrictions(user_id, channel_id, restrictions);
+    try {
+        chat->set_restrictions(user_id, channel_id, restrictions);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
 Pubnub::User* pn_chat_create_user_dirty(
@@ -102,13 +145,25 @@ Pubnub::User* pn_chat_create_user_dirty(
     converted_data.status = status;
     converted_data.type = type;
     
-    return new Pubnub::User(chat->create_user(user_id, converted_data));
+    try {
+        return new Pubnub::User(chat->create_user(user_id, converted_data));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 Pubnub::User* pn_chat_get_user(
         Pubnub::Chat* chat,
         const char* user_id) {
-    return new Pubnub::User(chat->get_user(user_id));
+    try {
+        return new Pubnub::User(chat->get_user(user_id));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 //std::vector<Pubnub::User>* pn_chat_get_users(
@@ -139,13 +194,27 @@ Pubnub::User* pn_chat_update_user_dirty(
     converted_data.status = status;
     converted_data.type = type;
     
-    return new Pubnub::User(chat->update_user(user_id, converted_data));
+    try {
+        return new Pubnub::User(chat->update_user(user_id, converted_data));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
-void pn_chat_delete_user(
+PnCResult pn_chat_delete_user(
         Pubnub::Chat* chat,
         const char* user_id) {
-    chat->delete_user(user_id);
+    try {
+        chat->delete_user(user_id);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
 const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
@@ -171,14 +240,27 @@ const char* jsonize_messages(std::vector<Pubnub::Message> messages) {
     return c_result;
 }
 
-void pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id, char* messages_json) {
-    auto messages = chat->get_pubnub_context().fetch_messages();
-    auto jsonised = jsonize_messages(messages);
-    strcpy(messages_json, jsonised);
-    delete[] jsonised;
+PnCResult pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id, char* messages_json) {
+    try {
+        auto messages = chat->get_pubnub_context().fetch_messages();
+        auto jsonised = jsonize_messages(messages);
+        strcpy(messages_json, jsonised);
+        delete[] jsonised;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
+
 void pn_clear_string(char* str) {
+    if (nullptr == str) {
+        return;
+    }
+
     delete[] str;
 }
 
