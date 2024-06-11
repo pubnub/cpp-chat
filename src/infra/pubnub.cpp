@@ -1,6 +1,7 @@
 #include "infra/pubnub.hpp"
 #include "chat/message.hpp"
 #include "chat/channel.hpp"
+#include "nlohmann/json.hpp"
 #include <thread>
 #include <vector>
 extern "C" {
@@ -17,6 +18,8 @@ extern "C" {
 #include <pubnub_fetch_history.h>
 #include <pubnub_actions_api.h>
 }
+
+using json = nlohmann::json;
 
 PubNub::PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
     chat_obj(in_chat),
@@ -576,14 +579,27 @@ void PubNub::call_subscribe()
 
 void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
 {
+    if(!message.payload.ptr || !message.channel.ptr)
+    {
+        throw std::runtime_error("received message is invalid");
+    }
 
-/*
-    for (Pubnub::String& message : messages) {
-        auto channel = message.get_message_data().channel_id;
-        if (this->message_callbacks_map.find(channel) != this->message_callbacks_map.end()) {
-            this->message_callbacks_map[channel](message);
-        } 
-    }*/
+    json message_json = json::parse(message.payload.ptr);
+    
+    if(message_json.is_null())
+    {
+        throw std::runtime_error("Failed to parse message into json");
+    }
+
+    //Handle chat messages
+    if(message_json.contains("text"), message_json.contains("type"))
+    {
+        if (this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
+        {
+            this->message_callbacks_map[message.channel.ptr](pubnub_to_chat_message(message));
+        }
+    }
+
 }
 
 Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
@@ -593,12 +609,14 @@ Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
         return Pubnub::String(message.ptr, message.size);
     };
 
+    json message_json = json::parse(to_pn_string(pn_message.payload));
+
     return Pubnub::Message(
             chat_obj,
             to_pn_string(pn_message.tt),
             Pubnub::ChatMessageData{
                 Pubnub::pubnub_chat_message_type::PCMT_TEXT,
-                to_pn_string(pn_message.payload),
+                Pubnub::String(message_json["text"]),
                 to_pn_string(pn_message.channel),
                 to_pn_string(pn_message.publisher),
                 to_pn_string(pn_message.metadata),
