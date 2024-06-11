@@ -298,6 +298,28 @@ bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
     return count > 0;
 }
 
+void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
+{
+    //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
+	String payload_parameters = payload;
+    payload_parameters.erase(0, 1);
+	payload_parameters.erase(payload_parameters.length() - 1);
+	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + Pubnub::chat_event_type_to_string(chat_event_type) = String("\"}");
+
+    this->pubnub.publish(channel_id, event_message);
+}
+
+void Chat::listen_for_events(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
+    }
+
+    pubnub.register_event_callback(channel_id, event_callback);
+    pubnub.subscribe_to_channel(channel_id);
+}
+
 void Chat::subscribe_to_channel(String channel_id)
 {
     this->pubnub.subscribe_to_channel(channel_id);
@@ -333,13 +355,3 @@ Channel Chat::create_channel(String channel_id, ChatChannelData channel_data)
     return channel_obj;
 }
 
-void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
-{
-    //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
-	String payload_parameters = payload;
-    payload_parameters.erase(0, 1);
-	payload_parameters.erase(payload_parameters.length() - 1);
-	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + Pubnub::chat_event_type_to_string(chat_event_type) = String("\"}");
-
-    this->pubnub.publish(channel_id, event_message);
-}

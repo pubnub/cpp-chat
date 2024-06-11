@@ -501,6 +501,16 @@ void PubNub::remove_channel_callback(Pubnub::String channel_id)
     this->channel_callbacks_map.erase(channel_id);
 }
 
+void PubNub::register_event_callback(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback)
+{
+    this->event_callbacks_map[channel_id] = event_callback;
+}
+
+void PubNub::remove_event_callback(Pubnub::String channel_id)
+{
+    this->event_callbacks_map.erase(channel_id);
+}
+
 void PubNub::stop_resolving_callbacks() {
     this->should_stop = true;
 }
@@ -607,6 +617,15 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         if (this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
         {
             this->channel_callbacks_map[message.channel.ptr](pubnub_message_to_chat_channel(message));
+        }
+    }
+
+    //Handle events
+    if(message_json.contains("event"))
+    {
+        if (this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
+        {
+            this->event_callbacks_map[message.channel.ptr](message.payload.ptr);
         }
     }
 
