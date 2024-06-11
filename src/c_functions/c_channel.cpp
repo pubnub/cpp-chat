@@ -51,7 +51,7 @@ void pn_channel_update_dirty(
 // TODO: dont copy code
 const char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
     if (messages.size() == 0) {
-        return "[]";
+        return Pubnub::String("[]");
     }
     
     Pubnub::String result = "[";
@@ -71,10 +71,11 @@ const char* jsonize_messages2(std::vector<Pubnub::Message> messages) {
 }
 
 
-const char* pn_channel_connect(Pubnub::Channel* channel) {
+void pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
     auto messages = channel->connect_and_get_messages();
-
-    return jsonize_messages2(messages);
+    auto jsonised = jsonize_messages2(messages);
+    strcpy(messages_json, jsonised);
+    delete[] jsonised;
 }
 
 void pn_channel_disconnect(Pubnub::Channel* channel) {
