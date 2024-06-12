@@ -569,14 +569,7 @@ void PubNub::cancel_previous_subscription()
                 );
         }
     }
-
-    Pubnub::String current_channels;
-    for (const auto& channel : this->subscribed_channels) {
-        current_channels += channel + ",";
-    }
-    current_channels.erase(current_channels.length() - 1, 1);
-
-    auto result = pubnub_leave(this->long_poll_context.get(), current_channels, NULL);
+    auto result = pubnub_leave(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), NULL);
     if (PNR_OK != result) {
         if (PNR_STARTED == result && PNR_OK != pubnub_await(this->long_poll_context.get())) {
             throw std::runtime_error(
@@ -591,13 +584,7 @@ void PubNub::cancel_previous_subscription()
 
 void PubNub::call_subscribe()
 {
-    Pubnub::String current_channels;
-    for (const auto& channel : this->subscribed_channels) {
-        current_channels += channel + ",";
-    }
-    current_channels.erase(current_channels.length() - 1, 1);
-
-    auto result = pubnub_subscribe_v2(this->long_poll_context.get(), current_channels, pubnub_subscribe_v2_defopts());
+    auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
     if (PNR_OK != result && PNR_STARTED != result) {
         throw std::runtime_error(
                 std::string("Failed to subscribe to channel: ")
@@ -671,6 +658,20 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         }
     }
 
+}
+
+Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()
+{
+    Pubnub::String current_channels;
+    for (const auto& channel : this->subscribed_channels) {
+        current_channels += channel + "," + channel + "-pnpres,";
+    }
+    if(!current_channels.empty())
+    {
+        current_channels.erase(current_channels.length() - 1, 1);
+    }
+    
+    return current_channels;
 }
 
 Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
