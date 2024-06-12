@@ -81,7 +81,9 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_channel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_user.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_errors.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_errors.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_message.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_membership.cpp)
 endif()
 
 if(NOT ${RUN_TESTS})
