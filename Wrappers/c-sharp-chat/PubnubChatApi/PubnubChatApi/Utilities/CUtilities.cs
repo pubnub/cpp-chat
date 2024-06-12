@@ -15,8 +15,8 @@ namespace PubnubChatApi.Utilities
     {
         [DllImport("pubnub-chat.dll")]
         private static extern void pn_c_get_error_message(StringBuilder buffer);
-        
-        internal static void ThrowCError()
+
+        private static void ThrowCError()
         {
             var buffer = new StringBuilder(4096);
             pn_c_get_error_message(buffer);
