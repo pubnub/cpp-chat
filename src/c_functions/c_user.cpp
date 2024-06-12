@@ -123,7 +123,7 @@ PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
     
     Pubnub::String result = "[";
     for (auto it = channels.begin(); it != channels.end(); ++it) {
-        result += "\"" + *it + "\"";
+        result += *it;
         if (it != channels.end() - 1) {
             result += ",";
         }
@@ -144,5 +144,4 @@ PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id) {
         return PN_C_UNKNOWN;
     }
 }
-
 
