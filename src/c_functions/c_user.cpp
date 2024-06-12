@@ -1,4 +1,5 @@
 #include "c_functions/c_user.hpp"
+#include "c_functions/c_errors.hpp"
 #include "chat/user.hpp"
 
 Pubnub::User* pn_user_create_dirty(
@@ -30,7 +31,7 @@ void pn_user_destroy(Pubnub::User* user) {
     delete user;
 }
 
-void pn_user_update_dirty(
+PnCResult pn_user_update_dirty(
         Pubnub::User* user,
         const char* user_data_json,
         const char* user_name,
@@ -50,14 +51,30 @@ void pn_user_update_dirty(
     user_data.status = status;
     user_data.type = type;
 
-    user->update(user_data);
+    try {
+        user->update(user_data);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_user_delete_user(Pubnub::User* user) {
-    user->delete_user();
+PnCResult pn_user_delete_user(Pubnub::User* user) {
+    try {
+        user->delete_user();
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_user_set_restrictions(
+PnCResult pn_user_set_restrictions(
         Pubnub::User* user,
         const char* channel_id,
         bool ban_user,
@@ -68,27 +85,64 @@ void pn_user_set_restrictions(
     restrictions.mute = mute_user;
     restrictions.reason = reason;
 
-    user->set_restrictions(channel_id, restrictions);
+    try {
+        user->set_restrictions(channel_id, restrictions);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_user_report(
+PnCResult pn_user_report(
         Pubnub::User* user,
         const char* reason) {
-    user->report(reason);
-}
+    try {
+        user->report(reason);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
 
-const char** pn_user_where_present(Pubnub::User* user) {
-    std::vector<Pubnub::String> channels = user->where_present();
-    const char** channels_arr = new const char*[channels.size() + 1];
-    for (int i = 0; i < channels.size(); i++) {
-        channels_arr[i] = channels[i].c_str();
+        return PN_C_ERROR;
     }
-    channels_arr[channels.size()] = nullptr;
-    return channels_arr;
+
+    return PN_C_OK;
 }
 
-bool pn_user_is_present_on(Pubnub::User* user, const char* channel_id) {
-    return user->is_present_on(channel_id);
+PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
+    std::vector<Pubnub::String> channels;
+
+    try {
+        channels = user->where_present();
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+    
+    Pubnub::String result = "[";
+    for (auto it = channels.begin(); it != channels.end(); ++it) {
+        result += "\"" + *it + "\"";
+        if (it != channels.end() - 1) {
+            result += ",";
+        }
+    }
+    result += "]";
+
+    strcpy(result_json, result.c_str());
+
+    return PN_C_OK;
+}
+
+PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id) {
+    try {
+        return user->is_present_on(channel_id) ? PN_C_TRUE : PN_C_FALSE;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_UNKNOWN;
+    }
 }
 
 
