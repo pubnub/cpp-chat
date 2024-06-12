@@ -26,10 +26,16 @@ Pubnub::Channel* pn_channel_new_dirty(
     converted_data.status = channel_status;
     converted_data.type = channel_type;
 
-    return new Pubnub::Channel(chat->create_public_conversation(channel_id, converted_data));
+    try {
+        return new Pubnub::Channel(chat->create_public_conversation(channel_id, converted_data));
+    } catch(std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
-void pn_channel_update_dirty(
+PnCResult pn_channel_update_dirty(
         Pubnub::Channel* channel,
         char* channel_name,
         char* channel_description,
@@ -46,7 +52,15 @@ void pn_channel_update_dirty(
     converted_data.status = channel_status;
     converted_data.type = channel_type;
 
-    return channel->update(converted_data);
+    try {
+        channel->update(converted_data);
+    } catch(std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
 // TODO: dont copy code
@@ -74,30 +88,70 @@ const char* jsonize_messages2(std::vector<Pubnub::String> messages) {
 }
 
 
-void pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
-    auto messages = channel->connect_and_get_messages();
-    auto jsonised = jsonize_messages2(messages);
-    strcpy(messages_json, jsonised);
-    delete[] jsonised;
+PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
+    try {
+        auto messages = channel->connect_and_get_messages();
+        auto jsonised = jsonize_messages2(messages);
+        strcpy(messages_json, jsonised);
+        delete[] jsonised;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_disconnect(Pubnub::Channel* channel) {
-    channel->disconnect();
+PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
+    try {
+        channel->disconnect();
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
-    channel->join(callback);
+PnCResult pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
+    try {
+        channel->join(callback);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_leave(Pubnub::Channel* channel) {
-    channel->leave();
+PnCResult pn_channel_leave(Pubnub::Channel* channel) {
+    try {
+        channel->leave();
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_delete_channel(Pubnub::Channel* channel) {
-    channel->delete_channel();
+PnCResult pn_channel_delete_channel(Pubnub::Channel* channel) {
+    try {
+        channel->delete_channel();
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_set_restrictions(
+PnCResult pn_channel_set_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
         bool ban,
@@ -109,15 +163,31 @@ void pn_channel_set_restrictions(
     restrictions.mute = mute;
     restrictions.reason = reason;
 
-    channel->set_restrictions(user_id, restrictions);
+    try {
+        channel->set_restrictions(user_id, restrictions);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
-void pn_channel_send_text(
+PnCResult pn_channel_send_text(
     Pubnub::Channel* channel,
     const char* message,
     Pubnub::pubnub_chat_message_type type,
     const char* metadata
     ) {
-    channel->send_text(message, type, metadata);
+    try {
+        channel->send_text(message, type, metadata);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 

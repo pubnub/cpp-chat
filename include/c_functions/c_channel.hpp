@@ -5,6 +5,7 @@
 #include "chat/channel.hpp"
 #include "export.hpp"
 #include "extern.hpp"
+#include "c_functions/c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_delete(Pubnub::Channel* channel);
 
@@ -18,7 +19,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_new_dirty(
         char* channel_status,
         char* channel_type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update_dirty(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_update_dirty(
         Pubnub::Channel* channel,
         char* channel_name,
         char* channel_description,
@@ -27,24 +28,24 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_update_dirty(
         char* channel_status,
         char* channel_type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_connect(Pubnub::Channel* channel, char* messages_json);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_disconnect(Pubnub::Channel* channel);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_disconnect(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_join(Pubnub::Channel* channel, const char* additional_params);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_leave(Pubnub::Channel* channel);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_leave(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_delete_channel(Pubnub::Channel* channel);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_delete_channel(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_set_restrictions(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_set_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
         bool ban,
         bool mute,
         const char* reason);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_send_text(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text(
         Pubnub::Channel* channel,
         const char* message,
         Pubnub::pubnub_chat_message_type type,
