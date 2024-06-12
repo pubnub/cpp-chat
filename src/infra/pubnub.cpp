@@ -672,7 +672,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions")
     {
-        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"];
+        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
 
         if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
         {
