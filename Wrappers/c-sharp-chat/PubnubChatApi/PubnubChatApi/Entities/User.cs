@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
+using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
@@ -10,9 +12,11 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_destroy(IntPtr user);
         [DllImport("pubnub-chat.dll")]
-        private static extern void pn_user_report(IntPtr user, string reason);
+        private static extern int pn_user_report(IntPtr user, string reason);
         [DllImport("pubnub-chat.dll")]
-        private static extern bool pn_user_is_present_on(IntPtr user, string channel_id);
+        private static extern int pn_user_is_present_on(IntPtr user, string channel_id);
+        [DllImport("pubnub-chat.dll")]
+        private static extern int pn_user_where_present(IntPtr user, StringBuilder result_json);
 
         #endregion
         
@@ -45,12 +49,21 @@ namespace PubNubChatAPI.Entities
 
         public void ReportUser(string reason)
         {
-            pn_user_report(userPointer, reason);
+            CUtilities.CheckCFunctionResult(pn_user_report(userPointer, reason));
         }
 
         public bool IsPresentOn(string channelId)
         {
-            return pn_user_is_present_on(userPointer, channelId);
+            var result = pn_user_is_present_on(userPointer, channelId);
+            CUtilities.CheckCFunctionResult(result);
+            return result == 1;
+        }
+
+        public string WherePresent()
+        {
+            var buffer = new StringBuilder(32768);
+            CUtilities.CheckCFunctionResult(pn_user_where_present(userPointer, buffer));
+            return buffer.ToString();
         }
 
         ~User()

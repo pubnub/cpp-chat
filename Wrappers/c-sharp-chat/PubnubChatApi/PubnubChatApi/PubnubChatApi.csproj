@@ -9,10 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Plugins\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="pubnub-chat.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

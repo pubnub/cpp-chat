@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PubnubChatApi.Enums;
 
@@ -16,13 +17,13 @@ namespace PubNubChatAPI.Entities
     
     public class Message
     {
+        private IntPtr messagePointer;
         private string timetoken;
         private ChatMessageData messageData;
         
-        public Message(string timetoken, ChatMessageData messageData)
+        internal Message(IntPtr messagePointer)
         {
-            this.timetoken = timetoken;
-            this.messageData = messageData;
+            this.messagePointer = messagePointer;
         }
     }
 }

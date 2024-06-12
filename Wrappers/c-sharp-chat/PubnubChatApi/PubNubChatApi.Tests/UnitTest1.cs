@@ -17,7 +17,7 @@ public class Tests
         try
         {
             var chat = new Chat("pub-c-79961364-c3e6-4e48-8d8d-fe4f34e228bf", "sub-c-2b4db8f2-c025-4a76-9e23-326123298667", "heheh");
-            var channel = chat.CreatePublicConversation(string.Empty, new ChatChannelData()
+            var channel = chat.CreatePublicConversation("test", new ChatChannelData()
             {
                 ChannelName = "test",
                 ChannelDescription = "fuck",
@@ -27,29 +27,7 @@ public class Tests
                 ChannelUpdated = "true"
             });
             
-
-            /*var callback = new Channel.CallbackStringFunction(((resulString, length) =>
-            {
-                var parsedString = new string('*', length);
-                /*string parsedString = "aaaa";
-                //make sure the buffer is big enough
-                if (parsedString.Length + 1 > length)
-                {
-                    Debug.WriteLine("WRONG");
-                    return;
-                }
-                var ptr = Marshal.StringToHGlobalAnsi(parsedString);
-                var bytes = new byte[parsedString.Length + 1];
-                Marshal.Copy(ptr, bytes, 0, parsedString.Length);
-                Marshal.Copy(bytes, 0, resulStringPtr, bytes.Length);
-                Marshal.FreeHGlobal(ptr);
-                Debug.WriteLine(parsedString);#1#
-            } ));
-            channel.Connect(callback);*/
-            
-            Debug.WriteLine("before connect");
             channel.Connect();
-            Debug.WriteLine("after connect");
 
             new Thread(() =>
                 {

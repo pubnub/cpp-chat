@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
@@ -98,9 +100,6 @@ namespace PubNubChatAPI.Entities
         
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_chat_get_messages(IntPtr chat, string channel_id, StringBuilder messages_json);
-
-        [DllImport("pubnub-chat.dll")]
-        private static extern void pn_c_get_error_message(StringBuilder buffer);
         
         #endregion
         
@@ -111,6 +110,7 @@ namespace PubNubChatAPI.Entities
         public Chat(string publishKey, string subscribeKey, string userId)
         {
             chatPointer = pn_chat_new(publishKey, subscribeKey, userId);
+            CUtilities.CheckCFunctionResult(chatPointer);
         }
 
         public Channel CreatePublicConversation(string channelId)
@@ -122,10 +122,7 @@ namespace PubNubChatAPI.Entities
         public string GetMessages(string channelId)
         {
             var messagesBuffer = new StringBuilder(32768);
-            if (pn_chat_get_messages(chatPointer, channelId, messagesBuffer) == -1)
-            {
-                ThrowCError();
-            }
+            CUtilities.CheckCFunctionResult(pn_chat_get_messages(chatPointer, channelId, messagesBuffer));
             return messagesBuffer.ToString();;
         }
 
@@ -144,10 +141,7 @@ namespace PubNubChatAPI.Entities
                 additionalData.ChannelUpdated,
                 additionalData.ChannelStatus,
                 additionalData.ChannelType);
-            if(channelPointer == IntPtr.Zero)
-            {
-                ThrowCError();
-            }
+            CUtilities.CheckCFunctionResult(channelPointer);
             var channel = new Channel(this, channelId, channelPointer);
             channels.Add(channelId, channel);
             return channel;
@@ -167,12 +161,13 @@ namespace PubNubChatAPI.Entities
 
         public void UpdateChannel(string channelId, ChatChannelData updatedData)
         {
-            pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
-                updatedData.ChannelDescription,
-                updatedData.ChannelCustomDataJson,
-                updatedData.ChannelUpdated,
-                updatedData.ChannelStatus,
-                updatedData.ChannelType);
+            CUtilities.CheckCFunctionResult(
+                pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
+                    updatedData.ChannelDescription,
+                    updatedData.ChannelCustomDataJson,
+                    updatedData.ChannelUpdated,
+                    updatedData.ChannelStatus,
+                    updatedData.ChannelType));
         }
 
         public void DeleteChannel(string channelId)
@@ -180,19 +175,14 @@ namespace PubNubChatAPI.Entities
             if (channels.ContainsKey(channelId))
             {
                 channels.Remove(channelId);
-                if (pn_chat_delete_channel(chatPointer, channelId) == -1)
-                {
-                    ThrowCError();
-                }
+                CUtilities.CheckCFunctionResult(pn_chat_delete_channel(chatPointer, channelId));
             }
         }
 
         public void SetRestrictions(string userId, string channelId, bool banUser, bool muteUser, string reason)
         {
-            if (pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason) == -1)
-            {
-                ThrowCError();
-            }
+            CUtilities.CheckCFunctionResult(
+                pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason));
         }
 
         public User CreateUser(string userId)
@@ -216,6 +206,7 @@ namespace PubNubChatAPI.Entities
                 additionalData.CustomDataJson, 
                 additionalData.Status, 
                 additionalData.Status);
+            CUtilities.CheckCFunctionResult(userPointer);
             var user = new User(this, userId, userPointer);
             users.Add(userId, user);
             return user;
@@ -235,14 +226,15 @@ namespace PubNubChatAPI.Entities
 
         public void UpdateUser(string userId, ChatUserData updatedData)
         {
-            pn_chat_update_user_dirty(chatPointer, userId, 
-                updatedData.Username,
-                updatedData.ExternalId, 
-                updatedData.ProfileUrl, 
-                updatedData.Email,
-                updatedData.CustomDataJson, 
-                updatedData.Status, 
-                updatedData.Status);
+            CUtilities.CheckCFunctionResult(
+                pn_chat_update_user_dirty(chatPointer, userId, 
+                    updatedData.Username,
+                    updatedData.ExternalId, 
+                    updatedData.ProfileUrl, 
+                    updatedData.Email,
+                    updatedData.CustomDataJson, 
+                    updatedData.Status, 
+                    updatedData.Status));
         }
 
         public void DeleteUser(string userId)
@@ -250,18 +242,8 @@ namespace PubNubChatAPI.Entities
             if (users.ContainsKey(userId))
             {
                 users.Remove(userId);
-                if (pn_chat_delete_user(chatPointer, userId) == -1)
-                {
-                    ThrowCError();
-                }
+                CUtilities.CheckCFunctionResult(pn_chat_delete_user(chatPointer, userId));
             }
-        }
-        
-        private void ThrowCError()
-        {
-            var buffer = new StringBuilder(4096);
-            pn_c_get_error_message(buffer);
-            throw new Exception(buffer.ToString());
         }
 
         ~Chat()
