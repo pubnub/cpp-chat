@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "chat/message.hpp"
 #include "chat/channel.hpp"
+#include "chat/user.hpp"
 #include "enums.hpp"
 #include <thread>
 #include <vector>
@@ -62,14 +63,15 @@ public:
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
     Pubnub::String add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::pubnub_message_action_type message_action_type, const Pubnub::String value);
 
+    /* CALLBACKS */
     void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
     void remove_message_callback(Pubnub::String channel_id);
-
     void register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback);
     void remove_channel_callback(Pubnub::String channel_id);
-
     void register_event_callback(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback);
     void remove_event_callback(Pubnub::String channel_id);
+    void register_user_callback(Pubnub::String user_id, std::function<void(Pubnub::User)> user_callback);
+    void remove_user_callback(Pubnub::String user_id);
 
     // TODO: not the greatest way but just for mvp...
     void stop_resolving_callbacks();
@@ -96,6 +98,7 @@ private:
     std::map<Pubnub::String, std::function<void(Pubnub::Message)>, Pubnub::StringComparer> message_callbacks_map;
     std::map<Pubnub::String, std::function<void(Pubnub::Channel)>, Pubnub::StringComparer> channel_callbacks_map;
     std::map<Pubnub::String, std::function<void(Pubnub::String)>, Pubnub::StringComparer> event_callbacks_map;
+    std::map<Pubnub::String, std::function<void(Pubnub::User)>, Pubnub::StringComparer> user_callbacks_map;
 
     bool is_subscribed = false;
     bool should_stop = false;

@@ -511,6 +511,16 @@ void PubNub::remove_event_callback(Pubnub::String channel_id)
     this->event_callbacks_map.erase(channel_id);
 }
 
+void PubNub::register_user_callback(Pubnub::String user_id, std::function<void(Pubnub::User)> user_callback)
+{
+    this->user_callbacks_map[user_id] = user_callback;
+}
+
+void PubNub::remove_user_callback(Pubnub::String user_id)
+{
+    this->user_callbacks_map.erase(user_id);
+}
+
 void PubNub::stop_resolving_callbacks() {
     this->should_stop = true;
 }

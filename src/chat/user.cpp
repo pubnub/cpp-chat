@@ -95,6 +95,26 @@ std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String 
     return memberships;
 }
 
+void User::stream_updates(std::function<void(User)> user_callback)
+{
+    std::vector<Pubnub::User> users;
+    users.push_back(*this);
+    stream_updates_on(users, user_callback);
+}
+void User::stream_updates_on(std::vector<Pubnub::User> users, std::function<void(User)> user_callback)
+{
+    if(users.empty())
+    {
+        throw std::invalid_argument("Cannot stream user updates on an empty list");
+    }
+
+    for(auto user : users)
+    {
+        chat_obj.get_pubnub_context().register_user_callback(user.user_id, user_callback);
+        //TODO: decide what to do here as without event engine we would probably need to subscribe to anny channel that user belongs to
+        //chat_obj.get_pubnub_context().subscribe_to_channel(channel.channel_id);
+    }
+}
 ChatUserData User::user_data_from_json(String data_json_string)
 {
     json user_data_json = json::parse(data_json_string);

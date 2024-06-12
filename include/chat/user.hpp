@@ -3,6 +3,7 @@
 
 #include "export.hpp"
 #include "string.hpp"
+#include <functional>
 #include <vector>
 
 extern "C" {
@@ -43,6 +44,9 @@ namespace Pubnub
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
         PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+
+        PN_CHAT_EXPORT void stream_updates(std::function<void(User)> user_callback);
+        PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::User> users, std::function<void(User)> user_callback);
 
         ChatUserData user_data_from_json(Pubnub::String data_json_string);
         Pubnub::String user_id_from_json(Pubnub::String data_json_string);
