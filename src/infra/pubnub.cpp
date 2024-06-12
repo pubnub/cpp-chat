@@ -490,6 +490,17 @@ void PubNub::remove_message_callback(Pubnub::String channel_id)
     this->message_callbacks_map.erase(channel_id);
 }
 
+void PubNub::register_message_update_callback(Pubnub::String message_timetoken, Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_update_callback)
+{
+    auto callback_tuple = std::make_tuple(channel_id, message_update_callback);
+    this->message_update_callbacks_map[message_timetoken] = callback_tuple;
+}
+
+void PubNub::remove_message_update_callback(Pubnub::String message_timetoken)
+{
+    this->message_update_callbacks_map.erase(message_timetoken);
+}
+
 void PubNub::register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback)
 {
     this->channel_callbacks_map[channel_id] = channel_callback;
@@ -655,6 +666,21 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         {
             std::vector<Pubnub::String> current_users = chat_obj.who_is_present(message.channel.ptr);
             this->channel_presence_callbacks_map[message.channel.ptr](current_users);
+        }
+    }
+
+    //Handle message updates
+    if(message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions")
+    {
+        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"];
+
+        if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
+        {
+            //TODO:: to finish. get message, etc
+            Pubnub::String message_channel;
+            std::function<void(Pubnub::Message)> callback;
+            sid::tie(message_channel, callback) = this->message_update_callbacks_map[message.channel.ptr];
+            //this->message_update_callbacks_map[message.channel.ptr](pubnub_message_to_chat_user(message));
         }
     }
 

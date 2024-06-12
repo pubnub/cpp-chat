@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <functional>
 #include "enums.hpp"
 #include "string.hpp"
 #include "export.hpp"
@@ -39,6 +40,9 @@ namespace Pubnub
         PN_CHAT_EXPORT Message delete_message();
         PN_CHAT_EXPORT bool deleted();
 
+        PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
+        PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
+        
         Pubnub::String to_string();
 
         PN_CHAT_EXPORT Pubnub::String get_timetoken();

@@ -108,7 +108,27 @@ bool Message::deleted()
     return message_data.message_actions.count(message_action_type_to_string(pubnub_message_action_type::PMAT_Deleted)) > 0;
 }
 
-String Message::to_string() {
+void Pubnub::Message::stream_updates(std::function<void(Message)> message_callback)
+{
+    std::vector<Pubnub::Message> messages;
+    messages.push_back(*this);
+    stream_updates_on(messages, message_callback);
+}
+void Pubnub::Message::stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback)
+{
+    if(messages.empty())
+    {
+        throw std::invalid_argument("Cannot stream message updates on an empty list");
+    }
+
+    for(auto message : messages)
+    {
+        chat_obj.get_pubnub_context().register_message_update_callback(timetoken, message_data.channel_id, message_callback);
+        chat_obj.get_pubnub_context().subscribe_to_channel(message_data.channel_id);
+    }
+}
+String Message::to_string()
+{
     //TODO: full conversion from message to json string
     return message_data.text;
 }
