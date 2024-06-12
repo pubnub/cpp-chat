@@ -545,6 +545,51 @@ void PubNub::stop_resolving_callbacks()
     this->should_stop = true;
 }
 
+bool PubNub::is_chat_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("text") && message_json.contains("type");
+}
+
+bool PubNub::is_message_update_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions";
+}
+
+bool PubNub::is_channel_update_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
+        message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set";
+}
+
+bool PubNub::is_user_update_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
+        message_json["source"] == "objects" && message_json["type"] == "uuid" && message_json["event"] == "set";
+}
+
+bool PubNub::is_event_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("event");
+}
+
+bool PubNub::is_presence_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    return message_json.contains("action") && message_json.contains("uuid");
+}
+
+bool PubNub::is_membership_update_message(Pubnub::String message_json_string)
+{
+    json message_json = json::parse(message_json_string);
+    //TODO: to finish
+    return false;
+}
+
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {
@@ -619,7 +664,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle chat messages
-    if(message_json.contains("text") && message_json.contains("type"))
+    if(is_chat_message(message.payload.ptr))
     {
         if(this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
         {
@@ -629,8 +674,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     
     //TODO:Handle also removing channel metadata
     //Handle channel updates
-    if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set")
+    if(is_channel_update_message(message.payload.ptr))
     {
         if(this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
         {
@@ -640,8 +684,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
 
     //TODO:Handle also removing user metadata
     //Handle user updates
-    if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "uuid" && message_json["event"] == "set")
+    if(is_user_update_message(message.payload.ptr))
     {
         if(this->user_callbacks_map.find(message.channel.ptr) != this->user_callbacks_map.end())
         {
@@ -650,7 +693,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle events
-    if(message_json.contains("event"))
+    if(is_event_message(message.payload.ptr))
     {
         if(this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
         {
@@ -659,7 +702,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle presence
-    if(message_json.contains("action") && message_json.contains("uuid"))
+    if(is_presence_message(message.payload.ptr))
     {
         if(this->channel_presence_callbacks_map.find(message.channel.ptr) != this->channel_presence_callbacks_map.end() ||
             this->channel_presence_callbacks_map.find(message.channel.ptr + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
@@ -670,7 +713,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle message updates
-    if(message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions")
+    if(is_message_update_message(message.payload.ptr))
     {
         Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
 
