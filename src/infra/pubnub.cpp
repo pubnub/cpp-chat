@@ -679,7 +679,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
             //TODO:: to finish. get message, etc
             Pubnub::String message_channel;
             std::function<void(Pubnub::Message)> callback;
-            sid::tie(message_channel, callback) = this->message_update_callbacks_map[message.channel.ptr];
+            std::tie(message_channel, callback) = this->message_update_callbacks_map[message.channel.ptr];
             //this->message_update_callbacks_map[message.channel.ptr](pubnub_message_to_chat_user(message));
         }
     }
