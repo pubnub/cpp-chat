@@ -62,7 +62,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);
-
+        PN_CHAT_EXPORT void stream_presence(std::function<void(std::vector<Pubnub::String>)> presence_callback);
 
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
         PN_CHAT_EXPORT ChatChannelData get_channel_data();

@@ -1,6 +1,5 @@
 #include "infra/pubnub.hpp"
-#include "chat/message.hpp"
-#include "chat/channel.hpp"
+#include "chat.hpp"
 #include "nlohmann/json.hpp"
 #include <thread>
 #include <vector>
@@ -521,7 +520,17 @@ void PubNub::remove_user_callback(Pubnub::String user_id)
     this->user_callbacks_map.erase(user_id);
 }
 
-void PubNub::stop_resolving_callbacks() {
+void PubNub::register_channel_presence_callback(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback)
+{
+    this->channel_presence_callbacks_map[channel_id] = presence_callback;
+}
+void PubNub::remove_channel_presence_callback(Pubnub::String channel_id)
+{
+    this->channel_presence_callbacks_map.erase(channel_id);
+}
+
+void PubNub::stop_resolving_callbacks()
+{
     this->should_stop = true;
 }
 
@@ -614,7 +623,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle chat messages
     if(message_json.contains("text") && message_json.contains("type"))
     {
-        if (this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
+        if(this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
         {
             this->message_callbacks_map[message.channel.ptr](pubnub_to_chat_message(message));
         }
@@ -624,7 +633,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
         message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set")
     {
-        if (this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
+        if(this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
         {
             this->channel_callbacks_map[message.channel.ptr](pubnub_message_to_chat_channel(message));
         }
@@ -633,9 +642,20 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle events
     if(message_json.contains("event"))
     {
-        if (this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
+        if(this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
         {
             this->event_callbacks_map[message.channel.ptr](message.payload.ptr);
+        }
+    }
+
+    //Handle presence
+    if(message_json.contains("action") && message_json.contains("uuid"))
+    {
+        if(this->channel_presence_callbacks_map.find(message.channel.ptr) != this->channel_presence_callbacks_map.end() ||
+            this->channel_presence_callbacks_map.find(message.channel.ptr + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
+        {
+            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(message.channel.ptr);
+            this->channel_presence_callbacks_map[message.channel.ptr](current_users);
         }
     }
 

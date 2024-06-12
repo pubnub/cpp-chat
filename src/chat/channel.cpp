@@ -264,6 +264,17 @@ void Channel::stream_updates_on(std::vector<Pubnub::Channel> channels, std::func
     }
 }
 
+void Channel::stream_presence(std::function<void(std::vector<Pubnub::String>)> presence_callback)
+{
+    //Send callback with currently present users
+    std::vector<Pubnub::String> current_users = who_is_present();
+    presence_callback(current_users);
+
+    String presence_channel = channel_id + "-pnpres";
+    chat_obj.get_pubnub_context().subscribe_to_channel(presence_channel);
+    chat_obj.get_pubnub_context().register_channel_presence_callback(channel_id, presence_callback);
+}
+
 Pubnub::String Channel::get_channel_id()
 {
     return channel_id;
