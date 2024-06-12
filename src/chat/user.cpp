@@ -111,8 +111,7 @@ void User::stream_updates_on(std::vector<Pubnub::User> users, std::function<void
     for(auto user : users)
     {
         chat_obj.get_pubnub_context().register_user_callback(user.user_id, user_callback);
-        //TODO: decide what to do here as without event engine we would probably need to subscribe to anny channel that user belongs to
-        //chat_obj.get_pubnub_context().subscribe_to_channel(channel.channel_id);
+        chat_obj.get_pubnub_context().subscribe_to_channel(user.user_id);
     }
 }
 ChatUserData User::user_data_from_json(String data_json_string)

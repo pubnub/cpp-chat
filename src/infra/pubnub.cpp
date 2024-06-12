@@ -629,6 +629,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         }
     }
     
+    //TODO:Handle also removing channel metadata
     //Handle channel updates
     if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
         message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set")
@@ -636,6 +637,17 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         if(this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
         {
             this->channel_callbacks_map[message.channel.ptr](pubnub_message_to_chat_channel(message));
+        }
+    }
+
+    //TODO:Handle also removing user metadata
+    //Handle user updates
+    if(message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
+        message_json["source"] == "objects" && message_json["type"] == "uuid" && message_json["event"] == "set")
+    {
+        if(this->user_callbacks_map.find(message.channel.ptr) != this->user_callbacks_map.end())
+        {
+            this->user_callbacks_map[message.channel.ptr](pubnub_message_to_chat_user(message));
         }
     }
 
@@ -692,17 +704,43 @@ Pubnub::Channel PubNub::pubnub_message_to_chat_channel(pubnub_v2_message pn_mess
     };
 
     json message_json = json::parse(to_pn_string(pn_message.payload));
+    json channel_data_json = message_json["data"];
 
     return Pubnub::Channel(
             chat_obj,
-            Pubnub::String(message_json["id"]),
+            Pubnub::String(channel_data_json["id"]),
             Pubnub::ChatChannelData{
-                Pubnub::String(message_json["name"]),
-                Pubnub::String(message_json["description"]),
-                Pubnub::String(message_json["custom"]),
-                Pubnub::String(message_json["updated"]),
-                Pubnub::String(message_json["status"]),
-                Pubnub::String(message_json["type"])
+                Pubnub::String(channel_data_json["name"]),
+                Pubnub::String(channel_data_json["description"]),
+                Pubnub::String(channel_data_json["custom"]),
+                Pubnub::String(channel_data_json["updated"]),
+                Pubnub::String(channel_data_json["status"]),
+                Pubnub::String(channel_data_json["type"])
+            }
+        );
+}
+
+Pubnub::User PubNub::pubnub_message_to_chat_user(pubnub_v2_message pn_message)
+{
+    // TODO: implement message parsing properly
+    auto to_pn_string = [](struct pubnub_char_mem_block message) {
+        return Pubnub::String(message.ptr, message.size);
+    };
+
+    json message_json = json::parse(to_pn_string(pn_message.payload));
+    json user_data_json = message_json["data"];
+
+    return Pubnub::User(
+            chat_obj,
+            Pubnub::String(user_data_json["id"]),
+            Pubnub::ChatUserData{
+                Pubnub::String(user_data_json["name"]),
+                Pubnub::String(user_data_json["externalId"]),
+                Pubnub::String(user_data_json["profileUrl"]),
+                Pubnub::String(user_data_json["email"]),
+                Pubnub::String(user_data_json["custom"]),
+                Pubnub::String(user_data_json["status"]),
+                Pubnub::String(user_data_json["type"])
             }
         );
 }

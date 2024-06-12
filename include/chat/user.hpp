@@ -25,8 +25,6 @@ namespace Pubnub
         Pubnub::String custom_data_json;
         Pubnub::String status;
         Pubnub::String type;
-
-        ChatUserData(){};
     };
 
     PN_CHAT_EXPORT class User
