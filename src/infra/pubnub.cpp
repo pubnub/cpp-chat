@@ -720,7 +720,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         {
             Pubnub::String membership_user;
             std::function<void(Pubnub::Membership)> callback;
-            std::tie(membership_channel, callback) = this->membership_callbacks_map[membership_channel];
+            std::tie(membership_user, callback) = this->membership_callbacks_map[membership_channel];
 
             Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), Pubnub::String(message_json["custom"]));
             callback(membership_obj);

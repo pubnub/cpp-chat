@@ -29,7 +29,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_presence(pubnub_v2_messag
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update);
 
-//TODO: Membership updates
+//Membership updates
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_message* membership);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_dispose_message(pubnub_v2_message* message);
 

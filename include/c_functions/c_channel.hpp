@@ -51,6 +51,33 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text(
         Pubnub::pubnub_chat_message_type type,
         const char* metadata);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_channel_id(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_channel_name(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_description(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_custom_data_json(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_updated(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_status(
+        Pubnub::Channel* channel,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_type(
+        Pubnub::Channel* channel,
+        char* result);
 
 #endif // PN_CHAT_C_CHANNEL_H
 

@@ -111,9 +111,9 @@ Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_mes
     }
 
     try {
-        json message_json = json::parse(message_update_json->payload.ptr);
-        if(message_json.is_null())
-        {
+        json message_json = json::parse(Pubnub::String(message_update_json->payload.ptr, message_update_json->payload.size));
+
+        if(message_json.is_null()) {
             throw std::runtime_error("Failed to parse message into json");
         }
 
@@ -127,6 +127,33 @@ Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_mes
         return PN_C_ERROR_PTR;
     }
 }
+
+Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_message* membership) {
+    if (!Deserialization::is_membership_update_message(Pubnub::String(membership->payload.ptr, membership->payload.size))) {
+        pn_c_set_error_message("Message is not a chat membership update");
+
+        return PN_C_ERROR_PTR;
+    }
+
+    try {
+        json message_json = json::parse(Pubnub::String(membership->payload.ptr, membership->payload.size));
+
+        if (message_json.is_null()) {
+            throw std::runtime_error("Failed to parse message into json");
+        }
+
+        auto membership_channel = message_json["data"]["messageTimetoken"]["id"].dump();
+
+        // TODO: implement that properly
+        return nullptr;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+
 
 void pn_dispose_message(pubnub_v2_message* message) {
     delete message;

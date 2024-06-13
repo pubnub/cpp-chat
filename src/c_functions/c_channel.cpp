@@ -191,3 +191,59 @@ PnCResult pn_channel_send_text(
     return PN_C_OK;
 }
 
+void pn_channel_get_channel_id(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto channel_id = channel->get_channel_id();
+    strcpy(result, channel_id.c_str());
+}
+
+void pn_channel_get_data_channel_name(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto channel_name = channel->get_channel_data().channel_name;
+    strcpy(result, channel_name.c_str());
+}
+
+void pn_channel_get_data_description(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto description = channel->get_channel_data().description;
+    strcpy(result, description.c_str());
+}
+
+void pn_channel_get_data_custom_data_json(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto custom_data_json = channel->get_channel_data().custom_data_json;
+    strcpy(result, custom_data_json.c_str());
+}
+
+void pn_channel_get_data_updated(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto updated = channel->get_channel_data().updated;
+    strcpy(result, updated.c_str());
+}
+
+void pn_channel_get_data_status(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto status = channel->get_channel_data().status;
+    strcpy(result, status.c_str());
+}
+
+void pn_channel_get_data_type(
+        Pubnub::Channel* channel,
+        char* result
+        ) {
+    auto type = channel->get_channel_data().type;
+    strcpy(result, type.c_str());
+}
+
