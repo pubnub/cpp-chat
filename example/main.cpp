@@ -8,6 +8,7 @@
 #include <thread>
 
 int main() {
+    /*
     std::string pub_key = "demo";
     std::string sub_key = "demo";
     std::string user = "hehehe";
@@ -67,5 +68,5 @@ int main() {
 
     kekw = false;
 
-    watek.join();
+    watek.join();*/
 }

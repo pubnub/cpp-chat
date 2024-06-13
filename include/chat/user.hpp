@@ -35,6 +35,8 @@ namespace Pubnub
         //From channel member json
         PN_CHAT_EXPORT User(Pubnub::Chat& chat, Pubnub::String user_data_json);
 
+        ~User() = default;
+
         PN_CHAT_EXPORT void update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_channel_id, Pubnub::PubnubRestrictionsData restrictions);

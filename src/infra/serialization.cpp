@@ -20,14 +20,14 @@ bool Deserialization::is_channel_update_message(Pubnub::String message_json_stri
 {
     json message_json = json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set";
+        message_json["source"] == "objects" && message_json["type"] == "channel";
 }
 
 bool Deserialization::is_user_update_message(Pubnub::String message_json_string)
 {
     json message_json = json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "uuid" && message_json["event"] == "set";
+        message_json["source"] == "objects" && message_json["type"] == "uuid";
 }
 
 bool Deserialization::is_event_message(Pubnub::String message_json_string)
@@ -45,8 +45,8 @@ bool Deserialization::is_presence_message(Pubnub::String message_json_string)
 bool Deserialization::is_membership_update_message(Pubnub::String message_json_string)
 {
     json message_json = json::parse(message_json_string);
-    //TODO: to finish
-    return false;
+    return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
+        message_json["source"] == "objects" && message_json["type"] == "membership";
 }
 
 Pubnub::Message Deserialization::pubnub_to_chat_message(Pubnub::Chat& chat_obj, pubnub_v2_message pn_message)

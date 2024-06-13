@@ -1,6 +1,10 @@
 #include "infra/pubnub.hpp"
 #include "infra/serialization.hpp"
 #include "chat.hpp"
+#include "chat/message.hpp"
+#include "chat/channel.hpp"
+#include "chat/user.hpp"
+#include "chat/membership.hpp"
 #include "nlohmann/json.hpp"
 #include <thread>
 #include <vector>
@@ -541,6 +545,17 @@ void PubNub::remove_channel_presence_callback(Pubnub::String channel_id)
     this->channel_presence_callbacks_map.erase(channel_id);
 }
 
+void PubNub::register_membership_callback(Pubnub::String channel_id, Pubnub::String user_id, std::function<void(Pubnub::Membership)> membership_callback)
+{
+    auto callback_tuple = std::make_tuple(user_id, membership_callback);
+    this->membership_callbacks_map[channel_id] = callback_tuple;
+}
+
+void PubNub::remove_membership_callback(Pubnub::String channel_id)
+{
+    this->membership_callbacks_map.erase(channel_id);
+}
+
 void PubNub::stop_resolving_callbacks()
 {
     this->should_stop = true;
@@ -674,7 +689,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(Deserialization::is_message_update_message(message.payload.ptr))
     {
-        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
+        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"];
 
         if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
         {
@@ -687,6 +702,21 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         }
     }
 
+    //Handle message updates
+    if(Deserialization::is_membership_update_message(message.payload.ptr))
+    {
+        Pubnub::String membership_channel = message_json["data"]["messageTimetoken"]["id"];
+
+        if(this->message_update_callbacks_map.find(membership_channel) != this->message_update_callbacks_map.end())
+        {
+            Pubnub::String membership_user;
+            std::function<void(Pubnub::Membership)> callback;
+            std::tie(membership_channel, callback) = this->membership_callbacks_map[membership_channel];
+
+            Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), Pubnub::String(message_json["custom"]));
+            callback(membership_obj);
+        }
+    }
 }
 
 Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()

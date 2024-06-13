@@ -2,9 +2,6 @@
 #define PN_CHAT_INFRA_PUBNUB_HPP
 
 #include "string.hpp"
-#include "chat/message.hpp"
-#include "chat/channel.hpp"
-#include "chat/user.hpp"
 #include "enums.hpp"
 #include <thread>
 #include <vector>
@@ -21,6 +18,14 @@ extern "C" {
 #define PUBNUB_WAIT_INTERVAL_MS 100
 #endif
 
+namespace Pubnub
+{
+    class Message;
+    class User;
+    class Channel;
+    class Chat;
+    class Membership;
+}
 // TODO: format file
 class PubNub {
 public:
@@ -77,6 +82,8 @@ public:
     void remove_user_callback(Pubnub::String user_id);
     void register_channel_presence_callback(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback);
     void remove_channel_presence_callback(Pubnub::String channel_id);
+    void register_membership_callback(Pubnub::String channel_id, Pubnub::String user_id, std::function<void(Pubnub::Membership)> membership_callback);
+    void remove_membership_callback(Pubnub::String channel_id);
 
     // TODO: not the greatest way but just for mvp...
     void stop_resolving_callbacks();
@@ -104,6 +111,7 @@ private:
     std::map<Pubnub::String, std::function<void(Pubnub::String)>, Pubnub::StringComparer> event_callbacks_map;
     std::map<Pubnub::String, std::function<void(Pubnub::User)>, Pubnub::StringComparer> user_callbacks_map;
     std::map<Pubnub::String, std::function<void(std::vector<Pubnub::String>)>, Pubnub::StringComparer> channel_presence_callbacks_map;
+    std::map<Pubnub::String, std::tuple<Pubnub::String, std::function<void(Pubnub::Membership)>>, Pubnub::StringComparer> membership_callbacks_map; 
 
 
 

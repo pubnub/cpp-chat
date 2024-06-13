@@ -22,9 +22,14 @@ namespace Pubnub
         //From channel member
         PN_CHAT_EXPORT Membership(Pubnub::Chat& in_chat, Pubnub::Channel in_channel, Pubnub::String in_member_json);
 
+        PN_CHAT_EXPORT Membership(Pubnub::Chat& in_chat, Pubnub::Channel in_channel, Pubnub::User in_user, Pubnub::String in_custom_json);
+
         ~Membership() = default;
 
-        Membership update(Pubnub::String in_custom_object_json);
+        PN_CHAT_EXPORT void stream_updates(std::function<void(Membership)> membership_callback);
+        PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Membership)> membership_callback);
+        
+        PN_CHAT_EXPORT Membership update(Pubnub::String in_custom_object_json);
 
         private:
         Pubnub::Chat& chat_obj;
