@@ -689,7 +689,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(Deserialization::is_message_update_message(message.payload.ptr))
     {
-        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"];
+        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
 
         if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
         {
@@ -705,7 +705,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(Deserialization::is_membership_update_message(message.payload.ptr))
     {
-        Pubnub::String membership_channel = message_json["data"]["messageTimetoken"]["id"];
+        Pubnub::String membership_channel = message_json["data"]["messageTimetoken"]["id"].dump();
 
         if(this->message_update_callbacks_map.find(membership_channel) != this->message_update_callbacks_map.end())
         {
