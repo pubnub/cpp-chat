@@ -8,6 +8,7 @@
 #include "nlohmann/json.hpp"
 #include <thread>
 #include <vector>
+#include <iostream>
 extern "C" {
 #include <pubnub_coreapi_ex.h>
 #include <pubnub_alloc.h>
@@ -482,7 +483,7 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
         return "";
     }
 
-    return Pubnub::String(add_action_response.ptr);
+    return Pubnub::String(add_action_response.ptr, add_action_response.size);
 }
 
 void PubNub::register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback)
@@ -627,7 +628,15 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         throw std::runtime_error("received message is invalid");
     }
 
-    json message_json = json::parse(message.payload.ptr);
+    Pubnub::String message_string = Pubnub::String(message.payload.ptr, message.payload.size);
+    Pubnub::String message_channel_string = Pubnub::String(message.channel.ptr, message.channel.size);
+
+    if(message_string.empty())
+    {
+        throw std::runtime_error("message is empty");
+    }
+
+    json message_json = json::parse(message_string);
     
     if(message_json.is_null())
     {
@@ -635,59 +644,59 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle chat messages
-    if(Deserialization::is_chat_message(message.payload.ptr))
+    if(Deserialization::is_chat_message(message_string))
     {
-        if(this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
+        if(this->message_callbacks_map.find(message_channel_string) != this->message_callbacks_map.end())
         {
-            this->message_callbacks_map[message.channel.ptr](
+            this->message_callbacks_map[message_channel_string](
                     Deserialization::pubnub_to_chat_message(this->chat_obj, message));
         }
     }
     
     //TODO:Handle also removing channel metadata
     //Handle channel updates
-    if(Deserialization::is_channel_update_message(message.payload.ptr))
+    if(Deserialization::is_channel_update_message(message_string))
     {
-        if(this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
+        if(this->channel_callbacks_map.find(message_channel_string) != this->channel_callbacks_map.end())
         {
-            this->channel_callbacks_map[message.channel.ptr](
+            this->channel_callbacks_map[message_channel_string](
                     Deserialization::pubnub_message_to_chat_channel(this->chat_obj, message));
         }
     }
 
     //TODO:Handle also removing user metadata
     //Handle user updates
-    if(Deserialization::is_user_update_message(message.payload.ptr))
+    if(Deserialization::is_user_update_message(message_string))
     {
-        if(this->user_callbacks_map.find(message.channel.ptr) != this->user_callbacks_map.end())
+        if(this->user_callbacks_map.find(message_channel_string) != this->user_callbacks_map.end())
         {
-            this->user_callbacks_map[message.channel.ptr](
+            this->user_callbacks_map[message_channel_string](
                     Deserialization::pubnub_message_to_chat_user(this->chat_obj, message));
         }
     }
 
     //Handle events
-    if(Deserialization::is_event_message(message.payload.ptr))
+    if(Deserialization::is_event_message(message_string))
     {
-        if(this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
+        if(this->event_callbacks_map.find(message_channel_string) != this->event_callbacks_map.end())
         {
-            this->event_callbacks_map[message.channel.ptr](message.payload.ptr);
+            this->event_callbacks_map[message_channel_string](message_string);
         }
     }
 
     //Handle presence
-    if(Deserialization::is_presence_message(message.payload.ptr))
+    if(Deserialization::is_presence_message(message_string))
     {
-        if(this->channel_presence_callbacks_map.find(message.channel.ptr) != this->channel_presence_callbacks_map.end() ||
-            this->channel_presence_callbacks_map.find(message.channel.ptr + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
+        if(this->channel_presence_callbacks_map.find(message_channel_string) != this->channel_presence_callbacks_map.end() ||
+            this->channel_presence_callbacks_map.find(message_channel_string + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
         {
-            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(message.channel.ptr);
-            this->channel_presence_callbacks_map[message.channel.ptr](current_users);
+            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(message_channel_string);
+            this->channel_presence_callbacks_map[message_channel_string](current_users);
         }
     }
 
     //Handle message updates
-    if(Deserialization::is_message_update_message(message.payload.ptr))
+    if(Deserialization::is_message_update_message(message_string))
     {
         Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
 
@@ -703,7 +712,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle message updates
-    if(Deserialization::is_membership_update_message(message.payload.ptr))
+    if(Deserialization::is_membership_update_message(message_string))
     {
         Pubnub::String membership_channel = message_json["data"]["messageTimetoken"]["id"].dump();
 

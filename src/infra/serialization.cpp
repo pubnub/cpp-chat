@@ -81,18 +81,11 @@ Pubnub::Channel Deserialization::pubnub_message_to_chat_channel(Pubnub::Chat& ch
 
     json message_json = json::parse(to_pn_string(pn_message.payload));
     json channel_data_json = message_json["data"];
+    Pubnub::String channel_data_string = channel_data_json.dump();
 
     return Pubnub::Channel(
             chat_obj,
-            Pubnub::String(channel_data_json["id"]),
-            Pubnub::ChatChannelData{
-                Pubnub::String(channel_data_json["name"]),
-                Pubnub::String(channel_data_json["description"]),
-                Pubnub::String(channel_data_json["custom"]),
-                Pubnub::String(channel_data_json["updated"]),
-                Pubnub::String(channel_data_json["status"]),
-                Pubnub::String(channel_data_json["type"])
-            }
+            channel_data_string
         );
 }
 
@@ -105,19 +98,11 @@ Pubnub::User Deserialization::pubnub_message_to_chat_user(Pubnub::Chat& chat_obj
 
     json message_json = json::parse(to_pn_string(pn_message.payload));
     json user_data_json = message_json["data"];
+    Pubnub::String user_data_string = user_data_json.dump();
 
     return Pubnub::User(
             chat_obj,
-            Pubnub::String(user_data_json["id"]),
-            Pubnub::ChatUserData{
-                Pubnub::String(user_data_json["name"]),
-                Pubnub::String(user_data_json["externalId"]),
-                Pubnub::String(user_data_json["profileUrl"]),
-                Pubnub::String(user_data_json["email"]),
-                Pubnub::String(user_data_json["custom"]),
-                Pubnub::String(user_data_json["status"]),
-                Pubnub::String(user_data_json["type"])
-            }
+            user_data_string
         );
 }
 
