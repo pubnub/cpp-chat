@@ -234,6 +234,7 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
         auto ptr = new pubnub_v2_message(message);
 
         // TODO: it cannot be like that
+        result += "0x";
         std::ostringstream oss;
         oss << static_cast<void*>(ptr);
         result += oss.str();

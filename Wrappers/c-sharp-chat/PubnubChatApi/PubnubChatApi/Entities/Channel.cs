@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
@@ -34,6 +35,9 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_channel_send_text(IntPtr channel, string message, byte type, string metadata);
 
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
+
         #endregion
 
         private IntPtr channelPointer;
@@ -42,8 +46,7 @@ namespace PubNubChatAPI.Entities
         private Thread messageFetchingThread;
 
         public string ChannelId { get; }
-        //TODO: message
-        public event Action<string> OnMessageReceived;
+        public event Action<Message> OnMessageReceived;
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer)
         {
@@ -59,11 +62,23 @@ namespace PubNubChatAPI.Entities
         {
             while (fetchMessages)
             {
-                //TODO: actual messages and per-message callback
                 var messages = chat.GetMessages(ChannelId);
                 if (!string.IsNullOrEmpty(messages) && messages != "[]")
                 {
-                    OnMessageReceived?.Invoke(messages);
+                    var pubnubV2MessagePointers = JsonConvert.DeserializeObject<IntPtr[]>(messages);
+                    if (pubnubV2MessagePointers == null)
+                    {
+                        continue;
+                    }
+                    
+                    foreach (var pointer in pubnubV2MessagePointers)
+                    {
+                        var messagePointer = pn_deserialize_message(chat.ChatPointer, pointer);
+                        if (messagePointer != IntPtr.Zero)
+                        {
+                            OnMessageReceived?.Invoke(new Message(chat, messagePointer));
+                        }
+                    }
                 }
                 Thread.Sleep(500);
             }

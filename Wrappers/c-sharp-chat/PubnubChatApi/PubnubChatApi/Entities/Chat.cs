@@ -103,26 +103,25 @@ namespace PubNubChatAPI.Entities
         
         #endregion
         
-        private IntPtr chatPointer;
+        internal IntPtr ChatPointer { get; }
         private Dictionary<string, Channel> channels = new();
         private Dictionary<string, User> users = new();
 
         public Chat(string publishKey, string subscribeKey, string userId)
         {
-            chatPointer = pn_chat_new(publishKey, subscribeKey, userId);
-            CUtilities.CheckCFunctionResult(chatPointer);
+            ChatPointer = pn_chat_new(publishKey, subscribeKey, userId);
+            CUtilities.CheckCFunctionResult(ChatPointer);
         }
 
         public Channel CreatePublicConversation(string channelId)
         {
             return CreatePublicConversation(channelId, new ChatChannelData());
         }
-
-        //TODO: return actual Message objects
-        public string GetMessages(string channelId)
+        
+        internal string GetMessages(string channelId)
         {
             var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_chat_get_messages(chatPointer, channelId, messagesBuffer));
+            CUtilities.CheckCFunctionResult(pn_chat_get_messages(ChatPointer, channelId, messagesBuffer));
             return messagesBuffer.ToString();;
         }
 
@@ -134,7 +133,7 @@ namespace PubNubChatAPI.Entities
                 return existingChannel;
             }
 
-            var channelPointer = pn_chat_create_public_conversation_dirty(chatPointer, channelId,
+            var channelPointer = pn_chat_create_public_conversation_dirty(ChatPointer, channelId,
                 additionalData.ChannelName,
                 additionalData.ChannelDescription,
                 additionalData.ChannelCustomDataJson,
@@ -162,7 +161,7 @@ namespace PubNubChatAPI.Entities
         public void UpdateChannel(string channelId, ChatChannelData updatedData)
         {
             CUtilities.CheckCFunctionResult(
-                pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
+                pn_chat_update_channel_dirty(ChatPointer, channelId, updatedData.ChannelName,
                     updatedData.ChannelDescription,
                     updatedData.ChannelCustomDataJson,
                     updatedData.ChannelUpdated,
@@ -175,14 +174,14 @@ namespace PubNubChatAPI.Entities
             if (channels.ContainsKey(channelId))
             {
                 channels.Remove(channelId);
-                CUtilities.CheckCFunctionResult(pn_chat_delete_channel(chatPointer, channelId));
+                CUtilities.CheckCFunctionResult(pn_chat_delete_channel(ChatPointer, channelId));
             }
         }
 
         public void SetRestrictions(string userId, string channelId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(
-                pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason));
+                pn_chat_set_restrictions(ChatPointer, userId, channelId, banUser, muteUser, reason));
         }
 
         public User CreateUser(string userId)
@@ -198,7 +197,7 @@ namespace PubNubChatAPI.Entities
                 return existingUser;
             }
             
-            var userPointer = pn_chat_create_user_dirty(chatPointer, userId, 
+            var userPointer = pn_chat_create_user_dirty(ChatPointer, userId, 
                 additionalData.Username,
                 additionalData.ExternalId, 
                 additionalData.ProfileUrl, 
@@ -227,7 +226,7 @@ namespace PubNubChatAPI.Entities
         public void UpdateUser(string userId, ChatUserData updatedData)
         {
             CUtilities.CheckCFunctionResult(
-                pn_chat_update_user_dirty(chatPointer, userId, 
+                pn_chat_update_user_dirty(ChatPointer, userId, 
                     updatedData.Username,
                     updatedData.ExternalId, 
                     updatedData.ProfileUrl, 
@@ -242,13 +241,13 @@ namespace PubNubChatAPI.Entities
             if (users.ContainsKey(userId))
             {
                 users.Remove(userId);
-                CUtilities.CheckCFunctionResult(pn_chat_delete_user(chatPointer, userId));
+                CUtilities.CheckCFunctionResult(pn_chat_delete_user(ChatPointer, userId));
             }
         }
 
         ~Chat()
         {
-            pn_chat_delete(chatPointer);
+            pn_chat_delete(ChatPointer);
         }
     }
 }

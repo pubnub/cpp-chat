@@ -6,15 +6,15 @@
 #include "chat/user.hpp"
 #include <pubnub_helper.h>
 
-Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* message_json) {
-    if (!Deserialization::is_chat_message(Pubnub::String(message_json->payload.ptr, message_json->payload.size))) {
+Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* message) {
+    if (!Deserialization::is_chat_message(Pubnub::String(message->payload.ptr, message->payload.size))) {
         pn_c_set_error_message("Message is not a chat message");
 
         return PN_C_ERROR_PTR;
     }
 
     try {
-        return new Pubnub::Message(Deserialization::pubnub_to_chat_message(*chat, *message_json));
+        return new Pubnub::Message(Deserialization::pubnub_to_chat_message(*chat, *message));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

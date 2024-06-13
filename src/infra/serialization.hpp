@@ -1,5 +1,5 @@
-#ifndef PN_CHAT_C_SERIALIZATION_H
-#define PN_CHAT_C_SERIALIZATION_H
+#ifndef PN_CHAT_SERIALIZATION_H
+#define PN_CHAT_SERIALIZATION_H
 
 #include "string.hpp"
 #include "chat/channel.hpp"
@@ -26,4 +26,4 @@ namespace Deserialization {
     Pubnub::String pubnub_message_to_string(pubnub_v2_message pn_message);
 }
 
-#endif // PN_CHAT_C_SERIALIZATION_H
+#endif // PN_CHAT_SERIALIZATION_H

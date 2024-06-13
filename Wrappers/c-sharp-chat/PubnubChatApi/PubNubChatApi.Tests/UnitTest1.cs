@@ -28,9 +28,9 @@ public class Tests
             });
             
             channel.Connect();
-            channel.OnMessageReceived += (messages) =>
+            channel.OnMessageReceived += (message) =>
             {
-                Debug.WriteLine(messages);
+                Debug.WriteLine(message.MessageText);
             };
 
             /*new Thread(() =>
