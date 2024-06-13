@@ -49,6 +49,7 @@ namespace Pubnub
         PN_CHAT_EXPORT void disconnect();
         PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, Pubnub::String additional_params = "");
         PN_CHAT_EXPORT void join(CallbackStringFunction string_callback, Pubnub::String additional_params = "");
+        PN_CHAT_EXPORT std::vector<String> join_and_get_messages(Pubnub::String additional_params = "");
         PN_CHAT_EXPORT void leave();
         PN_CHAT_EXPORT void delete_channel();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_user_id, Pubnub::PubnubRestrictionsData restrictions);

@@ -99,6 +99,21 @@ void Channel::join(CallbackStringFunction string_callback, Pubnub::String additi
     join(callback, additional_params);
 }
 
+std::vector<String> Channel::join_and_get_messages(Pubnub::String additional_params)
+{
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String custom_parameter_string;
+    additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
+    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
+
+    this->chat_obj
+        .get_pubnub_context()
+        .set_memberships(channel_id, set_object_string);
+
+    return connect_and_get_messages();
+}
+
+
 void Channel::leave()
 {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
