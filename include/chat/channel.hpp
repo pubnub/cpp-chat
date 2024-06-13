@@ -42,7 +42,7 @@ namespace Pubnub
         PN_CHAT_EXPORT Channel(Pubnub::Chat& InChat, Pubnub::String channel_data_json);
         ~Channel() = default;
 
-        PN_CHAT_EXPORT void update(ChatChannelData in_additional_channel_data);
+        PN_CHAT_EXPORT Pubnub::Channel update(ChatChannelData in_additional_channel_data);
         PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
         PN_CHAT_EXPORT void connect(CallbackStringFunction string_callback);
         PN_CHAT_EXPORT std::vector<Pubnub::String> connect_and_get_messages();

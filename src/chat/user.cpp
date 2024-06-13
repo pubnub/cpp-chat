@@ -28,13 +28,15 @@ User::User(Chat& chat, String user_id, String user_data_json) :
 User::User(Pubnub::Chat& chat, String user_data_json) :
     User(chat, user_id_from_json(user_data_json), user_data_from_json(user_data_json)) {}
 
-void User::update(ChatUserData in_user_data)
+User User::update(ChatUserData in_user_data)
 {
     this->chat_obj
         .get_pubnub_context()
         .set_user_metadata(user_id, user_data_to_json(user_id, in_user_data));
 
     this->user_data = in_user_data;
+
+    return *this;
 }
 
 void User::delete_user()

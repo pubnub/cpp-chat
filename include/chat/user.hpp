@@ -37,7 +37,7 @@ namespace Pubnub
 
         ~User() = default;
 
-        PN_CHAT_EXPORT void update(ChatUserData in_user_data);
+        PN_CHAT_EXPORT Pubnub::User update(ChatUserData in_user_data);
         PN_CHAT_EXPORT void delete_user();
         PN_CHAT_EXPORT void set_restrictions(Pubnub::String in_channel_id, Pubnub::PubnubRestrictionsData restrictions);
         PN_CHAT_EXPORT void report(Pubnub::String reason);

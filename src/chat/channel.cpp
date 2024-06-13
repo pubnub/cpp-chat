@@ -36,7 +36,7 @@ Channel::Channel(Chat& InChat, String in_channel_id, String channel_data_json) :
 Channel::Channel(Pubnub::Chat& InChat, String channel_data_json) :
     Channel(InChat, channel_id_from_json(channel_data_json), channel_data_from_json(channel_data_json)) {}
 
-void Channel::update(ChatChannelData in_additional_channel_data)
+Pubnub::Channel Channel::update(ChatChannelData in_additional_channel_data)
 {
     // TODO: transactional update
     channel_data = in_additional_channel_data;
@@ -44,6 +44,8 @@ void Channel::update(ChatChannelData in_additional_channel_data)
     this->chat_obj
         .get_pubnub_context()
         .set_channel_metadata(channel_id, channel_data_to_json(channel_id, channel_data));
+
+    return *this;
 }
 
 void Channel::connect(std::function<void(Message)> message_callback) {
