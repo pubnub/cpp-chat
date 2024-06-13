@@ -27,12 +27,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_event(pubnub_v2_message* 
 //Presence - LIST OF USER IDs
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_presence(pubnub_v2_message* presence, char* result);
 
-<<<<<<< HEAD
-//TODO: should be message
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_message_update(pubnub_v2_message* message_update, char* result);
-=======
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update);
->>>>>>> 828c833 (return message update as message)
 
 //TODO: Membership updates
 
