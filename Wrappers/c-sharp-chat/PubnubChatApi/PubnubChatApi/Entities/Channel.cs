@@ -1,15 +1,12 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using Newtonsoft.Json;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
-    public class Channel
+    public class Channel : PointerWrapper
     {
         #region DLL Imports
 
@@ -35,66 +32,24 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_channel_send_text(IntPtr channel, string message, byte type, string metadata);
 
-        [DllImport("pubnub-chat.dll")]
-        private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
-        
-        [DllImport("pubnub-chat.dll")]
-        private static extern void pn_dispose_message(IntPtr message);
-
         #endregion
-
-        private IntPtr channelPointer;
+        
         private Chat chat;
-        private bool fetchMessages = true;
-        private Thread messageFetchingThread;
-
-        public string ChannelId { get; }
+        
         public event Action<Message> OnMessageReceived;
-        /*public event Action<Event> OnEventReceived;
-        public event Action<Event> OnEventReceived;*/
+        public event Action<Channel> OnChannelUpdate;
+        //TODO: wrap this further?
+        public event Action<string> OnPresenceUpdate; 
 
-        internal Channel(Chat chat, string channelId, IntPtr channelPointer)
+        internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
         {
             this.chat = chat;
-            ChannelId = channelId;
-            this.channelPointer = channelPointer;
-
-            messageFetchingThread = new Thread(FetchMessagesLoop);
-            messageFetchingThread.Start();
         }
-
-        internal void UpdatePointer(IntPtr newChannelPointer)
+        
+        internal static string GetChannelIdFromPtr(IntPtr userPointer)
         {
-           pn_channel_delete(channelPointer);
-           channelPointer = newChannelPointer;
-        }
-
-        //TODO: MOVE TO CHAT, CHANNEL ID DOES NOTHING - REMOVE IT FROM SIGNATURE
-        private void FetchMessagesLoop()
-        {
-            while (fetchMessages)
-            {
-                var messages = chat.GetMessages(ChannelId);
-                if (!string.IsNullOrEmpty(messages) && messages != "[]")
-                {
-                    var pubnubV2MessagePointers = JsonConvert.DeserializeObject<IntPtr[]>(messages);
-                    if (pubnubV2MessagePointers == null)
-                    {
-                        continue;
-                    }
-                    
-                    foreach (var pointer in pubnubV2MessagePointers)
-                    {
-                        var messagePointer = pn_deserialize_message(chat.ChatPointer, pointer);
-                        if (messagePointer != IntPtr.Zero)
-                        {
-                            OnMessageReceived?.Invoke(new Message(chat, messagePointer));
-                        }
-                        pn_dispose_message(pointer);
-                    }
-                }
-                Thread.Sleep(500);
-            }
+            //TODO: C++ getters ID
+            return string.Empty;
         }
 
         //TODO: return actual Message objects
@@ -102,53 +57,51 @@ namespace PubNubChatAPI.Entities
         {
             OnMessageReceived = null;
             var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_channel_connect(channelPointer, messagesBuffer));
+            CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, messagesBuffer));
             return messagesBuffer.ToString();
         }
 
         public void Join()
         {
             OnMessageReceived = null;
-            CUtilities.CheckCFunctionResult(pn_channel_join(channelPointer, string.Empty));
+            CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty));
         }
 
         public void Disconnect()
         {
-            CUtilities.CheckCFunctionResult(pn_channel_disconnect(channelPointer));
+            CUtilities.CheckCFunctionResult(pn_channel_disconnect(pointer));
         }
 
         public void Leave()
         {
-            CUtilities.CheckCFunctionResult(pn_channel_leave(channelPointer));
+            CUtilities.CheckCFunctionResult(pn_channel_leave(pointer));
         }
 
         public void SetRestrictions(string userId, bool banUser, bool muteUser, string reason)
         {
-            CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(channelPointer, userId, banUser, muteUser,
+            CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(pointer, userId, banUser, muteUser,
                 reason));
         }
 
         public void SendText(string message)
         {
-            CUtilities.CheckCFunctionResult(pn_channel_send_text(channelPointer, message,
+            CUtilities.CheckCFunctionResult(pn_channel_send_text(pointer, message,
                 (byte)pubnub_chat_message_type.PCMT_TEXT, string.Empty));
         }
 
         public void UpdateChannel(ChatChannelData updatedData)
         {
-            chat.UpdateChannel(ChannelId, updatedData);
+            chat.UpdateChannel(Id, updatedData);
         }
 
         public void DeleteChannel()
         {
-            chat.DeleteChannel(ChannelId);
+            chat.DeleteChannel(Id);
         }
 
-        ~Channel()
+        protected override void DisposePointer()
         {
-            fetchMessages = false;
-            messageFetchingThread.Join();
-            pn_channel_delete(channelPointer);
+            pn_channel_delete(pointer);
         }
     }
 }

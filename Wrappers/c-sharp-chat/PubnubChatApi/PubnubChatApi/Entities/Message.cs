@@ -5,7 +5,7 @@ using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
-    public class Message
+    public class Message : PointerWrapper
     {
         #region DLL Imports
 
@@ -42,7 +42,7 @@ namespace PubNubChatAPI.Entities
             get
             {
                 var buffer = new StringBuilder(32768);
-                CUtilities.CheckCFunctionResult(pn_message_text(messagePointer, buffer));
+                CUtilities.CheckCFunctionResult(pn_message_text(pointer, buffer));
                 return buffer.ToString();
             }
         }
@@ -51,7 +51,7 @@ namespace PubNubChatAPI.Entities
             get
             {
                 var buffer = new StringBuilder(512);
-                pn_message_get_timetoken(messagePointer, buffer);
+                pn_message_get_timetoken(pointer, buffer);
                 return buffer.ToString();
             }
         }
@@ -60,7 +60,7 @@ namespace PubNubChatAPI.Entities
             get
             {
                 var buffer = new StringBuilder(512);
-                pn_message_get_data_channel_id(messagePointer, buffer);
+                pn_message_get_data_channel_id(pointer, buffer);
                 return buffer.ToString();
             }
         }
@@ -69,7 +69,7 @@ namespace PubNubChatAPI.Entities
             get
             {
                 var buffer = new StringBuilder(512);
-                pn_message_get_data_user_id(messagePointer, buffer);
+                pn_message_get_data_user_id(pointer, buffer);
                 return buffer.ToString();
             }
         }
@@ -78,7 +78,7 @@ namespace PubNubChatAPI.Entities
             get
             {
                 var buffer = new StringBuilder(4096);
-                pn_message_get_data_meta(messagePointer, buffer);
+                pn_message_get_data_meta(pointer, buffer);
                 return buffer.ToString();
             }
         }
@@ -86,34 +86,39 @@ namespace PubNubChatAPI.Entities
         {
             get
             {
-                var result = pn_message_deleted(messagePointer);
+                var result = pn_message_deleted(pointer);
                 CUtilities.CheckCFunctionResult(result);
                 return result == 1;
             }
         }
-
-        private IntPtr messagePointer;
-        private Chat chat;
         
-        internal Message(Chat chat, IntPtr messagePointer)
+        private Chat chat;
+        public event Action<Message> OnMessageUpdated; 
+        
+        internal Message(Chat chat, IntPtr messagePointer, string timeToken) : base(messagePointer, timeToken)
         {
-            this.messagePointer = messagePointer;
             this.chat = chat;
+        }
+        
+        internal static string GetMessageIdFromPtr(IntPtr userPointer)
+        {
+            //TODO: C++ getters ID
+            return string.Empty;
         }
 
         public void EditMessageText(string newText)
         {
-            CUtilities.CheckCFunctionResult(pn_message_edit_text(messagePointer, newText));
+            CUtilities.CheckCFunctionResult(pn_message_edit_text(pointer, newText));
         }
 
         public void DeleteMessage()
         {
-            CUtilities.CheckCFunctionResult(pn_message_delete_message(messagePointer));
+            CUtilities.CheckCFunctionResult(pn_message_delete_message(pointer));
         }
 
-        ~Message()
+        protected override void DisposePointer()
         {
-            pn_message_delete(messagePointer);
+            pn_message_delete(pointer);
         }
     }
 }

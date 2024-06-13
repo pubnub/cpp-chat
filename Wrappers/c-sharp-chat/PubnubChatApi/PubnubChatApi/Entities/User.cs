@@ -5,7 +5,7 @@ using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
-    public class User
+    public class User : PointerWrapper
     {
         #region DLL Imports
 
@@ -20,41 +20,43 @@ namespace PubNubChatAPI.Entities
 
         #endregion
         
-        public string UserId { get; }
-        
-        private IntPtr userPointer;
         private Chat chat;
+        public event Action<User> OnUserUpdated; 
         
-        internal User(Chat chat, string userId, IntPtr userPointer)
+        internal User(Chat chat, string userId, IntPtr userPointer) : base(userPointer, userId)
         {
             this.chat = chat;
-            UserId = userId;
-            this.userPointer = userPointer;
+        }
+
+        internal static string GetUserIdFromPtr(IntPtr userPointer)
+        {
+            //TODO: C++ getters ID
+            return string.Empty;
         }
 
         public void UpdateUser(ChatUserData updatedData)
         {
-            chat.UpdateUser(UserId, updatedData);
+            chat.UpdateUser(Id, updatedData);
         }
 
         public void DeleteUser()
         {
-            chat.DeleteUser(UserId);
+            chat.DeleteUser(Id);
         }
 
         public void SetRestrictions(string channelId, bool banUser, bool muteUser, string reason)
         {
-            chat.SetRestrictions(UserId, channelId, banUser, muteUser, reason);
+            chat.SetRestrictions(Id, channelId, banUser, muteUser, reason);
         }
 
         public void ReportUser(string reason)
         {
-            CUtilities.CheckCFunctionResult(pn_user_report(userPointer, reason));
+            CUtilities.CheckCFunctionResult(pn_user_report(pointer, reason));
         }
 
         public bool IsPresentOn(string channelId)
         {
-            var result = pn_user_is_present_on(userPointer, channelId);
+            var result = pn_user_is_present_on(pointer, channelId);
             CUtilities.CheckCFunctionResult(result);
             return result == 1;
         }
@@ -62,13 +64,13 @@ namespace PubNubChatAPI.Entities
         public string WherePresent()
         {
             var buffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_user_where_present(userPointer, buffer));
+            CUtilities.CheckCFunctionResult(pn_user_where_present(pointer, buffer));
             return buffer.ToString();
         }
 
-        ~User()
+        protected override void DisposePointer()
         {
-            pn_user_destroy(userPointer);
+            pn_user_destroy(pointer);
         }
     }
 }
