@@ -92,6 +92,7 @@ private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
     void cancel_previous_subscription();
+    void call_handshake();
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
     void broadcast_callbacks_from_message(pubnub_v2_message message);

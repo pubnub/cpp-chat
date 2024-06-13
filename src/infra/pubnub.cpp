@@ -81,6 +81,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(con
     }
 
     this->subscribed_channels.push_back(channel);
+    this->call_handshake();
     this->call_subscribe();
 
     this->is_subscribed = true;
@@ -209,6 +210,7 @@ std::vector<pubnub_v2_message> PubNub::unsubscribe_from_channel_and_get_messages
         return messages;
     }
 
+    this->call_handshake();
     this->call_subscribe();
 
     return messages;
@@ -597,6 +599,8 @@ void PubNub::cancel_previous_subscription()
                 );
         }
     }
+
+    // TODO: Should I always leave?
     auto result = pubnub_leave(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), NULL);
     if (PNR_OK != result) {
         if (PNR_STARTED == result && PNR_OK != pubnub_await(this->long_poll_context.get())) {
@@ -620,6 +624,27 @@ void PubNub::call_subscribe()
             );
     }
 }
+
+void PubNub::call_handshake()
+{
+    auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
+
+    if (PNR_OK != result) {
+        if (PNR_STARTED == result) {
+            result = pubnub_await(this->long_poll_context.get());
+        }
+
+        if (PNR_OK != result) {
+            throw std::runtime_error(
+                    std::string("Failed to subscribe to channel: ")
+                    + pubnub_res_2_string(result)
+                    );
+
+        }
+    }
+}
+
+
 
 void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
 {
@@ -705,7 +730,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
             Pubnub::String message_channel;
             std::function<void(Pubnub::Message)> callback;
             std::tie(message_channel, callback) = this->message_update_callbacks_map[message_timetoken];
-            // TODO: this should already give message with this new update, make sure it really does.
+            // TODO: this should already give message with this new update, make sure it really does.pubnub.cpp
             Pubnub::Message message_obj = chat_obj.get_channel(message_channel).get_message(message_timetoken);
             callback(message_obj);
         }
