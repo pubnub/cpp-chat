@@ -1,5 +1,6 @@
 #include "c_functions/c_membership.hpp"
 #include "c_functions/c_errors.hpp"
+#include "chat/membership.hpp"
 
 void pn_membership_delete(Pubnub::Membership* membership) {
     delete membership;
@@ -31,18 +32,16 @@ Pubnub::Membership* pn_membership_from_channel(
     }
 }
 
-PnCResult pn_membership_update_dirty(
+Pubnub::Membership* pn_membership_update_dirty(
         Pubnub::Membership* membership,
         const char* custom_object_json) {
     try {
-        membership->update(custom_object_json);
+        return new Pubnub::Membership(membership->update(custom_object_json));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 
