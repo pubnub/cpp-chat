@@ -35,7 +35,7 @@ int main() {
     auto chat = pn_chat_new(pub_key.c_str(), sub_key.c_str(), user.c_str());
     chat->get_pubnub_context().stop_resolving_callbacks();
 
-    pn_deserialize_message(chat, nullptr); 
+//    pn_deserialize_message(chat, nullptr); 
 //    auto channel = pn_chat_create_public_conversation_dirty(chat, "test", "test", "fuck", "{}", "true", "1", "sure");
 //
 //    auto mes1 = pn_channel_connect(channel);
