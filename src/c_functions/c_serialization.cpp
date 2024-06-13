@@ -103,21 +103,21 @@ PnCResult pn_deserialize_presence(pubnub_v2_message* presence_json, char* result
     }
 }
 
-Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update_json) {
-    if (!Deserialization::is_message_update_message(Pubnub::String(message_update_json->payload.ptr, message_update_json->payload.size))) {
+Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update) {
+    if (!Deserialization::is_message_update_message(Pubnub::String(message_update->payload.ptr, message_update->payload.size))) {
         pn_c_set_error_message("Message is not a chat message update");
 
         return PN_C_ERROR_PTR;
     }
 
     try {
-        json message_json = json::parse(Pubnub::String(message_update_json->payload.ptr, message_update_json->payload.size));
+        json message_json = json::parse(Pubnub::String(message_update->payload.ptr, message_update->payload.size));
 
         if(message_json.is_null()) {
             throw std::runtime_error("Failed to parse message into json");
         }
 
-        auto channel = Pubnub::String(message_update_json->channel.ptr, message_update_json->channel.size);
+        auto channel = Pubnub::String(message_update->channel.ptr, message_update->channel.size);
         auto timetoken = message_json["data"]["messageTimetoken"].dump();
 
         return new Pubnub::Message(chat->get_channel(channel).get_message(timetoken));
