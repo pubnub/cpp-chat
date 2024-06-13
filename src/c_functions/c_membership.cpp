@@ -44,4 +44,18 @@ Pubnub::Membership* pn_membership_update_dirty(
     }
 }
 
+void pn_membership_get_user_id(
+        Pubnub::Membership* membership,
+        char* result) {
+    auto user_id = membership->get_user_id();
+    strcpy(result, user_id.c_str());
+}
+
+void pn_membership_get_channel_id(
+        Pubnub::Membership* membership,
+        char* result) {
+    auto channel_id = membership->get_channel_id();
+    strcpy(result, channel_id.c_str());
+}
+
 

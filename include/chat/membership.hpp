@@ -31,6 +31,9 @@ namespace Pubnub
         
         PN_CHAT_EXPORT Membership update(Pubnub::String in_custom_object_json);
 
+        PN_CHAT_EXPORT Pubnub::String get_user_id();
+        PN_CHAT_EXPORT Pubnub::String get_channel_id();
+
         private:
         Pubnub::Chat& chat_obj;
         Pubnub::String custom_data_json;

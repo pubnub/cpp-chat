@@ -68,3 +68,13 @@ Membership Membership::update(Pubnub::String in_custom_object_json)
     custom_data_json = in_custom_object_json;
     return *this;
 }
+
+Pubnub::String Membership::get_user_id()
+{
+    return user.get_user_id();
+}
+
+Pubnub::String Membership::get_channel_id()
+{
+    return channel.get_channel_id();
+}

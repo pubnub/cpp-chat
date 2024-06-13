@@ -27,4 +27,13 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_update_dirty(
         Pubnub::Membership* membership,
         const char* custom_object_json);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_membership_get_user_id(
+        Pubnub::Membership* membership,
+        char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_membership_get_channel_id(
+        Pubnub::Membership* membership,
+        char* result);
+
+
 #endif // PN_CHAT_C_MEMBERSHIP_H
