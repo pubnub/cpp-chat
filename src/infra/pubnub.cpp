@@ -719,11 +719,12 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
 
         if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
         {
-            //TODO:: to finish. get message, etc
             Pubnub::String message_channel;
             std::function<void(Pubnub::Message)> callback;
-            std::tie(message_channel, callback) = this->message_update_callbacks_map[message.channel.ptr];
-            //this->message_update_callbacks_map[message.channel.ptr](pubnub_message_to_chat_user(message));
+            std::tie(message_channel, callback) = this->message_update_callbacks_map[message_timetoken];
+            // TODO: this should already give message with this new update, make sure it really does.
+            Pubnub::Message message_obj = chat_obj.get_channel(message_channel).get_message(message_timetoken);
+            callback(message_obj);
         }
     }
 
