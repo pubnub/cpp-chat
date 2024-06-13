@@ -1,4 +1,5 @@
 #include "infra/pubnub.hpp"
+#include "infra/serialization.hpp"
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
 #include <thread>
@@ -89,7 +90,7 @@ std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_str
     std::vector<Pubnub::String> messages;
     for(pubnub_v2_message& message : pubnub_messages)
     {
-        messages.push_back(this->pubnub_message_to_string(message));
+        messages.push_back(Deserialization::pubnub_message_to_string(message));
     }
 
     return messages;
@@ -138,7 +139,7 @@ std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
     std::vector<Pubnub::String> messages;
     for(pubnub_v2_message& message : pubnub_messages)
     {
-        messages.push_back(this->pubnub_message_to_string(message));
+        messages.push_back(Deserialization::pubnub_message_to_string(message));
     }
 
     return messages;
@@ -545,51 +546,6 @@ void PubNub::stop_resolving_callbacks()
     this->should_stop = true;
 }
 
-bool PubNub::is_chat_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("text") && message_json.contains("type");
-}
-
-bool PubNub::is_message_update_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions";
-}
-
-bool PubNub::is_channel_update_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "channel" && message_json["event"] == "set";
-}
-
-bool PubNub::is_user_update_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
-        message_json["source"] == "objects" && message_json["type"] == "uuid" && message_json["event"] == "set";
-}
-
-bool PubNub::is_event_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("event");
-}
-
-bool PubNub::is_presence_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    return message_json.contains("action") && message_json.contains("uuid");
-}
-
-bool PubNub::is_membership_update_message(Pubnub::String message_json_string)
-{
-    json message_json = json::parse(message_json_string);
-    //TODO: to finish
-    return false;
-}
-
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {
@@ -664,36 +620,39 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle chat messages
-    if(is_chat_message(message.payload.ptr))
+    if(Deserialization::is_chat_message(message.payload.ptr))
     {
         if(this->message_callbacks_map.find(message.channel.ptr) != this->message_callbacks_map.end())
         {
-            this->message_callbacks_map[message.channel.ptr](pubnub_to_chat_message(message));
+            this->message_callbacks_map[message.channel.ptr](
+                    Deserialization::pubnub_to_chat_message(this->chat_obj, message));
         }
     }
     
     //TODO:Handle also removing channel metadata
     //Handle channel updates
-    if(is_channel_update_message(message.payload.ptr))
+    if(Deserialization::is_channel_update_message(message.payload.ptr))
     {
         if(this->channel_callbacks_map.find(message.channel.ptr) != this->channel_callbacks_map.end())
         {
-            this->channel_callbacks_map[message.channel.ptr](pubnub_message_to_chat_channel(message));
+            this->channel_callbacks_map[message.channel.ptr](
+                    Deserialization::pubnub_message_to_chat_channel(this->chat_obj, message));
         }
     }
 
     //TODO:Handle also removing user metadata
     //Handle user updates
-    if(is_user_update_message(message.payload.ptr))
+    if(Deserialization::is_user_update_message(message.payload.ptr))
     {
         if(this->user_callbacks_map.find(message.channel.ptr) != this->user_callbacks_map.end())
         {
-            this->user_callbacks_map[message.channel.ptr](pubnub_message_to_chat_user(message));
+            this->user_callbacks_map[message.channel.ptr](
+                    Deserialization::pubnub_message_to_chat_user(this->chat_obj, message));
         }
     }
 
     //Handle events
-    if(is_event_message(message.payload.ptr))
+    if(Deserialization::is_event_message(message.payload.ptr))
     {
         if(this->event_callbacks_map.find(message.channel.ptr) != this->event_callbacks_map.end())
         {
@@ -702,7 +661,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle presence
-    if(is_presence_message(message.payload.ptr))
+    if(Deserialization::is_presence_message(message.payload.ptr))
     {
         if(this->channel_presence_callbacks_map.find(message.channel.ptr) != this->channel_presence_callbacks_map.end() ||
             this->channel_presence_callbacks_map.find(message.channel.ptr + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
@@ -713,7 +672,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     }
 
     //Handle message updates
-    if(is_message_update_message(message.payload.ptr))
+    if(Deserialization::is_message_update_message(message.payload.ptr))
     {
         Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
 
@@ -744,79 +703,4 @@ Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()
     return current_channels;
 }
 
-Pubnub::Message PubNub::pubnub_to_chat_message(pubnub_v2_message pn_message)
-{
-    // TODO: implement message parsing properly
-    auto to_pn_string = [](struct pubnub_char_mem_block message) {
-        return Pubnub::String(message.ptr, message.size);
-    };
 
-    json message_json = json::parse(to_pn_string(pn_message.payload));
-
-    return Pubnub::Message(
-            chat_obj,
-            to_pn_string(pn_message.tt),
-            Pubnub::ChatMessageData{
-                Pubnub::pubnub_chat_message_type::PCMT_TEXT,
-                Pubnub::String(message_json["text"]),
-                to_pn_string(pn_message.channel),
-                to_pn_string(pn_message.publisher),
-                to_pn_string(pn_message.metadata),
-                {}
-            }
-        );
-}
-
-Pubnub::Channel PubNub::pubnub_message_to_chat_channel(pubnub_v2_message pn_message)
-{
-    // TODO: implement message parsing properly
-    auto to_pn_string = [](struct pubnub_char_mem_block message) {
-        return Pubnub::String(message.ptr, message.size);
-    };
-
-    json message_json = json::parse(to_pn_string(pn_message.payload));
-    json channel_data_json = message_json["data"];
-
-    return Pubnub::Channel(
-            chat_obj,
-            Pubnub::String(channel_data_json["id"]),
-            Pubnub::ChatChannelData{
-                Pubnub::String(channel_data_json["name"]),
-                Pubnub::String(channel_data_json["description"]),
-                Pubnub::String(channel_data_json["custom"]),
-                Pubnub::String(channel_data_json["updated"]),
-                Pubnub::String(channel_data_json["status"]),
-                Pubnub::String(channel_data_json["type"])
-            }
-        );
-}
-
-Pubnub::User PubNub::pubnub_message_to_chat_user(pubnub_v2_message pn_message)
-{
-    // TODO: implement message parsing properly
-    auto to_pn_string = [](struct pubnub_char_mem_block message) {
-        return Pubnub::String(message.ptr, message.size);
-    };
-
-    json message_json = json::parse(to_pn_string(pn_message.payload));
-    json user_data_json = message_json["data"];
-
-    return Pubnub::User(
-            chat_obj,
-            Pubnub::String(user_data_json["id"]),
-            Pubnub::ChatUserData{
-                Pubnub::String(user_data_json["name"]),
-                Pubnub::String(user_data_json["externalId"]),
-                Pubnub::String(user_data_json["profileUrl"]),
-                Pubnub::String(user_data_json["email"]),
-                Pubnub::String(user_data_json["custom"]),
-                Pubnub::String(user_data_json["status"]),
-                Pubnub::String(user_data_json["type"])
-            }
-        );
-}
-
-Pubnub::String PubNub::pubnub_message_to_string(pubnub_v2_message pn_message)
-{
-    return Pubnub::String(pn_message.payload.ptr, pn_message.payload.size);
-}

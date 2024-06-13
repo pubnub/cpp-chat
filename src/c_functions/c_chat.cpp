@@ -2,6 +2,9 @@
 #include "c_functions/c_channel.hpp"
 #include "chat/channel.hpp"
 #include "c_functions/c_errors.hpp"
+#include <pubnub_helper.h>
+#include <sstream>
+#include <string>
 
 Pubnub::Chat* pn_chat_new(
         const char* publish,
@@ -9,7 +12,9 @@ Pubnub::Chat* pn_chat_new(
         const char* user_id) {
 
     try {
-        return new Pubnub::Chat(publish, subscribe, user_id);
+        auto* chat = new Pubnub::Chat(publish, subscribe, user_id);
+        chat->get_pubnub_context().stop_resolving_callbacks();
+        return chat;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -217,7 +222,7 @@ PnCResult pn_chat_delete_user(
     return PN_C_OK;
 }
 
-const char* jsonize_messages(std::vector<Pubnub::String> messages) {
+const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     if (messages.size() == 0) {
         char* empty_result = new char[3];
         memcpy(empty_result, "[]\0", 3);
@@ -226,7 +231,12 @@ const char* jsonize_messages(std::vector<Pubnub::String> messages) {
 
     Pubnub::String result = "[";
     for (auto message : messages) {
-        result += message;
+        auto ptr = new pubnub_v2_message(message);
+
+        // TODO: it cannot be like that
+        std::ostringstream oss;
+        oss << static_cast<void*>(ptr);
+        result += oss.str();
         result += ",";
     }   
 
@@ -242,8 +252,8 @@ const char* jsonize_messages(std::vector<Pubnub::String> messages) {
 
 PnCResult pn_chat_get_messages(Pubnub::Chat *chat, const char *channel_id, char* messages_json) {
     try {
-        auto messages = chat->get_pubnub_context().fetch_messages_as_strings();
-        auto jsonised = jsonize_messages(messages);
+        auto messages = chat->get_pubnub_context().fetch_messages();
+        auto jsonised = move_message_to_heap(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
     } catch (std::exception& e) {

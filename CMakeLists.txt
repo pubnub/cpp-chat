@@ -67,13 +67,14 @@ include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
 
 set(SOURCES
-    src/lib.cpp
-    src/chat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp)
 
 if(${ENABLE_C_ABI})
     set(SOURCES
@@ -83,7 +84,8 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_user.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_errors.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_message.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_membership.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_membership.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_serialization.cpp)
 endif()
 
 if(NOT ${RUN_TESTS})

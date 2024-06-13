@@ -27,7 +27,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_create_public_conversatio
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_update_channel_dirty(
         Pubnub::Chat* chat,
-        std::string channel_id,
+        const char* channel_id,
         char* channel_name,
         char* channel_description,
         char* channel_custom_data_json,

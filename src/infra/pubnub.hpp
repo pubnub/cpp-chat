@@ -81,15 +81,6 @@ public:
     // TODO: not the greatest way but just for mvp...
     void stop_resolving_callbacks();
 
-    /* Message strings interpretors*/
-    bool is_chat_message(Pubnub::String message_json_string);
-    bool is_message_update_message(Pubnub::String message_json_string);
-    bool is_channel_update_message(Pubnub::String message_json_string);
-    bool is_user_update_message(Pubnub::String message_json_string);
-    bool is_event_message(Pubnub::String message_json_string);
-    bool is_presence_message(Pubnub::String message_json_string);
-    bool is_membership_update_message(Pubnub::String message_json_string);
-
 private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
@@ -97,10 +88,6 @@ private:
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
     void broadcast_callbacks_from_message(pubnub_v2_message message);
-    Pubnub::Message pubnub_to_chat_message(pubnub_v2_message pn_message);
-    Pubnub::Channel pubnub_message_to_chat_channel(pubnub_v2_message pn_message);
-    Pubnub::User pubnub_message_to_chat_user(pubnub_v2_message pn_message);
-    Pubnub::String pubnub_message_to_string(pubnub_v2_message pn_message);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
