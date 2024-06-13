@@ -35,7 +35,7 @@ Pubnub::Channel* pn_channel_new_dirty(
     }
 }
 
-PnCResult pn_channel_update_dirty(
+Pubnub::Channel* pn_channel_update_dirty(
         Pubnub::Channel* channel,
         char* channel_name,
         char* channel_description,
@@ -53,14 +53,12 @@ PnCResult pn_channel_update_dirty(
     converted_data.type = channel_type;
 
     try {
-        channel->update(converted_data);
+        return new Pubnub::Channel(channel->update(converted_data));
     } catch(std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 // TODO: dont copy code
@@ -117,10 +115,7 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
 
 PnCResult pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
     try {
-        auto messages = channel->join_and_get_messages();
-        auto jsonised = jsonize_messages2(messages);
-        strcpy(messages_json, jsonised);
-        delete[] jsonised;
+        channel->join(callback);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -248,5 +243,30 @@ void pn_channel_get_data_type(
         ) {
     auto type = channel->get_channel_data().type;
     strcpy(result, type.c_str());
+}
+
+PnCTribool pn_channel_is_present(Pubnub::Channel* channel, const char* user_id) {
+    try {
+        return channel->is_present(user_id);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
+PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
+    try {
+        auto present = channel->who_is_present();
+        auto jsonised = jsonize_messages2(present);
+        strcpy(result, jsonised);
+        delete[] jsonised;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 

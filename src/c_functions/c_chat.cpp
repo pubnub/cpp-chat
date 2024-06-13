@@ -275,3 +275,46 @@ void pn_clear_string(char* str) {
     delete[] str;
 }
 
+PnCTribool pn_chat_is_present(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* channel_id) {
+    try {
+        return chat->is_present(user_id, channel_id);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
+PnCResult pn_chat_who_is_present(
+        Pubnub::Chat* chat,
+        const char* channel_id,
+        char* result) {
+    try {
+        auto people = chat->who_is_present(channel_id);
+
+        if (people.size() == 0) {
+            strcpy(result, "[]");
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto person : people) {
+            string += person;
+            string += ",";
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        strcpy(result, string.c_str());
+
+        return PN_C_OK;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}

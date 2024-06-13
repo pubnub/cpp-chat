@@ -19,7 +19,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_new_dirty(
         char* channel_status,
         char* channel_type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_update_dirty(
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_update_dirty(
         Pubnub::Channel* channel,
         char* channel_name,
         char* channel_description,
@@ -78,6 +78,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_status(
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_data_type(
         Pubnub::Channel* channel,
         char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_channel_is_present(Pubnub::Channel* channel, const char* user_id);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result);
+
 
 #endif // PN_CHAT_C_CHANNEL_H
 

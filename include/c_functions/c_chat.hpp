@@ -97,4 +97,15 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_updates(
         char* messages_json);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_clear_string(char* str);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_chat_is_present(
+        Pubnub::Chat* chat,
+        const char* user_id,
+        const char* channel_id);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_who_is_present(
+        Pubnub::Chat* chat,
+        const char* channel_id,
+        char* result);
+
 #endif // PN_CHAT_C_CHAT_HPP
