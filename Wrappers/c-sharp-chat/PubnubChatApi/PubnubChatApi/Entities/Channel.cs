@@ -42,7 +42,8 @@ namespace PubNubChatAPI.Entities
         private Thread messageFetchingThread;
 
         public string ChannelId { get; }
-        public event Action<Message> OnMessageReceived;
+        //TODO: message
+        public event Action<string> OnMessageReceived;
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer)
         {
@@ -51,15 +52,18 @@ namespace PubNubChatAPI.Entities
             this.channelPointer = channelPointer;
 
             messageFetchingThread = new Thread(FetchMessagesLoop);
+            messageFetchingThread.Start();
         }
 
         private void FetchMessagesLoop()
         {
             while (fetchMessages)
             {
-                if (!string.IsNullOrEmpty(chat.GetMessages(ChannelId)))
+                //TODO: actual messages and per-message callback
+                var messages = chat.GetMessages(ChannelId);
+                if (!string.IsNullOrEmpty(messages) && messages != "[]")
                 {
-                    //OnMessageReceived?.Invoke();
+                    OnMessageReceived?.Invoke(messages);
                 }
                 Thread.Sleep(500);
             }

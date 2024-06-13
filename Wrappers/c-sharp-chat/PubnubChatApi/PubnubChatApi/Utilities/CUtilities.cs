@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace PubnubChatApi.Utilities
 
         private static void ThrowCError()
         {
+            Debug.WriteLine("Throwing C-side Error!");
             var buffer = new StringBuilder(4096);
             pn_c_get_error_message(buffer);
             throw new PubNubCCoreException(buffer.ToString());

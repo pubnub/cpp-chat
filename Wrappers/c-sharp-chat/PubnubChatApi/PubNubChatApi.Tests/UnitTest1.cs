@@ -28,8 +28,12 @@ public class Tests
             });
             
             channel.Connect();
+            channel.OnMessageReceived += (messages) =>
+            {
+                Debug.WriteLine(messages);
+            };
 
-            new Thread(() =>
+            /*new Thread(() =>
                 {
                     while (true)
                     {
@@ -38,7 +42,7 @@ public class Tests
                     }
                 })
             { IsBackground = true }
-                .Start();
+                .Start();*/
 
             //Debug.WriteLine(chat.GetMessages("test"));
 
