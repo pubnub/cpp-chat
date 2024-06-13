@@ -714,7 +714,7 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(Deserialization::is_membership_update_message(message_string))
     {
-        Pubnub::String membership_channel = message_json["data"]["messageTimetoken"]["id"].dump();
+        Pubnub::String membership_channel = message_json["data"]["channel"]["id"].dump();
 
         if(this->message_update_callbacks_map.find(membership_channel) != this->message_update_callbacks_map.end())
         {
@@ -722,8 +722,13 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
             std::function<void(Pubnub::Membership)> callback;
             std::tie(membership_user, callback) = this->membership_callbacks_map[membership_channel];
 
-            Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), Pubnub::String(message_json["custom"]));
-            callback(membership_obj);
+            //Make sure this message is related to the user that we are streaming updates for
+            Pubnub::String user_from_message = message_json["data"]["uuid"]["id"].dump();
+            if(user_from_message == membership_user)
+            {
+                Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), Pubnub::String(message_json["custom"]));
+                callback(membership_obj);
+            }
         }
     }
 }
