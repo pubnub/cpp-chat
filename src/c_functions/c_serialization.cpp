@@ -111,6 +111,6 @@ PnCResult pn_deserialize_message_update(pubnub_v2_message* message_update_json, 
     }
 }
 
-void pn_dispose_message(Pubnub::Message* message) {
+void pn_dispose_message(pubnub_v2_message* channel_update) {
     delete message;
 }
