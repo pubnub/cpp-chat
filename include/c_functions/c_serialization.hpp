@@ -21,6 +21,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_presence(pubnub_v2_messag
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_message_update(pubnub_v2_message* message_update, char* result);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_dispose_message(pubnub_v2_message* channel_update);
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_dispose_message(pubnub_v2_message* message);
 
 #endif // PN_CHAT_C_SERIALIZATION_H
