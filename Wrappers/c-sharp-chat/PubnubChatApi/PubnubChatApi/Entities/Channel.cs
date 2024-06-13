@@ -37,6 +37,9 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
+        
+        [DllImport("pubnub-chat.dll")]
+        private static extern void pn_dispose_message(IntPtr message);
 
         #endregion
 
@@ -47,6 +50,8 @@ namespace PubNubChatAPI.Entities
 
         public string ChannelId { get; }
         public event Action<Message> OnMessageReceived;
+        /*public event Action<Event> OnEventReceived;
+        public event Action<Event> OnEventReceived;*/
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer)
         {
@@ -58,6 +63,13 @@ namespace PubNubChatAPI.Entities
             messageFetchingThread.Start();
         }
 
+        internal void UpdatePointer(IntPtr newChannelPointer)
+        {
+           pn_channel_delete(channelPointer);
+           channelPointer = newChannelPointer;
+        }
+
+        //TODO: MOVE TO CHAT, CHANNEL ID DOES NOTHING - REMOVE IT FROM SIGNATURE
         private void FetchMessagesLoop()
         {
             while (fetchMessages)
@@ -78,6 +90,7 @@ namespace PubNubChatAPI.Entities
                         {
                             OnMessageReceived?.Invoke(new Message(chat, messagePointer));
                         }
+                        pn_dispose_message(pointer);
                     }
                 }
                 Thread.Sleep(500);

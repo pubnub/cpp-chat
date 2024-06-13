@@ -4,7 +4,11 @@
 #include "chat/channel.hpp"
 #include "chat/message.hpp"
 #include "chat/user.hpp"
-#include <pubnub_helper.h>
+
+extern "C" {
+    #include <pubnub_api_types.h>
+    #include <pubnub_helper.h>
+}
 
 Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* message) {
     if (!Deserialization::is_chat_message(Pubnub::String(message->payload.ptr, message->payload.size))) {
