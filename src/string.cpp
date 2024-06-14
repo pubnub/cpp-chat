@@ -398,8 +398,6 @@ String operator+(const String& lhs, const String& rhs) {
 }
 
 bool operator==(const String& lhs, const String& rhs) {
-    std::cout << "Comparing: " << lhs.c_str() << " and " << rhs.c_str() << std::endl;
-    std::cout << "result: " << strcmp(lhs.c_str(), rhs.c_str()) << std::endl;
     return strcmp(lhs.c_str(), rhs.c_str()) == 0;
 }
 
