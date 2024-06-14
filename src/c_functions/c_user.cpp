@@ -2,6 +2,8 @@
 #include "c_functions/c_errors.hpp"
 #include "chat/user.hpp"
 #include "nlohmann/json.hpp"
+#include "chat/membership.hpp"
+#include <sstream>
 
 Pubnub::User* pn_user_create_dirty(
         Pubnub::Chat* chat,
@@ -209,6 +211,41 @@ PnCResult pn_user_get_channel_restrictions(
         restrictions_to_json(json, restrictions);
 
         strcpy(result, json.dump().c_str());
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_user_get_memberships(
+        Pubnub::User* user,
+        int limit,
+        const char* start,
+        const char* end,
+        char* result) {
+    try {
+        auto memberships = user->get_memberships(limit, start, end);
+
+        Pubnub::String string = "[";
+        for (auto membership : memberships) {
+            auto ptr = new Pubnub::Membership(membership);
+            // TODO: utils void* to string
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }   
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        strcpy(result, string.c_str());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
