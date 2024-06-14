@@ -73,7 +73,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_users(
         const char* include,
         const int limit,
         const char* start,
-        const char* end);
+        const char* end,
+        char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_update_user_dirty(
         Pubnub::Chat* chat,
