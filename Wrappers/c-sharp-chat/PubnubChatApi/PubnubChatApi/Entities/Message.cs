@@ -102,14 +102,16 @@ namespace PubNubChatAPI.Entities
         
         internal static string GetMessageIdFromPtr(IntPtr messagePointer)
         {
-            //TODO: C++ getters ID
-            return string.Empty;
+            var buffer = new StringBuilder(512);
+            pn_message_get_timetoken(messagePointer, buffer);
+            return buffer.ToString();
         }
         
         internal static string GetChannelIdFromMessagePtr(IntPtr messagePointer)
         {
-            //TODO: C++ getters ID
-            return string.Empty;
+            var buffer = new StringBuilder(512);
+            pn_message_get_data_channel_id(messagePointer, buffer);
+            return buffer.ToString();
         }
 
         internal void BroadcastMessageUpdate()

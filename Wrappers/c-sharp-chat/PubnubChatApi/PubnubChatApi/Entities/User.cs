@@ -17,6 +17,8 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_user_is_present_on(IntPtr user, string channel_id);
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_user_where_present(IntPtr user, StringBuilder result_json);
+        [DllImport("pubnub-chat.dll")]
+        private static extern void pn_user_get_user_id(IntPtr user, StringBuilder result);
 
         #endregion
         
@@ -30,8 +32,9 @@ namespace PubNubChatAPI.Entities
 
         internal static string GetUserIdFromPtr(IntPtr userPointer)
         {
-            //TODO: C++ getters ID
-            return string.Empty;
+            var buffer = new StringBuilder(512);
+            pn_user_get_user_id(userPointer, buffer);
+            return buffer.ToString();
         }
 
         internal void BroadcastUserUpdate()

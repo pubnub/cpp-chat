@@ -28,6 +28,11 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_channel_set_restrictions(IntPtr channel, string user_id, bool ban_user,
             bool mute_user, string reason);
+        
+        [DllImport("pubnub-chat.dll")]
+        private static extern void pn_channel_get_channel_id(
+            IntPtr channel,
+            StringBuilder result);
 
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_channel_send_text(IntPtr channel, string message, byte type, string metadata);
@@ -39,8 +44,6 @@ namespace PubNubChatAPI.Entities
         
         public event Action<Message> OnMessageReceived;
         public event Action<Channel> OnChannelUpdate;
-        //TODO: wrap this further?
-        public event Action<string> OnPresenceUpdate; 
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
         {
@@ -49,8 +52,9 @@ namespace PubNubChatAPI.Entities
         
         internal static string GetChannelIdFromPtr(IntPtr channelPointer)
         {
-            //TODO: C++ getters ID
-            return string.Empty;
+            var buffer = new StringBuilder(512);
+            pn_channel_get_channel_id(channelPointer, buffer);
+            return buffer.ToString();
         }
 
         internal void BroadcastMessageReceived(Message message)
@@ -67,14 +71,6 @@ namespace PubNubChatAPI.Entities
             if (connected)
             {
                 OnChannelUpdate?.Invoke(this);
-            }
-        }
-        
-        internal void BroadcastPresence(string presenceJson)
-        {
-            if (connected)
-            {
-                OnPresenceUpdate?.Invoke(presenceJson);
             }
         }
 

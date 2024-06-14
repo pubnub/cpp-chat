@@ -99,7 +99,7 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_chat_delete_user(IntPtr chat, string user_id);
 
         [DllImport("pubnub-chat.dll")]
-        private static extern int pn_chat_get_messages(IntPtr chat, string channel_id, StringBuilder messages_json);
+        private static extern int pn_chat_get_updates(IntPtr chat, StringBuilder messages_json);
 
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
@@ -134,6 +134,10 @@ namespace PubNubChatAPI.Entities
         private Dictionary<string, Membership> membershipWrappers = new();
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
+        
+        //TODO: wrap these further?
+        public event Action<List<string>> OnPresenceUpdate; 
+        public event Action<string> OnEvent; 
 
         public Chat(string publishKey, string subscribeKey, string userId)
         {
@@ -148,9 +152,8 @@ namespace PubNubChatAPI.Entities
         {
             while (fetchUpdates)
             {
-                //TODO: change signature
-                var messages = GetMessages("");
-                ParseJsonUpdatePointers(messages);
+                var updates = GetUpdates();
+                ParseJsonUpdatePointers(updates);
                 Thread.Sleep(500);
             }
         }
@@ -174,8 +177,7 @@ namespace PubNubChatAPI.Entities
                         var id = Message.GetChannelIdFromMessagePtr(messagePointer);
                         if (channelWrappers.TryGetValue(id, out var channel))
                         {
-                            //TODO: GET TIMETOKEN
-                            var timeToken = string.Empty;
+                            var timeToken = Message.GetMessageIdFromPtr(messagePointer);
                             var message = new Message(this, messagePointer, timeToken);
                             messageWrappers[timeToken] = message;
                             channel.BroadcastMessageReceived(message);
@@ -189,10 +191,10 @@ namespace PubNubChatAPI.Entities
                     if (updatedMessagePointer != IntPtr.Zero)
                     {
                         var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
-                        if (messageWrappers.TryGetValue(id, out var existingWrapper))
+                        if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            existingWrapper.UpdatePointer(updatedMessagePointer);
-                            existingWrapper.BroadcastMessageUpdate();
+                            existingMessageWrapper.UpdatePointer(updatedMessagePointer);
+                            existingMessageWrapper.BroadcastMessageUpdate();
                         }
 
                         pn_dispose_message(pointer);
@@ -204,10 +206,10 @@ namespace PubNubChatAPI.Entities
                     if (channelPointer != IntPtr.Zero)
                     {
                         var id = Channel.GetChannelIdFromPtr(channelPointer);
-                        if (channelWrappers.TryGetValue(id, out var existingWrapper))
+                        if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
-                            existingWrapper.UpdatePointer(channelPointer);
-                            existingWrapper.BroadcastChannelUpdate();
+                            existingChannelWrapper.UpdatePointer(channelPointer);
+                            existingChannelWrapper.BroadcastChannelUpdate();
                         }
 
                         pn_dispose_message(pointer);
@@ -219,10 +221,10 @@ namespace PubNubChatAPI.Entities
                     if (userPointer != IntPtr.Zero)
                     {
                         var id = User.GetUserIdFromPtr(userPointer);
-                        if (userWrappers.TryGetValue(id, out var existingWrapper))
+                        if (userWrappers.TryGetValue(id, out var existingUserWrapper))
                         {
-                            existingWrapper.UpdatePointer(userPointer);
-                            existingWrapper.BroadcastUserUpdate();
+                            existingUserWrapper.UpdatePointer(userPointer);
+                            existingUserWrapper.BroadcastUserUpdate();
                         }
 
                         pn_dispose_message(pointer);
@@ -234,10 +236,10 @@ namespace PubNubChatAPI.Entities
                     if (membershipPointer != IntPtr.Zero)
                     {
                         var id = Membership.GetMembershipIdFromPtr(membershipPointer);
-                        if (membershipWrappers.TryGetValue(id, out var existingWrapper))
+                        if (membershipWrappers.TryGetValue(id, out var existingMembershipWrapper))
                         {
-                            existingWrapper.UpdatePointer(membershipPointer);
-                            existingWrapper.BroadcastMembershipUpdate();
+                            existingMembershipWrapper.UpdatePointer(membershipPointer);
+                            existingMembershipWrapper.BroadcastMembershipUpdate();
                         }
 
                         pn_dispose_message(pointer);
@@ -249,7 +251,7 @@ namespace PubNubChatAPI.Entities
                     //Event (json)
                     if (pn_deserialize_event(pointer, stringUpdateBuffer) != -1)
                     {
-                        //TODO: callback
+                        OnEvent?.Invoke(stringUpdateBuffer.ToString());
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -257,7 +259,15 @@ namespace PubNubChatAPI.Entities
                     //Presence (json list of uuids)
                     if (pn_deserialize_presence(pointer, stringUpdateBuffer) != -1)
                     {
-                        //TODO: callback
+                        var uuidsJson = stringUpdateBuffer.ToString();
+                        if (!string.IsNullOrEmpty(uuidsJson) && uuidsJson != "[]" && uuidsJson != "{}")
+                        {
+                            var uuids = JsonConvert.DeserializeObject<List<string>>(stringUpdateBuffer.ToString());
+                            if (uuids != null)
+                            {
+                                OnPresenceUpdate?.Invoke(uuids);   
+                            }
+                        }
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -269,14 +279,12 @@ namespace PubNubChatAPI.Entities
         {
             return CreatePublicConversation(channelId, new ChatChannelData());
         }
-
-        //TODO: it's not messages, it's Updates, plus it doesn't actually take channel ID
-        internal string GetMessages(string channelId)
+        
+        internal string GetUpdates()
         {
             var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_chat_get_messages(chatPointer, channelId, messagesBuffer));
+            CUtilities.CheckCFunctionResult(pn_chat_get_updates(chatPointer, messagesBuffer));
             return messagesBuffer.ToString();
-            ;
         }
 
         public Channel CreatePublicConversation(string channelId, ChatChannelData additionalData)
