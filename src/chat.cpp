@@ -120,7 +120,7 @@ User Chat::get_user(String user_id)
         throw std::runtime_error("Failed to get user, response json can't be parsed");
     }
 
-    String user_data_string = static_cast<Pubnub::String>(response_json["data"]);
+    String user_data_string = static_cast<Pubnub::String>(response_json["data"].dump());
     User user_obj(*this, user_id, user_data_string);
 
     return user_obj;

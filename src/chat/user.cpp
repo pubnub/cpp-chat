@@ -127,33 +127,33 @@ ChatUserData User::user_data_from_json(String data_json_string)
 
     ChatUserData user_data;
 
-    if(user_data_json.contains("name") )
+    if(user_data_json.contains("name") && !user_data_json["name"].is_null())
     {
-        user_data.user_name = user_data_json["name"];
+        user_data.user_name = user_data_json["name"].dump();
     }
-    if(user_data_json.contains("externalId") )
+    if(user_data_json.contains("externalId") && !user_data_json["externalId"].is_null())
     {
-        user_data.external_id = user_data_json["externalId"];
+        user_data.external_id = user_data_json["externalId"].dump();
     }
-    if(user_data_json.contains("profileUrl") )
+    if(user_data_json.contains("profileUrl") && !user_data_json["profileUrl"].is_null())
     {
-        user_data.profile_url = user_data_json["profileUrl"];
+        user_data.profile_url = user_data_json["profileUrl"].dump();
     }
-    if(user_data_json.contains("email") )
+    if(user_data_json.contains("email") && !user_data_json["email"].is_null())
     {
-        user_data.email = user_data_json["email"];
+        user_data.email = user_data_json["email"].dump();
     }
-    if(user_data_json.contains("custom") )
+    if(user_data_json.contains("custom") && !user_data_json["custom"].is_null())
     {
         user_data.custom_data_json = user_data_json["custom"];
     }
-    if(user_data_json.contains("status") )
+    if(user_data_json.contains("status") && !user_data_json["status"].is_null())
     {
-        user_data.status = user_data_json["status"];
+        user_data.status = user_data_json["status"].dump();
     }
-    if(user_data_json.contains("type") )
+    if(user_data_json.contains("type") && !user_data_json["type"].is_null())
     {
-        user_data.type = user_data_json["type"];
+        user_data.type = user_data_json["type"].dump();
     }
 
     return user_data;
