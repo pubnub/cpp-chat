@@ -216,8 +216,4 @@ PnCResult pn_user_get_channel_restrictions(
     }
 
     return PN_C_OK;
-
-
-
-    return PN_C_OK;
 }

@@ -4,6 +4,9 @@
 #include "chat/message.hpp"
 #include "c_functions/c_errors.hpp"
 #include "nlohmann/json.hpp"
+#include "chat/membership.hpp"
+#include <iostream>
+#include <sstream>
 
 void pn_channel_delete(Pubnub::Channel* channel) {
     delete channel;
@@ -305,3 +308,37 @@ PnCResult pn_channel_get_user_restrictions(
     return PN_C_OK;
 }
 
+PnCResult pn_channel_get_members(
+        Pubnub::Channel* channel,
+        int limit,
+        const char* start,
+        const char* end,
+        char* result) {
+    try {
+        auto members = channel->get_members(limit, start, end);
+
+        Pubnub::String string = "[";
+        for (auto member : members) {
+            auto ptr = new Pubnub::Membership(member);
+            // TODO: utils void* to string
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }   
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        strcpy(result, string.c_str());
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
