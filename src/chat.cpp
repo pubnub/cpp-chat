@@ -255,8 +255,18 @@ std::vector<String> Chat::who_is_present(String channel_id)
 
 bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
 {
+    
     std::vector<String> channels = where_present(user_id);
-    int count = std::count(channels.begin(), channels.end(), channel_id);
+    //TODO: we should us std::count here, but it didn't work
+    int count = 0;
+    for( auto channel : channels)
+    {
+        if(channel_id == channel)
+        {
+            count = 1;
+        }
+    }
+    //int count = std::count(channels.begin(), channels.end(), channel_id);
     return count > 0;
 }
 

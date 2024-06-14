@@ -712,10 +712,13 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle presence
     if(Deserialization::is_presence_message(message_string))
     {
-        if(this->channel_presence_callbacks_map.find(message_channel_string) != this->channel_presence_callbacks_map.end() ||
-            this->channel_presence_callbacks_map.find(message_channel_string + Pubnub::String("-pnpres")) != this->channel_presence_callbacks_map.end())
+        //get channel name without -pnpres as all presence messages are on channels with -pnpres
+        Pubnub::String normal_channel_name = message_channel_string;
+        normal_channel_name.erase(message_channel_string.length() - 7, 7);
+
+        if(this->channel_presence_callbacks_map.find(normal_channel_name) != this->channel_presence_callbacks_map.end())
         {
-            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(message_channel_string);
+            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(normal_channel_name);
             this->channel_presence_callbacks_map[message_channel_string](current_users);
         }
     }
