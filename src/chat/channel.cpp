@@ -314,27 +314,27 @@ ChatChannelData Channel::channel_data_from_json(String data_json_string)
 
     if(channel_data_json.contains("name") )
     {
-        channel_data.channel_name = channel_data_json["name"];
+        channel_data.channel_name = channel_data_json["name"].dump();
     }
     if(channel_data_json.contains("description") )
     {
-        channel_data.description = channel_data_json["description"];
+        channel_data.description = channel_data_json["description"].dump();
     }
     if(channel_data_json.contains("custom") )
     {
-        channel_data.custom_data_json = channel_data_json["custom"];
+        channel_data.custom_data_json = channel_data_json["custom"].dump();
     }
     if(channel_data_json.contains("updated") )
     {
-        channel_data.updated = channel_data_json["updated"];
+        channel_data.updated = channel_data_json["updated"].dump();
     }
     if(channel_data_json.contains("status") )
     {
-        channel_data.status = channel_data_json["status"];
+        channel_data.status = channel_data_json["status"].dump();
     }
     if(channel_data_json.contains("type") )
     {
-        channel_data.type = channel_data_json["type"];
+        channel_data.type = channel_data_json["type"].dump();
     }
 
     return channel_data;

@@ -265,7 +265,7 @@ Pubnub::String PubNub::get_all_channels_metadata(
         const Pubnub::String start,
         const Pubnub::String end
 ) {
-    auto result = pubnub_getall_uuidmetadata(
+    auto result = pubnub_getall_channelmetadata(
             this->main_context.get(),
             include,
             limit,

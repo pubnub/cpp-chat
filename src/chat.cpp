@@ -76,7 +76,7 @@ std::vector<Channel> Chat::get_channels(String include, int limit, String start,
    
    for (auto& element : channel_data_array_json)
    {
-        Channel channel_obj(*this, String(element["id"]), String(element));
+        Channel channel_obj(*this, String(element["id"]), String(element.dump()));
         Channels.push_back(channel_obj);
    }
 
