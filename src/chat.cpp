@@ -55,7 +55,7 @@ Channel Chat::get_channel(String channel_id)
         throw std::runtime_error("can't get channel, response is incorrect");
     }
 
-    String channel_data_string = static_cast<Pubnub::String>(response_json["data"]);
+    String channel_data_string = static_cast<Pubnub::String>(response_json["data"].dump());
 
     return Channel(*this, channel_id, channel_data_string);
 }

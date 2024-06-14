@@ -252,8 +252,8 @@ Pubnub::String PubNub::get_channel_metadata(const Pubnub::String channel)
 {
     auto result = pubnub_get_channelmetadata(
             this->main_context.get(),
-            channel,
-            NULL
+            NULL,
+            channel
     );
 
     this->await_and_handle_error(result);
