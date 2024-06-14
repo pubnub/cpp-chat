@@ -32,7 +32,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_connect(Pubnub::Channel* chan
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_disconnect(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* messages_json);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_leave(Pubnub::Channel* channel);
 

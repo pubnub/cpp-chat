@@ -117,9 +117,12 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
     return PN_C_OK;
 }
 
-PnCResult pn_channel_join(Pubnub::Channel* channel, CallbackStringFunction callback) {
+PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* messages_json) {
     try {
-        channel->join(callback);
+        auto messages = channel->join_and_get_messages(additional_params);
+        auto jsonised = jsonize_messages2(messages);
+        strcpy(messages_json, jsonised);
+        delete[] jsonised;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
