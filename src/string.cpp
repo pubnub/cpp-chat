@@ -106,6 +106,9 @@ String& String::operator=(const String& string) {
 }
 
 String& String::operator+=(const char* string) {
+    if (string == nullptr) {
+        return *this;
+    }
     auto lenght = strlen(string);
 
     auto new_len = this->len + lenght;
