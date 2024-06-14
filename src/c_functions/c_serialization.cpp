@@ -92,7 +92,7 @@ PnCResult pn_deserialize_presence(pubnub_v2_message* presence_json, char* result
     }
 
     try {
-        auto string = Deserialization::pubnub_message_to_string(*presence_json);
+        Pubnub::String string(presence_json->channel.ptr, presence_json->channel.size);
         strcpy(result, string.c_str());
 
         return PN_C_OK;
