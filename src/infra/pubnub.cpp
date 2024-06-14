@@ -82,9 +82,8 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(con
 
     this->subscribed_channels.push_back(channel);
     this->call_handshake();
-    this->call_subscribe();
-
     this->is_subscribed = true;
+    this->call_subscribe();
 
     return messages;
 }
@@ -166,6 +165,7 @@ std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
         return {};
     }
 
+    this->is_subscribed = false;
     this->cancel_previous_subscription();
 
     std::vector<pubnub_v2_message> messages;
@@ -177,8 +177,6 @@ std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
         ) {
         messages.push_back(message);
     };
-
-    this->is_subscribed = false;
 
     return messages;
 }
@@ -589,8 +587,10 @@ bool PubNub::is_subscribed_to_channel(const Pubnub::String channel)
 
 void PubNub::cancel_previous_subscription()
 {
-    if (PN_CANCEL_FINISHED != pubnub_cancel(this->long_poll_context.get())) {
-        if (PNR_OK != pubnub_await(this->long_poll_context.get())) {
+    auto cancel_result = pubnub_cancel(this->long_poll_context.get());
+    if (PN_CANCEL_FINISHED != cancel_result) {
+        auto await_result = pubnub_await(this->long_poll_context.get());
+        if (PNR_OK != await_result) {
             throw std::runtime_error(
                     std::string("Failed to cancel previous subscription: ")
                     + pubnub_res_2_string(
