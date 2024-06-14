@@ -1,3 +1,6 @@
+#ifndef PN_CHAT_C_USER_HPP
+#define PN_CHAT_C_USER_HPP
+
 #include "chat.hpp"
 #include "chat/user.hpp"
 #include "export.hpp"
@@ -46,3 +49,20 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_where_present(Pubnub::User* user
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_user_id(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_user_name(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_external_id(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_profile_url(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_email(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_custom_data(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_status(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_type(Pubnub::User* user, char* result);
+
+#endif // PN_CHAT_C_USER_HPP

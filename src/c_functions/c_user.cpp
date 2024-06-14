@@ -145,3 +145,44 @@ PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id) {
     }
 }
 
+void pn_user_get_user_id(Pubnub::User* user, char* result) {
+    auto user_id = user->get_user_id();
+    strcpy(result, user_id.c_str());
+}
+
+void pn_user_get_data_user_name(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().user_name;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_external_id(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().external_id;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_profile_url(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().profile_url;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_email(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().email;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_custom_data_json(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().custom_data_json;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_status(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().status;
+    strcpy(result, user_data.c_str());
+}
+
+void pn_user_get_data_type(Pubnub::User* user, char* result) {
+    auto user_data = user->get_user_data().type;
+    strcpy(result, user_data.c_str());
+}
+
+
