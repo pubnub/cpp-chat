@@ -27,31 +27,36 @@ int main() {
     channel_data.channel_name = "iksde2";
     channel_data.description = "Wha";
     Pubnub::Channel channel = chat.create_public_conversation("my_channel2", channel_data);
+    //Pubnub::Channel channel = chat.get_channel("my_channel2"); //use instead of line above to test get_channel
 
     //Create channel to delete
     Pubnub::ChatChannelData delete_channel_data;
     delete_channel_data.channel_name = "to_delete";
     Pubnub::Channel channel_to_delete = chat.create_public_conversation("to_delete", channel_data);
 
-    //JOIN AND STREAM MESSAGES
     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //JOIN AND STREAM MESSAGES
     auto message_callback = [](Pubnub::Message message){
         std::cout << "message received: " << message.text() << std::endl;
+        std::cout << std::endl;
     };
     channel.join(message_callback);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     //DELETE CHANNEL
-    channel_to_delete.delete_channel();
+    //channel_to_delete.delete_channel();
+    chat.delete_channel(channel_to_delete.get_channel_id());
 
     //GET CHANNELS TEST
     std::cout << "get channels, you shouldn't see channel to delete here!!" << std::endl;
-    std::vector<Pubnub::Channel> channels = chat.get_channels("", 3, "1708181488", "1728181488");
+    std::vector<Pubnub::Channel> channels = chat.get_channels("", 30, "1708181488", "1728181488");
     for(auto received_channel : channels)
     {
         std::cout << "get channels, channel: " << received_channel.get_channel_id() << std::endl;
     }
+    std::cout << std::endl;
 
     //STREAM CHANNEL UPDATES
     auto channel_callback = [](Pubnub::Channel channel){ 
@@ -66,6 +71,58 @@ int main() {
     {
         std::cout << "get memberships. membership user:  " << membership.get_user_id() <<  " channel: " << membership.get_channel_id() << std::endl;
     }
+    std::cout << std::endl;
+
+    //LISTEN FOR EVENTS
+    auto event_callback = [](Pubnub::String event){ 
+        std::cout << "event callback: " <<  event << std::endl;
+        std::cout << std::endl;
+    };
+    chat.listen_for_events(channel.get_channel_id(), event_callback);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //SET RESTRICTIONS FROM CHANNEL
+    Pubnub::PubnubRestrictionsData restrictions_data;
+    restrictions_data.mute = true;
+    restrictions_data.reason = "bo tak";
+    channel.set_restrictions(user, restrictions_data);
+
+
+
+    /* USERS */
+
+    //CREATE USER
+    Pubnub::ChatUserData user_data;
+    user_data.user_name = "chat user name";
+    Pubnub::User chat_user = chat.create_user(user.c_str(), user_data);
+    //Pubnub::User chat_user = chat.get_user(user.c_str()); //use instead of line above to test get_user
+
+    //Create user to delete
+    Pubnub::ChatUserData delete_user_data;
+    delete_user_data.user_name = "user to delete";
+    Pubnub::User user_to_delete = chat.create_user("to_delete", delete_user_data);
+
+    //STREAM USER UPDATES
+    auto user_callback = [](Pubnub::User user){
+        std::cout << "user update callback. User name:  " << user.get_user_data().user_name << std::endl;
+        std::cout << std::endl;
+    };
+    chat_user.stream_updates(user_callback);
+
+    //DELETE USER
+    //user_to_delete.delete_user();
+    chat.delete_user(user_to_delete.get_user_id());
+
+    //GET_USERS
+    std::cout << "get users, you shouldn't see user to delete here!!" << std::endl;
+    std::vector<Pubnub::User> users = chat.get_users("", 10, "1738181488", "1718361914");
+    for(auto received_user : users)
+    {
+        std::cout << "get users, user: " << received_user.get_user_id() << std::endl;
+    }
+    std::cout << std::endl;
+
 
 
 
@@ -90,13 +147,27 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    //update user from user
+    user_data.user_name = "updated from user";
+    chat_user.update(user_data);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //update user from chat
+    user_data.user_name = "user updated from chat";
+    chat.update_user(chat_user.get_user_id(),  user_data);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //leave channel
     channel.leave();
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    //send message after leaving channel. This shouldn't be received
     channel.send_text("shouldn't see this message", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+
     std::this_thread::sleep_for(std::chrono::seconds(1));
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
