@@ -83,7 +83,7 @@ namespace PubNubChatAPI.Entities
             string custom_data_json,
             string status,
             string type);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_chat_update_user_dirty(IntPtr chat,
             string user_id,
@@ -94,31 +94,37 @@ namespace PubNubChatAPI.Entities
             string custom_data_json,
             string status,
             string type);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_chat_delete_user(IntPtr chat, string user_id);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_chat_get_messages(IntPtr chat, string channel_id, StringBuilder messages_json);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_deserialize_channel(IntPtr chat, IntPtr channel);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern IntPtr pn_deserialize_user(IntPtr chat, IntPtr user);
-        
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_deserialize_membership(IntPtr chat, IntPtr membership);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_deserialize_message_update(IntPtr chat, IntPtr message);
+
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_deserialize_event(IntPtr eventPtr, StringBuilder result);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_deserialize_presence(IntPtr presence, StringBuilder result);
-        
+
         [DllImport("pubnub-chat.dll")]
         private static extern void pn_dispose_message(IntPtr message);
-        
+
         #endregion
 
         private IntPtr chatPointer;
@@ -134,110 +140,149 @@ namespace PubNubChatAPI.Entities
             chatPointer = pn_chat_new(publishKey, subscribeKey, userId);
             CUtilities.CheckCFunctionResult(chatPointer);
 
-            fetchUpdatesThread = new Thread(FetchUpdatesLoop){IsBackground = true};
+            fetchUpdatesThread = new Thread(FetchUpdatesLoop) { IsBackground = true };
             fetchUpdatesThread.Start();
         }
-        
+
         private void FetchUpdatesLoop()
         {
             while (fetchUpdates)
             {
                 //TODO: change signature
                 var messages = GetMessages("");
-                if (!string.IsNullOrEmpty(messages) && messages != "[]")
-                {
-                    var pubnubV2MessagePointers = JsonConvert.DeserializeObject<IntPtr[]>(messages);
-                    if (pubnubV2MessagePointers == null)
-                    {
-                        continue;
-                    }
-                    
-                    foreach (var pointer in pubnubV2MessagePointers)
-                    {
-                        var messagePointer = pn_deserialize_message(chatPointer, pointer);
-                        if (messagePointer != IntPtr.Zero)
-                        {
-                            var id = Message.GetMessageIdFromPtr(messagePointer);
-                            if (messageWrappers.TryGetValue(id, out var existingWrapper))
-                            {
-                                existingWrapper.UpdatePointer(messagePointer);
-                                //TODO: callback
-                            }
-                            pn_dispose_message(pointer);
-                            continue;
-                        }
-
-                        var channelPointer = pn_deserialize_channel(chatPointer, pointer);
-                        if (channelPointer != IntPtr.Zero)
-                        {
-                            var id = Channel.GetChannelIdFromPtr(channelPointer);
-                            if (channelWrappers.TryGetValue(id, out var existingWrapper))
-                            {
-                                existingWrapper.UpdatePointer(channelPointer);
-                                //TODO: callback
-                            }
-                            pn_dispose_message(pointer);
-                            continue;
-                        }
-                        
-                        var userPointer = pn_deserialize_user(chatPointer, pointer);
-                        if (userPointer != IntPtr.Zero)
-                        {
-                            var id = User.GetUserIdFromPtr(userPointer);
-                            if (userWrappers.TryGetValue(id, out var existingWrapper))
-                            {
-                                existingWrapper.UpdatePointer(userPointer);
-                                //TODO: callback
-                            }
-                            pn_dispose_message(pointer);
-                            continue;
-                        }
-
-                        var stringUpdateBuffer = new StringBuilder(16384);
-
-                        if (pn_deserialize_event(pointer, stringUpdateBuffer) != -1)
-                        {
-                            //TODO: callback
-                            pn_dispose_message(pointer);
-                            continue;
-                        }
-                        
-                        if (pn_deserialize_presence(pointer, stringUpdateBuffer) != -1)
-                        {
-                            //TODO: callback
-                            pn_dispose_message(pointer);
-                            continue;
-                        }
-                        
-                        //TODO: Message Update
-                        //TODO: Membership Update
-                    }
-                }
+                ParseJsonUpdatePointers(messages);
                 Thread.Sleep(500);
             }
         }
 
-        private void AddOrUpdatePointerWrapper()
+        internal void ParseJsonUpdatePointers(string jsonPointers)
         {
-            
+            if (!string.IsNullOrEmpty(jsonPointers) && jsonPointers != "[]")
+            {
+                var pubnubV2MessagePointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
+                if (pubnubV2MessagePointers == null)
+                {
+                    return;
+                }
+
+                foreach (var pointer in pubnubV2MessagePointers)
+                {
+                    //New message
+                    var messagePointer = pn_deserialize_message(chatPointer, pointer);
+                    if (messagePointer != IntPtr.Zero)
+                    {
+                        var id = Message.GetChannelIdFromMessagePtr(messagePointer);
+                        if (channelWrappers.TryGetValue(id, out var channel))
+                        {
+                            //TODO: GET TIMETOKEN
+                            var timeToken = string.Empty;
+                            var message = new Message(this, messagePointer, timeToken);
+                            messageWrappers[timeToken] = message;
+                            channel.BroadcastMessageReceived(message);
+                        }
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    //Updated existing message
+                    var updatedMessagePointer = pn_deserialize_message_update(chatPointer, pointer);
+                    if (updatedMessagePointer != IntPtr.Zero)
+                    {
+                        var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
+                        if (messageWrappers.TryGetValue(id, out var existingWrapper))
+                        {
+                            existingWrapper.UpdatePointer(updatedMessagePointer);
+                            existingWrapper.BroadcastMessageUpdate();
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    //Updated channel
+                    var channelPointer = pn_deserialize_channel(chatPointer, pointer);
+                    if (channelPointer != IntPtr.Zero)
+                    {
+                        var id = Channel.GetChannelIdFromPtr(channelPointer);
+                        if (channelWrappers.TryGetValue(id, out var existingWrapper))
+                        {
+                            existingWrapper.UpdatePointer(channelPointer);
+                            existingWrapper.BroadcastChannelUpdate();
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    //Updated user
+                    var userPointer = pn_deserialize_user(chatPointer, pointer);
+                    if (userPointer != IntPtr.Zero)
+                    {
+                        var id = User.GetUserIdFromPtr(userPointer);
+                        if (userWrappers.TryGetValue(id, out var existingWrapper))
+                        {
+                            existingWrapper.UpdatePointer(userPointer);
+                            existingWrapper.BroadcastUserUpdate();
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    //Updated membership
+                    var membershipPointer = pn_deserialize_membership(chatPointer, pointer);
+                    if (membershipPointer != IntPtr.Zero)
+                    {
+                        var id = Membership.GetMembershipIdFromPtr(membershipPointer);
+                        if (membershipWrappers.TryGetValue(id, out var existingWrapper))
+                        {
+                            existingWrapper.UpdatePointer(membershipPointer);
+                            existingWrapper.BroadcastMembershipUpdate();
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    var stringUpdateBuffer = new StringBuilder(16384);
+
+                    //Event (json)
+                    if (pn_deserialize_event(pointer, stringUpdateBuffer) != -1)
+                    {
+                        //TODO: callback
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+
+                    //Presence (json list of uuids)
+                    if (pn_deserialize_presence(pointer, stringUpdateBuffer) != -1)
+                    {
+                        //TODO: callback
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
+                }
+            }
         }
 
         public Channel CreatePublicConversation(string channelId)
         {
             return CreatePublicConversation(channelId, new ChatChannelData());
         }
-        
+
+        //TODO: it's not messages, it's Updates, plus it doesn't actually take channel ID
         internal string GetMessages(string channelId)
         {
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_chat_get_messages(chatPointer, channelId, messagesBuffer));
-            return messagesBuffer.ToString();;
+            return messagesBuffer.ToString();
+            ;
         }
 
         public Channel CreatePublicConversation(string channelId, ChatChannelData additionalData)
         {
             if (channelWrappers.TryGetValue(channelId, out var existingChannel))
-            { 	
+            {
                 Debug.WriteLine("Trying to create a channel with ID that already exists! Returning existing one.");
                 return existingChannel;
             }
@@ -305,14 +350,14 @@ namespace PubNubChatAPI.Entities
                 Debug.WriteLine("Trying to create a user with ID that already exists! Returning existing one.");
                 return existingUser;
             }
-            
-            var userPointer = pn_chat_create_user_dirty(chatPointer, userId, 
+
+            var userPointer = pn_chat_create_user_dirty(chatPointer, userId,
                 additionalData.Username,
-                additionalData.ExternalId, 
-                additionalData.ProfileUrl, 
+                additionalData.ExternalId,
+                additionalData.ProfileUrl,
                 additionalData.Email,
-                additionalData.CustomDataJson, 
-                additionalData.Status, 
+                additionalData.CustomDataJson,
+                additionalData.Status,
                 additionalData.Status);
             CUtilities.CheckCFunctionResult(userPointer);
             var user = new User(this, userId, userPointer);
@@ -335,13 +380,13 @@ namespace PubNubChatAPI.Entities
         public void UpdateUser(string userId, ChatUserData updatedData)
         {
             CUtilities.CheckCFunctionResult(
-                pn_chat_update_user_dirty(chatPointer, userId, 
+                pn_chat_update_user_dirty(chatPointer, userId,
                     updatedData.Username,
-                    updatedData.ExternalId, 
-                    updatedData.ProfileUrl, 
+                    updatedData.ExternalId,
+                    updatedData.ProfileUrl,
                     updatedData.Email,
-                    updatedData.CustomDataJson, 
-                    updatedData.Status, 
+                    updatedData.CustomDataJson,
+                    updatedData.Status,
                     updatedData.Status));
         }
 

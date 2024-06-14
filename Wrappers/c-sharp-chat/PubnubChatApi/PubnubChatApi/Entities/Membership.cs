@@ -18,10 +18,15 @@ namespace PubNubChatAPI.Entities
         {
         }
         
-        internal static string GetMembershipIdFromPtr(IntPtr userPointer)
+        internal static string GetMembershipIdFromPtr(IntPtr membershipPointer)
         {
             //TODO: C++ getters ID
             return string.Empty;
+        }
+
+        internal void BroadcastMembershipUpdate()
+        {
+            OnMembershipUpdated?.Invoke(this);
         }
 
         protected override void DisposePointer()

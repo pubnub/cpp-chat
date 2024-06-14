@@ -100,10 +100,21 @@ namespace PubNubChatAPI.Entities
             this.chat = chat;
         }
         
-        internal static string GetMessageIdFromPtr(IntPtr userPointer)
+        internal static string GetMessageIdFromPtr(IntPtr messagePointer)
         {
             //TODO: C++ getters ID
             return string.Empty;
+        }
+        
+        internal static string GetChannelIdFromMessagePtr(IntPtr messagePointer)
+        {
+            //TODO: C++ getters ID
+            return string.Empty;
+        }
+
+        internal void BroadcastMessageUpdate()
+        {
+            OnMessageUpdated?.Invoke(this);
         }
 
         public void EditMessageText(string newText)

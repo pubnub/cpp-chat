@@ -34,6 +34,11 @@ namespace PubNubChatAPI.Entities
             return string.Empty;
         }
 
+        internal void BroadcastUserUpdate()
+        {
+            OnUserUpdated?.Invoke(this);
+        }
+
         public void UpdateUser(ChatUserData updatedData)
         {
             chat.UpdateUser(Id, updatedData);

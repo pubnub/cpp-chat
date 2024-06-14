@@ -35,6 +35,7 @@ namespace PubNubChatAPI.Entities
         #endregion
         
         private Chat chat;
+        private bool connected;
         
         public event Action<Message> OnMessageReceived;
         public event Action<Channel> OnChannelUpdate;
@@ -46,15 +47,41 @@ namespace PubNubChatAPI.Entities
             this.chat = chat;
         }
         
-        internal static string GetChannelIdFromPtr(IntPtr userPointer)
+        internal static string GetChannelIdFromPtr(IntPtr channelPointer)
         {
             //TODO: C++ getters ID
             return string.Empty;
         }
 
+        internal void BroadcastMessageReceived(Message message)
+        {
+            if (connected)
+            {
+                OnMessageReceived?.Invoke(message);
+            }
+        }
+        
+        internal void BroadcastChannelUpdate()
+        {
+            //TODO: is this check necessary?
+            if (connected)
+            {
+                OnChannelUpdate?.Invoke(this);
+            }
+        }
+        
+        internal void BroadcastPresence(string presenceJson)
+        {
+            if (connected)
+            {
+                OnPresenceUpdate?.Invoke(presenceJson);
+            }
+        }
+
         //TODO: return actual Message objects
         public string Connect()
         {
+            connected = true;
             OnMessageReceived = null;
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, messagesBuffer));
@@ -63,17 +90,20 @@ namespace PubNubChatAPI.Entities
 
         public void Join()
         {
+            connected = true;
             OnMessageReceived = null;
             CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty));
         }
 
         public void Disconnect()
         {
+            connected = false;
             CUtilities.CheckCFunctionResult(pn_channel_disconnect(pointer));
         }
 
         public void Leave()
         {
+            connected = false;
             CUtilities.CheckCFunctionResult(pn_channel_leave(pointer));
         }
 
