@@ -105,7 +105,7 @@ namespace Pubnub {
          * 
          * @param string The std::string rvalue reference to assign the String with.
          */
-        PN_CHAT_EXPORT String& operator=(String&& string) = default;
+        PN_CHAT_EXPORT String& operator=(String&& string);
 
         /**
          * Copy assignment operator that assigns the string with a const char* string.

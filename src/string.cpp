@@ -105,6 +105,10 @@ String& String::operator=(const String& string) {
     return this->operator=(string.string);
 }
 
+String& String::operator=(String&& string) {
+    return this->operator=(string.string);
+}
+
 String& String::operator+=(const char* string) {
     if (string == nullptr) {
         return *this;
