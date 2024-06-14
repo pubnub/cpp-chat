@@ -51,7 +51,7 @@ void User::set_restrictions(String in_channel_id, PubnubRestrictionsData restric
 
 void User::report(String reason)
 {
-    String payload = String("{") + reason + String(", reportedUserId: ") + user_id + String("}");
+    String payload = String("{reason: \"") + reason + String("\", reportedUserId: \"") + user_id + String("\"}");
     this->chat_obj
         .emit_chat_event(pubnub_chat_event_type::PCET_REPORT, this->chat_obj.internal_admin_channel, payload);
 }
