@@ -379,3 +379,15 @@ PnCResult pn_channel_get_history(
 
     return PN_C_OK;
 }
+
+Pubnub::Message* pn_channel_get_message(
+        Pubnub::Channel* channel,
+        const char* timetoken) {
+    try {
+        return new Pubnub::Message(channel->get_message(timetoken));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}

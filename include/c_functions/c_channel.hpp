@@ -106,5 +106,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_history(
         int count,
         char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_message(Pubnub::Channel* channel, const char* timetoken);
+
 #endif // PN_CHAT_C_CHANNEL_H
 
