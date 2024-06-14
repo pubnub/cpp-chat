@@ -95,9 +95,6 @@ void Chat::delete_channel(String channel_id)
 
 User Chat::create_user(String user_id, ChatUserData user_data)
 {
-    //Make sure user with this ID doesn't exist
-    get_user(user_id);
-
     User created_user(*this, user_id, user_data);
     this->pubnub.set_user_metadata(user_id, created_user.user_data_to_json(user_id, user_data));
 
