@@ -312,27 +312,27 @@ ChatChannelData Channel::channel_data_from_json(String data_json_string)
 
     ChatChannelData channel_data;
 
-    if(channel_data_json.contains("name") )
+    if(channel_data_json.contains("name") && !channel_data_json["name"].is_null())
     {
         channel_data.channel_name = channel_data_json["name"].dump();
     }
-    if(channel_data_json.contains("description") )
+    if(channel_data_json.contains("description") && !channel_data_json["description"].is_null())
     {
         channel_data.description = channel_data_json["description"].dump();
     }
-    if(channel_data_json.contains("custom") )
+    if(channel_data_json.contains("custom") && !channel_data_json["custom"].is_null())
     {
         channel_data.custom_data_json = channel_data_json["custom"].dump();
     }
-    if(channel_data_json.contains("updated") )
+    if(channel_data_json.contains("updated") && !channel_data_json["updated"].is_null())
     {
         channel_data.updated = channel_data_json["updated"].dump();
     }
-    if(channel_data_json.contains("status") )
+    if(channel_data_json.contains("status") && !channel_data_json["status"].is_null())
     {
         channel_data.status = channel_data_json["status"].dump();
     }
-    if(channel_data_json.contains("type") )
+    if(channel_data_json.contains("type") && !channel_data_json["type"].is_null())
     {
         channel_data.type = channel_data_json["type"].dump();
     }

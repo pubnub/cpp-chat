@@ -44,6 +44,7 @@ namespace Pubnub
         PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
         PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+        PN_CHAT_EXPORT PubnubRestrictionsData get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(User)> user_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::User> users, std::function<void(User)> user_callback);

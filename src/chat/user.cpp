@@ -97,6 +97,43 @@ std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String 
     return memberships;
 }
 
+PubnubRestrictionsData User::get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
+{
+    String full_channel_id = chat_obj.internal_moderation_prefix + in_channel_id;
+
+    String get_restrictions_response = chat_obj.get_pubnub_context().get_channel_members(full_channel_id, "totalCount,custom", limit, start, end);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channel restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    PubnubRestrictionsData FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["uuid"]["id"]) == in_user_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}
+
 void User::stream_updates(std::function<void(User)> user_callback)
 {
     std::vector<Pubnub::User> users;

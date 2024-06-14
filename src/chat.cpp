@@ -206,44 +206,6 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, PubnubRestr
     emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 }
 
-
-PubnubRestrictionsData Chat::get_channel_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end)
-{
-    String full_channel_id = internal_moderation_prefix + in_channel_id;
-
-    String get_restrictions_response = this->pubnub.get_channel_members(full_channel_id, "totalCount,custom", limit, start, end);
-
-    json response_json = json::parse(get_restrictions_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get channel restrictions, response is incorrect");
-    }
-
-    json response_data_json = response_json["data"];
-    PubnubRestrictionsData FinalRestrictionsData;
-
-   for (auto& element : response_data_json)
-   {
-        //Find restrictions data for requested channel
-        if(String(element["uuid"]["id"]) == in_user_id)
-        {
-            if(element["custom"]["ban"] == true)
-            {
-                FinalRestrictionsData.ban = true;
-            }
-            if(element["custom"]["mute"] == true)
-            {
-                FinalRestrictionsData.mute = true;
-            }
-            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
-            break;
-        }
-   }
-
-   return FinalRestrictionsData;
-}
-
 std::vector<String> Chat::where_present(String user_id)
 {
     String where_now_response = this->pubnub.where_now(user_id);
