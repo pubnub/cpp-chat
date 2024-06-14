@@ -342,3 +342,37 @@ PnCResult pn_channel_get_members(
 
     return PN_C_OK;
 }
+
+PnCResult pn_channel_get_history(
+        Pubnub::Channel* channel,
+        const char* start,
+        const char* end,
+        int count,
+        char* result) {
+    try {
+        auto history = channel->get_history(start, end, count);
+
+        Pubnub::String string = "[";
+        for (auto message : history) {
+            auto ptr = new Pubnub::Message(message);
+            // TODO: utils void* to string
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }   
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+   } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
