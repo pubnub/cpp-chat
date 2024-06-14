@@ -55,7 +55,7 @@ Channel Chat::get_channel(String channel_id)
         throw std::runtime_error("can't get channel, response is incorrect");
     }
 
-    String channel_data_string = static_cast<Pubnub::String>(response_json["Data"]);
+    String channel_data_string = static_cast<Pubnub::String>(response_json["data"]);
 
     return Channel(*this, channel_id, channel_data_string);
 }
@@ -71,7 +71,7 @@ std::vector<Channel> Chat::get_channels(String include, int limit, String start,
         throw std::runtime_error("can't get channels, response is incorrect");
     }
 
-    json channel_data_array_json = response_json["Data"];
+    json channel_data_array_json = response_json["data"];
     std::vector<Channel> Channels;
    
    for (auto& element : channel_data_array_json)
@@ -120,7 +120,7 @@ User Chat::get_user(String user_id)
         throw std::runtime_error("Failed to get user, response json can't be parsed");
     }
 
-    String user_data_string = static_cast<Pubnub::String>(response_json["Data"]);
+    String user_data_string = static_cast<Pubnub::String>(response_json["data"]);
     User user_obj(*this, user_id, user_data_string);
 
     return user_obj;
@@ -137,7 +137,7 @@ std::vector<User> Chat::get_users(Pubnub::String include, int limit, Pubnub::Str
         throw std::runtime_error("can't get channels, response is incorrect");
     }
 
-    json user_data_array_json = response_json["Data"];
+    json user_data_array_json = response_json["data"];
     std::vector<User> users;
    
    for (auto& element : user_data_array_json)
