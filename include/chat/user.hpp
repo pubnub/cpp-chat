@@ -52,8 +52,8 @@ namespace Pubnub
         Pubnub::String user_id_from_json(Pubnub::String data_json_string);
         Pubnub::String user_data_to_json(Pubnub::String in_user_id, ChatUserData in_user_data);
 
-        Pubnub::String get_user_id();
-        ChatUserData get_user_data();
+        PN_CHAT_EXPORT Pubnub::String get_user_id();
+        PN_CHAT_EXPORT ChatUserData get_user_data();
 
     private:
 
