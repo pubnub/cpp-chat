@@ -12,7 +12,7 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern void pn_message_delete(IntPtr message);
         [DllImport("pubnub-chat.dll")]
-        private static extern int pn_message_edit_text(IntPtr message, string text);
+        private static extern IntPtr pn_message_edit_text(IntPtr message, string text);
         [DllImport("pubnub-chat.dll")]
         private static extern int pn_message_text(IntPtr message, StringBuilder result);
         [DllImport("pubnub-chat.dll")]
@@ -91,6 +91,19 @@ namespace PubNubChatAPI.Entities
                 return result == 1;
             }
         }
+
+        //TODO: format to list?
+        public string MessageActions
+        {
+            get
+            {
+                var buffer = new StringBuilder(4096);
+                pn_message_get_data_message_actions(pointer, buffer);
+                return buffer.ToString();
+            }
+        }
+
+        public int DataType => pn_message_get_data_type(pointer);
         
         private Chat chat;
         public event Action<Message> OnMessageUpdated; 
@@ -121,7 +134,9 @@ namespace PubNubChatAPI.Entities
 
         public void EditMessageText(string newText)
         {
-            CUtilities.CheckCFunctionResult(pn_message_edit_text(pointer, newText));
+            var newPointer = pn_message_edit_text(pointer, newText);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public void DeleteMessage()

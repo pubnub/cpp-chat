@@ -125,19 +125,63 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat.dll")]
         private static extern void pn_dispose_message(IntPtr message);
 
+        [DllImport("pubnub-chat.dll")]
+        private static extern int pn_chat_get_users(
+            IntPtr chat,
+            string include,
+            int limit,
+            string start,
+            string end,
+            StringBuilder result);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_chat_get_user(
+            IntPtr chat,
+            string user_id);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_chat_get_channel(
+            IntPtr chat,
+            string channel_id);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern int pn_user_get_memberhips(
+            IntPtr user,
+            int limit,
+            string start,
+            string end,
+            StringBuilder result);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern int pn_channel_get_members(
+            IntPtr channel,
+            int limit,
+            string start,
+            string end,
+            StringBuilder result);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_channel_get_message(IntPtr channel, string timetoken);
+
+        [DllImport("pubnub-chat.dll")]
+        private static extern int pn_channel_get_history(
+            IntPtr channel,
+            string start,
+            string end,
+            int count,
+            StringBuilder result);
+
         #endregion
 
         private IntPtr chatPointer;
         private Dictionary<string, Channel> channelWrappers = new();
         private Dictionary<string, User> userWrappers = new();
-        private Dictionary<string, Message> messageWrappers = new();
         private Dictionary<string, Membership> membershipWrappers = new();
+        private Dictionary<string, Message> messageWrappers = new();
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
-        
-        //TODO: wrap these further?
-        public event Action<List<string>> OnPresenceUpdate; 
-        public event Action<string> OnEvent; 
+
+        public event Action<string> OnEvent;
 
         public Chat(string publishKey, string subscribeKey, string userId)
         {
@@ -147,6 +191,8 @@ namespace PubNubChatAPI.Entities
             fetchUpdatesThread = new Thread(FetchUpdatesLoop) { IsBackground = true };
             fetchUpdatesThread.Start();
         }
+
+        #region Updates handling
 
         private void FetchUpdatesLoop()
         {
@@ -182,6 +228,7 @@ namespace PubNubChatAPI.Entities
                             messageWrappers[timeToken] = message;
                             channel.BroadcastMessageReceived(message);
                         }
+
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -251,6 +298,7 @@ namespace PubNubChatAPI.Entities
                     //Event (json)
                     if (pn_deserialize_event(pointer, stringUpdateBuffer) != -1)
                     {
+                        //TODO: later Event will be a proper PointerWrapper class
                         OnEvent?.Invoke(stringUpdateBuffer.ToString());
                         pn_dispose_message(pointer);
                         continue;
@@ -259,15 +307,12 @@ namespace PubNubChatAPI.Entities
                     //Presence (json list of uuids)
                     if (pn_deserialize_presence(pointer, stringUpdateBuffer) != -1)
                     {
-                        var uuidsJson = stringUpdateBuffer.ToString();
-                        if (!string.IsNullOrEmpty(uuidsJson) && uuidsJson != "[]" && uuidsJson != "{}")
+                        var channelId = stringUpdateBuffer.ToString();
+                        if (TryGetChannel(channelId, out var channel))
                         {
-                            var uuids = JsonConvert.DeserializeObject<List<string>>(stringUpdateBuffer.ToString());
-                            if (uuids != null)
-                            {
-                                OnPresenceUpdate?.Invoke(uuids);   
-                            }
+                            channel.BroadcastPresenceUpdate();
                         }
+
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -275,16 +320,20 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        public Channel CreatePublicConversation(string channelId)
-        {
-            return CreatePublicConversation(channelId, new ChatChannelData());
-        }
-        
         internal string GetUpdates()
         {
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_chat_get_updates(chatPointer, messagesBuffer));
             return messagesBuffer.ToString();
+        }
+
+        #endregion
+
+        #region Channels
+
+        public Channel CreatePublicConversation(string channelId)
+        {
+            return CreatePublicConversation(channelId, new ChatChannelData());
         }
 
         public Channel CreatePublicConversation(string channelId, ChatChannelData additionalData)
@@ -310,25 +359,67 @@ namespace PubNubChatAPI.Entities
 
         public bool TryGetChannel(string channelId, out Channel channel)
         {
-            var foundChannel = channelWrappers.TryGetValue(channelId, out channel);
-            if (foundChannel && channel == null)
+            var channelPointer = pn_chat_get_channel(chatPointer, channelId);
+            return TryGetChannel(channelId, channelPointer, out channel);
+        }
+
+        private bool TryGetChannel(string channelId, IntPtr channelPointer, out Channel channel)
+        {
+            if (channelWrappers.TryGetValue(channelId, out channel))
             {
-                channelWrappers.Remove(channelId);
+                //We had it before but it's no longer valid
+                if (channelPointer == IntPtr.Zero)
+                {
+                    Debug.WriteLine(CUtilities.GetErrorMessage());
+                    channelWrappers.Remove(channelId);
+                    return false;
+                }
+
+                //Pointer is valid but something nulled the wrapper
+                if (channel == null)
+                {
+                    channelWrappers[channelId] = new Channel(this, channelId, channelPointer);
+                    channel = channelWrappers[channelId];
+                    return true;
+                }
+                //Updating existing wrapper with updated pointer
+                else
+                {
+                    channel.UpdatePointer(channelPointer);
+                    return true;
+                }
+            }
+            //Adding new user to wrappers cache
+            else if (channelPointer != IntPtr.Zero)
+            {
+                channel = new Channel(this, channelId, channelPointer);
+                channelWrappers.Add(channelId, channel);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
                 return false;
             }
-
-            return foundChannel;
         }
 
         public void UpdateChannel(string channelId, ChatChannelData updatedData)
         {
-            CUtilities.CheckCFunctionResult(
-                pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
-                    updatedData.ChannelDescription,
-                    updatedData.ChannelCustomDataJson,
-                    updatedData.ChannelUpdated,
-                    updatedData.ChannelStatus,
-                    updatedData.ChannelType));
+            var newPointer = pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
+                updatedData.ChannelDescription,
+                updatedData.ChannelCustomDataJson,
+                updatedData.ChannelUpdated,
+                updatedData.ChannelStatus,
+                updatedData.ChannelType);
+            CUtilities.CheckCFunctionResult(newPointer);
+            if (channelWrappers.TryGetValue(channelId, out var existingChannelWrapper))
+            {
+                existingChannelWrapper.UpdatePointer(newPointer);
+            }
+            else
+            {
+                channelWrappers.Add(channelId, new Channel(this, channelId, newPointer));
+            }
         }
 
         public void DeleteChannel(string channelId)
@@ -339,6 +430,10 @@ namespace PubNubChatAPI.Entities
                 CUtilities.CheckCFunctionResult(pn_chat_delete_channel(chatPointer, channelId));
             }
         }
+
+        #endregion
+
+        #region Users
 
         public void SetRestrictions(string userId, string channelId, bool banUser, bool muteUser, string reason)
         {
@@ -373,29 +468,131 @@ namespace PubNubChatAPI.Entities
             return user;
         }
 
-        public bool TryGetUser(string userId, out User user)
+        public bool IsPresent(string userId, string channelId)
         {
-            var foundUser = userWrappers.TryGetValue(userId, out user);
-            if (foundUser && user == null)
+            if (TryGetChannel(channelId, out var channel))
             {
-                userWrappers.Remove(userId);
+                return channel.IsUserPresent(userId);
+            }
+            else
+            {
                 return false;
             }
+        }
 
-            return foundUser;
+        public List<string> WhoIsPresent(string channelId)
+        {
+            if (TryGetChannel(channelId, out var channel))
+            {
+                return channel.WhoIsPresent();
+            }
+            else
+            {
+                return new List<string>();
+            }
+        }
+
+        public List<string> WherePresent(string userId)
+        {
+            if (TryGetUser(userId, out var user))
+            {
+                return user.WherePresent();
+            }
+            else
+            {
+                return new List<string>();
+            }
+        }
+
+        public bool TryGetUser(string userId, out User user)
+        {
+            var userPointer = pn_chat_get_user(chatPointer, userId);
+            return TryGetUser(userId, userPointer, out user);
+        }
+
+        private bool TryGetUser(string userId, IntPtr userPointer, out User user)
+        {
+            if (userWrappers.TryGetValue(userId, out user))
+            {
+                //We had it before but it's no longer valid
+                if (userPointer == IntPtr.Zero)
+                {
+                    Debug.WriteLine(CUtilities.GetErrorMessage());
+                    userWrappers.Remove(userId);
+                    return false;
+                }
+
+                //Pointer is valid but something nulled the wrapper
+                if (user == null)
+                {
+                    userWrappers[userId] = new User(this, userId, userPointer);
+                    user = userWrappers[userId];
+                    return true;
+                }
+                //Updating existing wrapper with updated pointer
+                else
+                {
+                    user.UpdatePointer(userPointer);
+                    return true;
+                }
+            }
+            //Adding new user to wrappers cache
+            else if (userPointer != IntPtr.Zero)
+            {
+                user = new User(this, userId, userPointer);
+                userWrappers.Add(userId, user);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
+                return false;
+            }
+        }
+
+        public List<User> GetUsers(string include, int limit, string startTimeToken, string endTimeToken)
+        {
+            var buffer = new StringBuilder(8192);
+            pn_chat_get_users(chatPointer, include, limit, startTimeToken, endTimeToken, buffer);
+            var jsonPointers = buffer.ToString();
+            var userPointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
+            var returnUsers = new List<User>();
+            if (userPointers == null)
+            {
+                return returnUsers;
+            }
+
+            foreach (var userPointer in userPointers)
+            {
+                var id = User.GetUserIdFromPtr(userPointer);
+                if (TryGetUser(id, userPointer, out var user))
+                {
+                    returnUsers.Add(user);
+                }
+            }
+
+            return returnUsers;
         }
 
         public void UpdateUser(string userId, ChatUserData updatedData)
         {
-            CUtilities.CheckCFunctionResult(
-                pn_chat_update_user_dirty(chatPointer, userId,
-                    updatedData.Username,
-                    updatedData.ExternalId,
-                    updatedData.ProfileUrl,
-                    updatedData.Email,
-                    updatedData.CustomDataJson,
-                    updatedData.Status,
-                    updatedData.Status));
+            var newPointer = pn_chat_update_user_dirty(chatPointer, userId,
+                updatedData.Username,
+                updatedData.ExternalId,
+                updatedData.ProfileUrl,
+                updatedData.Email,
+                updatedData.CustomDataJson,
+                updatedData.Status,
+                updatedData.Status);
+            CUtilities.CheckCFunctionResult(newPointer);
+            if (userWrappers.TryGetValue(userId, out var existingUserWrapper))
+            {
+                existingUserWrapper.UpdatePointer(newPointer);
+            }
+            else
+            {
+                userWrappers.Add(userId, new User(this, userId, newPointer));
+            }
         }
 
         public void DeleteUser(string userId)
@@ -406,6 +603,190 @@ namespace PubNubChatAPI.Entities
                 CUtilities.CheckCFunctionResult(pn_chat_delete_user(chatPointer, userId));
             }
         }
+
+        #endregion
+
+        #region Memberships
+
+        public List<Membership> GetUserMemberships(string userId, int limit, string startTimeToken, string endTimeToken)
+        {
+            if (!TryGetUser(userId, out var user))
+            {
+                return new List<Membership>();
+            }
+
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(pn_user_get_memberhips(user.Pointer, limit, startTimeToken, endTimeToken,
+                buffer));
+            return ParseJsonMembershipPointers(buffer.ToString());
+        }
+
+        public List<Membership> GetChannelMemberships(string channelId, int limit, string startTimeToken,
+            string endTimeToken)
+        {
+            if (!TryGetChannel(channelId, out var channel))
+            {
+                return new List<Membership>();
+            }
+
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(pn_channel_get_members(channel.Pointer, limit, startTimeToken, endTimeToken,
+                buffer));
+            return ParseJsonMembershipPointers(buffer.ToString());
+        }
+
+        private List<Membership> ParseJsonMembershipPointers(string membershipPointersJson)
+        {
+            var memberships = new List<Membership>();
+            if (!string.IsNullOrEmpty(membershipPointersJson) && membershipPointersJson != "[]" &&
+                membershipPointersJson != "{}")
+            {
+                var membershipPointers = JsonConvert.DeserializeObject<IntPtr[]>(membershipPointersJson);
+                if (membershipPointers == null)
+                {
+                    return memberships;
+                }
+
+                foreach (var membershipPointer in membershipPointers)
+                {
+                    var id = Membership.GetMembershipIdFromPtr(membershipPointer);
+                    if (TryGetMembership(id, membershipPointer, out var membership))
+                    {
+                        memberships.Add(membership);
+                    }
+                }
+            }
+
+            return memberships;
+        }
+
+        private bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
+        {
+            if (membershipWrappers.TryGetValue(membershipId, out membership))
+            {
+                //We had it before but it's no longer valid
+                if (membershipPointer == IntPtr.Zero)
+                {
+                    Debug.WriteLine(CUtilities.GetErrorMessage());
+                    membershipWrappers.Remove(membershipId);
+                    return false;
+                }
+
+                //Pointer is valid but something nulled the wrapper
+                if (membership == null)
+                {
+                    membershipWrappers[membershipId] = new Membership(membershipPointer, membershipId);
+                    membership = membershipWrappers[membershipId];
+                    return true;
+                }
+                //Updating existing wrapper with updated pointer
+                else
+                {
+                    membership.UpdatePointer(membershipPointer);
+                    return true;
+                }
+            }
+            //Adding new user to wrappers cache
+            else if (membershipPointer != IntPtr.Zero)
+            {
+                membership = new Membership(membershipPointer, membershipId);
+                membershipWrappers.Add(membershipId, membership);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Messages
+
+        public bool TryGetMessage(string channelId, string messageTimeToken, out Message message)
+        {
+            if (!TryGetChannel(channelId, out var channel))
+            {
+                message = null;
+                return false;
+            }
+
+            var messagePointer = pn_channel_get_message(channel.Pointer, messageTimeToken);
+            return TryGetMessage(messageTimeToken, messagePointer, out message);
+        }
+
+        private bool TryGetMessage(string timeToken, IntPtr messagePointer, out Message message)
+        {
+            if (messageWrappers.TryGetValue(timeToken, out message))
+            {
+                //We had it before but it's no longer valid
+                if (messagePointer == IntPtr.Zero)
+                {
+                    Debug.WriteLine(CUtilities.GetErrorMessage());
+                    messageWrappers.Remove(timeToken);
+                    return false;
+                }
+
+                //Pointer is valid but something nulled the wrapper
+                if (message == null)
+                {
+                    messageWrappers[timeToken] = new Message(this, messagePointer, timeToken);
+                    message = messageWrappers[timeToken];
+                    return true;
+                }
+                //Updating existing wrapper with updated pointer
+                else
+                {
+                    message.UpdatePointer(messagePointer);
+                    return true;
+                }
+            }
+            //Adding new user to wrappers cache
+            else if (messagePointer != IntPtr.Zero)
+            {
+                message = new Message(this, messagePointer, timeToken);
+                messageWrappers.Add(timeToken, message);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
+                return false;
+            }
+        }
+
+        public List<Message> GetChannelMessageHistory(string channelId, string startTimeToken, string endTimeToken,
+            int count)
+        {
+            var messages = new List<Message>();
+            if (!TryGetChannel(channelId, out var channel))
+            {
+                return messages;
+            }
+            var buffer = new StringBuilder(32768);
+            pn_channel_get_history(channel.Pointer, startTimeToken, endTimeToken, count, buffer);
+            var jsonPointers = buffer.ToString();
+            var messagePointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
+            var returnMessages = new List<Message>();
+            if (messagePointers == null)
+            {
+                return returnMessages;
+            }
+
+            foreach (var messagePointer in messagePointers)
+            {
+                var id = Message.GetMessageIdFromPtr(messagePointer);
+                if (TryGetMessage(id, messagePointer, out var message))
+                {
+                    returnMessages.Add(message);
+                }
+            }
+
+            return returnMessages;
+        }
+
+        #endregion
 
         ~Chat()
         {

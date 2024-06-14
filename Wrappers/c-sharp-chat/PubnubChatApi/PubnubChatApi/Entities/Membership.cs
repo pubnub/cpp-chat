@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
@@ -20,8 +21,33 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_membership_get_channel_id(
             IntPtr membership,
             StringBuilder result);
+        
+        [DllImport("pubnub-chat.dll")]
+        private static extern IntPtr pn_membership_update_dirty(
+            IntPtr membership,
+            string custom_object_json);
 
         #endregion
+
+        public string UserId
+        {
+            get
+            {
+                var buffer = new StringBuilder(512);
+                pn_membership_get_user_id(pointer, buffer);
+                return buffer.ToString();
+            }
+        }
+        
+        public string ChannelId
+        {
+            get
+            {
+                var buffer = new StringBuilder(512);
+                pn_membership_get_channel_id(pointer, buffer);
+                return buffer.ToString();
+            }
+        }
 
         public event Action<Membership> OnMembershipUpdated;
 
@@ -42,6 +68,11 @@ namespace PubNubChatAPI.Entities
         internal void BroadcastMembershipUpdate()
         {
             OnMembershipUpdated?.Invoke(this);
+        }
+
+        public void Update(string customJsonObject)
+        {
+            CUtilities.CheckCFunctionResult(pn_membership_update_dirty(pointer, customJsonObject));
         }
 
         protected override void DisposePointer()
