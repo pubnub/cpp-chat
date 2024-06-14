@@ -36,6 +36,17 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    //STREAM PRESENCE
+    auto presence_callback = [](std::vector<Pubnub::String> user_ids){ 
+        std::cout << "stream presence ids: " << std::endl;
+        for(auto user_id : user_ids)
+        {
+            std::cout << user_id << std::endl;
+        }
+        std::cout << std::endl;
+    };
+    channel.stream_presence(presence_callback);
+
     //JOIN AND STREAM MESSAGES
     auto message_callback = [](Pubnub::Message message){
         std::cout << "message received: " << message.text() << std::endl;
@@ -123,8 +134,26 @@ int main() {
     }
     std::cout << std::endl;
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    /* PRESENCE */
 
+    //WHERE PRESENT
+    std::cout << "PRESENCE CHECK"  << std::endl;
+    std::vector<Pubnub::String> present_channels = chat_user.where_present();
+    for(auto present_channel : present_channels)
+    {
+        std::cout << "user is present in: " << present_channel << std::endl;
+    }
+    std::cout << std::endl;
+
+    //IS PRESENT ON
+    bool is_user_present = chat_user.is_present_on(channel.get_channel_id());
+    std::cout << "is present on (should be true): " << is_user_present << std::endl;
+    
+    //IS PRESENT
+    bool is_user_present_in_chnnel = channel.is_present(chat_user.get_user_id());
+    std::cout << "is present (should be true): " << is_user_present_in_chnnel << std::endl;
 
 
     /* EXECUTION FLOW */
@@ -169,6 +198,10 @@ int main() {
 
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //report user, it should emit an event
+
+    //chat_user.report("a o tak o sobie");
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
 
