@@ -233,8 +233,10 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     for (auto message : messages) {
         auto ptr = new pubnub_v2_message(message);
 
-        // TODO: it cannot be like that
+        // TODO: utils void* to string
+#ifdef _WIN32
         result += "0x";
+#endif
         std::ostringstream oss;
         oss << static_cast<void*>(ptr);
         result += oss.str();
@@ -317,4 +319,45 @@ PnCResult pn_chat_who_is_present(
 
         return PN_C_ERROR;
     }
+}
+
+PnCResult pn_chat_get_users(
+        Pubnub::Chat* chat,
+        const char* include,
+        const int limit,
+        const char* start,
+        const char* end,
+        char* result) {
+    try {
+        auto users = chat->get_users(include, limit, start, end);
+
+        if (users.size() == 0) {
+            strcpy(result, "[]\0");
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto user : users) {
+            auto ptr = new Pubnub::User(user);
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        strcpy(result, string.c_str());
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+        
+    return PN_C_OK;
 }

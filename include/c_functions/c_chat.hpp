@@ -68,13 +68,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_get_user(
         Pubnub::Chat* chat,
         const char* user_id);
 
-// TODO: serialize or memory pointer?
-//PN_CHAT_EXTERN PN_CHAT_EXPORT std::vector<PubNub::User>* pn_chat_get_users(
-//        Pubnub::Chat* chat,
-//        const char* include,
-//        const int limit,
-//        const char* start,
-//        const char* end);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_users(
+        Pubnub::Chat* chat,
+        const char* include,
+        const int limit,
+        const char* start,
+        const char* end);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_update_user_dirty(
         Pubnub::Chat* chat,

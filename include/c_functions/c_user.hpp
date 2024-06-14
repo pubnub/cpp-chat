@@ -21,7 +21,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_user_create_dirty(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_destroy(Pubnub::User* user);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_update_dirty(
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_user_update_dirty(
         Pubnub::User* user,
         const char* user_data_json,
         const char* user_name,

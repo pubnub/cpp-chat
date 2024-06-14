@@ -31,7 +31,7 @@ void pn_user_destroy(Pubnub::User* user) {
     delete user;
 }
 
-PnCResult pn_user_update_dirty(
+Pubnub::User* pn_user_update_dirty(
         Pubnub::User* user,
         const char* user_data_json,
         const char* user_name,
@@ -52,11 +52,11 @@ PnCResult pn_user_update_dirty(
     user_data.type = type;
 
     try {
-        user->update(user_data);
+        new Pubnub::User(user->update(user_data));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
 
     return PN_C_OK;
