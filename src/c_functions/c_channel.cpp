@@ -3,6 +3,7 @@
 #include "chat.hpp"
 #include "chat/message.hpp"
 #include "c_functions/c_errors.hpp"
+#include "nlohmann/json.hpp"
 
 void pn_channel_delete(Pubnub::Channel* channel) {
     delete channel;
@@ -261,6 +262,39 @@ PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
         auto jsonised = jsonize_messages2(present);
         strcpy(result, jsonised);
         delete[] jsonised;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
+    j = nlohmann::json{
+        {"ban", data.ban},
+        {"mute", data.mute},
+        {"reason", data.reason}
+    };
+}
+
+PnCResult pn_channel_get_user_restrictions(
+        Pubnub::Channel* channel,
+        const char* user_id,
+        const char* channel_id,
+        int limit,
+        const char* start,
+        const char* end,
+        char* result
+        ) {
+    try {
+        auto restrictions = channel->get_user_restrictions(user_id, channel_id, limit, start, end);
+        nlohmann::json json;
+        restrictions_to_json(json, restrictions);
+
+
+        strcpy(result, json.dump().c_str());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
