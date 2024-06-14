@@ -5,18 +5,16 @@ void pn_message_delete(Pubnub::Message* message) {
     delete message;
 }
 
-PnCResult pn_message_edit_text(
+Pubnub::Message* pn_message_edit_text(
         Pubnub::Message* message,
         const char* text) {
     try {
-        message->edit_text(text);
+        return new Pubnub::Message(message->edit_text(text));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 PnCResult pn_message_text(

@@ -10,7 +10,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_delete(Pubnub::Message* message);
 
 // TODO: ctors with json check
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_edit_text(
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_edit_text(
         Pubnub::Message* message,
         const char* text);
 
