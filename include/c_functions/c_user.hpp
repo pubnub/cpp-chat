@@ -65,4 +65,13 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_status(Pubnub::User* user, c
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_type(Pubnub::User* user, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channel_restrictions(
+        Pubnub::User* user,
+        const char* user_id,
+        const char* channel_id,
+        int limit,
+        const char* start,
+        const char* end,
+        char* result);
+
 #endif // PN_CHAT_C_USER_HPP

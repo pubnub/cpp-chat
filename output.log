@@ -1,0 +1,6 @@
+message receivedtext from cpp
+present user: hehehe
+pbcc=0x150020000: No message payload in subscribe V2 response found, error=5
+pbcc=0x150020000: No message payload in subscribe V2 response found, error=5
+channel update. id: "my_channel2"
+user update callback received. user name:  

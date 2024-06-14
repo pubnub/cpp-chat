@@ -1,6 +1,7 @@
 #include "c_functions/c_user.hpp"
 #include "c_functions/c_errors.hpp"
 #include "chat/user.hpp"
+#include "nlohmann/json.hpp"
 
 Pubnub::User* pn_user_create_dirty(
         Pubnub::Chat* chat,
@@ -185,4 +186,38 @@ void pn_user_get_data_type(Pubnub::User* user, char* result) {
     strcpy(result, user_data.c_str());
 }
 
+// TODO: utils
+static void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
+    j = nlohmann::json{
+        {"ban", data.ban},
+        {"mute", data.mute},
+        {"reason", data.reason}
+    };
+}
 
+PnCResult pn_user_get_channel_restrictions(
+        Pubnub::User* user,
+        const char* user_id,
+        const char* channel_id,
+        int limit,
+        const char* start,
+        const char* end,
+        char* result) {
+    try {
+        auto restrictions = user->get_channel_restrictions(user_id, channel_id, limit, start, end);
+        nlohmann::json json;
+        restrictions_to_json(json, restrictions);
+
+        strcpy(result, json.dump().c_str());
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+
+
+
+    return PN_C_OK;
+}

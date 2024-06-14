@@ -271,7 +271,8 @@ PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
     return PN_C_OK;
 }
 
-void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
+// TODO: utils
+static void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
     j = nlohmann::json{
         {"ban", data.ban},
         {"mute", data.mute},
