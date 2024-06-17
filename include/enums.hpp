@@ -82,7 +82,7 @@ static inline Pubnub::String chat_message_type_to_string(pubnub_chat_message_typ
 
 static inline pubnub_chat_message_type chat_message_type_from_string(Pubnub::String chat_message_type_string)
 {
-	if(chat_message_type_string == Pubnub::String("text")) return pubnub_chat_message_type::PCMT_TEXT;
+	if(chat_message_type_string == Pubnub::String("text") || chat_message_type_string == Pubnub::String("\"text\"")) return pubnub_chat_message_type::PCMT_TEXT;
 
 	throw std::invalid_argument("can't convert chat_message_type_string to pubnub_chat_message_type");
 }
