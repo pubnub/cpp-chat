@@ -73,6 +73,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
         PN_CHAT_EXPORT void listen_for_events(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback);
+        PN_CHAT_EXPORT std::vector<Pubnub::String> listen_for_events_and_get_last_messages(Pubnub::String channel_id);
 
 
         // TODO: I'm totally sure that we should handle need for pubnub context in a different way

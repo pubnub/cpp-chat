@@ -289,6 +289,16 @@ void Chat::listen_for_events(Pubnub::String channel_id, std::function<void(Pubnu
     pubnub.subscribe_to_channel(channel_id);
 }
 
+std::vector<String> Chat::listen_for_events_and_get_last_messages(String channel_id)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
+    }
+
+    return this->pubnub.subscribe_to_channel_and_get_messages_as_strings(channel_id);
+}
+
 void Chat::subscribe_to_channel(String channel_id)
 {
     this->pubnub.subscribe_to_channel(channel_id);

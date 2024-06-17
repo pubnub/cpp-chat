@@ -208,6 +208,12 @@ namespace PubNubChatAPI.Entities
             string end,
             StringBuilder result);
 
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_listen_for_events(
+            IntPtr chat,
+            string channel_id,
+            StringBuilder result);
+
         #endregion
 
         private IntPtr chatPointer;
@@ -215,6 +221,7 @@ namespace PubNubChatAPI.Entities
         private Dictionary<string, User> userWrappers = new();
         private Dictionary<string, Membership> membershipWrappers = new();
         private Dictionary<string, Message> messageWrappers = new();
+        private List<string> channelEventsListeners = new();
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
 
@@ -1257,6 +1264,38 @@ namespace PubNubChatAPI.Entities
         }
 
         #endregion
+
+        // TODO: I added that here but probably it is not the best place:
+        /// <summary>
+        /// Starts listening for events.
+        /// <para>
+        /// Starts listening for channel events. 
+        /// It allows to receive different events without the need to 
+        /// connect to any channel.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.ListenForEvents();
+        /// chat.OnEvent += (event) => {
+        ///  // Event received
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="OnEvent"/>
+        public void ListenForEvents(string channelId)
+        {
+            if (string.IsNullOrEmpty(channelId))
+            {
+                throw new ArgumentException("Channel ID cannot be null or empty.");
+            }
+
+            var messagesBuffer = new StringBuilder(32768);
+            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(this.chatPointer, channelId, messagesBuffer));
+            this.ParseJsonUpdatePointers(messagesBuffer.ToString());
+        }
 
         ~Chat()
         {

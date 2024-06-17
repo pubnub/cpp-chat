@@ -69,6 +69,7 @@ Pubnub::User* pn_deserialize_user(Pubnub::Chat* chat, pubnub_v2_message* user_js
 
 PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
     if (!Deserialization::is_event_message(Pubnub::String(event_json->payload.ptr, event_json->payload.size))) {
+        std::cout << "Message is not a chat event" << std::endl;
         pn_c_set_error_message("Message is not a chat event");
 
         return PN_C_ERROR;
@@ -80,6 +81,7 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
 
         return PN_C_OK;
     } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
         pn_c_set_error_message(e.what());
 
         return PN_C_ERROR;

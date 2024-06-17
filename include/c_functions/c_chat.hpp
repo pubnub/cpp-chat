@@ -116,5 +116,10 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_channels(
         const char* end,
         char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_listen_for_events(
+        Pubnub::Chat* chat,
+        const char* channel_id,
+        char* result);
+
 
 #endif // PN_CHAT_C_CHAT_HPP

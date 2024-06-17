@@ -402,3 +402,33 @@ PnCResult pn_chat_get_channels(
     return PN_C_OK;
 }
 
+PnCResult pn_chat_listen_for_events(
+        Pubnub::Chat* chat,
+        const char* channel_id,
+        char* result) {
+    try {
+        auto events = chat->listen_for_events_and_get_last_messages(channel_id);
+
+        if (events.size() == 0) {
+            memcpy(result, "[]\0", 3);
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto event : events) {
+            string += event;
+            string += ",";
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        memcpy(result, string.c_str(), string.length() + 1);
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+        
+    return PN_C_OK;
+}
