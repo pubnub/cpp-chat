@@ -17,43 +17,43 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_destroy(IntPtr user);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern int pn_user_report(IntPtr user, string reason);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern int pn_user_is_present_on(IntPtr user, string channel_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern int pn_user_where_present(IntPtr user, StringBuilder result_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_user_id(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_user_name(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_external_id(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_profile_url(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_email(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_custom_data(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_status(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern void pn_user_get_data_type(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport("pubnub-chat.dll")]
         private static extern int pn_user_get_channel_restrictions(
             IntPtr user,
             string user_id,
@@ -287,7 +287,24 @@ namespace PubNubChatAPI.Entities
             chat.SetRestrictions(Id, channelId, banUser, muteUser, reason);
         }
 
-       public string GetChannelRestrictions(string channelId, int limit, string startTimeToken, string endTimeToken)
+        /// <summary>
+        /// Gets the restrictions on the user for the channel.
+        /// <para>
+        /// This method gets the restrictions on the user for the channel.
+        /// You can get the restrictions on the user for the channel.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel id for which the restrictions are to be fetched.</param>
+        /// <param name="limit">The limit on the number of restrictions to be fetched.</param>
+        /// <param name="startTimeToken">The start time token from which the restrictions are to be fetched.</param>
+        /// <param name="endTimeToken">The end time token till which the restrictions are to be fetched.</param>
+        /// <returns>
+        /// The restrictions on the user for the channel.
+        /// </returns>
+        /// <exception cref="PubNubCCoreException">
+        /// This exception might be thrown when any error occurs while getting the restrictions on the user for the channel.
+        /// 
+        public string GetChannelRestrictions(string channelId, int limit, string startTimeToken, string endTimeToken)
         {
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_user_get_channel_restrictions(pointer, Id, channelId, limit,
@@ -295,11 +312,49 @@ namespace PubNubChatAPI.Entities
             return buffer.ToString();
         }
 
+        /// <summary>
+        /// Reports the user.
+        /// <para>
+        /// This method reports the user.
+        /// Reason for reporting the user is to report the user for any inappropriate behavior.
+        /// </para>
+        /// </summary>
+        /// <param name="reason">The reason for reporting the user.</param>
+        /// <exception cref="PubNubCCoreException">
+        /// This exception might be thrown when any error occurs while reporting the user.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// var user = // ...;
+        /// user.ReportUser("Inappropriate behavior");
+        /// </code>
+        /// </example>
         public void ReportUser(string reason)
         {
             CUtilities.CheckCFunctionResult(pn_user_report(pointer, reason));
         }
 
+        /// <summary>
+        /// Checks if the user is present on the channel.
+        /// <para>
+        /// This method checks if the user is present on the channel.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel id on which the user's presence is to be checked.</param>
+        /// <returns>
+        /// <c>true</c> if the user is present on the channel; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="PubNubCCoreException">
+        /// This exception might be thrown when any error occurs while checking if the user is present on the channel.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// var user = // ...;
+        /// if (user.IsPresentOn("channel_id")) {
+        ///   // User is present on the channel
+        /// }
+        /// </code>
+        /// </example>
         public bool IsPresentOn(string channelId)
         {
             var result = pn_user_is_present_on(pointer, channelId);
@@ -307,6 +362,30 @@ namespace PubNubChatAPI.Entities
             return result == 1;
         }
 
+        /// <summary>
+        /// Gets the list of channels where the user is present.
+        /// <para>
+        /// This method gets the list of channels where the user is present.
+        /// </para>
+        /// </summary>
+        /// <returns>
+        /// The list of channels where the user is present.
+        /// </returns>
+        /// <remarks>
+        /// The list is kept as a list of channel ids.
+        /// </remarks>
+        /// <exception cref="PubNubCCoreException">
+        /// This exception might be thrown when any error occurs while getting the list of channels where the user is present.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// var user = // ...;
+        /// var channels = user.WherePresent();
+        /// foreach (var channel in channels) {
+        ///  Console.WriteLine(channel);
+        /// }
+        /// </code>
+        /// </example>
         public List<string> WherePresent()
         {
             var buffer = new StringBuilder(32768);
@@ -317,6 +396,32 @@ namespace PubNubChatAPI.Entities
             return channelIds;
         }
 
+        /// <summary>
+        /// Gets the list of memberships of the user.
+        /// <para>
+        /// This methods gets the list of memberships of the user.
+        /// All the relationships of the user with the channels are considered as memberships.
+        /// </para>
+        /// </summary>
+        /// <param name="limit">The limit on the number of memberships to be fetched.</param>
+        /// <param name="startTimeToken">The start time token from which the memberships are to be fetched.</param>
+        /// <param name="endTimeToken">The end time token till which the memberships are to be fetched.</param>
+        /// <returns>
+        /// The list of memberships of the user.
+        /// </returns>
+        /// <exception cref="PubNubCCoreException">
+        /// This exception might be thrown when any error occurs while getting the list of memberships of the user.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// var user = // ...;
+        /// var memberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
+        /// foreach (var membership in memberships) {
+        /// Console.WriteLine(membership.ChannelId);
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="Membership"/>
         public List<Membership> GetMemberships(int limit, string startTimeToken, string endTimeToken)
         {
             return chat.GetUserMemberships(Id, limit, startTimeToken, endTimeToken);
