@@ -653,6 +653,26 @@ namespace PubNubChatAPI.Entities
             return user;
         }
 
+        /// <summary>
+        /// Checks if the user with the provided user ID is present in the provided channel.
+        /// <para>
+        /// Checks if the user with the provided user ID is present in the provided channel.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="channelId">The channel ID.</param>
+        /// <returns>True if the user is present, false otherwise.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// if (chat.IsPresent("user_id", "channel_id")) {
+        ///   // User is present 
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="WhoIsPresent"/>
+        /// <seealso cref="WherePresent"/>
         public bool IsPresent(string userId, string channelId)
         {
             if (TryGetChannel(channelId, out var channel))
@@ -665,6 +685,26 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Gets the list of users present in the provided channel.
+        /// <para>
+        /// Gets all the users as a list of the strings present in the provided channel.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <returns>The list of the users present in the channel.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var users = chat.WhoIsPresent("channel_id");
+        /// foreach (var user in users) {
+        ///   // User is present on the channel
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="WherePresent"/>
+        /// <seealso cref="IsPresent"/>
         public List<string> WhoIsPresent(string channelId)
         {
             if (TryGetChannel(channelId, out var channel))
@@ -677,6 +717,26 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Gets the list of channels where the user with the provided user ID is present.
+        /// <para>
+        /// Gets all the channels as a list of the strings where the user with the provided user ID is present.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>The list of the channels where the user is present.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var channels = chat.WherePresent("user_id");
+        /// foreach (var channel in channels) {
+        ///  // Channel where User is IsPresent
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="WhoIsPresent"/>
+        /// <seealso cref="IsPresent"/>
         public List<string> WherePresent(string userId)
         {
             if (TryGetUser(userId, out var user))
@@ -689,6 +749,25 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Gets the user with the provided user ID.
+        /// <para>
+        /// Tries to get the user with the provided user ID.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="user">The out user.</param>
+        /// <returns>True if the user was found, false otherwise.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// if (chat.TryGetUser("user_id", out var user)) {
+        ///   // User found
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="User"/>
         public bool TryGetUser(string userId, out User user)
         {
             var userPointer = pn_chat_get_user(chatPointer, userId);
@@ -735,6 +814,33 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Gets the list of users with the provided parameters.
+        /// <para>
+        /// Gets all the users that matches the provided parameters.
+        /// </para>
+        /// </summary>
+        /// <param name="include">The include parameter.</param>
+        /// <param name="limit">The amount of userts to get.</param>
+        /// <param name="startTimeToken">The start time token of the users.</param>
+        /// <param name="endTimeToken">The end time token of the users.</param>
+        /// <returns>The list of the users that matches the provided parameters.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var users = chat.GetUsers(
+        ///     "admin",
+        ///     10,
+        ///     "16686902600029072"
+        ///     "16686902600028961",
+        /// );
+        /// foreach (var user in users) {
+        ///  // User found
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="User"/>
         public List<User> GetUsers(string include, int limit, string startTimeToken, string endTimeToken)
         {
             var buffer = new StringBuilder(8192);
@@ -760,6 +866,25 @@ namespace PubNubChatAPI.Entities
             return returnUsers;
         }
 
+        /// <summary>
+        /// Updates the user with the provided user ID.
+        /// <para>
+        /// Updates the user with the provided user ID with the provided data.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="updatedData">The updated data for the user.</param>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the user with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.UpdateUser("user_id", new ChatUserData {
+        ///   Username = "new_name"
+        ///   // ...
+        /// });
+        /// </code>
+        /// </example>
+        /// <seealso cref="ChatUserData"/>
         public void UpdateUser(string userId, ChatUserData updatedData)
         {
             var newPointer = pn_chat_update_user_dirty(chatPointer, userId,
@@ -781,6 +906,20 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Deletes the user with the provided user ID.
+        /// <para>
+        /// The user is deleted with all the messages and channels.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the user with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.DeleteUser("user_id");
+        /// </code>
+        /// </example>
         public void DeleteUser(string userId)
         {
             if (userWrappers.ContainsKey(userId))
