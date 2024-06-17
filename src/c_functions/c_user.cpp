@@ -125,12 +125,13 @@ PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
     }
     
     Pubnub::String result = "[";
-    for (auto it = channels.begin(); it != channels.end(); ++it) {
-        result += *it;
-        if (it != channels.end() - 1) {
-            result += ",";
-        }
+    for (auto channel : channels) {
+        result += "\"";
+        result += channel;
+        result += "\",";
     }
+
+    result.erase(result.length() - 1);
     result += "]";
 
     strcpy(result_json, result.c_str());
