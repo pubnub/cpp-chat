@@ -60,7 +60,7 @@ Message Message::edit_text(Pubnub::String new_text)
 
     pubnub_message_action_type edited_action_type = pubnub_message_action_type::PMAT_Edited;
 
-    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, edited_action_type, new_text);
+    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(edited_action_type), new_text);
     message_data.text = new_text;
     add_message_action_to_message_data(action_timetoken, edited_action_type, new_text);
     return *this;
@@ -98,7 +98,7 @@ Message Message::delete_message()
 {
     pubnub_message_action_type deleted_action_type = pubnub_message_action_type::PMAT_Deleted;
     String deleted_value = "\"deleted\"";
-    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, pubnub_message_action_type::PMAT_Deleted, deleted_value);
+    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(deleted_action_type), deleted_value);
 
     add_message_action_to_message_data(action_timetoken, deleted_action_type, deleted_value);
     return *this;
