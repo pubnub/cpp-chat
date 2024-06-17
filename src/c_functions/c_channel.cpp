@@ -75,8 +75,9 @@ const char* jsonize_messages2(std::vector<Pubnub::String> messages) {
     
     Pubnub::String result = "[";
     for (auto message : messages) {
+        result += "\"";
         result += message;
-        result += ",";
+        result += "\",";
     }   
 
     result.erase(result.length() - 1);
