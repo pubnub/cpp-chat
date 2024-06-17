@@ -332,7 +332,7 @@ PnCResult pn_chat_get_users(
         auto users = chat->get_users(include, limit, start, end);
 
         if (users.size() == 0) {
-            strcpy(result, "[]\0");
+            memcpy(result, "[]\0", 3);
             return PN_C_OK;
         }
 
@@ -352,7 +352,7 @@ PnCResult pn_chat_get_users(
         string.erase(string.length() - 1);
         string += "]";
 
-        strcpy(result, string.c_str());
+        memcpy(result, string.c_str(), string.length() + 1);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -373,7 +373,7 @@ PnCResult pn_chat_get_channels(
         auto channels = chat->get_channels(include, limit, start, end);
 
         if (channels.size() == 0) {
-            strcpy(result, "[]\0");
+            memcpy(result, "[]\0", 3);
             return PN_C_OK;
         }
 
@@ -392,7 +392,7 @@ PnCResult pn_chat_get_channels(
         string.erase(string.length() - 1);
         string += "]";
 
-        strcpy(result, string.c_str());
+        memcpy(result, string.c_str(), string.length() + 1);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
