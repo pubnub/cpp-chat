@@ -14,7 +14,7 @@ namespace PubnubChatApi.Utilities
     
     public static class CUtilities
     {
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_c_get_error_message(StringBuilder buffer);
 
         private static void ThrowCError()
