@@ -190,7 +190,9 @@ std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub
 
 Message Channel::get_message(Pubnub::String timetoken)
 {
-    int64_t start_timetoken_int = std::stoll(timetoken) + 1;
+
+    String in_timetoken = timetoken;
+    auto start_timetoken_int = std::stoull(timetoken.to_std_string()) + 1;
     String start_timetoken = std::to_string(start_timetoken_int);
     std::vector<Message> messages = get_history(start_timetoken, timetoken, 1);
     if(messages.size() == 0)

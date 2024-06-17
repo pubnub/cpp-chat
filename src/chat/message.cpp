@@ -30,6 +30,8 @@ Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_
     }
 
     timetoken = message_data_json["timetoken"].dump();
+    timetoken.erase(0, 1);
+    timetoken.erase(timetoken.length() - 1, 1);
 
     ChatMessageData message_data;
     message_data.channel_id = in_channel_id;
@@ -99,10 +101,15 @@ Pubnub::String Message::text()
         //check if there is any message action of type "edited"
         if(message_action.type == pubnub_message_action_type::PMAT_Edited)
         {
+            String current_timetoken_string = message_action.timetoken;
+            current_timetoken_string.erase(0, 1);
+            current_timetoken_string.erase(current_timetoken_string.length() - 1, 1);
+            
+            auto timetoken_value = std::stoull(current_timetoken_string.to_std_string());
             //check if edition token is newer
-            if(std::stoull(message_action.timetoken) > most_recent_timetoken)
+            if(timetoken_value > most_recent_timetoken)
             {
-                most_recent_timetoken = std::stoull(message_action.timetoken);
+                most_recent_timetoken = timetoken_value;
                 most_recent_edition = message_action.value;
             }
         }
