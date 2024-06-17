@@ -85,9 +85,10 @@ void Channel::join(std::function<void(Message)> message_callback, Pubnub::String
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
     String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
 
+    String user_id = this->chat_obj.get_pubnub_context().get_user_id();
     this->chat_obj
         .get_pubnub_context()
-        .set_memberships(channel_id, set_object_string);
+        .set_memberships(user_id, set_object_string);
 
     connect(message_callback);
 }
@@ -178,7 +179,8 @@ std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub
 
     for (auto& element : messages_array_json)
     {
-        messages.emplace_back(chat_obj, channel_id, element.dump());
+        Message message_obj(chat_obj, channel_id, element.dump());
+        messages.push_back(message_obj);
     }
 
     return messages;

@@ -45,13 +45,16 @@ Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_
         for (json::iterator message_action_type = message_action_types_json.begin(); message_action_type != message_action_types_json.end(); ++message_action_type) 
         {
             json message_actions_json = message_action_type.value();
+            String message_actions_json_string = message_actions_json.dump();
             for (json::iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) 
             {
+                json single_message_action_json = message_action.value();
+                String single_message_action_json_string = single_message_action_json.dump();
                 MessageActionData message_action_data;
                 message_action_data.type = message_action_type_from_string(message_action_type.key());
                 message_action_data.value = message_action.key();
-                message_action_data.timetoken = message_action.value()["actionTimetoken"].dump();
-                message_action_data.user_id = message_action.value()["uuid"].dump();
+                message_action_data.timetoken = single_message_action_json[0]["actionTimetoken"].dump();
+                message_action_data.user_id = single_message_action_json[0]["uuid"].dump();
                 message_data.message_actions.push_back(message_action_data);
             }
         }
@@ -90,7 +93,7 @@ Pubnub::String Message::text()
     //not actuall data. So can return incorrect text.
 
     String most_recent_edition = message_data.text;
-    uint64_t most_recent_timetoken = -1;
+    uint64_t most_recent_timetoken = 1;
     for(auto message_action : message_data.message_actions)
     {
         //check if there is any message action of type "edited"
