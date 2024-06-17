@@ -47,6 +47,8 @@ Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_
             message_data.message_actions[message_action.key()] = message_action.value();
         }
     }
+
+    this->message_data = message_data;
 }
 
 Message Message::edit_text(Pubnub::String new_text)
