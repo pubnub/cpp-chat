@@ -8,6 +8,13 @@ using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
+    /// <summary>
+    /// Class <c>Channel</c> represents a chat channel.
+    ///
+    /// <para>
+    /// A channel is a entity that allows users to publish and receive messages.
+    /// </para>
+    /// </summary>
     public class Channel : PointerWrapper
     {
         #region DLL Imports
@@ -87,6 +94,14 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
+        /// <summary>
+        /// The name of the channel.
+        ///
+        /// <para>
+        /// The name of the channel that is human meaningful.
+        /// </para>
+        /// </summary>
+        /// <value>The name of the channel.</value>
         public string Name
         {
             get
@@ -97,6 +112,12 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// The description of the channel.
+        ///
+        /// <para>
+        /// The description that allows users to understand the purpose of the channel.
+        /// </para>
         public string Description
         {
             get
@@ -107,6 +128,16 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// The custom data of the channel.
+        ///
+        /// <para>
+        /// The custom data that can be used to store additional information about the channel.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// The custom data is stored in JSON format.
+        /// </remarks>
         public string CustomDataJson
         {
             get
@@ -117,6 +148,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        // TODO: Docs
         public string Updated
         {
             get
@@ -127,6 +159,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        // TODO: Docs
         public string Status
         {
             get
@@ -150,8 +183,64 @@ namespace PubNubChatAPI.Entities
         private Chat chat;
         private bool connected;
 
+        /// <summary>
+        /// Event that is triggered when a message is received.
+        ///
+        /// <para>
+        /// The event is triggered when a message is received in the channel 
+        /// when the channel is connected.
+        /// </para>
+        /// </summary>
+        /// <value>The event that is triggered when a message is received.</value>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.OnMessageReceived += (message) => {
+        ///    Console.WriteLine($"Message received: {message.Text}");
+        /// };
+        /// channel.Connect();
+        /// </code>
+        /// </example>
         public event Action<Message> OnMessageReceived;
+
+        /// <summary>
+        /// Event that is triggered when the channel is updated.
+        ///
+        /// <para>
+        /// The event is triggered when the channel is updated by the user 
+        /// or by any other entity.
+        /// </para>
+        /// </summary>
+        /// <value>The event that is triggered when the channel is updated.</value>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.OnChannelUpdate += (channel) => {
+        ///   Console.WriteLine($"Channel updated: {channel.Name}");
+        /// };
+        /// channel.Connect();
+        /// </code>
+        /// </example>
         public event Action<Channel> OnChannelUpdate;
+
+        /// <summary>
+        /// Event that is triggered when any presence update occurs.
+        ///
+        /// <para>
+        /// Presence update occurs when a user joins or leaves the channel.
+        /// </para>
+        /// </summary>
+        /// <value>The event that is triggered when any presence update occurs.</value>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.OnPresenceUpdate += (users) => {
+        ///   Console.WriteLine($"Users present: {string.Join(", ", users)}");
+        /// };
+        /// channel.Connect();
+        /// </code>
+        /// </example>
+        ///
         public event Action<List<string>> OnPresenceUpdate;
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
@@ -191,6 +280,26 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Connects to the channel.
+        /// <para>
+        /// Connects to the channel and starts receiving messages. 
+        /// After connecting, the <see cref="OnMessageReceived"/> event is triggered when a message is received.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.OnMessageReceived += (message) => {
+        ///   Console.WriteLine($"Message received: {message.Text}");
+        /// };
+        /// channel.Connect();
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while connecting to the channel.</exception>
+        /// <seealso cref="OnMessageReceived"/>
+        /// <seealso cref="Disconnect"/>
+        /// <seealso cref="Join"/>
         public void Connect()
         {
             connected = true;
@@ -200,6 +309,29 @@ namespace PubNubChatAPI.Entities
             chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
         }
         
+        // TODO: Shouldn't join have additional parameters?
+        /// <summary>
+        /// Joins the channel.
+        /// <para>
+        /// Joins the channel and starts receiving messages.
+        /// After joining, the <see cref="OnMessageReceived"/> event is triggered when a message is received.
+        /// Additionally, there is a possibility to add additional parameters to the join request.
+        /// It also adds the membership to the channel.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.OnMessageReceived += (message) => {
+        ///  Console.WriteLine($"Message received: {message.Text}");
+        /// };
+        /// channel.Join();
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while joining the channel.</exception>
+        /// <seealso cref="OnMessageReceived"/>
+        /// <seealso cref="Connect"/>
+        /// <seealso cref="Disconnect"/>
         public void Join()
         {
             connected = true;
@@ -209,12 +341,50 @@ namespace PubNubChatAPI.Entities
             chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
         }
 
+        /// <summary>
+        /// Disconnects from the channel.
+        /// <para>
+        /// Disconnects from the channel and stops receiving messages.
+        /// Additionally, all the other listeners gets the presence update that the user has left the channel.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.Connect();
+        /// //...
+        /// channel.Disconnect();
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while disconnecting from the channel.</exception>
+        /// <seealso cref="Connect"/>
+        /// <seealso cref="Join"/>
         public void Disconnect()
         {
             connected = false;
             CUtilities.CheckCFunctionResult(pn_channel_disconnect(pointer));
         }
 
+        /// <summary>
+        /// Leaves the channel.
+        /// <para>
+        /// Leaves the channel and stops receiving messages.
+        /// Additionally, all the other listeners gets the presence update that the user has left the channel.
+        /// The membership is also removed from the channel.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.Join();
+        /// //...
+        /// channel.Leave();
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while leaving the channel.</exception>
+        /// <seealso cref="Join"/>
+        /// <seealso cref="Connect"/>
+        /// <seealso cref="Disconnect"/>
         public void Leave()
         {
             connected = false;
