@@ -202,7 +202,7 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_channels(
             IntPtr chat,
-            string include, 
+            string include,
             int limit,
             string start,
             string end,
@@ -272,7 +272,7 @@ namespace PubNubChatAPI.Entities
                         //TODO: later Event will be a proper PointerWrapper class
                         OnEvent?.Invoke(allEventsBuffer.ToString());
                     }
-                    
+
                     //New message
                     var messagePointer = pn_deserialize_message(chatPointer, pointer);
                     if (messagePointer != IntPtr.Zero)
@@ -315,6 +315,7 @@ namespace PubNubChatAPI.Entities
                             existingChannelWrapper.UpdatePointer(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
                         }
+
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -348,12 +349,18 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
-                    
+
                     var presenceBuffer = new StringBuilder(16384);
                     //Presence (json list of uuids)
                     if (pn_deserialize_presence(pointer, presenceBuffer) != -1)
                     {
                         var channelId = presenceBuffer.ToString();
+                        if (channelId.EndsWith("-pnpres"))
+                        {
+                            channelId = channelId.Substring(0,
+                                channelId.LastIndexOf("-pnpres", StringComparison.Ordinal));
+                        }
+
                         if (TryGetChannel(channelId, out var channel))
                         {
                             channel.BroadcastPresenceUpdate();
@@ -366,7 +373,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        internal string GetUpdates()
+        private string GetUpdates()
         {
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_chat_get_updates(chatPointer, messagesBuffer));
@@ -511,7 +518,8 @@ namespace PubNubChatAPI.Entities
         {
             Debug.WriteLine("1");
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_chat_get_channels(chatPointer, include, limit, startTimeToken, endTimeToken,
+            CUtilities.CheckCFunctionResult(pn_chat_get_channels(chatPointer, include, limit, startTimeToken,
+                endTimeToken,
                 buffer));
             Debug.WriteLine("2");
             var jsonPointers = buffer.ToString();
@@ -1215,7 +1223,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="Message"/>
-       public List<Message> GetChannelMessageHistory(string channelId, string startTimeToken, string endTimeToken,
+        public List<Message> GetChannelMessageHistory(string channelId, string startTimeToken, string endTimeToken,
             int count)
         {
             var messages = new List<Message>();
