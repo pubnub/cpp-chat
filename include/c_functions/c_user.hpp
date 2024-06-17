@@ -74,7 +74,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channel_restrictions(
         const char* end,
         char* result);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_memberhips(
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_memberships(
         Pubnub::User* user,
         int limit,
         const char* start,

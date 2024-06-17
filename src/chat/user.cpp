@@ -90,7 +90,7 @@ std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String 
 
     for (auto& element : channels_array_json)
     {
-        Membership membership_obj(chat_obj, *this, String(element["channel"]));
+        Membership membership_obj(chat_obj, *this, String(element["channel"].dump()));
         memberships.push_back(membership_obj);
     }
 

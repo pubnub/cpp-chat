@@ -746,9 +746,11 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     //Handle message updates
     if(Deserialization::is_membership_update_message(message_string))
     {
-        Pubnub::String membership_channel = message_json["data"]["channel"]["id"].dump();
+        // TODO: All dump() calls should be replaced with unified function that removes quotes from the string
+        Pubnub::String dumped = message_json["data"]["channel"]["id"].dump();
+        Pubnub::String membership_channel = Pubnub::String(&dumped.c_str()[1], dumped.length() - 2); 
 
-        if(this->message_update_callbacks_map.find(membership_channel) != this->message_update_callbacks_map.end())
+        if(this->membership_callbacks_map.find(membership_channel) != this->membership_callbacks_map.end())
         {
             Pubnub::String membership_user;
             std::function<void(Pubnub::Membership)> callback;
@@ -756,9 +758,12 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
 
             //Make sure this message is related to the user that we are streaming updates for
             Pubnub::String user_from_message = message_json["data"]["uuid"]["id"].dump();
-            if(user_from_message == membership_user)
+            Pubnub::String user_from_message_cleaned = Pubnub::String(&user_from_message.c_str()[1], user_from_message.length() - 2);
+            if(user_from_message_cleaned == membership_user)
             {
-                Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), Pubnub::String(message_json["custom"]));
+                auto custom_field = Pubnub::String(message_json["custom"].dump());
+                auto custom_field_cleaned = Pubnub::String(&custom_field.c_str()[1], custom_field.length() - 2);
+                Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), custom_field_cleaned);
                 callback(membership_obj);
             }
         }

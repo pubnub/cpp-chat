@@ -173,7 +173,7 @@ namespace PubNubChatAPI.Entities
             string channel_id);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_user_get_memberhips(
+        private static extern int pn_user_get_memberships(
             IntPtr user,
             int limit,
             string start,
@@ -1012,7 +1012,7 @@ namespace PubNubChatAPI.Entities
             }
 
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_user_get_memberhips(user.Pointer, limit, startTimeToken, endTimeToken,
+            CUtilities.CheckCFunctionResult(pn_user_get_memberships(user.Pointer, limit, startTimeToken, endTimeToken,
                 buffer));
             return ParseJsonMembershipPointers(buffer.ToString());
         }
