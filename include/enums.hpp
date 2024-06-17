@@ -35,15 +35,15 @@ static inline Pubnub::String message_action_type_to_string(pubnub_message_action
     switch(message_action_type)
 	{
 	case pubnub_message_action_type::PMAT_Reaction:
-		return "reaction";
+		return "\"reaction\"";
 	case pubnub_message_action_type::PMAT_Receipt:
-		return "report";
+		return "\"report\"";
 	case pubnub_message_action_type::PMAT_Custom:
-		return "custom";
+		return "\"custom\"";
 	case pubnub_message_action_type::PMAT_Edited:
-		return "edited";
+		return "\"edited\"";
 	case pubnub_message_action_type::PMAT_Deleted:
-		return "deleted";
+		return "\"deleted\"";
 	}
 	return "incorrect_chat_event_type";
 };
