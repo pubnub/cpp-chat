@@ -195,7 +195,7 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, PubnubRestr
 
 	//Ban or mute the user
 	String params_string = String("{\"ban\": ") + bool_to_string(restrictions.ban) + String(", \"mute\": ") + bool_to_string(restrictions.mute) + String(", \"reason\": \"") + restrictions.reason + String("\"}");
-	String set_members_string = String("[{\"uuid\": {\"id\": \"") + this->pubnub.get_user_id() + String("\"}, \"custom\": ") + params_string + String("}]");
+	String set_members_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}, \"custom\": ") + params_string + String("}]");
     this->pubnub.set_members(restrictions_channel, set_members_string);
     String restriction_text;
     restrictions.ban ? restriction_text = "banned" : "muted";
