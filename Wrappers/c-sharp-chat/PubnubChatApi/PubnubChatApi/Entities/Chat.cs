@@ -933,6 +933,34 @@ namespace PubNubChatAPI.Entities
 
         #region Memberships
 
+        /// <summary>
+        /// Gets the memberships of the user with the provided user ID.
+        /// <para>
+        /// Gets all the memberships of the user with the provided user ID.
+        /// The memberships are limited by the provided limit and the time tokens.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="limit">The maximum amount of the memberships.</param>
+        /// <param name="startTimeToken">The start time token of the memberships.</param>
+        /// <param name="endTimeToken">The end time token of the memberships.</param>
+        /// <returns>The list of the memberships of the user.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the user with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var memberships = chat.GetUserMemberships(
+        ///         "user_id",
+        ///         10,
+        ///         "16686902600029072",
+        ///         "16686902600028961"
+        /// );
+        /// foreach (var membership in memberships) {
+        ///  // Membership found
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="Membership"/>
         public List<Membership> GetUserMemberships(string userId, int limit, string startTimeToken, string endTimeToken)
         {
             if (!TryGetUser(userId, out var user))
@@ -946,6 +974,34 @@ namespace PubNubChatAPI.Entities
             return ParseJsonMembershipPointers(buffer.ToString());
         }
 
+        /// <summary>
+        /// Gets the memberships of the channel with the provided channel ID.
+        /// <para>
+        /// Gets all the memberships of the channel with the provided channel ID.
+        /// The memberships are limited by the provided limit and the time tokens.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="limit">The maximum amount of the memberships.</param>
+        /// <param name="startTimeToken">The start time token of the memberships.</param>
+        /// <param name="endTimeToken">The end time token of the memberships.</param>
+        /// <returns>The list of the memberships of the channel.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the channel with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var memberships = chat.GetChannelMemberships(
+        ///         "user_id",
+        ///         10,
+        ///         "16686902600029072",
+        ///         "16686902600028961"
+        /// );
+        /// foreach (var membership in memberships) {
+        ///  // Membership found
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="Membership"/>
         public List<Membership> GetChannelMemberships(string channelId, int limit, string startTimeToken,
             string endTimeToken)
         {
@@ -1029,6 +1085,26 @@ namespace PubNubChatAPI.Entities
 
         #region Messages
 
+        /// <summary>
+        /// Gets the <c>Message</c> object for the given timetoken.
+        /// <para>
+        /// Gets the <c>Message</c> object from the channel for the given timetoken.
+        /// The timetoken is used to identify the message.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="messageTimeToken">The timetoken of the message.</param>
+        /// <param name="message">The out parameter that contains the <c>Message</c> object.</param>
+        /// <returns><c>true</c> if the message is found; otherwise, <c>false</c>.</returns>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// if (chat.TryGetMessage("channel_id", "timetoken", out var message)) {
+        ///  // Message found
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="Message"/>
         public bool TryGetMessage(string channelId, string messageTimeToken, out Message message)
         {
             if (!TryGetChannel(channelId, out var channel))
@@ -1081,7 +1157,30 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        public List<Message> GetChannelMessageHistory(string channelId, string startTimeToken, string endTimeToken,
+        /// <summary>
+        /// Gets the channel message history.
+        /// <para>
+        /// Gets the list of the messages that were sent in the channel with the provided parameters.
+        /// The history is limited by the provided count of messages, start time token, and end time token.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="startTimeToken">The start time token of the messages.</param>
+        /// <param name="endTimeToken">The end time token of the messages.</param>
+        /// <param name="count">The maximum amount of the messages.</param>
+        /// <returns>The list of the messages that were sent in the channel.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the channel with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var messages = chat.GetChannelMessageHistory("channel_id", "start_time_token", "end_time_token", 10);
+        /// foreach (var message in messages) {
+        ///  // Message found
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="Message"/>
+       public List<Message> GetChannelMessageHistory(string channelId, string startTimeToken, string endTimeToken,
             int count)
         {
             var messages = new List<Message>();
