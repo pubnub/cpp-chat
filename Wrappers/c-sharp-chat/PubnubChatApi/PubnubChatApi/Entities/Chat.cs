@@ -265,6 +265,14 @@ namespace PubNubChatAPI.Entities
 
                 foreach (var pointer in pubnubV2MessagePointers)
                 {
+                    //All Events (json)
+                    var allEventsBuffer = new StringBuilder(16384);
+                    if (pn_deserialize_event(pointer, allEventsBuffer) != -1)
+                    {
+                        //TODO: later Event will be a proper PointerWrapper class
+                        OnEvent?.Invoke(allEventsBuffer.ToString());
+                    }
+                    
                     //New message
                     var messagePointer = pn_deserialize_message(chatPointer, pointer);
                     if (messagePointer != IntPtr.Zero)
@@ -301,17 +309,12 @@ namespace PubNubChatAPI.Entities
                     var channelPointer = pn_deserialize_channel(chatPointer, pointer);
                     if (channelPointer != IntPtr.Zero)
                     {
-                        Debug.WriteLine("DUUUUUUUUUUUUUUUUUUUUUUUUUDEEEEEEEEEEEEEEE");
                         var id = Channel.GetChannelIdFromPtr(channelPointer);
-                        ;
                         if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
-                            ;
                             existingChannelWrapper.UpdatePointer(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
                         }
-
-                        ;
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -345,22 +348,12 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
-
-                    var stringUpdateBuffer = new StringBuilder(16384);
-
-                    //Event (json)
-                    if (pn_deserialize_event(pointer, stringUpdateBuffer) != -1)
-                    {
-                        //TODO: later Event will be a proper PointerWrapper class
-                        OnEvent?.Invoke(stringUpdateBuffer.ToString());
-                        pn_dispose_message(pointer);
-                        continue;
-                    }
-
+                    
+                    var presenceBuffer = new StringBuilder(16384);
                     //Presence (json list of uuids)
-                    if (pn_deserialize_presence(pointer, stringUpdateBuffer) != -1)
+                    if (pn_deserialize_presence(pointer, presenceBuffer) != -1)
                     {
-                        var channelId = stringUpdateBuffer.ToString();
+                        var channelId = presenceBuffer.ToString();
                         if (TryGetChannel(channelId, out var channel))
                         {
                             channel.BroadcastPresenceUpdate();

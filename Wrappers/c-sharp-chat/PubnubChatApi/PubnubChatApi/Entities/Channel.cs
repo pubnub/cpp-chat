@@ -585,7 +585,6 @@ namespace PubNubChatAPI.Entities
                 ret = JsonConvert.DeserializeObject<List<string>>(jsonResult);
                 ret ??= new List<string>();
             }
-
             return ret;
         }
 

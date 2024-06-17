@@ -391,8 +391,12 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_user_where_present(pointer, buffer));
             var jsonChannelIds = buffer.ToString();
-            var channelIds = JsonConvert.DeserializeObject<List<string>>(jsonChannelIds);
-            channelIds ??= new List<string>();
+            var channelIds = new List<string>();
+            if (!string.IsNullOrEmpty(jsonChannelIds) && jsonChannelIds != "[]" && jsonChannelIds != "{}")
+            {
+                channelIds = JsonConvert.DeserializeObject<List<string>>(jsonChannelIds);
+                channelIds ??= new List<string>();
+            }
             return channelIds;
         }
 

@@ -92,12 +92,13 @@ namespace PubNubChatAPI.Entities
 
         internal static string GetMembershipIdFromPtr(IntPtr membershipPointer)
         {
-            var buffer = new StringBuilder(512);
-            pn_membership_get_user_id(membershipPointer, buffer);
-            var userId = buffer.ToString();
-            buffer = new StringBuilder(512);
-            pn_membership_get_channel_id(membershipPointer, buffer);
-            return userId + buffer;
+            var userIdBuffer = new StringBuilder(512);
+            pn_membership_get_user_id(membershipPointer, userIdBuffer);
+            var userId = userIdBuffer.ToString();
+            var channelIdBuffer = new StringBuilder(512);
+            pn_membership_get_channel_id(membershipPointer, channelIdBuffer);
+            var channelId = channelIdBuffer.ToString();
+            return userId + channelId;
         }
 
         internal void BroadcastMembershipUpdate()
