@@ -9,30 +9,30 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_delete(IntPtr message);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_message_edit_text(IntPtr message, string text);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_text(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_delete_message(IntPtr message);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_deleted(IntPtr message);
         
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_get_timetoken(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_get_data_type(IntPtr message);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_text(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_channel_id(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_user_id(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_meta(IntPtr message, StringBuilder result);
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
 
         #endregion

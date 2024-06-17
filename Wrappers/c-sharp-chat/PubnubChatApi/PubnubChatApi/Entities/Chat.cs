@@ -64,13 +64,13 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_new(string publish, string subscribe, string user_id);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_chat_delete(IntPtr chat);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_create_public_conversation_dirty(IntPtr chat,
             string channel_id,
             string channel_name,
@@ -80,7 +80,7 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_update_channel_dirty(IntPtr chat,
             string channel_id,
             string channel_name,
@@ -90,7 +90,7 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_chat_set_restrictions(IntPtr chat,
             string user_id,
             string channel_id,
@@ -98,10 +98,10 @@ namespace PubNubChatAPI.Entities
             bool mute_user,
             string reason);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_chat_delete_channel(IntPtr chat, string channel_id);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_create_user_dirty(IntPtr chat,
             string user_id,
             string user_name,
@@ -112,7 +112,7 @@ namespace PubNubChatAPI.Entities
             string status,
             string type);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_update_user_dirty(IntPtr chat,
             string user_id,
             string user_name,
@@ -123,37 +123,37 @@ namespace PubNubChatAPI.Entities
             string status,
             string type);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_chat_delete_user(IntPtr chat, string user_id);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_updates(IntPtr chat, StringBuilder messages_json);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_channel(IntPtr chat, IntPtr channel);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_user(IntPtr chat, IntPtr user);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_membership(IntPtr chat, IntPtr membership);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_message_update(IntPtr chat, IntPtr message);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_deserialize_event(IntPtr eventPtr, StringBuilder result);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_deserialize_presence(IntPtr presence, StringBuilder result);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern void pn_dispose_message(IntPtr message);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_users(
             IntPtr chat,
             string include,
@@ -162,17 +162,17 @@ namespace PubNubChatAPI.Entities
             string end,
             StringBuilder result);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_get_user(
             IntPtr chat,
             string user_id);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_get_channel(
             IntPtr chat,
             string channel_id);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_user_get_memberhips(
             IntPtr user,
             int limit,
@@ -180,7 +180,7 @@ namespace PubNubChatAPI.Entities
             string end,
             StringBuilder result);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_members(
             IntPtr channel,
             int limit,
@@ -188,15 +188,24 @@ namespace PubNubChatAPI.Entities
             string end,
             StringBuilder result);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern IntPtr pn_channel_get_message(IntPtr channel, string timetoken);
 
-        [DllImport("pubnub-chat.dll")]
+        [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_history(
             IntPtr channel,
             string start,
             string end,
             int count,
+            StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_get_channels(
+            IntPtr chat,
+            string include, 
+            int limit,
+            string start,
+            string end,
             StringBuilder result);
 
         #endregion
@@ -292,13 +301,17 @@ namespace PubNubChatAPI.Entities
                     var channelPointer = pn_deserialize_channel(chatPointer, pointer);
                     if (channelPointer != IntPtr.Zero)
                     {
+                        Debug.WriteLine("DUUUUUUUUUUUUUUUUUUUUUUUUUDEEEEEEEEEEEEEEE");
                         var id = Channel.GetChannelIdFromPtr(channelPointer);
+                        ;
                         if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
+                            ;
                             existingChannelWrapper.UpdatePointer(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
                         }
 
+                        ;
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -499,6 +512,35 @@ namespace PubNubChatAPI.Entities
                 Debug.WriteLine(CUtilities.GetErrorMessage());
                 return false;
             }
+        }
+
+        public List<Channel> GetChannels(string include, int limit, string startTimeToken, string endTimeToken)
+        {
+            Debug.WriteLine("1");
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(pn_chat_get_channels(chatPointer, include, limit, startTimeToken, endTimeToken,
+                buffer));
+            Debug.WriteLine("2");
+            var jsonPointers = buffer.ToString();
+            Debug.WriteLine("3");
+            var channelPointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
+            Debug.WriteLine("4");
+            var returnChannels = new List<Channel>();
+            if (channelPointers == null)
+            {
+                return returnChannels;
+            }
+
+            foreach (var channelPointer in channelPointers)
+            {
+                var id = Channel.GetChannelIdFromPtr(channelPointer);
+                if (TryGetChannel(id, channelPointer, out var channel))
+                {
+                    returnChannels.Add(channel);
+                }
+            }
+
+            return returnChannels;
         }
 
         /// <summary>
