@@ -37,7 +37,7 @@ static inline Pubnub::String message_action_type_to_string(pubnub_message_action
 	case pubnub_message_action_type::PMAT_Reaction:
 		return "\"reaction\"";
 	case pubnub_message_action_type::PMAT_Receipt:
-		return "\"report\"";
+		return "\"receipt\"";
 	case pubnub_message_action_type::PMAT_Custom:
 		return "\"custom\"";
 	case pubnub_message_action_type::PMAT_Edited:
@@ -85,6 +85,22 @@ static inline pubnub_chat_message_type chat_message_type_from_string(Pubnub::Str
 	if(chat_message_type_string == Pubnub::String("text") || chat_message_type_string == Pubnub::String("\"text\"")) return pubnub_chat_message_type::PCMT_TEXT;
 
 	throw std::invalid_argument("can't convert chat_message_type_string to pubnub_chat_message_type");
+}
+
+static inline pubnub_message_action_type message_action_type_from_string(Pubnub::String message_action_type_string)
+{
+	if(message_action_type_string == Pubnub::String("reaction") || message_action_type_string == Pubnub::String("\"reaction\"")) 
+		return pubnub_message_action_type::PMAT_Reaction;
+	else if(message_action_type_string == Pubnub::String("receipt") || message_action_type_string == Pubnub::String("\"receipt\"")) 
+		return pubnub_message_action_type::PMAT_Receipt;
+	else if(message_action_type_string == Pubnub::String("custom") || message_action_type_string == Pubnub::String("\"custom\"")) 
+		return pubnub_message_action_type::PMAT_Custom;
+	else if(message_action_type_string == Pubnub::String("edited") || message_action_type_string == Pubnub::String("\"edited\"")) 
+		return pubnub_message_action_type::PMAT_Edited;
+	else if(message_action_type_string == Pubnub::String("deleted") || message_action_type_string == Pubnub::String("\"deleted\"")) 
+		return pubnub_message_action_type::PMAT_Deleted;
+	
+	throw std::invalid_argument("can't convert message_action_type_string to pubnub_message_action_type");
 }
 
 }

@@ -13,6 +13,14 @@ namespace Pubnub
 {
     class Chat;
 
+    struct MessageActionData
+    {
+        Pubnub::pubnub_message_action_type type;
+        Pubnub::String value;
+        Pubnub::String timetoken;
+        Pubnub::String user_id;
+    };
+
     struct ChatMessageData
     {
         pubnub_chat_message_type type;
@@ -22,8 +30,7 @@ namespace Pubnub
         Pubnub::String user_id;
         //meta doesn't work for now, because we don't get this info from pubnub_fetch_history
         Pubnub::String meta;
-        //key - message action type, value - message action data in json format
-        std::map<Pubnub::String, Pubnub::String> message_actions;
+        std::vector<MessageActionData> message_actions;
     };
 
 
@@ -53,7 +60,7 @@ namespace Pubnub
         Pubnub::String timetoken;
         ChatMessageData message_data;
 
-        void add_message_action_to_message_data(Pubnub::String action_timetoken, pubnub_message_action_type action_type, Pubnub::String value);
+        void add_message_action_to_message_data(Pubnub::MessageActionData message_action);
     };
 }
 #endif /* MESSAGE_H */

@@ -24,27 +24,36 @@ Message::Message(Pubnub::Chat& in_chat, String in_channel_id, Pubnub::String in_
         throw std::runtime_error("Failed to construct message, in_message_data_json is invalid Json");
     }
 
-    if(!message_data_json.contains("timetoken"))
+    if(!message_data_json.contains("timetoken") && !message_data_json["timetoken"].is_null())
     {
         throw std::runtime_error("Failed to construct message, in_message_data_json doesn't have  timetoken field");
     }
 
-    timetoken = message_data_json["timetoken"];
+    timetoken = message_data_json["timetoken"].dump();
 
     ChatMessageData message_data;
     message_data.channel_id = in_channel_id;
 
-    if(message_data_json.contains("message"))
+    if(message_data_json.contains("message") && !message_data_json["message"].is_null())
     {
-        message_data.text = message_data_json["message"]["text"];
-        message_data.type = chat_message_type_from_string(String(message_data_json["message"]["type"]));
+        message_data.text = message_data_json["message"]["text"].dump();
+        message_data.type = chat_message_type_from_string(message_data_json["message"]["type"].dump());
     }
-    if(message_data_json.contains("actions"))
+    if(message_data_json.contains("actions") && !message_data_json["actions"].is_null())
     {
-        json message_actions_json = message_data_json["actions"];
-        //Add all message actions - for now as map of strings. We might need to create struct to hold message action data in more handy way.
-        for (json::iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) {
-            message_data.message_actions[message_action.key()] = message_action.value();
+        json message_action_types_json = message_data_json["actions"];
+        for (json::iterator message_action_type = message_action_types_json.begin(); message_action_type != message_action_types_json.end(); ++message_action_type) 
+        {
+            json message_actions_json = message_action_type.value();
+            for (json::iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) 
+            {
+                MessageActionData message_action_data;
+                message_action_data.type = message_action_type_from_string(message_action_type.key());
+                message_action_data.value = message_action.key();
+                message_action_data.timetoken = message_action.value()["actionTimetoken"].dump();
+                message_action_data.user_id = message_action.value()["uuid"].dump();
+                message_data.message_actions.push_back(message_action_data);
+            }
         }
     }
 
@@ -60,9 +69,18 @@ Message Message::edit_text(Pubnub::String new_text)
 
     pubnub_message_action_type edited_action_type = pubnub_message_action_type::PMAT_Edited;
 
-    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(edited_action_type), new_text);
+    //Message action value sent to server has to be in quotation marks
+    String new_text_with_quotations = "\"" + new_text + "\"";
+    String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(edited_action_type), new_text_with_quotations);
+    
+    //But we store message text without quotations marks
     message_data.text = new_text;
-    add_message_action_to_message_data(action_timetoken, edited_action_type, new_text);
+    MessageActionData edited_message_action;
+    edited_message_action.type = edited_action_type;
+    edited_message_action.value = new_text;
+    edited_message_action.timetoken = action_timetoken;
+    edited_message_action.user_id = message_data.user_id;
+    add_message_action_to_message_data(edited_message_action);
     return *this;
 }
 
@@ -71,27 +89,22 @@ Pubnub::String Message::text()
     //TODO: this function has potential issue. If there are 2 objects for the same message and one is editted - another one will have
     //not actuall data. So can return incorrect text.
 
-    //Check if there are any editions of current text
-    if(message_data.message_actions.count(message_action_type_to_string(pubnub_message_action_type::PMAT_Edited)) > 0)
+    String most_recent_edition = message_data.text;
+    uint64_t most_recent_timetoken = -1;
+    for(auto message_action : message_data.message_actions)
     {
-        json message_actions_json = message_data.message_actions[message_action_type_to_string(pubnub_message_action_type::PMAT_Edited)];
-
-        //Find the most recent edition by comparing timetokens
-        String most_recent_edition;
-        uint64_t most_recent_timetoken = -1;
-        for (json::iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) {
-            message_data.message_actions[message_action.key()] = message_action.value();
-            if(std::stoull(String(message_action.value()["timetoken"])) > most_recent_timetoken)
+        //check if there is any message action of type "edited"
+        if(message_action.type == pubnub_message_action_type::PMAT_Edited)
+        {
+            //check if edition token is newer
+            if(std::stoull(message_action.timetoken) > most_recent_timetoken)
             {
-                most_recent_timetoken = std::stoull(String(message_action.value()["timetoken"]));
-                most_recent_edition = message_action.key();
+                most_recent_timetoken = std::stoull(message_action.timetoken);
+                most_recent_edition = message_action.value;
             }
         }
-        return most_recent_edition;
     }
-    
-    //There are no any editions, just return current text from data
-    return message_data.text;
+    return most_recent_edition;
 }
 
 Message Message::delete_message()
@@ -100,14 +113,26 @@ Message Message::delete_message()
     String deleted_value = "\"deleted\"";
     String action_timetoken = chat_obj.get_pubnub_context().add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(deleted_action_type), deleted_value);
 
-    add_message_action_to_message_data(action_timetoken, deleted_action_type, deleted_value);
+    MessageActionData deleted_message_action;
+    deleted_message_action.type = deleted_action_type;
+    deleted_message_action.value = deleted_value;
+    deleted_message_action.timetoken = action_timetoken;
+    deleted_message_action.user_id = message_data.user_id;
+    add_message_action_to_message_data(deleted_message_action);
     return *this;
 }
 
 bool Message::deleted()
 {
-    //check if there is any message action of type "deleted"
-    return message_data.message_actions.count(message_action_type_to_string(pubnub_message_action_type::PMAT_Deleted)) > 0;
+    for(auto message_action : message_data.message_actions)
+    {
+        //check if there is any message action of type "deleted"
+        if(message_action.type == pubnub_message_action_type::PMAT_Deleted)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Pubnub::Message::stream_updates(std::function<void(Message)> message_callback)
@@ -145,22 +170,7 @@ ChatMessageData Message::get_message_data()
     return message_data;
 }
 
-void Message::add_message_action_to_message_data(Pubnub::String action_timetoken, pubnub_message_action_type action_type, Pubnub::String value)
+void Message::add_message_action_to_message_data(Pubnub::MessageActionData message_action)
 {
-    Pubnub::String existing_actions = message_data.message_actions[message_action_type_to_string(action_type)];
-
-    json message_actions_json = json::object();
-
-    if(!existing_actions.empty())
-    {
-        message_actions_json = json::parse(existing_actions);
-    }
-
-    //server response structure requires it to be an array
-    json current_action_json_array = json::array();
-    json current_action_json = json::object();
-    current_action_json["uuid"] = message_data.user_id;
-    current_action_json["actionTimetoken"] = action_timetoken;
-    current_action_json_array.push_back(current_action_json);
-    message_actions_json[value] = current_action_json_array;
+    message_data.message_actions.push_back(message_action);
 }
