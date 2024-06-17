@@ -209,7 +209,10 @@ String User::user_id_from_json(String data_json_string)
 
     if(user_data_json.contains("id") )
     {
-        return user_data_json["id"].dump();
+        auto dumped = user_data_json["id"].dump();
+
+        // removal of quotes
+        return String(&dumped[1], dumped.size() - 2);
     }
 
     return "";
