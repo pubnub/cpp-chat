@@ -320,6 +320,11 @@ PnCResult pn_channel_get_members(
     try {
         auto members = channel->get_members(limit, start, end);
 
+        if (members.size() == 0) {
+            memcpy(result, "[]\0", 3);
+            return PN_C_OK;
+        }
+
         Pubnub::String string = "[";
         for (auto member : members) {
             auto ptr = new Pubnub::Membership(member);
@@ -355,6 +360,11 @@ PnCResult pn_channel_get_history(
     try {
         auto history = channel->get_history(start, end, count);
 
+        if (history.size() == 0) {
+            memcpy(result, "[]\0", 3);
+            return PN_C_OK;
+        }
+
         Pubnub::String string = "[";
         for (auto message : history) {
             auto ptr = new Pubnub::Message(message);
@@ -371,6 +381,7 @@ PnCResult pn_channel_get_history(
         string.erase(string.length() - 1);
         string += "]";
 
+        memcpy(result, string.c_str(), string.length() + 1);
    } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
