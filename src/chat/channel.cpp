@@ -109,9 +109,11 @@ std::vector<String> Channel::join_and_get_messages(Pubnub::String additional_par
     additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
     String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
 
+    String user_id = this->chat_obj.get_pubnub_context().get_user_id();
+
     this->chat_obj
         .get_pubnub_context()
-        .set_memberships(channel_id, set_object_string);
+        .set_memberships(user_id, set_object_string);
 
     return connect_and_get_messages();
 }
