@@ -341,8 +341,8 @@ Pubnub::String PubNub::get_user_metadata(const Pubnub::String user_id)
 {
     auto result = pubnub_get_uuidmetadata(
             this->main_context.get(),
-            user_id,
-            NULL
+            NULL,
+            user_id
     );
 
     this->await_and_handle_error(result);
