@@ -178,8 +178,7 @@ std::vector<Message> Channel::get_history(Pubnub::String start_timetoken, Pubnub
 
     for (auto& element : messages_array_json)
     {
-        Message message_obj(chat_obj, channel_id, element.dump());
-        messages.push_back(message_obj);
+        messages.emplace_back(chat_obj, channel_id, element.dump());
     }
 
     return messages;
@@ -351,7 +350,10 @@ String Channel::channel_id_from_json(String data_json_string)
 
     if(channel_data_json.contains("id") )
     {
-        return channel_data_json["id"].dump();
+        auto dumped = channel_data_json["id"].dump();
+
+        // removal of quotes
+        return String(&dumped[1], dumped.size() - 2);
     }
 
     return "";
