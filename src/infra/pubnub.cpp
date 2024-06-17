@@ -726,6 +726,11 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     if(Deserialization::is_message_update_message(message_string))
     {
         Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
+        if (message_timetoken.front() == '"' && message_timetoken.back() == '"')
+        {
+            message_timetoken.erase(0, 1);
+            message_timetoken.erase(message_timetoken.length() - 1, 1);
+        }
 
         if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
         {
