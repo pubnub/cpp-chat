@@ -148,7 +148,12 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        // TODO: Docs
+        /// <summary>
+        /// The information about the last update of the channel.
+        /// <para>
+        /// The time when the channel was last updated.
+        /// </para>
+        /// </summary>
         public string Updated
         {
             get
@@ -159,7 +164,12 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        // TODO: Docs
+        /// <summary>
+        /// The status of the channel.
+        /// <para>
+        /// The last status response received from the server.
+        /// </para>
+        /// </summary>
         public string Status
         {
             get
@@ -170,6 +180,12 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// The type of the channel.
+        /// <para>
+        /// The type of the response received from the server when the channel was created.
+        /// </para>
+        /// </summary>
         public string Type
         {
             get
@@ -391,29 +407,123 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_channel_leave(pointer));
         }
 
+        /// <summary>
+        /// Sets the restrictions for the user.
+        /// <para>
+        /// Sets the information about the restrictions for the user.
+        /// The restrictions include banning and muting the user.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <param name="banUser">if set to <c>true</c> the user is banned.</param>
+        /// <param name="muteUser">if set to <c>true</c> the user is muted.</param>
+        /// <param name="reason">The reason for the restrictions.</param>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.SetRestrictions("user1", true, false, "Spamming");
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while setting the restrictions.</exception>
+        /// <seealso cref="GetUserRestrictions"/>
         public void SetRestrictions(string userId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(pointer, userId, banUser, muteUser,
                 reason));
         }
 
+        /// <summary>
+        /// Sends the text message.
+        /// <para>
+        /// Sends the text message to the channel.
+        /// The message is sent in the form of a text.
+        /// </para>
+        /// </summary>
+        /// <param name="message">The message to be sent.</param>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.SendText("Hello, World!");
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while sending the message.</exception>
+        /// <seealso cref="OnMessageReceived"/>
         public void SendText(string message)
         {
             CUtilities.CheckCFunctionResult(pn_channel_send_text(pointer, message,
                 (byte)pubnub_chat_message_type.PCMT_TEXT, string.Empty));
         }
 
+        /// <summary>
+        /// Updates the channel.
+        /// <para>
+        /// Updates the channel with the new data.
+        /// The data includes the name, description, custom data, and type of the channel.
+        /// </para>
+        /// </summary>
+        /// <param name="updatedData">The updated data of the channel.</param>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.UpdateChannel(new ChatChannelData {
+        ///  Name = "newName",
+        ///  Description = "newDescription",
+        ///  CustomDataJson = "{\"key\": \"value\"}",
+        ///  Type = "newType"
+        /// });
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while updating the channel.</exception>
+        /// <seealso cref="OnChannelUpdate"/>
+        /// <seealso cref="ChatChannelData"/>
         public void UpdateChannel(ChatChannelData updatedData)
         {
             chat.UpdateChannel(Id, updatedData);
         }
 
+        /// <summary>
+        /// Deletes the channel.
+        /// <para>
+        /// Deletes the channel and removes all the messages and memberships from the channel.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// channel.DeleteChannel();
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while deleting the channel.</exception>
         public void DeleteChannel()
         {
             chat.DeleteChannel(Id);
         }
 
         //TODO: wrap further?
+        /// <summary>
+        /// Gets the user restrictions.
+        /// <para>
+        /// Gets the user restrictions that include the information about the bans and mutes.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <param name="limit">The maximum amount of the restrictions received.</param>
+        /// <param name="startTimetoken">The start timetoken of the restrictions.</param>
+        /// <param name="endTimetoken">The end timetoken of the restrictions.</param>
+        /// <returns>The user restrictions in JSON format.</returns>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// var restrictions = channel.GetUserRestrictions(
+        ///     "user1",
+        ///     10,
+        ///     "16686902600029072"
+        ///     "16686902600028961",
+        /// );
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the user restrictions.</exception>
+        /// <seealso cref="SetRestrictions"/>
         public string GetUserRestrictions(string userId, int limit, string startTimetoken, string endTimetoken)
         {
             var buffer = new StringBuilder(4096);
@@ -422,6 +532,24 @@ namespace PubNubChatAPI.Entities
             return buffer.ToString();
         }
 
+
+        /// <summary>
+        /// Determines whether the user is present in the channel.
+        /// <para>
+        /// The method checks whether the user is present in the channel.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user identifier.</param>
+        /// <returns><c>true</c> if the user is present in the channel; otherwise, <c>false</c>.</returns>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// var isUserPresent = channel.IsUserPresent("user1");
+        /// Console.WriteLine($"User present: {isUserPresent}");
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while checking the presence of the user.</exception>
+        /// <seealso cref="WhoIsPresent"/>
         public bool IsUserPresent(string userId)
         {
             var result = pn_channel_is_present(pointer, userId);
@@ -429,6 +557,24 @@ namespace PubNubChatAPI.Entities
             return result == 1;
         }
 
+        /// <summary>
+        /// Gets the list of users present in the channel.
+        /// <para>
+        /// Gets all the users that are present in the channel.
+        /// </para>
+        /// </summary>
+        /// <returns>The list of users present in the channel.</returns>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// var users = channel.WhoIsPresent();
+        /// foreach (var user in users) {
+        ///  Console.WriteLine($"User present: {user}");
+        /// }
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the list of users present in the channel.</exception>
+        /// <seealso cref="IsUserPresent"/>
         public List<string> WhoIsPresent()
         {
             var buffer = new StringBuilder(4096);
@@ -444,11 +590,52 @@ namespace PubNubChatAPI.Entities
             return ret;
         }
 
+        /// <summary>
+        /// Gets the list of the <c>Membership</c> objects.
+        /// <para>
+        /// Gets the list of the <c>Membership</c> objects that represent the users that are members 
+        /// of the channel and the relationships between the users and the channel.
+        /// </para>
+        /// </summary>
+        /// <param name="limit">The maximum amount of the memberships received.</param>
+        /// <param name="startTimeToken">The start timetoken of the memberships.</param>
+        /// <param name="endTimeToken">The end timetoken of the memberships.</param>
+        /// <returns>The list of the <c>Membership</c> objects.</returns>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// var memberships = channel.GetMemberships(10, "16686902600029072", "16686902600028961");
+        /// foreach (var membership in memberships) {
+        ///   Console.WriteLine($"Membership: {membership.UserId}");
+        /// }
+        /// </code>
+        /// </example>
+        /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the list of memberships.</exception>
+        /// <seealso cref="Membership"/>
         public List<Membership> GetMemberships(int limit, string startTimeToken, string endTimeToken)
         {
             return chat.GetChannelMemberships(Id, limit, startTimeToken, endTimeToken);
         }
 
+        /// <summary>
+        /// Gets the <c>Message</c> object for the given timetoken.
+        /// <para>
+        /// Gets the <c>Message</c> object for the given timetoken.
+        /// The timetoken is used to identify the message.
+        /// </para>
+        /// </summary>
+        /// <param name="timeToken">The timetoken of the message.</param>
+        /// <param name="message">The out parameter that contains the <c>Message</c> object.</param>
+        /// <returns><c>true</c> if the message is found; otherwise, <c>false</c>.</returns>
+        /// <example>
+        /// <code>
+        /// var channel = //...
+        /// if (channel.TryGetMessage("16686902600029072", out var message)) {
+        ///  Console.WriteLine($"Message: {message.Text}");
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="Message"/>
         public bool TryGetMessage(string timeToken, out Message message)
         {
             return chat.TryGetMessage(Id, timeToken, out message);
