@@ -5,6 +5,19 @@ using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
+    /// <summary>
+    /// Represents a membership of a user in a channel.
+    /// <para>
+    /// Memberships are relations between users and channels. They are used to determine
+    /// which users are allowed to send messages to which channels.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// Memberships are created when a user joins a channel and are deleted when a user leaves a channel.
+    /// </remarks>
+    /// <seealso cref="Chat"/>
+    /// <seealso cref="User"/>
+    /// <seealso cref="Channel"/>
     public class Membership : PointerWrapper
     {
         #region DLL Imports
@@ -29,6 +42,9 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
+        /// <summary>
+        /// The user ID of the user that this membership belongs to.
+        /// </summary>
         public string UserId
         {
             get
@@ -39,6 +55,9 @@ namespace PubNubChatAPI.Entities
             }
         }
         
+        /// <summary>
+        /// The channel ID of the channel that this membership belongs to.
+        /// </summary>
         public string ChannelId
         {
             get
@@ -49,6 +68,22 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Event that is triggered when the membership is updated.
+        /// <para>
+        /// This event is triggered when the membership is updated by the server.
+        /// Every time the membership is updated, this event is triggered.
+        /// </para>
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// membership.OnMembershipUpdated += (membership) =>
+        /// {
+        ///    Console.WriteLine("Membership updated!");
+        /// };
+        /// </code>
+        /// </example>
+        /// <seealso cref="Update"/>
         public event Action<Membership> OnMembershipUpdated;
 
         internal Membership(IntPtr membershipPointer, string membershipId) : base(membershipPointer, membershipId)
@@ -70,6 +105,20 @@ namespace PubNubChatAPI.Entities
             OnMembershipUpdated?.Invoke(this);
         }
 
+        /// <summary>
+        /// Updates the membership with a custom JSON object.
+        /// <para>
+        /// This method updates the membership with a custom JSON object. This object can be used to store
+        /// additional information about the membership.
+        /// </para>
+        /// </summary>
+        /// <param name="customJsonObject">The custom JSON object to update the membership with.</param>
+        /// <example>
+        /// <code>
+        /// membership.Update("{\"key\": \"value\"}");
+        /// </code>
+        /// </example>
+        /// <seealso cref="OnMembershipUpdated"/>
         public void Update(string customJsonObject)
         {
             CUtilities.CheckCFunctionResult(pn_membership_update_dirty(pointer, customJsonObject));
