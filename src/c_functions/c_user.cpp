@@ -123,6 +123,12 @@ PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
 
         return PN_C_ERROR;
     }
+
+    if (channels.empty()) {
+        memcpy(result_json, "[]\0", 3);
+
+        return PN_C_OK;
+    }
     
     Pubnub::String result = "[";
     for (auto channel : channels) {
