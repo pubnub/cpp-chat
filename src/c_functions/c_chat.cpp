@@ -361,3 +361,44 @@ PnCResult pn_chat_get_users(
         
     return PN_C_OK;
 }
+
+PnCResult pn_chat_get_channels(
+        Pubnub::Chat* chat,
+        const char* include,
+        const int limit,
+        const char* start,
+        const char* end,
+        char* result) {
+    try {
+        auto channels = chat->get_channels(include, limit, start, end);
+
+        if (channels.size() == 0) {
+            strcpy(result, "[]\0");
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto channel : channels) {
+            auto ptr = new Pubnub::Channel(channel);
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        strcpy(result, string.c_str());
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+        
+    return PN_C_OK;
+}
+
