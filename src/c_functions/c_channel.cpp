@@ -75,6 +75,29 @@ const char* jsonize_messages2(std::vector<Pubnub::String> messages) {
     
     Pubnub::String result = "[";
     for (auto message : messages) {
+        result += message;
+    }   
+
+    result.erase(result.length() - 1);
+    result += "]";
+    
+    char* c_result = new char[result.length() + 1];
+
+    memcpy(c_result, result.c_str(), result.length() + 1);
+
+    return c_result;
+}
+
+// TODO: dont copy code
+const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
+    if (messages.size() == 0) {
+        char* empty_result = new char[3];
+        memcpy(empty_result, "[]\0", 3);
+        return empty_result;
+    }
+    
+    Pubnub::String result = "[";
+    for (auto message : messages) {
         result += "\"";
         result += message;
         result += "\",";
@@ -89,6 +112,7 @@ const char* jsonize_messages2(std::vector<Pubnub::String> messages) {
 
     return c_result;
 }
+
 
 
 PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
@@ -266,7 +290,7 @@ PnCTribool pn_channel_is_present(Pubnub::Channel* channel, const char* user_id) 
 PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
     try {
         auto present = channel->who_is_present();
-        auto jsonised = jsonize_messages2(present);
+        auto jsonised = jsonize_messages3(present);
         strcpy(result, jsonised);
         delete[] jsonised;
     } catch (std::exception& e) {
