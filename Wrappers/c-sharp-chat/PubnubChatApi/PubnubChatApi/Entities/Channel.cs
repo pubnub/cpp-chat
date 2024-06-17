@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -319,7 +320,6 @@ namespace PubNubChatAPI.Entities
         public void Connect()
         {
             connected = true;
-            OnMessageReceived = null;
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, messagesBuffer));
             chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
@@ -351,7 +351,6 @@ namespace PubNubChatAPI.Entities
         public void Join()
         {
             connected = true;
-            OnMessageReceived = null;
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty, messagesBuffer));
             chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
@@ -639,6 +638,12 @@ namespace PubNubChatAPI.Entities
         public bool TryGetMessage(string timeToken, out Message message)
         {
             return chat.TryGetMessage(Id, timeToken, out message);
+        }
+
+        public List<Message> GetMessageHistory(string startTimeToken, string endTimeToken,
+            int count)
+        {
+            return chat.GetChannelMessageHistory(Id, startTimeToken, endTimeToken, count);
         }
 
         protected override void DisposePointer()

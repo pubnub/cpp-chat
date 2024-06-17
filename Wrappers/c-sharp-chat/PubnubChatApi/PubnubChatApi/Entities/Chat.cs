@@ -553,7 +553,8 @@ namespace PubNubChatAPI.Entities
         public List<User> GetUsers(string include, int limit, string startTimeToken, string endTimeToken)
         {
             var buffer = new StringBuilder(8192);
-            pn_chat_get_users(chatPointer, include, limit, startTimeToken, endTimeToken, buffer);
+            CUtilities.CheckCFunctionResult(pn_chat_get_users(chatPointer, include, limit, startTimeToken, endTimeToken,
+                buffer));
             var jsonPointers = buffer.ToString();
             var userPointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
             var returnUsers = new List<User>();
@@ -762,10 +763,13 @@ namespace PubNubChatAPI.Entities
             var messages = new List<Message>();
             if (!TryGetChannel(channelId, out var channel))
             {
+                Debug.WriteLine("Didn't find the channel for history fetch!");
                 return messages;
             }
+
             var buffer = new StringBuilder(32768);
-            pn_channel_get_history(channel.Pointer, startTimeToken, endTimeToken, count, buffer);
+            CUtilities.CheckCFunctionResult(pn_channel_get_history(channel.Pointer, startTimeToken, endTimeToken, count,
+                buffer));
             var jsonPointers = buffer.ToString();
             var messagePointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
             var returnMessages = new List<Message>();
