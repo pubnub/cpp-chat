@@ -10,6 +10,15 @@ using PubnubChatApi.Utilities;
 namespace PubNubChatAPI.Entities
 {
     //TODO: move out of this file
+    /// <summary>
+    /// Data class for the chat user.
+    /// <para>
+    /// Contains all the data related to the chat user.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// By default, all the properties are set to empty strings.
+    /// </remarks>
     public class ChatUserData
     {
         public string Username { get; set; } = string.Empty;
@@ -22,6 +31,15 @@ namespace PubNubChatAPI.Entities
     }
 
     //TODO: move out of this file
+    /// <summary>
+    /// Data class for the chat channel.
+    /// <para>
+    /// Contains all the data related to the chat channel.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// By default, all the properties are set to empty strings.
+    /// </remarks>
     public class ChatChannelData
     {
         public string ChannelName { get; set; } = string.Empty;
@@ -32,6 +50,16 @@ namespace PubNubChatAPI.Entities
         public string ChannelType { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Main class for the chat.
+    /// <para>
+    /// Contains all the methods to interact with the chat.
+    /// It should be treated as a root of the chat system.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// The class is responsible for creating and managing channels, users, and messages.
+    /// </remarks>
     public class Chat
     {
         #region DLL Imports
@@ -183,6 +211,18 @@ namespace PubNubChatAPI.Entities
 
         public event Action<string> OnEvent;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Chat"/> class.
+        /// <para>
+        /// Creates a new chat instance.
+        /// </para>
+        /// </summary>
+        /// <param name="publishKey">The PubNub publish key.</param>
+        /// <param name="subscribeKey">The PubNub subscribe key.</param>
+        /// <param name="userId">The user ID.</param>
+        /// <remarks>
+        /// The constructor initializes the chat instance with the provided keys and user ID.
+        /// </remarks>
         public Chat(string publishKey, string subscribeKey, string userId)
         {
             chatPointer = pn_chat_new(publishKey, subscribeKey, userId);
@@ -331,11 +371,51 @@ namespace PubNubChatAPI.Entities
 
         #region Channels
 
+        /// <summary>
+        /// Creates a new public conversation.
+        /// <para>
+        /// Creates a new public conversation with the provided channel ID.
+        /// Conversation allows users to interact with each other.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <returns>The created channel.</returns>
+        /// <remarks>
+        /// The method creates a chat channel with the provided channel ID.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var channel = chat.CreatePublicConversation("channel_id");
+        /// </code>
+        /// </example>
+        /// <seealso cref="Channel"/>
         public Channel CreatePublicConversation(string channelId)
         {
             return CreatePublicConversation(channelId, new ChatChannelData());
         }
 
+        /// <summary>
+        /// Creates a new public conversation.
+        /// <para>
+        /// Creates a new public conversation with the provided channel ID.
+        /// Conversation allows users to interact with each other.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="additionalData">The additional data for the channel.</param>
+        /// <returns>The created channel.</returns>
+        /// <remarks>
+        /// The method creates a chat channel with the provided channel ID.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var channel = chat.CreatePublicConversation("channel_id");
+        /// </code>
+        /// </example>
+        /// <seealso cref="Channel"/>
+        /// <seealso cref="ChatChannelData"/>
         public Channel CreatePublicConversation(string channelId, ChatChannelData additionalData)
         {
             if (channelWrappers.TryGetValue(channelId, out var existingChannel))
@@ -357,6 +437,24 @@ namespace PubNubChatAPI.Entities
             return channel;
         }
 
+        /// <summary>
+        /// Gets the channel by the provided channel ID.
+        /// <para>
+        /// Tries to get the channel by the provided channel ID.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="channel">The out channel.</param>
+        /// <returns>True if the channel was found, false otherwise.</returns>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// if (chat.TryGetChannel("channel_id", out var channel)) {
+        ///    // Channel found
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="Channel"/>
         public bool TryGetChannel(string channelId, out Channel channel)
         {
             var channelPointer = pn_chat_get_channel(chatPointer, channelId);
@@ -403,6 +501,25 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Updates the channel with the provided channel ID.
+        /// <para>
+        /// Updates the channel with the provided channel ID with the provided data.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="updatedData">The updated data for the channel.</param>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the channel with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.UpdateChannel("channel_id", new ChatChannelData {
+        ///    ChannelName = "new_name"
+        ///    // ...
+        ///  });
+        /// </code>
+        /// </example>
+        /// <seealso cref="ChatChannelData"/>
         public void UpdateChannel(string channelId, ChatChannelData updatedData)
         {
             var newPointer = pn_chat_update_channel_dirty(chatPointer, channelId, updatedData.ChannelName,
@@ -422,6 +539,20 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        /// <summary>
+        /// Deletes the channel with the provided channel ID.
+        /// <para>
+        /// The channel is deleted with all the messages and users.
+        /// </para>
+        /// </summary>
+        /// <param name="channelId">The channel ID.</param>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the channel with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.DeleteChannel("channel_id");
+        /// </code>
+        /// </example>
         public void DeleteChannel(string channelId)
         {
             if (channelWrappers.ContainsKey(channelId))
@@ -435,17 +566,71 @@ namespace PubNubChatAPI.Entities
 
         #region Users
 
+        /// <summary>
+        /// Sets the restrictions for the user with the provided user ID.
+        /// <para>
+        /// Sets the restrictions for the user with the provided user ID in the provided channel.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="channelId">The channel ID.</param>
+        /// <param name="banUser">The ban user flag.</param>
+        /// <param name="muteUser">The mute user flag.</param>
+        /// <param name="reason">The reason for the restrictions.</param>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if the user with the provided ID does not exist or any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// chat.SetRestrictions("user_id", "channel_id", true, true, "Spamming");
+        /// </code>
+        /// </example>
         public void SetRestrictions(string userId, string channelId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(
                 pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason));
         }
 
+        /// <summary>
+        /// Creates a new user with the provided user ID.
+        /// <para>
+        /// Creates a new user with the empty data and the provided user ID.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>The created user.</returns>
+        /// <remarks>
+        /// The data for user is empty.
+        /// </remarks>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var user = chat.CreateUser("user_id");
+        /// </code>
+        /// </example>
+        /// <seealso cref="User"/>
         public User CreateUser(string userId)
         {
             return CreateUser(userId, new ChatUserData());
         }
 
+        /// <summary>
+        /// Creates a new user with the provided user ID.
+        /// <para>
+        /// Creates a new user with the provided data and the provided user ID.
+        /// </para>
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="additionalData">The additional data for the user.</param>
+        /// <returns>The created user.</returns>
+        /// <exception cref="PubNubCCoreException"> Throws an exception if any connection problem persists.</exception>
+        /// <example>
+        /// <code>
+        /// var chat = // ...
+        /// var user = chat.CreateUser("user_id");
+        /// </code>
+        /// </example>
+        /// <seealso cref="User"/>
         public User CreateUser(string userId, ChatUserData additionalData)
         {
             if (userWrappers.TryGetValue(userId, out var existingUser))
