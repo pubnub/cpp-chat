@@ -19,14 +19,13 @@ int main() {
     Pubnub::Chat chat(pub_key.c_str(), sub_key.c_str(), user.c_str());
 
 
-
     /* CHANNELS */
 
     //CREATE CHANNEL  
     Pubnub::ChatChannelData channel_data;
     channel_data.channel_name = "iksde2";
     channel_data.description = "Wha";
-    Pubnub::Channel channel = chat.create_public_conversation("my_channel2", channel_data);
+    Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
     //Pubnub::Channel channel = chat.get_channel("my_channel2"); //use instead of line above to test get_channel
 
     //Create channel to delete
@@ -62,7 +61,7 @@ int main() {
 
     //GET CHANNELS TEST
     std::cout << "get channels, you shouldn't see channel to delete here!!" << std::endl;
-    std::vector<Pubnub::Channel> channels = chat.get_channels("", 30, "1708181488", "1728181488");
+    std::vector<Pubnub::Channel> channels = chat.get_channels("", 30, "1728181488", "1708181488");
     for(auto received_channel : channels)
     {
         std::cout << "get channels, channel: " << received_channel.get_channel_id() << std::endl;
@@ -77,7 +76,7 @@ int main() {
     channel.stream_updates(channel_callback);
 
     //CHANNEL GET MEMBERS
-    std::vector<Pubnub::Membership> memberships = channel.get_members(3, "1708181488", "1728181488");
+    std::vector<Pubnub::Membership> memberships = channel.get_members(3, "17386132136530924", "17086132136530924");
         for(auto membership : memberships)
     {
         std::cout << "get memberships. membership user:  " << membership.get_user_id() <<  " channel: " << membership.get_channel_id() << std::endl;
@@ -99,9 +98,51 @@ int main() {
     restrictions_data.reason = "bo tak";
     channel.set_restrictions(user, restrictions_data);
 
+    //GET CHANNEL HISTORY
+    std::cout <<  std::endl;
+    std::cout <<"GET HISTORY: " <<  std::endl;
+    std::vector<Pubnub::Message> history_messages = channel.get_history("17386132136530924", "17086132136530924", 5);
+    for(auto history_message : history_messages)
+    {
+        std::cout <<"history message: " <<  history_message.get_message_data().text << std::endl;
+    }
+
+
+
+    /* MESSAGES */
+
+
+    //GET MESSAGE
+    std::cout <<  std::endl;
+
+    Pubnub::String message_token = "17186347059205817";
+    Pubnub::Message message_from_get = channel.get_message(message_token);
+    std::cout <<"Message from get: " <<  message_from_get.text() << std::endl;
+    std::cout <<  std::endl;
+
+    //STREAM MESSAGE UPDATES
+    auto message_update_callback = [](Pubnub::Message message){
+        std::cout << "message update received: " << message.text() << std::endl;
+        std::cout << std::endl;
+    };
+    message_from_get.stream_updates(message_update_callback);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    //EDIT MESSAGE
+    //message_from_get.edit_text("newly edited"); //change message for each test or server will throw an exception
+
+    /* DELETE MESSAGE TEST
+    std::cout <<"Is message deleted: " <<  message_from_get.deleted() << std::endl;
+    message_from_get.delete_message();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout <<"Is message deleted: " <<  message_from_get.deleted() << std::endl;
+    */
+
 
 
     /* USERS */
+
 
     //CREATE USER
     Pubnub::ChatUserData user_data;
@@ -155,6 +196,9 @@ int main() {
     bool is_user_present_in_chnnel = channel.is_present(chat_user.get_user_id());
     std::cout << "is present (should be true): " << is_user_present_in_chnnel << std::endl;
 
+    //REPORT USER
+    chat_user.report("a o tak o sobie");
+
 
     /* EXECUTION FLOW */
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -186,11 +230,10 @@ int main() {
     user_data.user_name = "user updated from chat";
     chat.update_user(chat_user.get_user_id(),  user_data);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     //leave channel
     channel.leave();
-
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     //send message after leaving channel. This shouldn't be received
@@ -201,8 +244,7 @@ int main() {
 
     //report user, it should emit an event
 
-    //chat_user.report("a o tak o sobie");
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+
 
 
     std::cout << "end of main" << std::endl;
