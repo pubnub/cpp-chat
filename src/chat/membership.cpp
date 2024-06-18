@@ -78,3 +78,8 @@ Pubnub::String Membership::get_channel_id()
 {
     return channel.get_channel_id();
 }
+
+Pubnub::String Membership::get_custom_data_json()
+{
+    return custom_data_json;
+}

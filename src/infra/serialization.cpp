@@ -33,7 +33,15 @@ bool Deserialization::is_user_update_message(Pubnub::String message_json_string)
 bool Deserialization::is_event_message(Pubnub::String message_json_string)
 {
     json message_json = json::parse(message_json_string);
-    return message_json.contains("event");
+    if(!message_json.contains("type") || message_json["type"].is_null())
+    {
+        return false;
+    }
+
+    bool is_event_message = message_json["type"] == "typing" || message_json["type"] == "report" || message_json["type"] == "receipt" ||
+        message_json["type"] == "mention" || message_json["type"] == "invite" || message_json["type"] == "custom" || message_json["type"] == "moderation";
+    
+    return is_event_message;
 }
 
 bool Deserialization::is_presence_message(Pubnub::String message_json_string)

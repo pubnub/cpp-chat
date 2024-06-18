@@ -33,6 +33,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT Pubnub::String get_user_id();
         PN_CHAT_EXPORT Pubnub::String get_channel_id();
+        PN_CHAT_EXPORT Pubnub::String get_custom_data_json();
 
         private:
         Pubnub::Chat& chat_obj;
