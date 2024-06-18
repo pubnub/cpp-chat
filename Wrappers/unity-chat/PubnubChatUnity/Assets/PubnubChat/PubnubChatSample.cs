@@ -57,5 +57,27 @@ public class PubnubChatSample : MonoBehaviour
         {
             Debug.Log($"Message from history with timetoken {historyMessage.TimeToken}: {historyMessage.MessageText}");
         }
+        
+        //Get main users memberships
+        var userMemberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
+        foreach (var userMembership in userMemberships)
+        {
+            Debug.Log($"Membership - User: {userMembership.UserId}, Channel: {userMembership.ChannelId}");
+        }
+        
+        //Set a restriction on user
+        user.SetRestriction(channel.Id, new Restriction()
+        {
+            Ban = true,
+            Mute = true,
+            Reason = "You were mean!"
+        });
+       
+        //Wait a moment to wait for the restriction to be registered
+        await Task.Delay(3000);
+        
+        //Print channel's user restriction
+        var restriction = channel.GetUserRestriction(user.Id, 50, "99999999999999999", "00000000000000000");
+        Debug.Log($"{user.Id}'s ban status is: {restriction.Ban}, reason: {restriction.Reason}");
     }
 }
