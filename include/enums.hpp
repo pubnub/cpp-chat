@@ -103,6 +103,26 @@ static inline pubnub_message_action_type message_action_type_from_string(Pubnub:
 	throw std::invalid_argument("can't convert message_action_type_string to pubnub_message_action_type");
 }
 
+static inline pubnub_chat_event_type chat_event_type_from_string(Pubnub::String chat_event_type_string)
+{
+	if(chat_event_type_string == Pubnub::String("typing") || chat_event_type_string == Pubnub::String("\"typing\"")) 
+		return pubnub_chat_event_type::PCET_TYPING;
+	else if(chat_event_type_string == Pubnub::String("report") || chat_event_type_string == Pubnub::String("\"report\"")) 
+		return pubnub_chat_event_type::PCET_REPORT;
+	else if(chat_event_type_string == Pubnub::String("receipt") || chat_event_type_string == Pubnub::String("\"receipt\"")) 
+		return pubnub_chat_event_type::PCET_RECEPIT;
+	else if(chat_event_type_string == Pubnub::String("mention") || chat_event_type_string == Pubnub::String("\"mention\"")) 
+		return pubnub_chat_event_type::PCET_MENTION;
+	else if(chat_event_type_string == Pubnub::String("invite") || chat_event_type_string == Pubnub::String("\"invite\"")) 
+		return pubnub_chat_event_type::PCET_INVITE;
+	else if(chat_event_type_string == Pubnub::String("custom") || chat_event_type_string == Pubnub::String("\"custom\"")) 
+		return pubnub_chat_event_type::PCET_CUSTOM;
+	else if(chat_event_type_string == Pubnub::String("moderation") || chat_event_type_string == Pubnub::String("\"moderation\"")) 
+		return pubnub_chat_event_type::PCET_MODERATION;
+	
+	throw std::invalid_argument("can't convert chat_event_type_string to pubnub_chat_event_type");
+}
+
 }
 
 #endif // PN_ENUMS_HPP

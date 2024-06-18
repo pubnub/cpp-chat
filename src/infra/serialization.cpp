@@ -38,6 +38,7 @@ bool Deserialization::is_event_message(Pubnub::String message_json_string)
         return false;
     }
 
+    //TODO: this could be done much more beautiful :) 
     bool is_event_message = message_json["type"] == "typing" || message_json["type"] == "report" || message_json["type"] == "receipt" ||
         message_json["type"] == "mention" || message_json["type"] == "invite" || message_json["type"] == "custom" || message_json["type"] == "moderation";
     

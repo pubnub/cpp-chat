@@ -278,14 +278,14 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channe
     this->pubnub.publish(channel_id, event_message);
 }
 
-void Chat::listen_for_events(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback)
+void Chat::listen_for_events(Pubnub::String channel_id, pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback)
 {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
     }
 
-    pubnub.register_event_callback(channel_id, event_callback);
+    pubnub.register_event_callback(channel_id, chat_event_type, event_callback);
     pubnub.subscribe_to_channel(channel_id);
 }
 

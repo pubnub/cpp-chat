@@ -516,13 +516,22 @@ void PubNub::remove_channel_callback(Pubnub::String channel_id)
     this->channel_callbacks_map.erase(channel_id);
 }
 
-void PubNub::register_event_callback(Pubnub::String channel_id, std::function<void(Pubnub::String)> event_callback)
+void PubNub::register_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback)
 {
-    this->event_callbacks_map[channel_id] = event_callback;
+    //TODO: Storing this in map is not good idea, as someone could listen for 2 types on the same channel. Then only 1 type would work.
+    //But it's not causing any issues in MVP, as only 2 types are supported and type REPORT can only be used with Internal Admin Channel
+    //In MVP we only support these 2 types.
+    if(chat_event_type != Pubnub::pubnub_chat_event_type::PCET_MODERATION && chat_event_type != Pubnub::pubnub_chat_event_type::PCET_REPORT)
+    {
+        return;
+    }
+    std::tuple<Pubnub::pubnub_chat_event_type, std::function<void(Pubnub::String)>> callback_tuple = std::make_tuple(chat_event_type, event_callback);
+    this->event_callbacks_map[channel_id] = callback_tuple;
 }
 
-void PubNub::remove_event_callback(Pubnub::String channel_id)
+void PubNub::remove_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type)
 {
+    //TODO: The same as above, this shouldn't be a map
     this->event_callbacks_map.erase(channel_id);
 }
 
@@ -704,7 +713,16 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
     {
         if(this->event_callbacks_map.find(message_channel_string) != this->event_callbacks_map.end())
         {
-            this->event_callbacks_map[message_channel_string](message_string);
+            //Get event type from callback
+            Pubnub::pubnub_chat_event_type event_type;
+            std::function<void(Pubnub::String)> callback;
+            std::tie(event_type, callback) = this->event_callbacks_map[message_channel_string];
+
+            //only send callback if event types ara matching
+            if(Pubnub::chat_event_type_from_string(message_json["type"].dump()) == event_type)
+            {
+                callback(message_string);
+            }
         }
     }
 
