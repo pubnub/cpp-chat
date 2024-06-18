@@ -686,7 +686,6 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         }
     }
     
-    //TODO:Handle also removing channel metadata
     //Handle channel updates
     if(Deserialization::is_channel_update_message(message_string))
     {
@@ -697,7 +696,6 @@ void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
         }
     }
 
-    //TODO:Handle also removing user metadata
     //Handle user updates
     if(Deserialization::is_user_update_message(message_string))
     {
