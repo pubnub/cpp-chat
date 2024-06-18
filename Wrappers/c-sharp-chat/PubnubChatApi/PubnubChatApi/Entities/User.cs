@@ -282,9 +282,14 @@ namespace PubNubChatAPI.Entities
         /// user.SetRestrictions("channel_id", true, false, "Banned from the channel");
         /// </code>
         /// </example>
-        public void SetRestrictions(string channelId, bool banUser, bool muteUser, string reason)
+        public void SetRestriction(string channelId, bool banUser, bool muteUser, string reason)
         {
-            chat.SetRestrictions(Id, channelId, banUser, muteUser, reason);
+            chat.SetRestriction(Id, channelId, banUser, muteUser, reason);
+        }
+        
+        public void SetRestriction(string channelId, Restriction restriction)
+        {
+            chat.SetRestriction(Id, channelId, restriction);
         }
 
         /// <summary>
@@ -304,12 +309,18 @@ namespace PubNubChatAPI.Entities
         /// <exception cref="PubNubCCoreException">
         /// This exception might be thrown when any error occurs while getting the restrictions on the user for the channel.
         /// 
-        public string GetChannelRestrictions(string channelId, int limit, string startTimeToken, string endTimeToken)
+        public Restriction GetChannelRestriction(string channelId, int limit, string startTimeToken, string endTimeToken)
         {
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_user_get_channel_restrictions(pointer, Id, channelId, limit,
                 startTimeToken, endTimeToken, buffer));
-            return buffer.ToString();
+            var restrictionJson = buffer.ToString();
+            var restriction = new Restriction();
+            if (!string.IsNullOrEmpty(restrictionJson) && restrictionJson != "{}" && restrictionJson != "[]")
+            {
+                restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
+            }
+            return restriction;
         }
 
         /// <summary>

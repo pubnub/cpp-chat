@@ -51,6 +51,16 @@ namespace PubNubChatAPI.Entities
     }
 
     /// <summary>
+    /// Data struct for restriction.
+    /// </summary>
+    public struct Restriction
+    {
+        public bool Ban;
+        public bool Mute;
+        public string Reason;
+    }
+
+    /// <summary>
     /// Main class for the chat.
     /// <para>
     /// Contains all the methods to interact with the chat.
@@ -634,10 +644,15 @@ namespace PubNubChatAPI.Entities
         /// chat.SetRestrictions("user_id", "channel_id", true, true, "Spamming");
         /// </code>
         /// </example>
-        public void SetRestrictions(string userId, string channelId, bool banUser, bool muteUser, string reason)
+        public void SetRestriction(string userId, string channelId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(
                 pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason));
+        }
+        
+        public void SetRestriction(string userId, string channelId, Restriction restriction)
+        {
+            SetRestriction(userId, channelId, restriction.Ban, restriction.Mute, restriction.Reason);
         }
 
         /// <summary>

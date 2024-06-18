@@ -307,7 +307,7 @@ static void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrict
     j = nlohmann::json{
         {"ban", data.ban},
         {"mute", data.mute},
-        {"reason", data.reason}
+        {"reason", data.reason.c_str()}
     };
 }
 

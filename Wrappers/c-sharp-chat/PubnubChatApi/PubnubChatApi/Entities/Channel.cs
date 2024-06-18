@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -424,11 +423,16 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while setting the restrictions.</exception>
-        /// <seealso cref="GetUserRestrictions"/>
+        /// <seealso cref="GetUserRestriction"/>
         public void SetRestrictions(string userId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(pointer, userId, banUser, muteUser,
                 reason));
+        }
+        
+        public void SetRestrictions(string userId, Restriction restriction)
+        {
+            SetRestrictions(userId, restriction.Ban, restriction.Mute, restriction.Reason);
         }
 
         /// <summary>
@@ -523,14 +527,19 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the user restrictions.</exception>
         /// <seealso cref="SetRestrictions"/>
-        public string GetUserRestrictions(string userId, int limit, string startTimetoken, string endTimetoken)
+        public Restriction GetUserRestriction(string userId, int limit, string startTimetoken, string endTimetoken)
         {
             var buffer = new StringBuilder(4096);
             CUtilities.CheckCFunctionResult(pn_channel_get_user_restrictions(pointer, userId, Id, limit, startTimetoken,
                 endTimetoken, buffer));
-            return buffer.ToString();
+            var restrictionJson = buffer.ToString();
+            var restriction = new Restriction();
+            if (!string.IsNullOrEmpty(restrictionJson) && restrictionJson != "{}" && restrictionJson != "[]")
+            {
+                restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
+            }
+            return restriction;
         }
-
 
         /// <summary>
         /// Determines whether the user is present in the channel.
