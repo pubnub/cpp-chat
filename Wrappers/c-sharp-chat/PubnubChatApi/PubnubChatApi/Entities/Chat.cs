@@ -231,11 +231,12 @@ namespace PubNubChatAPI.Entities
         private Dictionary<string, User> userWrappers = new();
         private Dictionary<string, Membership> membershipWrappers = new();
         private Dictionary<string, Message> messageWrappers = new();
-        private List<string> channelEventsListeners = new();
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
 
-        public event Action<string> OnEvent;
+        //TODO: these will be Action<Event>
+        public event Action<string> OnReportEvent;
+        public event Action<string> OnModerationEvent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Chat"/> class.
@@ -282,12 +283,35 @@ namespace PubNubChatAPI.Entities
 
                 foreach (var pointer in pubnubV2MessagePointers)
                 {
-                    //All Events (json)
+                    //TODO: this handling is temporary until Events are actual entities
+                    //Events (json for now)
                     var allEventsBuffer = new StringBuilder(16384);
                     if (pn_deserialize_event(pointer, allEventsBuffer) != -1)
                     {
-                        //TODO: later Event will be a proper PointerWrapper class
-                        OnEvent?.Invoke(allEventsBuffer.ToString());
+                        var eventJson = allEventsBuffer.ToString();
+                        if (string.IsNullOrEmpty(eventJson) || eventJson == "{}" || eventJson == "[]")
+                        {
+                            pn_dispose_message(pointer);
+                            continue;
+                        }
+                        
+                        var eventData = JsonConvert.DeserializeObject<Dictionary<string, string>>(eventJson);
+                        if (eventData != null && eventData.TryGetValue("type", out var eventType))
+                        {
+                            //TODO: dumb
+                            switch (eventType)
+                            {
+                                case "moderation":
+                                    OnModerationEvent?.Invoke(eventJson);
+                                    break;
+                                case "report":
+                                    OnReportEvent?.Invoke(eventJson);
+                                    break;
+                            }
+                        }
+                        
+                        pn_dispose_message(pointer);
+                        continue;
                     }
 
                     //New message
@@ -386,6 +410,8 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
+                    
+                    pn_dispose_message(pointer);
                 }
             }
         }
@@ -1280,7 +1306,28 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
-        // TODO: I added that here but probably it is not the best place:
+        #region Events
+
+        //TODO: full summary
+        /// <summary>
+        /// Start listening for Moderation Events for this UserId.
+        /// </summary>
+        /// <param name="userId">User whose Moderation Events are to be broadcast.</param>
+        public void StartListeningForUserModerationEvents(string userId)
+        {
+            ListenForEvents(userId);
+        }
+
+        //TODO: full summary
+        /// <summary>
+        /// Start listening for Report Events.
+        /// </summary>
+        public void StartListeningForReportEvents()
+        {
+            ListenForEvents("PUBNUB_INTERNAL_ADMIN_CHANNEL");
+        }
+        
+        //TODO: I added that here but probably it is not the best place:
         /// <summary>
         /// Starts listening for events.
         /// <para>
@@ -1300,7 +1347,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="OnEvent"/>
-        public void ListenForEvents(string channelId)
+        private void ListenForEvents(string channelId)
         {
             if (string.IsNullOrEmpty(channelId))
             {
@@ -1308,9 +1355,11 @@ namespace PubNubChatAPI.Entities
             }
 
             var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(this.chatPointer, channelId, messagesBuffer));
-            this.ParseJsonUpdatePointers(messagesBuffer.ToString());
+            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(chatPointer, channelId, messagesBuffer));
+            ParseJsonUpdatePointers(messagesBuffer.ToString());
         }
+
+        #endregion
 
         ~Chat()
         {
