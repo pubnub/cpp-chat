@@ -69,7 +69,6 @@ Pubnub::User* pn_deserialize_user(Pubnub::Chat* chat, pubnub_v2_message* user_js
 
 PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
     if (!Deserialization::is_event_message(Pubnub::String(event_json->payload.ptr, event_json->payload.size))) {
-        std::cout << "Message is not a chat event" << std::endl;
         pn_c_set_error_message("Message is not a chat event");
 
         return PN_C_ERROR;
@@ -81,7 +80,6 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
 
         return PN_C_OK;
     } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
         pn_c_set_error_message(e.what());
 
         return PN_C_ERROR;
@@ -123,6 +121,10 @@ Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_mes
 
         auto channel = Pubnub::String(message_update->channel.ptr, message_update->channel.size);
         auto timetoken = message_json["data"]["messageTimetoken"].dump();
+        if (timetoken.front() == '"' && timetoken.back() == '"') {
+            timetoken.erase(0, 1);
+            timetoken.erase(timetoken.size() - 1, 1);
+        }
 
         return new Pubnub::Message(chat->get_channel(channel).get_message(timetoken));
     } catch (std::exception& e) {
@@ -134,7 +136,6 @@ Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_mes
 
 Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_message* membership) {
     if (!Deserialization::is_membership_update_message(Pubnub::String(membership->payload.ptr, membership->payload.size))) {
-        std::cout << "Message is not a chat membership update" << std::endl;
         pn_c_set_error_message("Message is not a chat membership update");
 
         return PN_C_ERROR_PTR;
@@ -142,7 +143,6 @@ Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_mess
 
     try {
         json message_json = json::parse(Pubnub::String(membership->payload.ptr, membership->payload.size));
-        std::cout << Pubnub::String(membership->payload.ptr, membership->payload.size) << std::endl;
 
         if (message_json.is_null()) {
             throw std::runtime_error("Failed to parse message into json");
@@ -162,8 +162,6 @@ Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_mess
 
         return new Pubnub::Membership(*chat, channel_obj, user_obj, membership_string);
     } catch (std::exception& e) {
-        std::cout << ":CCCCCCCCC" << std::endl;
-        std::cout << e.what() << std::endl;
         pn_c_set_error_message(e.what());
 
         return PN_C_ERROR_PTR;
