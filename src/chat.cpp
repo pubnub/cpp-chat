@@ -187,7 +187,7 @@ void Chat::set_restrictions(String in_user_id, String in_channel_id, PubnubRestr
 	if(!restrictions.ban && !restrictions.mute)
 	{
 		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + in_user_id + String("\"}}]");
-        this->pubnub.remove_members(restrictions_channel, in_user_id);
+        this->pubnub.remove_members(restrictions_channel, remove_member_string);
 		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + restrictions.reason + String("\"}");
         emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, in_user_id, event_payload_string);
 		return;
