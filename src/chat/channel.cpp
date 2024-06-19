@@ -7,6 +7,7 @@
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
+#include "chat/chat_helpers.hpp"
 
 extern "C" {
 #include "core/pubnub_objects_api.h"
@@ -81,9 +82,7 @@ void Channel::disconnect()
 void Channel::join(std::function<void(Message)> message_callback, Pubnub::String additional_params)
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
-    String custom_parameter_string;
-    additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
-    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
+    String set_object_string = create_set_memberships_object(channel_id, additional_params);
 
     String user_id = this->chat_obj.get_pubnub_context().get_user_id();
     this->chat_obj
@@ -105,9 +104,7 @@ void Channel::join(CallbackStringFunction string_callback, Pubnub::String additi
 std::vector<String> Channel::join_and_get_messages(Pubnub::String additional_params)
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
-    String custom_parameter_string;
-    additional_params.empty() ? custom_parameter_string="{}" : custom_parameter_string = additional_params;
-    String set_object_string = String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}, \"custom\": ") + custom_parameter_string + String("}]");
+    String set_object_string = create_set_memberships_object(channel_id, additional_params);
 
     String user_id = this->chat_obj.get_pubnub_context().get_user_id();
 
@@ -263,6 +260,31 @@ std::vector<Pubnub::Membership> Channel::get_members(int limit, Pubnub::String s
     }
 
     return memberships;
+}
+
+Pubnub::Membership Channel::invite(Pubnub::User user)
+{
+    /* disabled for testing
+    if(channel_data.type == String("public"))
+    {
+        throw std::runtime_error("Channel invites are not supported in Public chats");
+    }*/
+
+    //TODO:: check here if user already is on that channel. Requires C-Core filtering
+
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String set_memeberships_obj = create_set_memberships_object(channel_id, "");
+    String memberships_response = chat_obj.get_pubnub_context().set_memberships(user.get_user_id(), set_memeberships_obj, include_string);
+    
+    json memberships_response_json = json::parse(memberships_response);
+
+    String channel_data_string = memberships_response_json["data"][0].dump();
+
+    String event_payload = "{\"channelType\": \"" + channel_data.type + "\", \"channelId\": \"" + channel_id + "\"}";
+    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_INVITE, user.get_user_id(), event_payload);
+    
+    return Membership(chat_obj, user, channel_data_string);
+
 }
 
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)

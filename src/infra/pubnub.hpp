@@ -55,13 +55,13 @@ public:
     Pubnub::String get_all_channels_metadata(const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
     Pubnub::String get_channel_members(const Pubnub::String channel, const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
     void remove_members(const Pubnub::String channel, const Pubnub::String members_object);
-    void set_members(const Pubnub::String channel, const Pubnub::String members_object);
+    Pubnub::String set_members(const Pubnub::String channel, const Pubnub::String members_object);
     void set_user_metadata(const Pubnub::String user_id, const Pubnub::String metadata);
     Pubnub::String get_user_metadata(const Pubnub::String user_id);
     Pubnub::String get_all_user_metadata(const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
     void remove_user_metadata(const Pubnub::String user_id);
     Pubnub::String get_memberships(const Pubnub::String user_id, const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
-    void set_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object);
+    Pubnub::String set_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object, const Pubnub::String include = "");
     void remove_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object);
     Pubnub::String where_now(const Pubnub::String user_id);
     Pubnub::String here_now(const Pubnub::String channel);

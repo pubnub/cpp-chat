@@ -313,7 +313,7 @@ void PubNub::remove_members(const Pubnub::String channel, const Pubnub::String m
     this->await_and_handle_error(result);
 }
 
-void PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object)
+Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object)
 {
     auto result = pubnub_set_members(
             this->main_context.get(),
@@ -323,6 +323,8 @@ void PubNub::set_members(const Pubnub::String channel, const Pubnub::String memb
     );
 
     this->await_and_handle_error(result);
+
+    return pubnub_get(this->main_context.get());
 }
 
 void PubNub::set_user_metadata(const Pubnub::String user_id, const Pubnub::String metadata)
@@ -402,16 +404,18 @@ Pubnub::String PubNub::get_memberships(
     return pubnub_get(this->main_context.get());
 }
 
-void PubNub::set_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object)
+Pubnub::String PubNub::set_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object, const Pubnub::String include)
 {
     auto result = pubnub_set_memberships(
             this->main_context.get(),
             user_id,
-            NULL,
+            include,
             memberships_object
     );
 
     this->await_and_handle_error(result);
+
+    return pubnub_get(this->main_context.get());
 }
 
 void PubNub::remove_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object)

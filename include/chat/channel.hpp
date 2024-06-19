@@ -19,6 +19,7 @@ namespace Pubnub
     class Chat;
     class Message;
     class Membership;
+    class User;
     struct PubnubRestrictionsData;
 
     struct ChatChannelData
@@ -60,6 +61,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Message get_message(Pubnub::String timetoken);
         PN_CHAT_EXPORT Pubnub::PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+        PN_CHAT_EXPORT Pubnub::Membership invite(Pubnub::User user);
+
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);
