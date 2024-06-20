@@ -207,9 +207,9 @@ String User::user_id_from_json(String data_json_string)
 
     ChatUserData user_data;
 
-    if(user_data_json.contains("id") )
+    if(user_data_json.contains("uuid") )
     {
-        auto dumped = user_data_json["id"].dump();
+        auto dumped = user_data_json["uuid"]["id"].dump();
 
         // removal of quotes
         return String(&dumped[1], dumped.size() - 2);
