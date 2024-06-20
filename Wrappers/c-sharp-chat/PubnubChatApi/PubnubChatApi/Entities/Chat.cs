@@ -5,61 +5,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
+using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
-    //TODO: move out of this file
-    /// <summary>
-    /// Data class for the chat user.
-    /// <para>
-    /// Contains all the data related to the chat user.
-    /// </para>
-    /// </summary>
-    /// <remarks>
-    /// By default, all the properties are set to empty strings.
-    /// </remarks>
-    public class ChatUserData
-    {
-        public string Username { get; set; } = string.Empty;
-        public string ExternalId { get; set; } = string.Empty;
-        public string ProfileUrl { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string CustomDataJson { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
-    }
-
-    //TODO: move out of this file
-    /// <summary>
-    /// Data class for the chat channel.
-    /// <para>
-    /// Contains all the data related to the chat channel.
-    /// </para>
-    /// </summary>
-    /// <remarks>
-    /// By default, all the properties are set to empty strings.
-    /// </remarks>
-    public class ChatChannelData
-    {
-        public string ChannelName { get; set; } = string.Empty;
-        public string ChannelDescription { get; set; } = string.Empty;
-        public string ChannelCustomDataJson { get; set; } = string.Empty;
-        public string ChannelUpdated { get; set; } = string.Empty;
-        public string ChannelStatus { get; set; } = string.Empty;
-        public string ChannelType { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// Data struct for restriction.
-    /// </summary>
-    public struct Restriction
-    {
-        public bool Ban;
-        public bool Mute;
-        public string Reason;
-    }
-
     /// <summary>
     /// Main class for the chat.
     /// <para>
@@ -289,7 +239,7 @@ namespace PubNubChatAPI.Entities
                     if (pn_deserialize_event(pointer, allEventsBuffer) != -1)
                     {
                         var eventJson = allEventsBuffer.ToString();
-                        if (string.IsNullOrEmpty(eventJson) || eventJson == "{}" || eventJson == "[]")
+                        if (!CUtilities.IsValidJson(eventJson))
                         {
                             pn_dispose_message(pointer);
                             continue;
@@ -1042,8 +992,7 @@ namespace PubNubChatAPI.Entities
         private List<Membership> ParseJsonMembershipPointers(string membershipPointersJson)
         {
             var memberships = new List<Membership>();
-            if (!string.IsNullOrEmpty(membershipPointersJson) && membershipPointersJson != "[]" &&
-                membershipPointersJson != "{}")
+            if (CUtilities.IsValidJson(membershipPointersJson))
             {
                 var membershipPointers = JsonConvert.DeserializeObject<IntPtr[]>(membershipPointersJson);
                 if (membershipPointers == null)

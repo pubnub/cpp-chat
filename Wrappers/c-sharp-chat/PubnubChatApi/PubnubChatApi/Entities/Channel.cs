@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
+using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
@@ -501,8 +502,7 @@ namespace PubNubChatAPI.Entities
         {
             chat.DeleteChannel(Id);
         }
-
-        //TODO: wrap further?
+        
         /// <summary>
         /// Gets the user restrictions.
         /// <para>
@@ -534,7 +534,7 @@ namespace PubNubChatAPI.Entities
                 endTimetoken, buffer));
             var restrictionJson = buffer.ToString();
             var restriction = new Restriction();
-            if (!string.IsNullOrEmpty(restrictionJson) && restrictionJson != "{}" && restrictionJson != "[]")
+            if (CUtilities.IsValidJson(restrictionJson))
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
@@ -589,7 +589,7 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_channel_who_is_present(pointer, buffer));
             var jsonResult = buffer.ToString();
             var ret = new List<string>();
-            if (!string.IsNullOrEmpty(jsonResult) && jsonResult != "[]" && jsonResult != "{}")
+            if (CUtilities.IsValidJson(jsonResult))
             {
                 ret = JsonConvert.DeserializeObject<List<string>>(jsonResult);
                 ret ??= new List<string>();
