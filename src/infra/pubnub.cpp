@@ -313,12 +313,12 @@ void PubNub::remove_members(const Pubnub::String channel, const Pubnub::String m
     this->await_and_handle_error(result);
 }
 
-Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object)
+Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include)
 {
     auto result = pubnub_set_members(
             this->main_context.get(),
             channel,
-            NULL,
+            include,
             members_object
     );
 
@@ -525,10 +525,7 @@ void PubNub::register_event_callback(Pubnub::String channel_id, Pubnub::pubnub_c
     //TODO: Storing this in map is not good idea, as someone could listen for 2 types on the same channel. Then only 1 type would work.
     //But it's not causing any issues in MVP, as only 2 types are supported and type REPORT can only be used with Internal Admin Channel
     //In MVP we only support these 2 types.
-    if(chat_event_type != Pubnub::pubnub_chat_event_type::PCET_MODERATION && chat_event_type != Pubnub::pubnub_chat_event_type::PCET_REPORT)
-    {
-        return;
-    }
+
     std::tuple<Pubnub::pubnub_chat_event_type, std::function<void(Pubnub::String)>> callback_tuple = std::make_tuple(chat_event_type, event_callback);
     this->event_callbacks_map[channel_id] = callback_tuple;
 }

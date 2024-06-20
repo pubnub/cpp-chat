@@ -287,6 +287,48 @@ Pubnub::Membership Channel::invite(Pubnub::User user)
 
 }
 
+std::vector<Pubnub::Membership> Channel::inviteMultiple(std::vector<Pubnub::User> users)
+{
+    /* disabled for testing
+    if(channel_data.type == String("public"))
+    {
+        throw std::runtime_error("Channel invites are not supported in Public chats");
+    }*/
+
+    //TODO:: check here if users already are on that channel. Requires C-Core filtering
+    std::vector<String> filtered_users_ids;
+
+    for(auto &user : users)
+    {
+        filtered_users_ids.push_back(user.get_user_id());
+    }
+
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
+    String set_members_response = chat_obj.get_pubnub_context().set_members(this->channel_id, set_memebers_obj, include_string);
+    
+    std::vector<Pubnub::Membership> invitees_memberships;
+
+    json memberships_response_json = json::parse(set_members_response);
+    json memberships_data_array = memberships_response_json["data"];
+
+    String test = memberships_data_array.dump();
+    
+
+    for (json::iterator single_data_json = memberships_data_array.begin(); single_data_json != memberships_data_array.end(); ++single_data_json) 
+    {
+        Pubnub::String membership_data = single_data_json.value().dump();
+        Pubnub::Membership membership_obj(chat_obj, *this, membership_data);
+        invitees_memberships.push_back(membership_obj);
+
+        String event_payload = "{\"channelType\": \"" + channel_data.type + "\", \"channelId\": \"" + channel_id + "\"}";
+        chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_INVITE, membership_obj.get_user_id(), event_payload);
+    }
+
+    return invitees_memberships;
+
+}
+
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)
 {
     std::vector<Pubnub::Channel> channels;
