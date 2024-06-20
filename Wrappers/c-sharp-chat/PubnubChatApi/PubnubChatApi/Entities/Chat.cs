@@ -294,7 +294,7 @@ namespace PubNubChatAPI.Entities
                             pn_dispose_message(pointer);
                             continue;
                         }
-                        
+
                         var eventData = JsonConvert.DeserializeObject<Dictionary<string, string>>(eventJson);
                         if (eventData != null && eventData.TryGetValue("type", out var eventType))
                         {
@@ -309,7 +309,7 @@ namespace PubNubChatAPI.Entities
                                     break;
                             }
                         }
-                        
+
                         pn_dispose_message(pointer);
                         continue;
                     }
@@ -410,7 +410,7 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
-                    
+
                     pn_dispose_message(pointer);
                 }
             }
@@ -519,42 +519,8 @@ namespace PubNubChatAPI.Entities
 
         private bool TryGetChannel(string channelId, IntPtr channelPointer, out Channel channel)
         {
-            if (channelWrappers.TryGetValue(channelId, out channel))
-            {
-                //We had it before but it's no longer valid
-                if (channelPointer == IntPtr.Zero)
-                {
-                    Debug.WriteLine(CUtilities.GetErrorMessage());
-                    channelWrappers.Remove(channelId);
-                    return false;
-                }
-
-                //Pointer is valid but something nulled the wrapper
-                if (channel == null)
-                {
-                    channelWrappers[channelId] = new Channel(this, channelId, channelPointer);
-                    channel = channelWrappers[channelId];
-                    return true;
-                }
-                //Updating existing wrapper with updated pointer
-                else
-                {
-                    channel.UpdatePointer(channelPointer);
-                    return true;
-                }
-            }
-            //Adding new user to wrappers cache
-            else if (channelPointer != IntPtr.Zero)
-            {
-                channel = new Channel(this, channelId, channelPointer);
-                channelWrappers.Add(channelId, channel);
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine(CUtilities.GetErrorMessage());
-                return false;
-            }
+            return TryGetWrapper(channelWrappers, channelId, channelPointer,
+                () => new Channel(this, channelId, channelPointer), out channel);
         }
 
         public List<Channel> GetChannels(string include, int limit, string startTimeToken, string endTimeToken)
@@ -675,7 +641,7 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(
                 pn_chat_set_restrictions(chatPointer, userId, channelId, banUser, muteUser, reason));
         }
-        
+
         public void SetRestriction(string userId, string channelId, Restriction restriction)
         {
             SetRestriction(userId, channelId, restriction.Ban, restriction.Mute, restriction.Reason);
@@ -867,42 +833,8 @@ namespace PubNubChatAPI.Entities
 
         private bool TryGetUser(string userId, IntPtr userPointer, out User user)
         {
-            if (userWrappers.TryGetValue(userId, out user))
-            {
-                //We had it before but it's no longer valid
-                if (userPointer == IntPtr.Zero)
-                {
-                    Debug.WriteLine(CUtilities.GetErrorMessage());
-                    userWrappers.Remove(userId);
-                    return false;
-                }
-
-                //Pointer is valid but something nulled the wrapper
-                if (user == null)
-                {
-                    userWrappers[userId] = new User(this, userId, userPointer);
-                    user = userWrappers[userId];
-                    return true;
-                }
-                //Updating existing wrapper with updated pointer
-                else
-                {
-                    user.UpdatePointer(userPointer);
-                    return true;
-                }
-            }
-            //Adding new user to wrappers cache
-            else if (userPointer != IntPtr.Zero)
-            {
-                user = new User(this, userId, userPointer);
-                userWrappers.Add(userId, user);
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine(CUtilities.GetErrorMessage());
-                return false;
-            }
+            return TryGetWrapper(userWrappers, userId, userPointer, () => new User(this, userId, userPointer),
+                out user);
         }
 
         /// <summary>
@@ -1134,42 +1066,8 @@ namespace PubNubChatAPI.Entities
 
         private bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
         {
-            if (membershipWrappers.TryGetValue(membershipId, out membership))
-            {
-                //We had it before but it's no longer valid
-                if (membershipPointer == IntPtr.Zero)
-                {
-                    Debug.WriteLine(CUtilities.GetErrorMessage());
-                    membershipWrappers.Remove(membershipId);
-                    return false;
-                }
-
-                //Pointer is valid but something nulled the wrapper
-                if (membership == null)
-                {
-                    membershipWrappers[membershipId] = new Membership(membershipPointer, membershipId);
-                    membership = membershipWrappers[membershipId];
-                    return true;
-                }
-                //Updating existing wrapper with updated pointer
-                else
-                {
-                    membership.UpdatePointer(membershipPointer);
-                    return true;
-                }
-            }
-            //Adding new user to wrappers cache
-            else if (membershipPointer != IntPtr.Zero)
-            {
-                membership = new Membership(membershipPointer, membershipId);
-                membershipWrappers.Add(membershipId, membership);
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine(CUtilities.GetErrorMessage());
-                return false;
-            }
+            return TryGetWrapper(membershipWrappers, membershipId, membershipPointer,
+                () => new Membership(membershipPointer, membershipId), out membership);
         }
 
         #endregion
@@ -1210,42 +1108,8 @@ namespace PubNubChatAPI.Entities
 
         private bool TryGetMessage(string timeToken, IntPtr messagePointer, out Message message)
         {
-            if (messageWrappers.TryGetValue(timeToken, out message))
-            {
-                //We had it before but it's no longer valid
-                if (messagePointer == IntPtr.Zero)
-                {
-                    Debug.WriteLine(CUtilities.GetErrorMessage());
-                    messageWrappers.Remove(timeToken);
-                    return false;
-                }
-
-                //Pointer is valid but something nulled the wrapper
-                if (message == null)
-                {
-                    messageWrappers[timeToken] = new Message(this, messagePointer, timeToken);
-                    message = messageWrappers[timeToken];
-                    return true;
-                }
-                //Updating existing wrapper with updated pointer
-                else
-                {
-                    message.UpdatePointer(messagePointer);
-                    return true;
-                }
-            }
-            //Adding new user to wrappers cache
-            else if (messagePointer != IntPtr.Zero)
-            {
-                message = new Message(this, messagePointer, timeToken);
-                messageWrappers.Add(timeToken, message);
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine(CUtilities.GetErrorMessage());
-                return false;
-            }
+            return TryGetWrapper(messageWrappers, timeToken, messagePointer,
+                () => new Message(this, messagePointer, timeToken), out message);
         }
 
         /// <summary>
@@ -1326,7 +1190,7 @@ namespace PubNubChatAPI.Entities
         {
             ListenForEvents("PUBNUB_INTERNAL_ADMIN_CHANNEL");
         }
-        
+
         //TODO: I added that here but probably it is not the best place:
         /// <summary>
         /// Starts listening for events.
@@ -1360,6 +1224,47 @@ namespace PubNubChatAPI.Entities
         }
 
         #endregion
+
+        private bool TryGetWrapper<T>(Dictionary<string, T> wrappers, string id, IntPtr pointer, Func<T> createWrapper,
+            out T wrapper) where T : PointerWrapper
+        {
+            if (wrappers.TryGetValue(id, out wrapper))
+            {
+                //We had it before but it's no longer valid
+                if (pointer == IntPtr.Zero)
+                {
+                    Debug.WriteLine(CUtilities.GetErrorMessage());
+                    wrappers.Remove(id);
+                    return false;
+                }
+
+                //Pointer is valid but something nulled the wrapper
+                if (wrapper == null)
+                {
+                    wrappers[id] = createWrapper();
+                    wrapper = wrappers[id];
+                    return true;
+                }
+                //Updating existing wrapper with updated pointer
+                else
+                {
+                    wrapper.UpdatePointer(pointer);
+                    return true;
+                }
+            }
+            //Adding new user to wrappers cache
+            else if (pointer != IntPtr.Zero)
+            {
+                wrapper = createWrapper();
+                wrappers.Add(id, wrapper);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
+                return false;
+            }
+        }
 
         ~Chat()
         {
