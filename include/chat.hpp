@@ -68,6 +68,7 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
         //User is invitee, so this shouldn't be owner of the chat instance, but another user. 
         PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(Pubnub::User user, Pubnub::String channel_id, ChatChannelData channel_data, Pubnub::String membership_data = "");
+        PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(std::vector<Pubnub::User> users, Pubnub::String channel_id, ChatChannelData channel_data, Pubnub::String membership_data = "");
         PN_CHAT_EXPORT Pubnub::Channel update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Channel get_channel(Pubnub::String channel_id);
         PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);

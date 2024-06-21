@@ -52,6 +52,32 @@ CreatedChannelWrapper Chat::create_direct_conversation(Pubnub::User user, String
     return return_value;
 }
 
+CreatedChannelWrapper Chat::create_group_conversation(std::vector<Pubnub::User> users, String channel_id, ChatChannelData channel_data, Pubnub::String membership_data)
+{
+    //TODO: channel id should be optional and if it's not provided, we should create hashed channel id
+    String final_channel_id = channel_id;
+
+    channel_data.type = "group";
+    auto created_channel = create_channel(final_channel_id, channel_data);
+
+    //TODO: Add filter when it will be supported in C-Core
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String memberships_response = pubnub.set_memberships(pubnub.get_user_id(), create_set_memberships_object(final_channel_id), include_string);
+
+    json memberships_response_json = json::parse(memberships_response);
+    String channel_data_string = memberships_response_json["data"][0].dump();
+
+    //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
+    Pubnub::User current_user = get_user(pubnub.get_user_id());
+
+    Pubnub::Membership host_membership(*this, current_user, channel_data_string);
+
+
+    std::vector<Pubnub::Membership> invitees_memberships = created_channel.invite_multiple(users);
+    CreatedChannelWrapper return_value(created_channel, host_membership, invitees_memberships);
+    return return_value;
+}
+
 Channel Chat::update_channel(String channel_id, ChatChannelData channel_data)
 {
     if(channel_id.empty())

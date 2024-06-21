@@ -62,7 +62,7 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::PubnubRestrictionsData get_user_restrictions(Pubnub::String in_user_id, Pubnub::String in_channel_id, int limit, String start, String end);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
         PN_CHAT_EXPORT Pubnub::Membership invite(Pubnub::User user);
-        PN_CHAT_EXPORT std::vector<Pubnub::Membership> inviteMultiple(std::vector<Pubnub::User> users);
+        PN_CHAT_EXPORT std::vector<Pubnub::Membership> invite_multiple(std::vector<Pubnub::User> users);
 
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);

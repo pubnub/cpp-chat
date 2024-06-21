@@ -287,7 +287,7 @@ Pubnub::Membership Channel::invite(Pubnub::User user)
 
 }
 
-std::vector<Pubnub::Membership> Channel::inviteMultiple(std::vector<Pubnub::User> users)
+std::vector<Pubnub::Membership> Channel::invite_multiple(std::vector<Pubnub::User> users)
 {
     /* disabled for testing
     if(channel_data.type == String("public"))
