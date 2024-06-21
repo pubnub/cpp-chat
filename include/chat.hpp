@@ -12,6 +12,7 @@
 #include "chat/user.hpp"
 #include "chat/channel.hpp"
 #include "chat/message.hpp"
+#include "chat/membership.hpp"
 #include "infra/pubnub.hpp"
 
 
@@ -23,11 +24,30 @@ class PubNub;
 
 namespace Pubnub
 {
+    class Membership;
     struct PubnubRestrictionsData
     {
         bool ban;
         bool mute;
         Pubnub::String reason;
+    };
+
+    struct CreatedChannelWrapper
+    {
+        Pubnub::Channel &created_channel;
+        Pubnub::Membership &host_membership;
+        std::vector<Pubnub::Membership> invitees_memberships;
+
+        CreatedChannelWrapper(Pubnub::Channel &in_channel, Pubnub::Membership &in_host_membership, std::vector<Pubnub::Membership> in_invitees_memberships) :
+        created_channel(in_channel),
+        host_membership(in_host_membership),
+        invitees_memberships(in_invitees_memberships)
+        {}
+
+        CreatedChannelWrapper(Pubnub::Channel &in_channel, Pubnub::Membership &in_host_membership) :
+        created_channel(in_channel),
+        host_membership(in_host_membership)
+        {}
     };
 
     class Chat
@@ -46,6 +66,8 @@ namespace Pubnub
         /* CHANNELS*/
 
         PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
+        //User is invitee, so this shouldn't be owner of the chat instance, but another user. 
+        PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(Pubnub::User user, Pubnub::String channel_id, ChatChannelData channel_data, Pubnub::String membership_data = "");
         PN_CHAT_EXPORT Pubnub::Channel update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
         PN_CHAT_EXPORT Channel get_channel(Pubnub::String channel_id);
         PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
