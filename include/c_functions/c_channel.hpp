@@ -108,5 +108,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_history(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_message(Pubnub::Channel* channel, const char* timetoken);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_channel_invite_user(Pubnub::Channel* channel, Pubnub::User* user);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** users, int users_length, char* result_json);
+
 #endif // PN_CHAT_C_CHANNEL_H
 

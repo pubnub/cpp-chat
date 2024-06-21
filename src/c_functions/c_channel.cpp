@@ -427,3 +427,55 @@ Pubnub::Message* pn_channel_get_message(
         return PN_C_ERROR_PTR;
     }
 }
+
+Pubnub::Membership* pn_channel_invite_user(Pubnub::Channel* channel, Pubnub::User* user) {
+    try {
+        return new Pubnub::Membership(channel->invite(*user));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** users, int users_length, char* result_json) {
+    try {
+        auto users_vector = std::vector<Pubnub::User>(users_length);
+        for (int i = 0; i < users_length; i++)
+        {
+            users_vector.push_back(*users[i]);
+        }
+        auto memberships = channel->invite_multiple(users_vector);
+        
+        if (memberships.size() == 0) {
+            memcpy(result_json, "[]\0", 3);
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto membership : memberships) {
+            auto ptr = new Pubnub::Membership(membership);
+            // TODO: utils void* to string
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        memcpy(result_json, string.c_str(), string.length() + 1);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
