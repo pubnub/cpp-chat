@@ -377,6 +377,17 @@ namespace PubNubChatAPI.Entities
 
         #region Channels
 
+        public void AddListenerToChannelsUpdate(List<string> channelIds, Action<Channel> listener)
+        {
+            foreach (var channelId in channelIds)
+            {
+                if (TryGetChannel(channelId, out var channel))
+                {
+                    channel.OnChannelUpdate += listener;
+                }
+            }
+        }
+        
         /// <summary>
         /// Creates a new public conversation.
         /// <para>
@@ -595,6 +606,17 @@ namespace PubNubChatAPI.Entities
         public void SetRestriction(string userId, string channelId, Restriction restriction)
         {
             SetRestriction(userId, channelId, restriction.Ban, restriction.Mute, restriction.Reason);
+        }
+        
+        public void AddListenerToUsersUpdate(List<string> userIds, Action<User> listener)
+        {
+            foreach (var userId in userIds)
+            {
+                if (TryGetUser(userId, out var user))
+                {
+                    user.OnUserUpdated += listener;
+                }
+            }
         }
 
         /// <summary>
@@ -946,6 +968,17 @@ namespace PubNubChatAPI.Entities
                 buffer));
             return ParseJsonMembershipPointers(buffer.ToString());
         }
+        
+        public void AddListenerToMembershipsUpdate(List<string> membershipIds, Action<Membership> listener)
+        {
+            foreach (var membershipId in membershipIds)
+            {
+                if (membershipWrappers.TryGetValue(membershipId, out var membership))
+                {
+                    membership.OnMembershipUpdated += listener;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the memberships of the channel with the provided channel ID.
@@ -1059,6 +1092,17 @@ namespace PubNubChatAPI.Entities
         {
             return TryGetWrapper(messageWrappers, timeToken, messagePointer,
                 () => new Message(this, messagePointer, timeToken), out message);
+        }
+        
+        public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens, Action<Message> listener)
+        {
+            foreach (var messageTimeToken in messageTimeTokens)
+            {
+                if (TryGetMessage(channelId, messageTimeToken, out var message))
+                {
+                    message.OnMessageUpdated += listener;
+                }
+            }
         }
 
         /// <summary>
