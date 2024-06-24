@@ -1022,7 +1022,7 @@ namespace PubNubChatAPI.Entities
             return ParseJsonMembershipPointers(buffer.ToString());
         }
 
-        private List<Membership> ParseJsonMembershipPointers(string membershipPointersJson)
+        internal List<Membership> ParseJsonMembershipPointers(string membershipPointersJson)
         {
             var memberships = new List<Membership>();
             if (CUtilities.IsValidJson(membershipPointersJson))
@@ -1046,7 +1046,7 @@ namespace PubNubChatAPI.Entities
             return memberships;
         }
 
-        private bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
+        internal bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
         {
             return TryGetWrapper(membershipWrappers, membershipId, membershipPointer,
                 () => new Membership(membershipPointer, membershipId), out membership);

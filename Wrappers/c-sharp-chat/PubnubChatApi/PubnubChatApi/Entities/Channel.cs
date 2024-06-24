@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -30,7 +31,8 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_channel_disconnect(IntPtr channel);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_join(IntPtr channel, string additional_params, StringBuilder messages_json);
+        private static extern int pn_channel_join(IntPtr channel, string additional_params,
+            StringBuilder messages_json);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_leave(IntPtr channel);
@@ -92,6 +94,13 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_who_is_present(IntPtr channel, StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_invite_user(IntPtr channel, IntPtr user);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_invite_multiple(IntPtr channel, IntPtr[] users, int users_length,
+            StringBuilder result_json);
 
         #endregion
 
@@ -324,7 +333,7 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, messagesBuffer));
             chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
         }
-        
+
         // TODO: Shouldn't join have additional parameters?
         /// <summary>
         /// Joins the channel.
@@ -430,7 +439,7 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(pointer, userId, banUser, muteUser,
                 reason));
         }
-        
+
         public void SetRestrictions(string userId, Restriction restriction)
         {
             SetRestrictions(userId, restriction.Ban, restriction.Mute, restriction.Reason);
@@ -502,7 +511,7 @@ namespace PubNubChatAPI.Entities
         {
             chat.DeleteChannel(Id);
         }
-        
+
         /// <summary>
         /// Gets the user restrictions.
         /// <para>
@@ -538,6 +547,7 @@ namespace PubNubChatAPI.Entities
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
+
             return restriction;
         }
 
@@ -594,6 +604,7 @@ namespace PubNubChatAPI.Entities
                 ret = JsonConvert.DeserializeObject<List<string>>(jsonResult);
                 ret ??= new List<string>();
             }
+
             return ret;
         }
 
@@ -652,6 +663,23 @@ namespace PubNubChatAPI.Entities
             int count)
         {
             return chat.GetChannelMessageHistory(Id, startTimeToken, endTimeToken, count);
+        }
+
+        public Membership Invite(User user)
+        {
+            var membershipPointer = pn_channel_invite_user(pointer, user.Pointer);
+            CUtilities.CheckCFunctionResult(membershipPointer);
+            var membershipId = Membership.GetMembershipIdFromPtr(membershipPointer);
+            chat.TryGetMembership(membershipId, membershipPointer, out var membership);
+            return membership;
+        }
+
+        public List<Membership> InviteMultiple(List<User> users)
+        {
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(pn_channel_invite_multiple(pointer, users.Select(x => x.Pointer).ToArray(),
+                users.Count, buffer));
+            return chat.ParseJsonMembershipPointers(buffer.ToString());
         }
 
         protected override void DisposePointer()

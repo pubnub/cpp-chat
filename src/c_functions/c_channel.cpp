@@ -441,7 +441,8 @@ Pubnub::Membership* pn_channel_invite_user(Pubnub::Channel* channel, Pubnub::Use
 
 PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** users, int users_length, char* result_json) {
     try {
-        auto users_vector = std::vector<Pubnub::User>(users_length);
+        std::vector<Pubnub::User> users_vector;
+        users_vector.reserve(users_length);
         for (int i = 0; i < users_length; i++)
         {
             users_vector.push_back(*users[i]);
