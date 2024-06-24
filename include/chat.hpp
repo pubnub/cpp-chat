@@ -34,17 +34,18 @@ namespace Pubnub
 
     struct CreatedChannelWrapper
     {
-        Pubnub::Channel &created_channel;
+        Pubnub::Channel created_channel;
+        //TODO: fix circular dependencies so we can copy object here
         Pubnub::Membership &host_membership;
         std::vector<Pubnub::Membership> invitees_memberships;
 
-        CreatedChannelWrapper(Pubnub::Channel &in_channel, Pubnub::Membership &in_host_membership, std::vector<Pubnub::Membership> in_invitees_memberships) :
+        CreatedChannelWrapper(Pubnub::Channel in_channel, Pubnub::Membership &in_host_membership, std::vector<Pubnub::Membership> in_invitees_memberships) :
         created_channel(in_channel),
         host_membership(in_host_membership),
         invitees_memberships(in_invitees_memberships)
         {}
 
-        CreatedChannelWrapper(Pubnub::Channel &in_channel, Pubnub::Membership &in_host_membership) :
+        CreatedChannelWrapper(Pubnub::Channel in_channel, Pubnub::Membership &in_host_membership) :
         created_channel(in_channel),
         host_membership(in_host_membership)
         {}

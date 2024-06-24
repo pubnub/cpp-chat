@@ -4,15 +4,16 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <map>
 #include "export.hpp"
 #include "enums.hpp"
 #include "string.hpp"
 #include "callbacks.hpp"
+#include "infra/timer.hpp"
 
 extern "C" {
     #include "core/pubnub_api_types.h"
 }
-
 
 namespace Pubnub
 {
@@ -64,6 +65,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Membership invite(Pubnub::User user);
         PN_CHAT_EXPORT std::vector<Pubnub::Membership> invite_multiple(std::vector<Pubnub::User> users);
 
+        PN_CHAT_EXPORT void start_typing();
+        PN_CHAT_EXPORT void stop_typing();
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);
@@ -81,6 +84,16 @@ namespace Pubnub
         Pubnub::Chat& chat_obj;
         Pubnub::String channel_id;
         ChatChannelData channel_data;
+
+        //TYPING
+        //TODO: Move this to config
+        int TYPING_TIMEOUT = 5000;
+
+        bool typing_sent = false;
+        Timer typing_sent_timer;
+        std::map<Pubnub::String, Timer> typing_indicators;
+
+
 
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, pubnub_chat_message_type message_type);
     };

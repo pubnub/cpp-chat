@@ -8,6 +8,7 @@
 #include "nlohmann/json.hpp"
 #include "chat.hpp"
 #include "chat/chat_helpers.hpp"
+#include "infra/timer.hpp"
 
 extern "C" {
 #include "core/pubnub_objects_api.h"
@@ -327,6 +328,41 @@ std::vector<Pubnub::Membership> Channel::invite_multiple(std::vector<Pubnub::Use
 
     return invitees_memberships;
 
+}
+
+void Channel::start_typing()
+{
+    /* disabled for testing
+    if(channel_data.type == String("public"))
+    {
+        throw std::runtime_error("Typing indicators are not supported in Public chats");
+    }*/
+    if(typing_sent) return;
+
+    typing_sent = true;
+    typing_sent_timer = Timer();
+    typing_sent_timer.start(TYPING_TIMEOUT - 1000, [=](){
+        typing_sent = false;
+    });
+    
+    typing_sent = true;
+    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, "{\"value\": true}");
+
+}
+
+void Channel::stop_typing()
+{
+    /* disabled for testing
+    if(channel_data.type == String("public"))
+    {
+        throw std::runtime_error("Typing indicators are not supported in Public chats");
+    }*/
+    typing_sent_timer.stop();
+
+    if(!typing_sent) return;
+
+    typing_sent = false;
+    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, "{\"value\": false}");
 }
 
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)
