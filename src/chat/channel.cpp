@@ -418,9 +418,9 @@ String Channel::channel_id_from_json(String data_json_string)
         return "";
     }
 
-    if(channel_data_json.contains("id") )
+    if(channel_data_json.contains("channel") )
     {
-        auto dumped = channel_data_json["id"].dump();
+        auto dumped = channel_data_json["channel"]["id"].dump();
 
         // removal of quotes
         return String(&dumped[1], dumped.size() - 2);
