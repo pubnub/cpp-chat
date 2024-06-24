@@ -75,7 +75,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp)
 
 if(${ENABLE_C_ABI})
     set(SOURCES
