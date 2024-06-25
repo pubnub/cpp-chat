@@ -5,6 +5,7 @@
 #include "extern.hpp"
 #include "export.hpp"
 #include <vector>
+#include <map>
 
 namespace Pubnub
 {
@@ -18,6 +19,33 @@ Pubnub::String create_set_members_object(Pubnub::String user_id, Pubnub::String 
 
 //Creates Json object required to use set_members function. Overload for multiple users
 Pubnub::String create_set_members_object(std::vector<Pubnub::String> users_ids, Pubnub::String custom_params_json = "");
+
+
+//TODO: Probably move this to separate namespace and helper file
+//Get all keys from std::map as a std::vector
+template<typename K, typename V, typename C = std::less<K>>
+std::vector<K> getKeys(const std::map<K, V, C>& m) 
+{
+    std::vector<K> keys;
+    keys.reserve(m.size());
+    for (const auto& pair : m) {
+        keys.push_back(pair.first);
+    }
+    return keys;
+};
+
+//TODO: Probably move this to separate namespace and helper file
+//Get all values from std::map as a std::vector
+template<typename K, typename V, typename C = std::less<K>>
+std::vector<K> getValues(const std::map<K, V, C>& m) 
+{
+    std::vector<K> values;
+    values.reserve(m.size());
+    for (const auto& pair : m) {
+        values.push_back(pair.second);
+    }
+    return values;
+};
 
 }
 

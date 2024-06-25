@@ -346,7 +346,8 @@ void Channel::start_typing()
     });
     
     typing_sent = true;
-    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, "{\"value\": true}");
+    String event_payload = String("{\"value\": true, \"userId\": \"") + chat_obj.get_pubnub_context().get_user_id() + String("\"}");
+    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
 
 }
 
@@ -362,7 +363,48 @@ void Channel::stop_typing()
     if(!typing_sent) return;
 
     typing_sent = false;
-    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, "{\"value\": false}");
+    String event_payload = String("{\"value\": false, \"userId\": \"") + chat_obj.get_pubnub_context().get_user_id() + String("\"}");
+    chat_obj.emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
+}
+
+void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback)
+{
+    std::function<void(Pubnub::String)> internal_typing_callback = [=](Pubnub::String event_string)
+    {
+        json event_json = json::parse(event_string);
+        String user_id = event_json["userId"].dump();
+        user_id.erase(0, 1);
+        user_id.erase(user_id.length() - 1, 1);
+        bool typing_value = event_json["value"];
+        
+        //stop typing
+        if(!typing_value && this->typing_indicators.find(user_id) != this->typing_indicators.end())
+        {
+            typing_indicators["user_id"].stop();
+            typing_indicators.erase(user_id);
+        }
+        //start typing
+        if(typing_value)
+        {
+            //Stop the old timer
+            if(this->typing_indicators.find(user_id) != this->typing_indicators.end())
+            {
+                typing_indicators["user_id"].stop();
+            }
+            
+            //Create and start new timer
+            Timer new_timer;
+            new_timer.start(TYPING_TIMEOUT, [=]()
+            {
+                typing_indicators.erase(user_id);
+                typing_callback(Pubnub::getKeys(typing_indicators));
+            });
+            typing_indicators[user_id] = new_timer;
+        }
+        typing_callback(Pubnub::getKeys(typing_indicators));
+    };
+
+    chat_obj.listen_for_events(this->channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
 }
 
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)

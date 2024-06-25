@@ -14,6 +14,8 @@ class Timer
 
     void stop();
 
+    inline bool is_active() {return is_running;};
+
     private:
     void async_start(int duration_ms, std::function<void()> callback);
     bool is_running = false;

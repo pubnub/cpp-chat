@@ -67,6 +67,7 @@ namespace Pubnub
 
         PN_CHAT_EXPORT void start_typing();
         PN_CHAT_EXPORT void stop_typing();
+        PN_CHAT_EXPORT void get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback);
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);
@@ -91,7 +92,7 @@ namespace Pubnub
 
         bool typing_sent = false;
         Timer typing_sent_timer;
-        std::map<Pubnub::String, Timer> typing_indicators;
+        std::map<Pubnub::String, Timer, Pubnub::StringComparer> typing_indicators;
 
 
 
