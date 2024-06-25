@@ -432,3 +432,116 @@ PnCResult pn_chat_listen_for_events(
         
     return PN_C_OK;
 }
+
+Pubnub::CreatedChannelWrapper* pn_chat_create_direct_conversation_dirty(
+    Pubnub::Chat* chat,
+    Pubnub::User* user,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type
+) {
+    Pubnub::ChatChannelData converted_data;
+    converted_data.channel_name = channel_name;
+    converted_data.description = channel_description;
+    converted_data.custom_data_json = channel_custom_data_json;
+    converted_data.updated = channel_updated;
+    converted_data.status = channel_status;
+    converted_data.type = channel_type;
+
+    try {
+        return new Pubnub::CreatedChannelWrapper(chat->create_direct_conversation(*user, channel_id, converted_data));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
+    Pubnub::Chat* chat,
+    Pubnub::User** users,
+    int users_length,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type
+) {
+    Pubnub::ChatChannelData converted_data;
+    converted_data.channel_name = channel_name;
+    converted_data.description = channel_description;
+    converted_data.custom_data_json = channel_custom_data_json;
+    converted_data.updated = channel_updated;
+    converted_data.status = channel_status;
+    converted_data.type = channel_type;
+
+    try {
+
+        std::vector<Pubnub::User> users_vector;
+        users_vector.reserve(users_length);
+        for (int i = 0; i < users_length; i++)
+        {
+            users_vector.push_back(*users[i]);
+        }
+
+        return new Pubnub::CreatedChannelWrapper(chat->create_group_conversation(users_vector, channel_id, converted_data));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::Channel* pn_chat_get_created_channel_wrapper_channel(
+    Pubnub::CreatedChannelWrapper* wrapper) {
+    return &(wrapper->created_channel);
+}
+
+Pubnub::Membership* pn_chat_get_created_channel_wrapper_host_membership(
+    Pubnub::CreatedChannelWrapper* wrapper) {
+    return &(wrapper->host_membership);
+}
+
+PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
+    Pubnub::CreatedChannelWrapper* wrapper, char* result_json) {
+    try {
+        auto memberships = wrapper->invitees_memberships;
+
+        if (memberships.size() == 0) {
+            memcpy(result_json, "[]\0", 3);
+            return PN_C_OK;
+        }
+
+        Pubnub::String string = "[";
+        for (auto membership : memberships) {
+            auto ptr = new Pubnub::Membership(membership);
+#ifdef _WIN32
+            string += "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(ptr);
+            string += oss.str();
+            string += ",";
+        }
+
+        string.erase(string.length() - 1);
+        string += "]";
+
+        memcpy(result_json, string.c_str(), string.length() + 1);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

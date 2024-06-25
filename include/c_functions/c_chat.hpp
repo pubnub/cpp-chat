@@ -121,5 +121,36 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_listen_for_events(
         const char* channel_id,
         char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CreatedChannelWrapper* pn_chat_create_direct_conversation_dirty(
+    Pubnub::Chat* chat,
+    Pubnub::User* user, 
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
+    Pubnub::Chat* chat,
+    Pubnub::User** users,
+    int users_length,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_created_channel_wrapper_channel(
+    Pubnub::CreatedChannelWrapper* wrapper);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_chat_get_created_channel_wrapper_host_membership(
+    Pubnub::CreatedChannelWrapper* wrapper);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
+    Pubnub::CreatedChannelWrapper* wrapper, char* result_json);
 
 #endif // PN_CHAT_C_CHAT_HPP
