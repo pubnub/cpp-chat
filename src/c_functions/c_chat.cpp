@@ -502,12 +502,12 @@ Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
 
 Pubnub::Channel* pn_chat_get_created_channel_wrapper_channel(
     Pubnub::CreatedChannelWrapper* wrapper) {
-    return &(wrapper->created_channel);
+    return new Pubnub::Channel(wrapper->created_channel);
 }
 
 Pubnub::Membership* pn_chat_get_created_channel_wrapper_host_membership(
     Pubnub::CreatedChannelWrapper* wrapper) {
-    return &(wrapper->host_membership);
+    return new Pubnub::Membership(wrapper->host_membership);
 }
 
 PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
@@ -544,4 +544,9 @@ PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
     }
 
     return PN_C_OK;
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_dispose_created_channel_wrapper(
+    Pubnub::CreatedChannelWrapper* wrapper) {
+    delete wrapper;
 }

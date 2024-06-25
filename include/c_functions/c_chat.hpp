@@ -153,4 +153,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_chat_get_created_channel_wr
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
     Pubnub::CreatedChannelWrapper* wrapper, char* result_json);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_dispose_created_channel_wrapper(
+    Pubnub::CreatedChannelWrapper* wrapper);
+
 #endif // PN_CHAT_C_CHAT_HPP

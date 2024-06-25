@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -173,6 +174,45 @@ namespace PubNubChatAPI.Entities
             IntPtr chat,
             string channel_id,
             StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_chat_create_direct_conversation_dirty(
+            IntPtr chat,
+            IntPtr user, string channel_id,
+            string channel_name,
+            string channel_description,
+            string channel_custom_data_json,
+            string channel_updated,
+            string channel_status,
+            string channel_type);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_chat_create_group_conversation_dirty(
+            IntPtr chat,
+            IntPtr[] users,
+            int users_length, string channel_id,
+            string channel_name,
+            string channel_description,
+            string channel_custom_data_json,
+            string channel_updated,
+            string channel_status,
+            string channel_type);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_chat_get_created_channel_wrapper_channel(
+            IntPtr wrapper);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_chat_get_created_channel_wrapper_host_membership(
+            IntPtr wrapper);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_get_created_channel_wrapper_invited_memberships(
+            IntPtr wrapper, StringBuilder result_json);
+        
+        [DllImport("pubnub-chat")]
+        private static extern void pn_chat_dispose_created_channel_wrapper(
+            IntPtr wrapper);
 
         #endregion
 
@@ -387,7 +427,7 @@ namespace PubNubChatAPI.Entities
                 }
             }
         }
-        
+
         /// <summary>
         /// Creates a new public conversation.
         /// <para>
@@ -454,6 +494,74 @@ namespace PubNubChatAPI.Entities
             return channel;
         }
 
+        public (Channel createdChannel, Membership hostMembership, Membership inviteeMembership)
+            CreateDirectConversation(User user, string channelId)
+        {
+            return CreateDirectConversation(user, channelId, new ChatChannelData());
+        }
+
+        public (Channel createdChannel, Membership hostMembership, Membership inviteeMembership)
+            CreateDirectConversation(User user, string channelId, ChatChannelData channelData)
+        {
+            var wrapperPointer = pn_chat_create_direct_conversation_dirty(chatPointer, user.Pointer, channelId,
+                channelData.ChannelName,
+                channelData.ChannelDescription, channelData.ChannelCustomDataJson, channelData.ChannelUpdated,
+                channelData.ChannelStatus, channelData.ChannelType);
+            CUtilities.CheckCFunctionResult(wrapperPointer);
+
+            var createdChannelPointer = pn_chat_get_created_channel_wrapper_channel(wrapperPointer);
+            CUtilities.CheckCFunctionResult(createdChannelPointer);
+            TryGetChannel(createdChannelPointer, out var createdChannel);
+
+            //TODO: waiting for C++ side fix
+            /*var hostMembershipPointer = pn_chat_get_created_channel_wrapper_host_membership(wrapperPointer);
+            CUtilities.CheckCFunctionResult(hostMembershipPointer);
+            TryGetMembership(hostMembershipPointer, out var hostMembership);*/
+
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(
+                pn_chat_get_created_channel_wrapper_invited_memberships(wrapperPointer, buffer));
+            var inviteeMembership = ParseJsonMembershipPointers(buffer.ToString())[0];
+
+            pn_chat_dispose_created_channel_wrapper(wrapperPointer);
+            
+            return (createdChannel, null, inviteeMembership);
+        }
+        
+        public (Channel createdChannel, Membership hostMembership, List<Membership> inviteeMemberships)
+            CreateGroupConversation(List<User> users, string channelId)
+        {
+            return CreateGroupConversation(users, channelId, new ChatChannelData());
+        }
+
+        public (Channel createdChannel, Membership hostMembership, List<Membership> inviteeMemberships)
+            CreateGroupConversation(List<User> users, string channelId, ChatChannelData channelData)
+        {
+            var wrapperPointer = pn_chat_create_group_conversation_dirty(chatPointer,
+                users.Select(x => x.Pointer).ToArray(), users.Count, channelId, channelData.ChannelName,
+                channelData.ChannelDescription, channelData.ChannelCustomDataJson, channelData.ChannelUpdated,
+                channelData.ChannelStatus, channelData.ChannelType);
+            CUtilities.CheckCFunctionResult(wrapperPointer);
+
+            var createdChannelPointer = pn_chat_get_created_channel_wrapper_channel(wrapperPointer);
+            CUtilities.CheckCFunctionResult(createdChannelPointer);
+            TryGetChannel(createdChannelPointer, out var createdChannel);
+
+            //TODO: waiting for C++ side fix
+            /*var hostMembershipPointer = pn_chat_get_created_channel_wrapper_host_membership(wrapperPointer);
+            CUtilities.CheckCFunctionResult(hostMembershipPointer);
+            TryGetMembership(hostMembershipPointer, out var hostMembership);*/
+
+            var buffer = new StringBuilder(8192);
+            CUtilities.CheckCFunctionResult(
+                pn_chat_get_created_channel_wrapper_invited_memberships(wrapperPointer, buffer));
+            var inviteeMemberships = ParseJsonMembershipPointers(buffer.ToString());
+            
+            pn_chat_dispose_created_channel_wrapper(wrapperPointer);
+
+            return (createdChannel, null, inviteeMemberships);
+        }
+
         /// <summary>
         /// Gets the channel by the provided channel ID.
         /// <para>
@@ -475,6 +583,12 @@ namespace PubNubChatAPI.Entities
         public bool TryGetChannel(string channelId, out Channel channel)
         {
             var channelPointer = pn_chat_get_channel(chatPointer, channelId);
+            return TryGetChannel(channelId, channelPointer, out channel);
+        }
+
+        private bool TryGetChannel(IntPtr channelPointer, out Channel channel)
+        {
+            var channelId = Channel.GetChannelIdFromPtr(channelPointer);
             return TryGetChannel(channelId, channelPointer, out channel);
         }
 
@@ -607,7 +721,7 @@ namespace PubNubChatAPI.Entities
         {
             SetRestriction(userId, channelId, restriction.Ban, restriction.Mute, restriction.Reason);
         }
-        
+
         public void AddListenerToUsersUpdate(List<string> userIds, Action<User> listener)
         {
             foreach (var userId in userIds)
@@ -968,7 +1082,7 @@ namespace PubNubChatAPI.Entities
                 buffer));
             return ParseJsonMembershipPointers(buffer.ToString());
         }
-        
+
         public void AddListenerToMembershipsUpdate(List<string> membershipIds, Action<Membership> listener)
         {
             foreach (var membershipId in membershipIds)
@@ -1046,6 +1160,12 @@ namespace PubNubChatAPI.Entities
             return memberships;
         }
 
+        private bool TryGetMembership(IntPtr membershipPointer, out Membership membership)
+        {
+            var membershipId = Membership.GetMembershipIdFromPtr(membershipPointer);
+            return TryGetMembership(membershipId, membershipPointer, out membership);
+        }
+
         internal bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
         {
             return TryGetWrapper(membershipWrappers, membershipId, membershipPointer,
@@ -1093,8 +1213,9 @@ namespace PubNubChatAPI.Entities
             return TryGetWrapper(messageWrappers, timeToken, messagePointer,
                 () => new Message(this, messagePointer, timeToken), out message);
         }
-        
-        public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens, Action<Message> listener)
+
+        public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens,
+            Action<Message> listener)
         {
             foreach (var messageTimeToken in messageTimeTokens)
             {
