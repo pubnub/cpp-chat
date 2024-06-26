@@ -380,7 +380,7 @@ void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing
         //stop typing
         if(!typing_value && this->typing_indicators.find(user_id) != this->typing_indicators.end())
         {
-            typing_indicators["user_id"].stop();
+            typing_indicators[user_id].stop();
             typing_indicators.erase(user_id);
         }
         //start typing
@@ -389,7 +389,7 @@ void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing
             //Stop the old timer
             if(this->typing_indicators.find(user_id) != this->typing_indicators.end())
             {
-                typing_indicators["user_id"].stop();
+                typing_indicators[user_id].stop();
             }
             
             //Create and start new timer
