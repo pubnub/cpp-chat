@@ -145,6 +145,35 @@ void Chat::delete_channel(String channel_id)
     this->pubnub.remove_channel_metadata(channel_id);
 }
 
+void Chat::pin_message_to_channel(Pubnub::Message &message, Pubnub::Channel &channel)
+{
+    String custom_channel_data;
+    channel.get_channel_data().custom_data_json.empty() ?  custom_channel_data = "{}" :  custom_channel_data = channel.get_channel_data().custom_data_json;
+
+    json custom_data_json = json::parse(custom_channel_data);
+    custom_data_json["pinnedMessageTimetoken"] = message.get_timetoken();
+    custom_data_json["pinnedMessageChannelID"] = channel.get_channel_id();
+
+    ChatChannelData new_channel_data = channel.get_channel_data();
+    new_channel_data.custom_data_json = custom_data_json.dump();
+    channel.update(new_channel_data);
+}
+
+void Chat::unpin_message_from_channel(Pubnub::Channel &channel)
+{
+    //There is no pinned message if custom data json is empty
+    if(channel.get_channel_data().custom_data_json.empty())
+    {return;}
+
+    json custom_data_json = json::parse(channel.get_channel_data().custom_data_json);
+    custom_data_json.erase("pinnedMessageTimetoken");
+    custom_data_json.erase("pinnedMessageChannelID");
+
+    ChatChannelData new_channel_data = channel.get_channel_data();
+    new_channel_data.custom_data_json = custom_data_json.dump();
+    channel.update(new_channel_data);
+}
+
 User Chat::create_user(String user_id, ChatUserData user_data)
 {
     User created_user(*this, user_id, user_data);

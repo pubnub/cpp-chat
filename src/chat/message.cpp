@@ -164,6 +164,13 @@ void Pubnub::Message::stream_updates_on(std::vector<Pubnub::Message> messages, s
         chat_obj.get_pubnub_context().subscribe_to_channel(message_data.channel_id);
     }
 }
+
+void Message::pin()
+{
+    Pubnub::Channel channel = chat_obj.get_channel(message_data.channel_id);
+    chat_obj.pin_message_to_channel(*this, channel);
+}
+
 String Message::to_string()
 {
     //TODO: full conversion from message to json string

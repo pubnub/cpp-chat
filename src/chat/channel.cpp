@@ -407,6 +407,37 @@ void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing
     chat_obj.listen_for_events(this->channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
 }
 
+Pubnub::Channel& Channel::pin_message(Pubnub::Message &message)
+{
+    chat_obj.pin_message_to_channel(message, *this);
+    return *this;
+}
+
+Pubnub::Channel& Channel::unpin_message()
+{
+    chat_obj.unpin_message_from_channel(*this);
+    return *this;
+}
+
+Pubnub::Message Channel::get_pinned_message()
+{
+    json custom_data_json = json::parse(channel_data.custom_data_json);
+    if(!custom_data_json.contains("pinnedMessageTimetoken") || custom_data_json["pinnedMessageTimetoken"].is_null())
+    {
+        //TODO: I don't think we need to throw any error here, but we don't have empty message object.
+        throw std::invalid_argument("there is no any pinned message");
+    }
+
+    String message_timetoken = custom_data_json["pinnedMessageTimetoken"];
+    message_timetoken.erase(0, 1);
+    message_timetoken.erase(message_timetoken.length() - 1, 1);
+
+    Pubnub::Message pinned_message = this->get_message(message_timetoken);
+
+    //TODO: also check here for pinned message in thread channela after implementing threads
+    return pinned_message;
+}
+
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)
 {
     std::vector<Pubnub::Channel> channels;

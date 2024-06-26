@@ -50,6 +50,8 @@ namespace Pubnub
         PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
         
+        PN_CHAT_EXPORT void pin();
+
         Pubnub::String to_string();
 
         PN_CHAT_EXPORT Pubnub::String get_timetoken();
