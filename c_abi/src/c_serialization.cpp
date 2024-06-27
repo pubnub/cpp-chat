@@ -75,7 +75,14 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
     }
 
     try {
+        //TODO: temporary to have channel ID, will be removed once Event is a proper entity
         auto string = Deserialization::pubnub_message_to_string(*event_json);
+        string.erase(string.length() - 1);
+        string += ", \"channelId\": ";
+        Pubnub::String channel_string = "\"";
+        channel_string += Pubnub::String(event_json->channel.ptr, event_json->channel.size);
+        channel_string += "\"}";
+        string += channel_string;
         strcpy(result, string.c_str());
 
         return PN_C_OK;

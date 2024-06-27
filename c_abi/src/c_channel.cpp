@@ -480,3 +480,29 @@ PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** us
 
     return PN_C_OK;
 }
+
+PnCResult pn_channel_start_typing(Pubnub::Channel* channel) {
+    try {
+        channel->start_typing();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_channel_stop_typing(Pubnub::Channel* channel) {
+    try {
+        channel->stop_typing();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

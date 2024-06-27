@@ -112,5 +112,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_channel_invite_user(Pubnub:
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** users, int users_length, char* result_json);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_start_typing(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_stop_typing(Pubnub::Channel* channel);
+
 #endif // PN_CHAT_C_CHANNEL_H
 
