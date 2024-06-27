@@ -68,9 +68,17 @@ include_directories(${json_SOURCE_DIR}/include)
 
 set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/sync.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/entity_repository.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
+
+set(DOMAIN_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/chat_entity.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/channel_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/user_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_entity.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
@@ -98,7 +106,8 @@ endif()
 
 set(SOURCES
     ${SOURCES}
-    ${INFRA_SOURCES})
+    ${INFRA_SOURCES}
+    ${DOMAIN_SOURCES})
 
 add_library(pubnub-chat SHARED ${SOURCES})
 
