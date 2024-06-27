@@ -1,3 +1,6 @@
+#ifndef PN_CHAT_MESSAGE_ENTITY_HPP
+#define PN_CHAT_MESSAGE_ENTITY_HPP
+
 #include "enums.hpp"
 #include "string.hpp"
 #include <vector>
@@ -30,3 +33,5 @@ class MessageEntity {
         Pubnub::String timetoken;
         MessageData message_data;
 };
+
+#endif // PN_CHAT_MESSAGE_ENTITY_HPP

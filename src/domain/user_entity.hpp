@@ -1,3 +1,6 @@
+#ifndef PN_CHAT_USER_ENTITY_HPP
+#define PN_CHAT_USER_ENTITY_HPP
+
 #include "string.hpp"
 
 class UserEntity {
@@ -18,3 +21,5 @@ class UserEntity {
         Pubnub::String user_id;
         UserData user_data;
 };
+
+#endif // PN_CHAT_USER_ENTITY_HPP

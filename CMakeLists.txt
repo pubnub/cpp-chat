@@ -67,7 +67,7 @@ include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
 
 set(INFRA_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/sync.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/entity_repository.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)

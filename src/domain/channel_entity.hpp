@@ -1,3 +1,6 @@
+#ifndef PN_CHAT_CHANNEL_ENTITY_HPP
+#define PN_CHAT_CHANNEL_ENTITY_HPP
+
 #include "string.hpp"
 
 class ChannelEntity {
@@ -16,3 +19,5 @@ class ChannelEntity {
         Pubnub::String channel_id;
         ChannelData channel_data;
 };
+
+#endif // PN_CHAT_CHANNEL_ENTITY_HPP
