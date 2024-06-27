@@ -41,4 +41,12 @@ Pubnub::String create_set_members_object(std::vector<Pubnub::String> users_ids, 
     return final_object;
 }
 
+bool string_starts_with(const Pubnub::String& string, const Pubnub::String prefix)
+{
+    //If string is smaller it can't start with given prefix
+    if (string.length() < prefix.length()) return false;
+
+    return std::equal(prefix.to_std_string().begin(), prefix.to_std_string().end(), string.to_std_string().begin());
+}
+
 }

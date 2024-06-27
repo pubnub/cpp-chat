@@ -85,6 +85,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message_draft.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp

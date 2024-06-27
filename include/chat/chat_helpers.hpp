@@ -5,6 +5,7 @@
 #include "extern.hpp"
 #include "export.hpp"
 #include <vector>
+#include <string>
 #include <map>
 
 namespace Pubnub
@@ -46,6 +47,9 @@ std::vector<K> getValues(const std::map<K, V, C>& m)
     }
     return values;
 };
+
+//Checks if string starts with provided prefix
+bool string_starts_with(const Pubnub::String& string, const Pubnub::String prefix);
 
 }
 

@@ -21,7 +21,10 @@ namespace Pubnub
     class Message;
     class Membership;
     class User;
+    class MessageDraft;
     struct PubnubRestrictionsData;
+    struct MessageDraftConfig;
+    
 
     struct ChatChannelData
     {
@@ -72,6 +75,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Channel& pin_message(Pubnub::Message &message);
         PN_CHAT_EXPORT Pubnub::Channel& unpin_message();
         PN_CHAT_EXPORT Pubnub::Message get_pinned_message();
+        //TODO: make config optional, impossible before refactor because of circular dependency
+        PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config);
 
         PN_CHAT_EXPORT void stream_updates(std::function<void(Channel)> channel_callback);
         PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Channel)> channel_callback);

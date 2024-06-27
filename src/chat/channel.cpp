@@ -21,6 +21,7 @@ extern "C" {
 
 #include "chat/message.hpp"
 #include "chat/membership.hpp"
+#include "chat/message_draft.hpp"
 
 
 using namespace Pubnub;
@@ -436,6 +437,11 @@ Pubnub::Message Channel::get_pinned_message()
 
     //TODO: also check here for pinned message in thread channela after implementing threads
     return pinned_message;
+}
+
+Pubnub::MessageDraft Channel::create_message_draft(Pubnub::MessageDraftConfig message_draft_config)
+{
+    return MessageDraft(chat_obj, *this, message_draft_config);
 }
 
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)
