@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(pubnub-chat VERSION 0.0.1)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 if(${ENABLE_ASAN})

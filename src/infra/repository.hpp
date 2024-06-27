@@ -2,6 +2,7 @@
 #define PN_CHAT_REPOSITORY_HPP
 
 #include <map>
+#include <optional>
 #include <utility>
 #include "sync.hpp"
 
@@ -12,32 +13,40 @@ class Repository {
         ~Repository() = default;
 
         void update_or_insert(Key key, Value value) {
-            auto guard = data.lock();
+            auto guard = this->data.lock();
             guard->insert_or_assign(key, value);
         };
 
         void update_or_insert(std::pair<Key, Value> pair) {
-            auto guard = data.lock();
+            auto guard = this->data.lock();
             guard->insert_or_assign(pair.first, pair.second);
         };
 
         void remove(Key key) {
-            auto guard = data.lock();
+            auto guard = this->data.lock();
             guard->erase(key);
         };
 
         bool exists(Key key) {
-            auto guard = data.lock();
-            return guard->find(key) != guard->end();
+            auto guard = this->data.lock();
+            return this->exists(key, *guard);
         };
 
-        Value get(Key key) {
-            auto guard = data.lock();
-            return guard->at(key);
+        std::optional<Value> get(Key key) {
+            auto guard = this->data.lock();
+            if (this->exists(key, *guard)) {
+                return guard->at(key);
+            }
+
+            return {};
         };
 
     private:
         Mutex<std::map<Key, Value>> data;
+
+        bool exists(Key key, std::map<Key, Value> data) {
+            return data.find(key) != data.end();
+        };
 };
 
 #endif // PN_CHAT_REPOSITORY_HPP
