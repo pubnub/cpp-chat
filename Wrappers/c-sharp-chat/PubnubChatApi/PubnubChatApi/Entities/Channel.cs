@@ -352,18 +352,9 @@ namespace PubNubChatAPI.Entities
                     OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
                 };
                 typingIndicators[userId] = newTimer;
+                newTimer.Start();
             }
             OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
-        }
-        
-                
-        //TODO: full summary
-        /// <summary>
-        /// Start listening for Typing Events.
-        /// </summary>
-        public void StartListeningForTypingEvents()
-        {
-            chat.ListenForEvents(Id);
         }
 
         public void StartTyping()

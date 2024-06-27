@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using PubNubChatAPI.Entities;
 
 namespace PubNubChatApi.Tests;
@@ -6,7 +5,6 @@ namespace PubNubChatApi.Tests;
 public class ChannelTests
 {
     private Chat chat;
-    private Channel channel;
     private User user;
 
     [SetUp]
@@ -16,24 +14,57 @@ public class ChannelTests
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
             "channel_tests_user");
-        channel = chat.CreatePublicConversation("channel_tests_channel");
         user = chat.CreateUser("channel_tests_user");
-        channel.Join();
     }
 
     [Test]
-    public async Task TestTypingEvent()
+    public async Task TestStartTyping()
     {
+        var channel = chat.CreatePublicConversation("start_typing_test_channel");
+        channel.Join();
         channel.OnUsersTyping += typingUsers =>
         {
-            Debug.WriteLine($"TYPING EVENT COUNT: {typingUsers.Count}");
-            foreach (var typingUser in typingUsers)
-            {
-                Debug.WriteLine($"{typingUser} is typing");
-            }
+            Assert.That(typingUsers, Does.Contain(user.Id));
         };
         channel.StartTyping();
 
-        await Task.Delay(10000);
+        await Task.Delay(3000);
+    }
+    
+    [Test]
+    public async Task TestStopTyping()
+    {
+        var channel = chat.CreatePublicConversation("stop_typing_test_channel");
+        channel.Join();
+        
+        channel.StartTyping();
+        
+        await Task.Delay(1000);
+        
+        channel.OnUsersTyping += typingUsers =>
+        {
+            Assert.That(typingUsers, Is.Empty);
+        };
+        channel.StopTyping();
+
+        await Task.Delay(3000);
+    }
+    
+    [Test]
+    public async Task TestStopTypingFromTimer()
+    {
+        var channel = chat.CreatePublicConversation("stop_typing_timer_test_channel");
+        channel.Join();
+        
+        channel.StartTyping();
+
+        await Task.Delay(3000);
+        
+        channel.OnUsersTyping += typingUsers =>
+        {
+            Assert.That(typingUsers, Is.Empty);
+        };
+        
+        await Task.Delay(9000);
     }
 }
