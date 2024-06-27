@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_SYNC_HPP
 #define PN_CHAT_SYNC_HPP
 
+#include <memory>
 #include <mutex>
 
 template <typename T>
@@ -38,5 +39,8 @@ private:
     T value;
     std::mutex mutex;
 };
+
+template <typename T>
+using ThreadSafePtr = std::shared_ptr<Mutex<T>>;
 
 #endif // PN_CHAT_SYNC_HPP
