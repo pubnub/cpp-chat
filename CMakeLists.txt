@@ -79,15 +79,16 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp)
 
 if(${ENABLE_C_ABI})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/c_abi/include)
     set(SOURCES
         ${SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_chat.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_channel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_user.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_errors.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_message.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_membership.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_functions/c_serialization.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_chat.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_channel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_user.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_errors.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_message.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_membership.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_serialization.cpp)
 endif()
 
 if(NOT ${RUN_TESTS})
