@@ -428,7 +428,7 @@ Pubnub::Message Channel::get_pinned_message()
         throw std::invalid_argument("there is no any pinned message");
     }
 
-    String message_timetoken = custom_data_json["pinnedMessageTimetoken"];
+    String message_timetoken = custom_data_json["pinnedMessageTimetoken"].dump();
     message_timetoken.erase(0, 1);
     message_timetoken.erase(message_timetoken.length() - 1, 1);
 

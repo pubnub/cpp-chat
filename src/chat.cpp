@@ -151,8 +151,8 @@ void Chat::pin_message_to_channel(Pubnub::Message &message, Pubnub::Channel &cha
     channel.get_channel_data().custom_data_json.empty() ?  custom_channel_data = "{}" :  custom_channel_data = channel.get_channel_data().custom_data_json;
 
     json custom_data_json = json::parse(custom_channel_data);
-    custom_data_json["pinnedMessageTimetoken"] = message.get_timetoken();
-    custom_data_json["pinnedMessageChannelID"] = channel.get_channel_id();
+    custom_data_json["pinnedMessageTimetoken"] = message.get_timetoken().c_str();
+    custom_data_json["pinnedMessageChannelID"] = channel.get_channel_id().c_str();
 
     ChatChannelData new_channel_data = channel.get_channel_data();
     new_channel_data.custom_data_json = custom_data_json.dump();
