@@ -1,5 +1,5 @@
-#include "c_functions/c_user.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_user.hpp"
+#include "c_errors.hpp"
 #include "chat/user.hpp"
 #include "nlohmann/json.hpp"
 #include "chat/membership.hpp"

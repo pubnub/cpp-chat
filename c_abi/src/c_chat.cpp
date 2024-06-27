@@ -1,10 +1,10 @@
-#include "c_functions/c_chat.hpp"
-#include "c_functions/c_channel.hpp"
+#include "c_chat.hpp"
+#include "c_channel.hpp"
 #include "chat/channel.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 #include <pubnub_helper.h>
-#include <sstream>
 #include <string>
+#include <sstream>
 
 Pubnub::Chat* pn_chat_new(
         const char* publish,

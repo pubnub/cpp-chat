@@ -4,7 +4,7 @@
 #include "chat/message.hpp"
 #include "export.hpp"
 #include "extern.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_delete(Pubnub::Message* message);
 

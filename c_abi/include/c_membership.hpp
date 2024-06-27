@@ -5,7 +5,6 @@
 #include "chat/user.hpp"
 #include "export.hpp"
 #include "extern.hpp"
-#include "c_functions/c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_membership_delete(Pubnub::Membership* membership);
 

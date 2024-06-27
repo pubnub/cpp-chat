@@ -1,5 +1,5 @@
 #include <cstring>
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 
 static char* pn_c_error_message_ptr = nullptr;
 

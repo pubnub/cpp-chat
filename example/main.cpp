@@ -1,5 +1,3 @@
-#include "c_functions/c_channel.hpp"
-#include "c_functions/c_chat.hpp"
 #include "chat.hpp"
 #include "chat/message.hpp"
 #include "chat/membership.hpp"
@@ -88,7 +86,8 @@ int main() {
         std::cout << "event callback: " <<  event << std::endl;
         std::cout << std::endl;
     };
-    chat.listen_for_events(channel.get_channel_id(), event_callback);
+    // TODO: something is wrong here
+//    chat.listen_for_events(channel.get_channel_id(), event_callback);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 

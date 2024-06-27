@@ -6,7 +6,7 @@
 #include "extern.hpp"
 #include "chat/channel.hpp"
 #include "chat/user.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* publish,

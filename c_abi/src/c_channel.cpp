@@ -1,8 +1,8 @@
-#include "c_functions/c_channel.hpp"
+#include "c_channel.hpp"
 #include "callbacks.hpp"
 #include "chat.hpp"
 #include "chat/message.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 #include "nlohmann/json.hpp"
 #include "chat/membership.hpp"
 #include <iostream>

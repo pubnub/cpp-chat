@@ -1,5 +1,5 @@
-#include "c_functions/c_message.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_message.hpp"
+#include "c_errors.hpp"
 
 void pn_message_delete(Pubnub::Message* message) {
     delete message;

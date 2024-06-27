@@ -1,5 +1,5 @@
-#include "c_functions/c_membership.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_membership.hpp"
+#include "c_errors.hpp"
 #include "chat/membership.hpp"
 
 void pn_membership_delete(Pubnub::Membership* membership) {

@@ -6,7 +6,7 @@
 #include "chat/user.hpp"
 #include "export.hpp"
 #include "extern.hpp"
-#include "c_functions/c_errors.hpp"
+#include "c_errors.hpp"
 
 extern "C" {
 	#include <pubnub_api_types.h>
