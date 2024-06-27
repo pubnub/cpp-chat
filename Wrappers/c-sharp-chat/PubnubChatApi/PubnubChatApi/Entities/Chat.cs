@@ -297,6 +297,13 @@ namespace PubNubChatAPI.Entities
                                 case "report":
                                     OnReportEvent?.Invoke(eventJson);
                                     break;
+                                case "typing":
+                                    if (eventData.TryGetValue("channelId", out var channelId) &&
+                                        TryGetChannel(channelId, out var channel))
+                                    {
+                                        channel.ParseAndBroadcastTypingEvent(eventData);
+                                    }
+                                    break;
                             }
                         }
 
@@ -1284,6 +1291,7 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
+        //TODO: use enum instead of all these methods?
         #region Events
 
         //TODO: full summary
@@ -1325,7 +1333,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="OnEvent"/>
-        private void ListenForEvents(string channelId)
+        internal void ListenForEvents(string channelId)
         {
             if (string.IsNullOrEmpty(channelId))
             {

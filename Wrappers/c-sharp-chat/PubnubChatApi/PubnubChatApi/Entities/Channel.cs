@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Timers;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Enums;
@@ -102,6 +103,12 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_channel_invite_multiple(IntPtr channel, IntPtr[] users, int users_length,
             StringBuilder result_json);
 
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_start_typing(IntPtr channel);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_stop_typing(IntPtr channel);
+        
         #endregion
 
         /// <summary>
@@ -208,6 +215,7 @@ namespace PubNubChatAPI.Entities
 
         private Chat chat;
         private bool connected;
+        private Dictionary<string, Timer> typingIndicators = new();
 
         /// <summary>
         /// Event that is triggered when a message is received.
@@ -269,6 +277,8 @@ namespace PubNubChatAPI.Entities
         ///
         public event Action<List<string>> OnPresenceUpdate;
 
+        public event Action<List<string>> OnUsersTyping; 
+
         internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
         {
             this.chat = chat;
@@ -304,6 +314,66 @@ namespace PubNubChatAPI.Entities
             {
                 OnPresenceUpdate?.Invoke(WhoIsPresent());
             }
+        }
+
+        internal void ParseAndBroadcastTypingEvent(Dictionary<string, string> eventJson)
+        {
+            if (!eventJson.TryGetValue("userId", out var userId))
+            {
+                return;
+            }
+            if (!eventJson.TryGetValue("value", out var valueString) 
+                || !bool.TryParse(valueString, out var typingValue))
+            {
+                return;
+            }
+
+            //stop typing
+            if(!typingValue && typingIndicators.ContainsKey(userId))
+            {
+                typingIndicators[userId].Stop();
+                typingIndicators.Remove(userId);
+            }
+            //start typing
+            if(typingValue)
+            {
+                //Stop the old timer
+                if(typingIndicators.TryGetValue(userId, out var typingTimer))
+                {
+                    typingTimer.Stop();
+                }
+    
+                //Create and start new timer
+                //TODO: Get this from config
+                var newTimer = new Timer(5000);
+                newTimer.Elapsed += (_, _) =>
+                {
+                    typingIndicators.Remove(userId);
+                    OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
+                };
+                typingIndicators[userId] = newTimer;
+            }
+            OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
+        }
+        
+                
+        //TODO: full summary
+        /// <summary>
+        /// Start listening for Typing Events.
+        /// </summary>
+        public void StartListeningForTypingEvents()
+        {
+            chat.ListenForEvents(Id);
+        }
+
+        public void StartTyping()
+        {
+            CUtilities.CheckCFunctionResult(pn_channel_start_typing(pointer));
+        }
+
+        public void StopTyping()
+        {
+            CUtilities.CheckCFunctionResult(pn_channel_stop_typing(pointer));
         }
 
         /// <summary>
