@@ -1,5 +1,6 @@
 #include "enums.hpp"
 #include "string.hpp"
+#include <vector>
 
 class MessageEntity {
     public:
