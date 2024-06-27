@@ -66,6 +66,12 @@ include_directories(${c-core_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
 
+set(INFRA_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/sync.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
+
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat.cpp
@@ -75,8 +81,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp)
+)
 
 if(${ENABLE_C_ABI})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/c_abi/include)
@@ -91,12 +96,9 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_serialization.cpp)
 endif()
 
-if(NOT ${RUN_TESTS})
-    set(SOURCES
-        ${SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
-endif()
-
+set(SOURCES
+    ${SOURCES}
+    ${INFRA_SOURCES})
 
 add_library(pubnub-chat SHARED ${SOURCES})
 
