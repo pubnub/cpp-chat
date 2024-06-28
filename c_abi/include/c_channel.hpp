@@ -116,5 +116,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_start_typing(Pubnub::Channel*
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_stop_typing(Pubnub::Channel* channel);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_pin_message(Pubnub::Channel* channel, Pubnub::Message* message);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_unpin_message(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_pinned_message(Pubnub::Channel* channel);
+
 #endif // PN_CHAT_C_CHANNEL_H
 

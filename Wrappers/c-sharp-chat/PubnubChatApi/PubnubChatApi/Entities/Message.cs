@@ -43,6 +43,8 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_message_get_data_meta(IntPtr message, StringBuilder result);
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_pin(IntPtr message);
 
         #endregion
 
@@ -236,6 +238,11 @@ namespace PubNubChatAPI.Entities
             var newPointer = pn_message_edit_text(pointer, newText);
             CUtilities.CheckCFunctionResult(newPointer);
             UpdatePointer(newPointer);
+        }
+
+        public void PinMessage()
+        {
+            CUtilities.CheckCFunctionResult(pn_message_pin(pointer));
         }
 
         /// <summary>

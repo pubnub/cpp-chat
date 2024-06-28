@@ -1220,6 +1220,12 @@ namespace PubNubChatAPI.Entities
             return TryGetWrapper(messageWrappers, timeToken, messagePointer,
                 () => new Message(this, messagePointer, timeToken), out message);
         }
+        
+        internal bool TryGetMessage(IntPtr messagePointer, out Message message)
+        {
+            var messageId = Message.GetMessageIdFromPtr(messagePointer);
+            return TryGetMessage(messageId, messagePointer, out message);
+        }
 
         public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens,
             Action<Message> listener)
@@ -1230,6 +1236,22 @@ namespace PubNubChatAPI.Entities
                 {
                     message.OnMessageUpdated += listener;
                 }
+            }
+        }
+
+        public void PinMessageToChannel(string channelId, Message message)
+        {
+            if (TryGetChannel(channelId, out var channel))
+            {
+                channel.PinMessage(message);
+            }
+        }
+
+        public void UnpinMessageFromChannel(string channelId)
+        {
+            if (TryGetChannel(channelId, out var channel))
+            {
+                channel.UnpinMessage();
             }
         }
 

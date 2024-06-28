@@ -86,3 +86,16 @@ void pn_message_get_data_meta(Pubnub::Message* message, char* result) {
 void pn_message_get_data_message_actions(Pubnub::Message* message, char* result) {
     // TODO: implement
 }
+
+PnCResult pn_message_pin(Pubnub::Message* message) {
+    try {
+        message->pin();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

@@ -109,6 +109,15 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_stop_typing(IntPtr channel);
         
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_pin_message(IntPtr channel, IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_unpin_message(IntPtr channel);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_get_pinned_message(IntPtr channel);
+        
         #endregion
 
         /// <summary>
@@ -365,6 +374,35 @@ namespace PubNubChatAPI.Entities
         public void StopTyping()
         {
             CUtilities.CheckCFunctionResult(pn_channel_stop_typing(pointer));
+        }
+
+        public void PinMessage(Message message)
+        {
+            var newPointer = pn_channel_pin_message(pointer, message.Pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
+        }
+
+        public void UnpinMessage()
+        {
+            var newPointer = pn_channel_unpin_message(pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
+        }
+
+        //TODO: currently same result whether error or no pinned message present
+        public bool TryGetPinnedMessage(out Message pinnedMessage)
+        {
+            var pinnedMessagePointer = pn_channel_get_pinned_message(pointer);
+            if (pinnedMessagePointer != IntPtr.Zero)
+            {
+                return chat.TryGetMessage(pinnedMessagePointer, out pinnedMessage);
+            }
+            else
+            {
+                pinnedMessage = null;
+                return false;
+            }
         }
 
         /// <summary>

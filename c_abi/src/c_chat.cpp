@@ -546,7 +546,32 @@ PnCResult pn_chat_get_created_channel_wrapper_invited_memberships(
     return PN_C_OK;
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_dispose_created_channel_wrapper(
+void pn_chat_dispose_created_channel_wrapper(
     Pubnub::CreatedChannelWrapper* wrapper) {
     delete wrapper;
+}
+
+PnCResult pin_message_to_channel(Pubnub::Chat* chat, Pubnub::Message* message, Pubnub::Channel* channel) {
+    try {
+        chat->pin_message_to_channel(*message, *channel);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+PnCResult unpin_message_from_channel(Pubnub::Chat* chat, Pubnub::Channel* channel) {
+    try {
+        chat->unpin_message_from_channel(*channel);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
