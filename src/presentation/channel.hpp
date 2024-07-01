@@ -4,7 +4,7 @@
 class ChannelService; 
 
 namespace Pubnub {
-    struct ChatChannelData
+    struct ChannelData
     {
         Pubnub::String channel_name;
         Pubnub::String description;
@@ -14,9 +14,9 @@ namespace Pubnub {
         Pubnub::String type;
     };
 
-    class Channel {
+    PN_CHAT_EXPORT class Channel {
         private:
-            Channel(String channel_id, std::shared_ptr<ChannelService> channel_service);
+            PN_CHAT_EXPORT Channel(String channel_id, std::shared_ptr<ChannelService> channel_service);
             String channel_id;
             std::shared_ptr<ChannelService> channel_service;
 

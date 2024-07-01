@@ -10,6 +10,9 @@ struct ChannelEntity {
     Pubnub::String updated;
     Pubnub::String status;
     Pubnub::String type;
+
+    //This is equivalent of channel_data_to_json from the old channel obj
+    Pubnub::String get_channel_metadata_json_string();
 };
 
 #endif // PN_CHAT_CHANNEL_ENTITY_HPP
