@@ -11,10 +11,6 @@
 #include "callbacks.hpp"
 #include "infra/timer.hpp"
 
-extern "C" {
-    #include "core/pubnub_api_types.h"
-}
-
 namespace Pubnub
 {
     class Chat;

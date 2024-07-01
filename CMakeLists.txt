@@ -57,14 +57,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(json)
 
-include_directories(${CURRENT_SOURCE_DIR}/include)
-
-include_directories(${c-core_SOURCE_DIR}/posix)
-include_directories(${c-core_SOURCE_DIR}/core)
-include_directories(${c-core_SOURCE_DIR})
+include_directories(${pubnub_SOURCE_DIR}/posix)
+include_directories(${pubnub_SOURCE_DIR}/core)
+include_directories(${pubnub_SOURCE_DIR})
 
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
+
+include_directories(${CURRENT_SOURCE_DIR}/include)
 
 set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/entity_repository.cpp

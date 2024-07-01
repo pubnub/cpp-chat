@@ -6,10 +6,6 @@
 #include <functional>
 #include <vector>
 
-extern "C" {
-    #include "core/pubnub_api_types.h"
-}
-
 namespace Pubnub
 {
     struct PubnubRestrictionsData;
