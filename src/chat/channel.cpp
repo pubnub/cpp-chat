@@ -408,13 +408,13 @@ void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing
     chat_obj.listen_for_events(this->channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
 }
 
-Pubnub::Channel& Channel::pin_message(Pubnub::Message &message)
+Pubnub::Channel Channel::pin_message(Pubnub::Message &message)
 {
     chat_obj.pin_message_to_channel(message, *this);
     return *this;
 }
 
-Pubnub::Channel& Channel::unpin_message()
+Pubnub::Channel Channel::unpin_message()
 {
     chat_obj.unpin_message_from_channel(*this);
     return *this;

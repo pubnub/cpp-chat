@@ -68,8 +68,8 @@ namespace Pubnub
         PN_CHAT_EXPORT void stop_typing();
         PN_CHAT_EXPORT void get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback);
 
-        PN_CHAT_EXPORT Pubnub::Channel& pin_message(Pubnub::Message &message);
-        PN_CHAT_EXPORT Pubnub::Channel& unpin_message();
+        PN_CHAT_EXPORT Pubnub::Channel pin_message(Pubnub::Message &message);
+        PN_CHAT_EXPORT Pubnub::Channel unpin_message();
         PN_CHAT_EXPORT Pubnub::Message get_pinned_message();
         //TODO: make config optional, impossible before refactor because of circular dependency
         PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config);
