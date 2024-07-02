@@ -1,5 +1,6 @@
 #include "channel_service.hpp"
 #include "infra/pubnub.hpp"
+#include "infra/entity_repository.hpp"
 
 ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository):
     pubnub(pubnub),

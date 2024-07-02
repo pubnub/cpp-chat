@@ -2,11 +2,13 @@
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
 #include "presentation/channel.hpp"
-#include "infra/entity_repository.hpp"
-#include "infra/pubnub.hpp"
-#include "infra/sync.hpp"
 #include "export.hpp"
+#include "infra/sync.hpp"
 #include <memory>
+
+class EntityRepository;
+class PubNub;
+class ChannelEntity;
 
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {

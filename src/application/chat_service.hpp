@@ -1,15 +1,13 @@
 #ifndef PN_CHAT_CHAT_SERVICE_HPP
 #define PN_CHAT_CHAT_SERVICE_HPP
 
-#include "infra/entity_repository.hpp"
-#include "infra/pubnub.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include "export.hpp"
 
 class ChannelService;
-class UserService;
-
+class EntityRepository;
+class PubNub;
 
 class ChatService {
     public:

@@ -1,6 +1,7 @@
 #include "chat_service.hpp"
 #include "application/channel_service.hpp"
-#include "infra/sync.hpp"
+#include "infra/entity_repository.hpp"
+#include "infra/pubnub.hpp"
 
 ChatService::ChatService(ThreadSafePtr<PubNub> pubnub):
 pubnub(pubnub),
