@@ -13,6 +13,7 @@ class EntityRepository {
         Repository<Pubnub::String, UserEntity>& get_user_entities();
         Repository<Pubnub::String, ChannelEntity>& get_channel_entities();
         Repository<Pubnub::String, MessageEntity>& get_message_entities();
+
      private:
         Repository<Pubnub::String, UserEntity> user_entities;
         Repository<Pubnub::String, ChannelEntity> channel_entities;

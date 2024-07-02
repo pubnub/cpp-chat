@@ -19,11 +19,14 @@ namespace Pubnub {
     };
 
     class Channel {
-        private:
-            PN_CHAT_EXPORT Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id, Pubnub::ChatChannelData channel_data);
-            String channel_id;
-            std::shared_ptr<ChannelService> channel_service;
+        public:
+            PN_CHAT_EXPORT inline Pubnub::String channel_id(){return channel_id_internal;};
+            PN_CHAT_EXPORT Pubnub::String channel_data();
 
+        private:
+            PN_CHAT_EXPORT Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id);
+            std::shared_ptr<ChannelService> channel_service;
+            Pubnub::String channel_id_internal;
 
         friend class ChannelService;
     };

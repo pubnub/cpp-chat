@@ -4,12 +4,13 @@
 #include "string.hpp"
 
 struct ChannelEntity {
-    Pubnub::String channel_name;
-    Pubnub::String description;
-    Pubnub::String custom_data_json;
-    Pubnub::String updated;
-    Pubnub::String status;
-    Pubnub::String type;
+    Pubnub::String channel_id = "";
+    Pubnub::String channel_name = "";
+    Pubnub::String description = "";
+    Pubnub::String custom_data_json = "";
+    Pubnub::String updated = "";
+    Pubnub::String status = "";
+    Pubnub::String type = "";
 
     //This is equivalent of channel_data_to_json from the old channel obj
     Pubnub::String get_channel_metadata_json_string();
