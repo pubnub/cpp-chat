@@ -79,15 +79,19 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_entity.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp)
 
+set(APP_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/channel_service.cpp)
+
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message_draft.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/chat_helpers.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/channel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/user.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message_draft.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/membership.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )
 
@@ -107,7 +111,8 @@ endif()
 set(SOURCES
     ${SOURCES}
     ${INFRA_SOURCES}
-    ${DOMAIN_SOURCES})
+    ${DOMAIN_SOURCES}
+    ${APP_SOURCES})
 
 add_library(pubnub-chat SHARED ${SOURCES})
 

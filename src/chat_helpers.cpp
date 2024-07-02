@@ -1,4 +1,4 @@
-#include "chat/chat_helpers.hpp"
+#include "chat_helpers.hpp"
 
 
 namespace Pubnub

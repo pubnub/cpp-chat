@@ -29,7 +29,8 @@ private:
 template <typename T>
 class Mutex {
 public:
-    Mutex(T value): value(value) {};
+template<typename... Args>
+    Mutex(Args&&... args): value(std::forward<Args>(args)...) {};
     ~Mutex() = default;
 
     MutexGuard<T> lock() {
