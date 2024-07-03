@@ -22,7 +22,7 @@ namespace Pubnub
     class Channel {
         public:
             PN_CHAT_EXPORT inline Pubnub::String channel_id(){return channel_id_internal;};
-            PN_CHAT_EXPORT Pubnub::String channel_data();
+            PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data();
 
         private:
             PN_CHAT_EXPORT Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id);

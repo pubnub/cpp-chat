@@ -25,7 +25,7 @@ namespace Pubnub
     {
         public:
             PN_CHAT_EXPORT inline Pubnub::String user_id(){return user_id_internal;};
-            PN_CHAT_EXPORT Pubnub::String channel_data();
+            PN_CHAT_EXPORT Pubnub::ChatUserData user_data();
 
         private:
             PN_CHAT_EXPORT User(std::shared_ptr<UserService> user_service, Pubnub::String user_id);
