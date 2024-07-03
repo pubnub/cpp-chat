@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -168,8 +169,9 @@ namespace PubNubChatAPI.Entities
         {
             get
             {
-                var buffer = new StringBuilder(512);
+                var buffer = new StringBuilder(2048);
                 pn_channel_get_data_custom_data_json(pointer, buffer);
+                Debug.WriteLine(CUtilities.GetErrorMessage());
                 return buffer.ToString();
             }
         }

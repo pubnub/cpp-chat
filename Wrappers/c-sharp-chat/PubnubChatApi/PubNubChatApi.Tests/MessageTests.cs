@@ -76,4 +76,21 @@ public class MessageTests
 
         await Task.Delay(7000);
     }
+
+    [Test]
+    public async Task TestPinMessage()
+    {
+        channel.OnMessageReceived += async message =>
+        {
+            message.PinMessage();
+
+            await Task.Delay(2000);
+            
+            Console.WriteLine("lol");
+            Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
+        };
+        channel.SendText("message to pin");
+        
+        await Task.Delay(6000);
+    }
 }
