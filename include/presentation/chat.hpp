@@ -3,6 +3,7 @@
 
 #include "string.hpp"
 #include "presentation/channel.hpp"
+#include "presentation/message.hpp"
 #include <memory>
 #include <vector>
 
@@ -23,6 +24,8 @@ namespace Pubnub {
             PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
             PN_CHAT_EXPORT Pubnub::Channel update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
             PN_CHAT_EXPORT void delete_channel(Pubnub::String channel_id);
+            PN_CHAT_EXPORT void pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel);
+            PN_CHAT_EXPORT void unpin_message_from_channel(Pubnub::Channel channel);
 
 
 

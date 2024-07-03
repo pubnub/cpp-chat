@@ -11,10 +11,16 @@ class EntityRepository;
 class PubNub;
 class ChannelEntity;
 
+namespace Pubnub
+{
+    class Message;
+}
+
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
         PN_CHAT_EXPORT ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository);
+        Pubnub::ChatChannelData get_channel_data(Pubnub::String channel_id);
 
         Pubnub::Channel create_public_conversation(Pubnub::String channel_id, Pubnub::ChatChannelData data);
         Pubnub::Channel create_channel(Pubnub::String channel_id, Pubnub::ChatChannelData data);
@@ -22,6 +28,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::vector<Pubnub::Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
         Pubnub::Channel update_channel(Pubnub::String channel_id, Pubnub::ChatChannelData channel_data);
         void delete_channel(Pubnub::String channel_id);
+        void pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel);
+        void unpin_message_from_channel(Pubnub::Channel channel);
 
     private:
         ThreadSafePtr<PubNub> pubnub;
@@ -33,6 +41,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ChannelEntity create_domain_from_channel_response(Pubnub::String json_response);
         //Creates ChannelEntity from channel response "data" field
         ChannelEntity create_domain_from_channel_response_data(Pubnub::String json_response_data);
+
+        Pubnub::ChatChannelData presentation_data_from_domain(ChannelEntity& channel_entity);
 };
 
 #endif // PN_CHAT_CHANNEL_SERVICE_HPP

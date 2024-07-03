@@ -39,3 +39,13 @@ void Chat::delete_channel(String channel_id)
 {
     this->channel_service->delete_channel(channel_id);
 }
+
+void Chat::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel)
+{
+    this->channel_service->pin_message_to_channel(message, channel);
+}
+
+void Chat::unpin_message_from_channel(Pubnub::Channel channel)
+{
+    this->channel_service->unpin_message_from_channel(channel);
+}

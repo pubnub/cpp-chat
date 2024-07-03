@@ -1,4 +1,5 @@
 #include "channel_service.hpp"
+#include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -10,6 +11,18 @@ ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<Ent
     pubnub(pubnub),
     entity_repository(entity_repository)
 {}
+
+Pubnub::ChatChannelData ChannelService::get_channel_data(Pubnub::String channel_id)
+{
+    auto maybe_channel = this->entity_repository->get_channel_entities().get(channel_id);
+
+    if (!maybe_channel.has_value()) 
+    {
+        throw std::invalid_argument("Failed to get channel data, there is no channel with this id");
+    }
+
+    return presentation_data_from_domain(maybe_channel.value());
+}
 
 Channel ChannelService::create_public_conversation(String channel_id, ChatChannelData data)
 {
@@ -118,13 +131,46 @@ void ChannelService::delete_channel(String channel_id)
     {
         throw std::invalid_argument("Failed to delete channel, channel_id is empty");
     }
-    
+
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->remove_channel_metadata(channel_id);
 
     //Also remove this channel from entities repository
     entity_repository->get_channel_entities().remove(channel_id);
 }
+
+void ChannelService::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel)
+{
+    String custom_channel_data;
+    channel.channel_data().custom_data_json.empty() ?  custom_channel_data = "{}" :  custom_channel_data = channel.channel_data().custom_data_json;
+
+    json custom_data_json = json::parse(custom_channel_data);
+    custom_data_json["pinnedMessageTimetoken"] = message.timetoken().c_str();
+    custom_data_json["pinnedMessageChannelID"] = channel.channel_id().c_str();
+
+    ChatChannelData new_channel_data = channel.channel_data();
+    new_channel_data.custom_data_json = custom_data_json.dump();
+
+    this->update_channel(channel.channel_id(), new_channel_data);
+}
+
+void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
+{
+    String custom_channel_data = channel.channel_data().custom_data_json;
+    if(!custom_channel_data.empty())
+    {
+        json custom_data_json = json::parse(channel.channel_data().custom_data_json);
+        custom_data_json.erase("pinnedMessageTimetoken");
+        custom_data_json.erase("pinnedMessageChannelID");
+        custom_channel_data = custom_data_json.dump();
+    }
+
+    ChatChannelData new_channel_data = channel.channel_data();
+    new_channel_data.custom_data_json = custom_channel_data;
+    this->update_channel(channel.channel_id(), new_channel_data);
+}
+
+
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)
 {
@@ -205,4 +251,17 @@ ChannelEntity ChannelService::create_domain_from_channel_response_data(Pubnub::S
     }
 
     return new_channel_entity;
+}
+
+Pubnub::ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &channel_entity)
+{
+    ChatChannelData channel_data;
+    channel_data.channel_name = channel_entity.channel_name;
+    channel_data.description = channel_entity.description;
+    channel_data.custom_data_json = channel_entity.custom_data_json;
+    channel_data.updated = channel_entity.updated;
+    channel_data.status = channel_entity.status;
+    channel_data.type = channel_entity.type;
+
+    return channel_data;
 }
