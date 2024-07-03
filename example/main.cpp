@@ -1,5 +1,6 @@
 #include "presentation/chat.hpp"
 #include "presentation/channel.hpp"
+#include "presentation/user.hpp"
 
 #include "enums.hpp"
 #include <chrono>

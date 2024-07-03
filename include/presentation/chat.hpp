@@ -7,6 +7,7 @@
 
 class ChatService;
 class ChannelService;
+class UserService;
 
 namespace Pubnub {
 
@@ -18,6 +19,7 @@ namespace Pubnub {
         private:
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<ChannelService> channel_service;
+            std::shared_ptr<UserService> user_service;
     };
 }
 

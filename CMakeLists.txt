@@ -82,7 +82,8 @@ set(DOMAIN_SOURCES
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/channel_service.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/user_service.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/user_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/message_service.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp

@@ -6,6 +6,8 @@
 #include "export.hpp"
 
 class ChannelService;
+class UserService;
+class MessageService;
 class EntityRepository;
 class PubNub;
 
@@ -17,6 +19,8 @@ class ChatService {
                 Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
 
     std::shared_ptr<ChannelService> channel_service;
+    std::shared_ptr<UserService> user_service;
+    std::shared_ptr<MessageService> message_service;
     
     private:
         ThreadSafePtr<PubNub> pubnub;
