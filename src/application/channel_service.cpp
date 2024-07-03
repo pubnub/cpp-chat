@@ -13,26 +13,25 @@ Pubnub::Channel ChannelService::create_public_conversation(Pubnub::String channe
     return create_channel(channel_id, data);
 }
 
-
 Pubnub::Channel ChannelService::create_channel(Pubnub::String channel_id, Pubnub::ChatChannelData data) {
+
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to create channel, channel_id is empty");
+    }
+
     auto maybe_channel = this->entity_repository->get_channel_entities().get(channel_id);
 
     if (maybe_channel.has_value()) {
         return Pubnub::Channel(shared_from_this(), channel_id);
     }
 
-    /* To domain
-    if(channel_id.empty())
-    {
-        throw std::invalid_argument("Failed to create channel, channel_id is empty");
-    }*/
-
     auto channel = Pubnub::Channel(shared_from_this(), channel_id);
 
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, data);
 
-    //this->pubnub.set_channel_metadata(channel_id, channel.get_channel_metadata_json_string());
-
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string());
 
     //Add channel_entity to repository
     entity_repository->get_channel_entities().update_or_insert(channel_id, new_channel_entity);
