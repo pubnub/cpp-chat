@@ -2,6 +2,7 @@
 #include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
+#include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 
 using namespace Pubnub;
@@ -146,12 +147,12 @@ void ChannelService::pin_message_to_channel(Pubnub::Message message, Pubnub::Cha
 
     json custom_data_json = json::parse(custom_channel_data);
     custom_data_json["pinnedMessageTimetoken"] = message.timetoken().c_str();
-    custom_data_json["pinnedMessageChannelID"] = channel.channel_id().c_str();
+    custom_data_json["pinnedMessageChannelID"] = channel.channel_id_internal.c_str();
 
     ChatChannelData new_channel_data = channel.channel_data();
     new_channel_data.custom_data_json = custom_data_json.dump();
 
-    this->update_channel(channel.channel_id(), new_channel_data);
+    this->update_channel(channel.channel_id_internal, new_channel_data);
 }
 
 void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
@@ -167,9 +168,130 @@ void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
 
     ChatChannelData new_channel_data = channel.channel_data();
     new_channel_data.custom_data_json = custom_channel_data;
-    this->update_channel(channel.channel_id(), new_channel_data);
+    this->update_channel(channel.channel_id_internal, new_channel_data);
 }
 
+void ChannelService::connect(Pubnub::String channel_id, std::function<void(Message)> message_callback)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->subscribe_to_channel(channel_id);
+
+    //TODO:: CALLBACK - add callback
+}
+
+void ChannelService::disconnect(Pubnub::String channel_id)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->unsubscribe_from_channel(channel_id);
+
+    //TODO:: CALLBACK - remove callback
+}
+
+void ChannelService::join(Pubnub::String channel_id, std::function<void(Message)> message_callback, Pubnub::String additional_params)
+{
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String set_object_string = create_set_memberships_object(channel_id, additional_params);
+
+    auto pubnub_handle = this->pubnub->lock();
+    String user_id = pubnub_handle->get_user_id();
+    pubnub_handle->set_memberships(user_id, set_object_string);
+
+    this->connect(channel_id, message_callback);
+}
+
+void ChannelService::leave(Pubnub::String channel_id)
+{
+    String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
+
+    auto pubnub_handle = this->pubnub->lock();
+    String user_id = pubnub_handle->get_user_id();
+    pubnub_handle->remove_memberships(user_id, remove_object_string);
+
+	this->disconnect(channel_id);
+}
+
+void ChannelService::send_text(Pubnub::String channel_id, Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data)
+{
+    //TODO:: meta_data is not used. Add support for metadata
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type));
+}
+
+std::vector<String> ChannelService::where_present(Pubnub::String channel_id, String user_id)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    String where_now_response = pubnub_handle->where_now(user_id);
+
+    json response_json = json::parse(where_now_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get where present, response is incorrect");
+    }
+
+    json response_payload_json = response_json["payload"];
+    json channels_array_json = response_payload_json["channels"];
+
+    std::vector<String> channel_ids;
+   
+    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
+    {
+        channel_ids.push_back(static_cast<String>(*it));
+    }
+    
+    return channel_ids;
+}
+
+std::vector<Pubnub::String> ChannelService::who_is_present(Pubnub::String channel_id)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    String here_now_response = pubnub_handle->here_now(channel_id);
+
+    json response_json = json::parse(here_now_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get who is present, response is incorrect");
+    }
+
+    json uuids_array_json = response_json["uuids"];
+
+    std::vector<String> user_ids;
+   
+    for (json::iterator it = uuids_array_json.begin(); it != uuids_array_json.end(); ++it) 
+    {
+        user_ids.push_back(static_cast<String>(*it));
+    }
+    
+    return user_ids;
+}
+
+bool ChannelService::is_present(Pubnub::String channel_id, Pubnub::String user_id)
+{
+    std::vector<String> channels = this->where_present(channel_id, user_id);
+    //TODO: we should us std::count here, but it didn't work. Our StringComparer doesn't work here
+    int count = 0;
+    for( auto channel : channels)
+    {
+        if(channel_id == channel)
+        {
+            count = 1;
+        }
+    }
+    //int count = std::count(channels.begin(), channels.end(), channel_id);
+    return count > 0;
+}
+
+String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
+{
+    json message_json;
+	
+	message_json["type"] = Pubnub::chat_message_type_to_string(message_type).c_str();
+    message_json["text"] = message.c_str();
+
+	//Convert constructed Json to FString
+	return message_json.dump();
+}
 
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)

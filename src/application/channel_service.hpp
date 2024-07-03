@@ -3,6 +3,7 @@
 
 #include "presentation/channel.hpp"
 #include "export.hpp"
+#include "enums.hpp"
 #include "infra/sync.hpp"
 #include <memory>
 #include <vector>
@@ -30,11 +31,20 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void delete_channel(Pubnub::String channel_id);
         void pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel);
         void unpin_message_from_channel(Pubnub::Channel channel);
+        void connect(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
+        void disconnect(Pubnub::String channel_id);
+        void join(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback, Pubnub::String additional_params = "");
+        void leave(Pubnub::String channel_id);
+        void send_text(Pubnub::String channel_id, Pubnub::String message, Pubnub::pubnub_chat_message_type message_type, Pubnub::String meta_data);
+        std::vector<Pubnub::String> where_present(Pubnub::String channel_id, Pubnub::String user_id);
+        std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
+        bool is_present(Pubnub::String channel_id, Pubnub::String user_id);
 
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
 
+        Pubnub::String chat_message_to_publish_string(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type);
 
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
         //Creates ChannelEntity from channel response - put the whole response, not only "data" field
