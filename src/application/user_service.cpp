@@ -1,6 +1,10 @@
 #include "user_service.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
+#include "nlohmann/json.hpp"
+
+using namespace Pubnub;
+using json = nlohmann::json;
 
 UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository):
     pubnub(pubnub),
@@ -21,4 +25,29 @@ UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user
     new_user_entity.type = presentation_data.type;
 
     return new_user_entity;
+}
+
+std::vector<String> UserService::where_present(String user_id)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    String where_now_response = pubnub_handle->where_now(user_id);
+
+    json response_json = json::parse(where_now_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get where present, response is incorrect");
+    }
+
+    json response_payload_json = response_json["payload"];
+    json channels_array_json = response_payload_json["channels"];
+
+    std::vector<String> channel_ids;
+   
+    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
+    {
+        channel_ids.push_back(static_cast<String>(*it));
+    }
+    
+    return channel_ids;
 }

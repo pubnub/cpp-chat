@@ -4,6 +4,10 @@
 #include "application/message_service.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
+#include "nlohmann/json.hpp"
+
+using namespace Pubnub;
+using json = nlohmann::json;
 
 ChatService::ChatService(ThreadSafePtr<PubNub> pubnub):
 pubnub(pubnub),

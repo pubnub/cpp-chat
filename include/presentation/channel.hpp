@@ -10,6 +10,7 @@
 #include <functional>
 
 class ChannelService; 
+class ChatService;
 
 namespace Pubnub 
 {
@@ -43,6 +44,7 @@ namespace Pubnub
         private:
             PN_CHAT_EXPORT Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id);
             std::shared_ptr<ChannelService> channel_service;
+            std::shared_ptr<ChatService> chat_service;
             Pubnub::String channel_id_internal;
 
         friend class ChannelService;

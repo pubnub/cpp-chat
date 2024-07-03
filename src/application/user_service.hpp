@@ -5,6 +5,7 @@
 #include "export.hpp"
 #include "infra/sync.hpp"
 #include <memory>
+#include <vector>
 
 class EntityRepository;
 class PubNub;
@@ -14,6 +15,8 @@ class UserService : public std::enable_shared_from_this<UserService>
 {
     public:
         PN_CHAT_EXPORT UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository);
+
+        std::vector<Pubnub::String> where_present(Pubnub::String user_id);
 
 
     private:

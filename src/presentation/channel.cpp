@@ -56,5 +56,17 @@ std::vector<Pubnub::String> Channel::who_is_present()
 
 bool Channel::is_present(Pubnub::String user_id)
 {
-    return this->channel_service->is_present(channel_id_internal, user_id);
+    std::vector<String> users = this->who_is_present();
+    //TODO: we should us std::count here, but it didn't work
+    int count = 0;
+    for( auto user : users)
+    {
+        if(user_id == user)
+        {
+            count = 1;
+            break;
+        }
+    }
+    //int count = std::count(channels.begin(), channels.end(), channel_id);
+    return count > 0;
 }

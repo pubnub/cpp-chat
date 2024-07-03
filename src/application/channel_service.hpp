@@ -36,9 +36,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void join(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback, Pubnub::String additional_params = "");
         void leave(Pubnub::String channel_id);
         void send_text(Pubnub::String channel_id, Pubnub::String message, Pubnub::pubnub_chat_message_type message_type, Pubnub::String meta_data);
-        std::vector<Pubnub::String> where_present(Pubnub::String channel_id, Pubnub::String user_id);
         std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
-        bool is_present(Pubnub::String channel_id, Pubnub::String user_id);
 
     private:
         ThreadSafePtr<PubNub> pubnub;

@@ -217,31 +217,6 @@ void ChannelService::send_text(Pubnub::String channel_id, Pubnub::String message
     pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type));
 }
 
-std::vector<String> ChannelService::where_present(Pubnub::String channel_id, String user_id)
-{
-    auto pubnub_handle = this->pubnub->lock();
-    String where_now_response = pubnub_handle->where_now(user_id);
-
-    json response_json = json::parse(where_now_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get where present, response is incorrect");
-    }
-
-    json response_payload_json = response_json["payload"];
-    json channels_array_json = response_payload_json["channels"];
-
-    std::vector<String> channel_ids;
-   
-    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
-    {
-        channel_ids.push_back(static_cast<String>(*it));
-    }
-    
-    return channel_ids;
-}
-
 std::vector<Pubnub::String> ChannelService::who_is_present(Pubnub::String channel_id)
 {
     auto pubnub_handle = this->pubnub->lock();
@@ -266,22 +241,6 @@ std::vector<Pubnub::String> ChannelService::who_is_present(Pubnub::String channe
     return user_ids;
 }
 
-bool ChannelService::is_present(Pubnub::String channel_id, Pubnub::String user_id)
-{
-    std::vector<String> channels = this->where_present(channel_id, user_id);
-    //TODO: we should us std::count here, but it didn't work. Our StringComparer doesn't work here
-    int count = 0;
-    for( auto channel : channels)
-    {
-        if(channel_id == channel)
-        {
-            count = 1;
-        }
-    }
-    //int count = std::count(channels.begin(), channels.end(), channel_id);
-    return count > 0;
-}
-
 String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
 {
     json message_json;
@@ -289,7 +248,6 @@ String ChannelService::chat_message_to_publish_string(String message, pubnub_cha
 	message_json["type"] = Pubnub::chat_message_type_to_string(message_type).c_str();
     message_json["text"] = message.c_str();
 
-	//Convert constructed Json to FString
 	return message_json.dump();
 }
 
