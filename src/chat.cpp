@@ -145,7 +145,7 @@ void Chat::delete_channel(String channel_id)
     this->pubnub.remove_channel_metadata(channel_id);
 }
 
-void Chat::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel)
+void Chat::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel& channel)
 {
     String custom_channel_data;
     channel.get_channel_data().custom_data_json.empty() ?  custom_channel_data = "{}" :  custom_channel_data = channel.get_channel_data().custom_data_json;
