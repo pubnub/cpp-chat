@@ -19,3 +19,23 @@ Channel Chat::create_public_conversation(String channel_id, ChatChannelData chan
 {
     return this->channel_service->create_public_conversation(channel_id, channel_data);
 }
+
+Channel Chat::get_channel(String channel_id)
+{
+    return this->channel_service->get_channel(channel_id);
+}
+
+std::vector<Channel> Chat::get_channels(String include, int limit, String start, String end)
+{
+    return this->channel_service->get_channels(include, limit, start, end);
+}
+
+Channel Chat::update_channel(String channel_id, ChatChannelData channel_data)
+{
+    return this->channel_service->update_channel(channel_id, channel_data);
+}
+
+void Chat::delete_channel(String channel_id)
+{
+    this->channel_service->delete_channel(channel_id);
+}
