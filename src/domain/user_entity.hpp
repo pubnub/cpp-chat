@@ -12,6 +12,8 @@ struct UserEntity {
     Pubnub::String custom_data_json = "";
     Pubnub::String status = "";
     Pubnub::String type = "";
+
+    Pubnub::String get_user_metadata_json_string();
 };
 
 #endif // PN_CHAT_USER_ENTITY_HPP
