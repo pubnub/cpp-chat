@@ -7,15 +7,16 @@
 
 class ChannelService; 
 
-namespace Pubnub {
+namespace Pubnub 
+{
     struct ChatChannelData
     {
-        Pubnub::String channel_name;
-        Pubnub::String description;
-        Pubnub::String custom_data_json;
-        Pubnub::String updated;
-        Pubnub::String status;
-        Pubnub::String type;
+        Pubnub::String channel_name = "";
+        Pubnub::String description = "";
+        Pubnub::String custom_data_json = "";
+        Pubnub::String updated = "";
+        Pubnub::String status = "";
+        Pubnub::String type = "";
     };
 
     class Channel {
