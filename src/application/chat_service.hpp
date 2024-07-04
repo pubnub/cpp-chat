@@ -11,7 +11,8 @@ class MessageService;
 class EntityRepository;
 class PubNub;
 
-class ChatService {
+class ChatService : public std::enable_shared_from_this<ChatService>
+{
     public:
         PN_CHAT_EXPORT ChatService(ThreadSafePtr<PubNub> pubnub);
 

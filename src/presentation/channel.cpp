@@ -4,9 +4,10 @@
 
 using namespace Pubnub;
 
-Channel::Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id) :
-channel_service(channel_service),
-channel_id_internal(channel_id)
+Channel::Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service) :
+channel_id_internal(channel_id),
+chat_service(chat_service),
+channel_service(channel_service)
 {}
 
 Pubnub::ChatChannelData Channel::channel_data()

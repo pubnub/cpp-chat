@@ -42,7 +42,7 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
 
         private:
-            PN_CHAT_EXPORT Channel(std::shared_ptr<ChannelService> channel_service, Pubnub::String channel_id);
+            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service);
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<ChatService> chat_service;
             Pubnub::String channel_id_internal;

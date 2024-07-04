@@ -6,9 +6,10 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository):
+UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository)
+    entity_repository(entity_repository),
+    chat_service(chat_service)
 {}
 
 User UserService::create_user(String user_id, ChatUserData user_data)
@@ -21,10 +22,10 @@ User UserService::create_user(String user_id, ChatUserData user_data)
     auto maybe_user= this->entity_repository->get_user_entities().get(user_id);
 
     if (maybe_user.has_value()) {
-        return User(shared_from_this(), user_id);
+        return create_presentation_object(user_id);
     }
 
-    User user = User(shared_from_this(), user_id);
+    User user = create_presentation_object(user_id);
 
     UserEntity new_user_entity = create_domain_from_presentation_data(user_id, user_data);
 
@@ -50,7 +51,7 @@ User UserService::get_user(String user_id)
     json response_json = json::parse(user_response);
 
     UserEntity new_user_entity = create_domain_from_user_response(user_response);
-    User user = User(shared_from_this(), user_id);
+    User user = create_presentation_object(user_id);
 
     //Add or update user_entity to repository
     entity_repository->get_user_entities().update_or_insert(user_id, new_user_entity);
@@ -76,7 +77,7 @@ std::vector<User> UserService::get_users(Pubnub::String include, int limit, Pubn
    for (auto& element : user_data_array_json)
    {
         UserEntity new_user_entity = create_domain_from_user_response_data(String(element.dump()));
-        User user = User(shared_from_this(), String(element["id"]));
+        User user = create_presentation_object(String(element["id"]));
 
         entity_repository->get_user_entities().update_or_insert(String(element["id"]), new_user_entity);
 
@@ -93,7 +94,7 @@ User UserService::update_user(String user_id, ChatUserData user_data)
         throw std::invalid_argument("Failed to update user, user_id is empty");
     }
 
-    User user = User(shared_from_this(), user_id);
+    User user = create_presentation_object(user_id);
 
     UserEntity new_user_entity = create_domain_from_presentation_data(user_id, user_data);
 
@@ -143,6 +144,17 @@ std::vector<String> UserService::where_present(String user_id)
     }
     
     return channel_ids;
+}
+
+Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
+{
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Can't create user object, chat service pointer is invalid");
+    }
+
+    return User(user_id, chat_service_shared, shared_from_this());
 }
 
 UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user_id, Pubnub::ChatUserData &presentation_data)

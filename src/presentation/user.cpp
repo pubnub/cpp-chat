@@ -3,9 +3,10 @@
 
 using namespace Pubnub;
 
-User::User(std::shared_ptr<UserService> user_service, Pubnub::String user_id) :
-user_service(user_service),
-user_id_internal(user_id)
+User::User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service) :
+user_id_internal(user_id),
+chat_service(chat_service),
+user_service(user_service)
 {}
 
 User User::update(ChatUserData user_data)

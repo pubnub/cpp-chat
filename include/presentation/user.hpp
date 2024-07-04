@@ -7,6 +7,7 @@
 #include <vector>
 
 class UserService;
+class ChatService;
 
 namespace Pubnub
 {
@@ -34,8 +35,9 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
 
         private:
-            PN_CHAT_EXPORT User(std::shared_ptr<UserService> user_service, Pubnub::String user_id);
+            PN_CHAT_EXPORT User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service);
             std::shared_ptr<UserService> user_service;
+            std::shared_ptr<ChatService> chat_service;
             Pubnub::String user_id_internal;
 
         friend class UserService;

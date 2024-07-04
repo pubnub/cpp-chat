@@ -8,9 +8,10 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository):
+ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository)
+    entity_repository(entity_repository),
+    chat_service(chat_service)
 {}
 
 Pubnub::ChatChannelData ChannelService::get_channel_data(Pubnub::String channel_id)
@@ -41,10 +42,10 @@ Channel ChannelService::create_channel(String channel_id, ChatChannelData data) 
     auto maybe_channel = this->entity_repository->get_channel_entities().get(channel_id);
 
     if (maybe_channel.has_value()) {
-        return Channel(shared_from_this(), channel_id);
+        return create_presentation_object(channel_id);
     }
 
-    Channel channel = Channel(shared_from_this(), channel_id);
+    Channel channel = create_presentation_object(channel_id);
 
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, data);
 
@@ -70,7 +71,7 @@ Channel ChannelService::get_channel(String channel_id)
     String channel_response = pubnub_handle->get_channel_metadata(channel_id);
 
     ChannelEntity new_channel_entity = create_domain_from_channel_response(channel_response);
-    Channel channel = Channel(shared_from_this(), channel_id);
+    Channel channel = create_presentation_object(channel_id);
 
     //Add or update channel_entity to repository
     entity_repository->get_channel_entities().update_or_insert(channel_id, new_channel_entity);
@@ -96,7 +97,7 @@ std::vector<Channel> ChannelService::get_channels(String include, int limit, Str
    for (auto& element : channel_data_array_json)
    {
         ChannelEntity new_channel_entity = create_domain_from_channel_response_data(String(element.dump()));
-        Channel channel = Channel(shared_from_this(), String(element["id"]));
+        Channel channel = create_presentation_object(String(element["id"]));
 
         entity_repository->get_channel_entities().update_or_insert(String(element["id"]), new_channel_entity);
 
@@ -113,7 +114,7 @@ Channel ChannelService::update_channel(String channel_id, ChatChannelData channe
         throw std::invalid_argument("Failed to update channel, channel_id is empty");
     }
 
-    Channel channel = Channel(shared_from_this(), channel_id);
+    Channel channel = create_presentation_object(channel_id);
 
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, channel_data);
 
@@ -251,6 +252,16 @@ String ChannelService::chat_message_to_publish_string(String message, pubnub_cha
 	return message_json.dump();
 }
 
+Pubnub::Channel ChannelService::create_presentation_object(Pubnub::String channel_id)
+{
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Can't create channel object, chat service pointer is invalid");
+    }
+
+    return Channel(channel_id, chat_service_shared, shared_from_this());
+}
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)
 {
