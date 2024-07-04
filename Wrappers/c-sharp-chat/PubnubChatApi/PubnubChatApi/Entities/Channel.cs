@@ -171,7 +171,6 @@ namespace PubNubChatAPI.Entities
             {
                 var buffer = new StringBuilder(2048);
                 pn_channel_get_data_custom_data_json(pointer, buffer);
-                Debug.WriteLine(CUtilities.GetErrorMessage());
                 return buffer.ToString();
             }
         }

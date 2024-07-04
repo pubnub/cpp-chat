@@ -73,31 +73,34 @@ public class ChannelTests
     [Test]
     public async Task TestPinMessage()
     {
-        var channel = chat.CreatePublicConversation("pin_message_test_channel_26", new ChatChannelData()
+        var channel = chat.CreatePublicConversation("pin_message_test_channel_32", new ChatChannelData()
         {
             ChannelName = "Some fucking name",
             ChannelCustomDataJson = "{}"
         });
         
         Debug.WriteLine($"Name on create: {channel.Name}");
-        //Debug.WriteLine($"Json on create: {channel.CustomDataJson}");
+        Debug.WriteLine($"Json on create: {channel.CustomDataJson}");
         
         channel.Join();
         
         Debug.WriteLine($"Name after join: {channel.Name}");
-        //Debug.WriteLine($"Json after join: {channel.CustomDataJson}");
+        Debug.WriteLine($"Json after join: {channel.CustomDataJson}");
         
         channel.OnMessageReceived += async message =>
         {
             Debug.WriteLine($"Name before pin: {channel.Name}");
-            //Debug.WriteLine($"Json before pin: {channel.CustomDataJson}");
+            Debug.WriteLine($"Json before pin: {channel.CustomDataJson}");
             
             channel.PinMessage(message);
             
+            Debug.WriteLine($"Name IMMEDIETELY after pin: {channel.Name}");
+            Debug.WriteLine($"Json IMMEDIETELY after pin: {channel.CustomDataJson}");
+            
             await Task.Delay(5000);
             
-            Debug.WriteLine($"Name after pin: {channel.Name}");
-            Debug.WriteLine($"Json after pin: {channel.CustomDataJson}");
+            Debug.WriteLine($"Name 5s after pin: {channel.Name}");
+            Debug.WriteLine($"Json 5s after pin: {channel.CustomDataJson}");
             
             Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
         };

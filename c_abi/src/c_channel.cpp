@@ -507,7 +507,7 @@ PnCResult pn_channel_stop_typing(Pubnub::Channel* channel) {
     return PN_C_OK;
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_pin_message(Pubnub::Channel* channel, Pubnub::Message* message) {
+Pubnub::Channel* pn_channel_pin_message(Pubnub::Channel* channel, Pubnub::Message* message) {
     try {
         return new Pubnub::Channel(channel->pin_message(*message));
     }
@@ -518,7 +518,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_pin_message(Pubnub::Ch
     }
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_unpin_message(Pubnub::Channel* channel) {
+Pubnub::Channel* pn_channel_unpin_message(Pubnub::Channel* channel) {
     try {
         return new Pubnub::Channel(channel->unpin_message());
     }
@@ -529,7 +529,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_unpin_message(Pubnub::
     }
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_pinned_message(Pubnub::Channel* channel) {
+Pubnub::Message* pn_channel_get_pinned_message(Pubnub::Channel* channel) {
     try {
         return new Pubnub::Message(channel->get_pinned_message());
     }
