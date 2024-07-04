@@ -2,15 +2,17 @@
 #include "presentation/message.hpp"
 #include "application/channel_service.hpp"
 #include "application/presence_service.hpp"
+#include "application/restrictions_service.hpp"
 
 using namespace Pubnub;
 
 Channel::Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service,
-                std::shared_ptr<PresenceService> presence_service) :
+                std::shared_ptr<PresenceService> presence_service, std::shared_ptr<RestrictionsService> restrictions_service) :
 channel_id_internal(channel_id),
 chat_service(chat_service),
 channel_service(channel_service),
-presence_service(presence_service)
+presence_service(presence_service),
+restrictions_service(restrictions_service)
 {}
 
 Pubnub::ChatChannelData Channel::channel_data()
@@ -61,4 +63,14 @@ std::vector<Pubnub::String> Channel::who_is_present()
 bool Channel::is_present(Pubnub::String user_id)
 {
     return this->presence_service->is_present(user_id, channel_id_internal);
+}
+
+void Channel::set_restrictions(String user_id, Restriction restrictions)
+{
+    this->restrictions_service->set_restrictions(user_id, channel_id_internal, restrictions);
+}
+
+Restriction Channel::get_user_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, String start, String end)
+{
+    return this->restrictions_service->get_user_restrictions(user_id, channel_id, limit, start, end);
 }

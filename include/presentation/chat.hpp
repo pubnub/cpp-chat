@@ -5,12 +5,15 @@
 #include "presentation/channel.hpp"
 #include "presentation/message.hpp"
 #include "presentation/user.hpp"
+#include "restrictions.hpp"
 #include <memory>
 #include <vector>
 
 class ChatService;
 class ChannelService;
 class UserService;
+class PresenceService;
+class RestrictionsService;
 
 namespace Pubnub {
 
@@ -42,6 +45,10 @@ namespace Pubnub {
             PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
             PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
 
+            /* MODERATION */
+
+            PN_CHAT_EXPORT void set_restrictions(Pubnub::String user_id, Pubnub::String channel_id, Pubnub::Restriction restrictions);
+            PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
 
         private:
@@ -49,6 +56,7 @@ namespace Pubnub {
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<UserService> user_service;
             std::shared_ptr<PresenceService> presence_service;
+            std::shared_ptr<RestrictionsService> restrictions_service;
     };
 }
 

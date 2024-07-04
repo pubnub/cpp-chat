@@ -84,7 +84,8 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/channel_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/user_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/message_service.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/presence_service.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/presence_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/restrictions_service.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp

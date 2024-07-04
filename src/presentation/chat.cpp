@@ -3,6 +3,7 @@
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
 #include "application/presence_service.hpp"
+#include "application/restrictions_service.hpp"
 
 using namespace Pubnub;
 
@@ -14,7 +15,8 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
         ),
     channel_service(chat_service->channel_service),
     user_service(chat_service->user_service),
-    presence_service(chat_service->presence_service)
+    presence_service(chat_service->presence_service),
+    restrictions_service(chat_service->restrictions_service)
 {}
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
@@ -90,4 +92,14 @@ std::vector<Pubnub::String> Chat::who_is_present(Pubnub::String channel_id)
 bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
 {
     return this->presence_service->is_present(user_id, channel_id);
+}
+
+void Chat::set_restrictions(String user_id, String channel_id, Restriction restrictions)
+{
+    this->restrictions_service->set_restrictions(user_id, channel_id, restrictions);
+}
+
+void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
+{
+    this->chat_service->emit_chat_event(chat_event_type, channel_id, payload);
 }

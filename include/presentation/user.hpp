@@ -3,12 +3,14 @@
 
 #include "string.hpp"
 #include "export.hpp"
+#include "restrictions.hpp"
 #include <memory>
 #include <vector>
 
 class UserService;
 class ChatService;
 class PresenceService;
+class RestrictionsService;
 
 namespace Pubnub
 {
@@ -35,14 +37,19 @@ namespace Pubnub
             PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
             PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
 
+            PN_CHAT_EXPORT void set_restrictions(Pubnub::String channel_id, Pubnub::Restriction restrictions);
+            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
+
         private:
-            PN_CHAT_EXPORT User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service);
+            PN_CHAT_EXPORT User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service,
+                                std::shared_ptr<RestrictionsService> restrictions_service);
             
             Pubnub::String user_id_internal;
 
             std::shared_ptr<UserService> user_service;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<PresenceService> presence_service;
+            std::shared_ptr<RestrictionsService> restrictions_service;
 
 
         friend class UserService;

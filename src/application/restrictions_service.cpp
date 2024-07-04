@@ -1,0 +1,132 @@
+#include "restrictions_service.hpp"
+#include "application/chat_service.hpp"
+#include "infra/pubnub.hpp"
+#include "infra/entity_repository.hpp"
+#include "presentation/const_values.hpp"
+#include "chat_helpers.hpp"
+#include "nlohmann/json.hpp"
+
+using namespace Pubnub;
+using json = nlohmann::json;
+
+RestrictionsService::RestrictionsService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
+    pubnub(pubnub),
+    entity_repository(entity_repository),
+    chat_service(chat_service)
+{}
+
+void RestrictionsService::set_restrictions(String user_id, String channel_id, Restriction restrictions)
+{
+    if(user_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, user_id is empty");
+    }
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Failed to set restrictions, channel_id is empty");
+    }
+    
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Failed to set restrictions, chat_service is invalid");
+    }
+
+    auto pubnub_handle = this->pubnub->lock();
+
+	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
+	String restrictions_channel = INTERNAL_MODERATION_PREFIX + channel_id;
+
+	//Lift restrictions
+	if(!restrictions.ban && !restrictions.mute)
+	{
+		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}}]");
+        pubnub_handle->remove_members(restrictions_channel, remove_member_string);
+		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + restrictions.reason + String("\"}");
+        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
+		return;
+	}
+
+	//Ban or mute the user
+	String params_string = String("{\"ban\": ") + bool_to_string(restrictions.ban) + String(", \"mute\": ") + bool_to_string(restrictions.mute) + String(", \"reason\": \"") + restrictions.reason + String("\"}");
+    pubnub_handle->set_members(restrictions_channel, create_set_members_object(user_id, params_string));
+    String restriction_text;
+    restrictions.ban ? restriction_text = "banned" : "muted";
+	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + restrictions.reason + String("\"}");
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
+}
+
+Restriction RestrictionsService::get_user_restrictions(String user_id, String channel_id, int limit, String start, String end)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    String get_restrictions_response = pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, start, end);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get user restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
+    Restriction FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["channel"]["id"]) == full_channel_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}
+
+Restriction RestrictionsService::get_channel_restrictions(String user_id, String channel_id, int limit, String start, String end)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
+
+    String get_restrictions_response = pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, start, end);
+
+    json response_json = json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channel restrictions, response is incorrect");
+    }
+
+    json response_data_json = response_json["data"];
+    Restriction FinalRestrictionsData;
+
+   for (auto& element : response_data_json)
+   {
+        //Find restrictions data for requested channel
+        if(String(element["uuid"]["id"]) == user_id)
+        {
+            if(element["custom"]["ban"] == true)
+            {
+                FinalRestrictionsData.ban = true;
+            }
+            if(element["custom"]["mute"] == true)
+            {
+                FinalRestrictionsData.mute = true;
+            }
+            FinalRestrictionsData.reason = String(element["custom"]["reason"]);
+            break;
+        }
+   }
+
+   return FinalRestrictionsData;
+}

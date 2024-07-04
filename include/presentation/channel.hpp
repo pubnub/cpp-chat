@@ -12,6 +12,7 @@
 class ChannelService; 
 class ChatService;
 class PresenceService;
+class RestrictionsService;
 
 namespace Pubnub 
 {
@@ -41,15 +42,19 @@ namespace Pubnub
             PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
             PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present();
             PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
+            PN_CHAT_EXPORT void set_restrictions(Pubnub::String user_id, Pubnub::Restriction restrictions);
+            PN_CHAT_EXPORT Pubnub::Restriction get_user_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
 
         private:
-            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service);
+            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
+                                   std::shared_ptr<RestrictionsService> restrictions_service);
             
             Pubnub::String channel_id_internal;
 
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<PresenceService> presence_service;
+            std::shared_ptr<RestrictionsService> restrictions_service;
 
         friend class ChannelService;
     };
