@@ -1,4 +1,5 @@
 #include "user_service.hpp"
+#include "chat_service.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -121,31 +122,6 @@ void UserService::delete_user(String user_id)
     entity_repository->get_user_entities().remove(user_id);
 }
 
-std::vector<String> UserService::where_present(String user_id)
-{
-    auto pubnub_handle = this->pubnub->lock();
-    String where_now_response = pubnub_handle->where_now(user_id);
-
-    json response_json = json::parse(where_now_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get where present, response is incorrect");
-    }
-
-    json response_payload_json = response_json["payload"];
-    json channels_array_json = response_payload_json["channels"];
-
-    std::vector<String> channel_ids;
-   
-    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
-    {
-        channel_ids.push_back(static_cast<String>(*it));
-    }
-    
-    return channel_ids;
-}
-
 Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
 {
     auto chat_service_shared = chat_service.lock();
@@ -154,7 +130,7 @@ Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
         throw std::runtime_error("Can't create user object, chat service pointer is invalid");
     }
 
-    return User(user_id, chat_service_shared, shared_from_this());
+    return User(user_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service);
 }
 
 UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user_id, Pubnub::ChatUserData &presentation_data)

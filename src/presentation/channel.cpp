@@ -1,13 +1,16 @@
 #include "presentation/channel.hpp"
 #include "presentation/message.hpp"
 #include "application/channel_service.hpp"
+#include "application/presence_service.hpp"
 
 using namespace Pubnub;
 
-Channel::Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service) :
+Channel::Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service,
+                std::shared_ptr<PresenceService> presence_service) :
 channel_id_internal(channel_id),
 chat_service(chat_service),
-channel_service(channel_service)
+channel_service(channel_service),
+presence_service(presence_service)
 {}
 
 Pubnub::ChatChannelData Channel::channel_data()
@@ -52,22 +55,10 @@ void Channel::send_text(String message, pubnub_chat_message_type message_type, S
 
 std::vector<Pubnub::String> Channel::who_is_present()
 {
-    return this->channel_service->who_is_present(channel_id_internal);
+    return this->presence_service->who_is_present(channel_id_internal);
 }
 
 bool Channel::is_present(Pubnub::String user_id)
 {
-    std::vector<String> users = this->who_is_present();
-    //TODO: we should us std::count here, but it didn't work
-    int count = 0;
-    for( auto user : users)
-    {
-        if(user_id == user)
-        {
-            count = 1;
-            break;
-        }
-    }
-    //int count = std::count(channels.begin(), channels.end(), channel_id);
-    return count > 0;
+    return this->presence_service->is_present(user_id, channel_id_internal);
 }

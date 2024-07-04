@@ -2,6 +2,7 @@
 #include "application/chat_service.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
+#include "application/presence_service.hpp"
 
 using namespace Pubnub;
 
@@ -12,7 +13,8 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
             )
         ),
     channel_service(chat_service->channel_service),
-    user_service(chat_service->user_service)
+    user_service(chat_service->user_service),
+    presence_service(chat_service->presence_service)
 {}
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
@@ -77,27 +79,15 @@ void Chat::delete_user(String user_id)
 
 std::vector<Pubnub::String> Chat::where_present(Pubnub::String user_id)
 {
-    return this->user_service->where_present(user_id);
+    return this->presence_service->where_present(user_id);
 }
 
 std::vector<Pubnub::String> Chat::who_is_present(Pubnub::String channel_id)
 {
-    return this->channel_service->who_is_present(channel_id);
+    return this->presence_service->who_is_present(channel_id);
 }
 
 bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
 {
-    std::vector<String> channels = this->where_present(user_id);
-    //TODO: we should us std::count here, but it didn't work
-    int count = 0;
-    for( auto channel : channels)
-    {
-        if(channel_id == channel)
-        {
-            count = 1;
-            break;
-        }
-    }
-    //int count = std::count(channels.begin(), channels.end(), channel_id);
-    return count > 0;
+    return this->presence_service->is_present(user_id, channel_id);
 }

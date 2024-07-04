@@ -48,6 +48,7 @@ namespace Pubnub {
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<UserService> user_service;
+            std::shared_ptr<PresenceService> presence_service;
     };
 }
 

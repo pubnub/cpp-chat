@@ -1,4 +1,5 @@
 #include "channel_service.hpp"
+#include "chat_service.hpp"
 #include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
@@ -218,30 +219,6 @@ void ChannelService::send_text(Pubnub::String channel_id, Pubnub::String message
     pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type));
 }
 
-std::vector<Pubnub::String> ChannelService::who_is_present(Pubnub::String channel_id)
-{
-    auto pubnub_handle = this->pubnub->lock();
-    String here_now_response = pubnub_handle->here_now(channel_id);
-
-    json response_json = json::parse(here_now_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get who is present, response is incorrect");
-    }
-
-    json uuids_array_json = response_json["uuids"];
-
-    std::vector<String> user_ids;
-   
-    for (json::iterator it = uuids_array_json.begin(); it != uuids_array_json.end(); ++it) 
-    {
-        user_ids.push_back(static_cast<String>(*it));
-    }
-    
-    return user_ids;
-}
-
 String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
 {
     json message_json;
@@ -260,7 +237,7 @@ Pubnub::Channel ChannelService::create_presentation_object(Pubnub::String channe
         throw std::runtime_error("Can't create channel object, chat service pointer is invalid");
     }
 
-    return Channel(channel_id, chat_service_shared, shared_from_this());
+    return Channel(channel_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service);
 }
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)

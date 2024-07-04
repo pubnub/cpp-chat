@@ -4,6 +4,7 @@
 #include "presentation/user.hpp"
 #include "export.hpp"
 #include "infra/sync.hpp"
+#include "string.hpp"
 #include <memory>
 #include <vector>
 
@@ -22,7 +23,6 @@ class UserService : public std::enable_shared_from_this<UserService>
         PN_CHAT_EXPORT std::vector<Pubnub::User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
         PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
         PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
-        std::vector<Pubnub::String> where_present(Pubnub::String user_id);
 
 
     private:

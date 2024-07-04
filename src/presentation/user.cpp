@@ -1,12 +1,14 @@
 #include "presentation/user.hpp"
 #include "application/user_service.hpp"
+#include "application/presence_service.hpp"
 
 using namespace Pubnub;
 
-User::User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service) :
+User::User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service) :
 user_id_internal(user_id),
 chat_service(chat_service),
-user_service(user_service)
+user_service(user_service),
+presence_service(presence_service)
 {}
 
 User User::update(ChatUserData user_data)
@@ -21,22 +23,10 @@ void User::delete_user()
 
 std::vector<Pubnub::String> User::where_present()
 {
-    return this->user_service->where_present(user_id_internal);
+    return this->presence_service->where_present(user_id_internal);
 }
 
 bool User::is_present_on(Pubnub::String channel_id)
 {
-    std::vector<String> channels = this->where_present();
-    //TODO: we should us std::count here, but it didn't work
-    int count = 0;
-    for( auto channel : channels)
-    {
-        if(channel_id == channel)
-        {
-            count = 1;
-            break;
-        }
-    }
-    //int count = std::count(channels.begin(), channels.end(), channel_id);
-    return count > 0;
+    return this->presence_service->is_present(user_id_internal, channel_id);
 }

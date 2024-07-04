@@ -11,6 +11,7 @@
 
 class ChannelService; 
 class ChatService;
+class PresenceService;
 
 namespace Pubnub 
 {
@@ -42,10 +43,13 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
 
         private:
-            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service);
+            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service);
+            
+            Pubnub::String channel_id_internal;
+
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<ChatService> chat_service;
-            Pubnub::String channel_id_internal;
+            std::shared_ptr<PresenceService> presence_service;
 
         friend class ChannelService;
     };
