@@ -11,18 +11,28 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-ChatService::ChatService(ThreadSafePtr<PubNub> pubnub):
+ChatService::ChatService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository):
 pubnub(pubnub),
-channel_service(std::make_shared<ChannelService>(pubnub, entity_repository, weak_from_this())),
-user_service(std::make_shared<UserService>(pubnub, entity_repository, weak_from_this())),
-message_service(std::make_shared<MessageService>(pubnub, entity_repository, weak_from_this())),
-presence_service(std::make_shared<PresenceService>(pubnub, entity_repository, weak_from_this())),
-restrictions_service(std::make_shared<RestrictionsService>(pubnub, entity_repository, weak_from_this()))
+entity_repository(entity_repository)
 {}
+
+void ChatService::init_services()
+{
+    channel_service = std::make_shared<ChannelService>(pubnub, entity_repository, weak_from_this());
+    user_service = std::make_shared<UserService>(pubnub, entity_repository, weak_from_this());
+    message_service = std::make_shared<MessageService>(pubnub, entity_repository, weak_from_this());
+    presence_service = std::make_shared<PresenceService>(pubnub, entity_repository, weak_from_this());
+    restrictions_service = std::make_shared<RestrictionsService>(pubnub, entity_repository, weak_from_this());
+}
 
 ThreadSafePtr<PubNub> ChatService::create_pubnub(String publish_key, String subscribe_key, String user_id)
 {
     return std::make_shared<Mutex<PubNub>>(publish_key, subscribe_key, user_id);
+}
+
+std::shared_ptr<EntityRepository> ChatService::create_entity_repository()
+{
+    return std::make_shared<EntityRepository>();
 }
 
 void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)

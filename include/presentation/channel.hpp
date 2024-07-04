@@ -39,7 +39,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, Pubnub::String additional_params = "");
             PN_CHAT_EXPORT void leave();
             PN_CHAT_EXPORT void delete_channel();
-            PN_CHAT_EXPORT void send_text(Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data);
+            PN_CHAT_EXPORT void send_text(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, Pubnub::String meta_data = "");
             PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present();
             PN_CHAT_EXPORT bool is_present(Pubnub::String user_id);
             PN_CHAT_EXPORT void set_restrictions(Pubnub::String user_id, Pubnub::Restriction restrictions);

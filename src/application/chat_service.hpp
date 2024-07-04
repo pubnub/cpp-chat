@@ -16,9 +16,11 @@ class PubNub;
 class ChatService : public std::enable_shared_from_this<ChatService>
 {
     public:
-        ChatService(ThreadSafePtr<PubNub> pubnub);
+        ChatService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository);
+        void init_services();
 
         static ThreadSafePtr<PubNub> create_pubnub(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
+        static std::shared_ptr<EntityRepository> create_entity_repository();
 
         void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
 
