@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "export.hpp"
 #include <memory>
+#include <vector>
 
 class UserService;
 
@@ -26,6 +27,11 @@ namespace Pubnub
         public:
             PN_CHAT_EXPORT inline Pubnub::String user_id(){return user_id_internal;};
             PN_CHAT_EXPORT Pubnub::ChatUserData user_data();
+
+            PN_CHAT_EXPORT Pubnub::User update(Pubnub::ChatUserData user_data);
+            PN_CHAT_EXPORT void delete_user();
+            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
+            PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
 
         private:
             PN_CHAT_EXPORT User(std::shared_ptr<UserService> user_service, Pubnub::String user_id);

@@ -52,27 +52,27 @@ void Chat::unpin_message_from_channel(Pubnub::Channel channel)
 
 User Chat::create_user(String user_id, ChatUserData user_data)
 {
-    return user_service->create_user(user_id, user_data);
+    return this->user_service->create_user(user_id, user_data);
 }
 
 User Chat::get_user(String user_id)
 {
-    return user_service->get_user(user_id);
+    return this->user_service->get_user(user_id);
 }
 
 std::vector<User> Chat::get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end)
 {
-    return user_service->get_users(include, limit, start, end);
+    return this->user_service->get_users(include, limit, start, end);
 }
 
 User Chat::update_user(String user_id, ChatUserData user_data)
 {
-    return user_service->update_user(user_id, user_data);
+    return this->user_service->update_user(user_id, user_data);
 }
 
 void Chat::delete_user(String user_id)
 {
-    return user_service->delete_user(user_id);
+    return this->user_service->delete_user(user_id);
 }
 
 std::vector<Pubnub::String> Chat::where_present(Pubnub::String user_id)
