@@ -149,12 +149,12 @@ void ChannelService::pin_message_to_channel(Pubnub::Message message, Pubnub::Cha
 
     json custom_data_json = json::parse(custom_channel_data);
     custom_data_json["pinnedMessageTimetoken"] = message.timetoken().c_str();
-    custom_data_json["pinnedMessageChannelID"] = channel.channel_id_internal.c_str();
+    custom_data_json["pinnedMessageChannelID"] = channel.channel_id().c_str();
 
     ChatChannelData new_channel_data = channel.channel_data();
     new_channel_data.custom_data_json = custom_data_json.dump();
 
-    this->update_channel(channel.channel_id_internal, new_channel_data);
+    this->update_channel(channel.channel_id(), new_channel_data);
 }
 
 void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
@@ -170,7 +170,7 @@ void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
 
     ChatChannelData new_channel_data = channel.channel_data();
     new_channel_data.custom_data_json = custom_channel_data;
-    this->update_channel(channel.channel_id_internal, new_channel_data);
+    this->update_channel(channel.channel_id(), new_channel_data);
 }
 
 void ChannelService::connect(Pubnub::String channel_id, std::function<void(Message)> message_callback)

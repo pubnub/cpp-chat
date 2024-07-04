@@ -52,7 +52,7 @@ namespace Pubnub
             std::shared_ptr<RestrictionsService> restrictions_service;
 
 
-        friend class UserService;
+        friend class ::UserService;
     };
 }
 #endif /* PN_CHAT_USER_H */

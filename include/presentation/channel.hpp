@@ -56,7 +56,7 @@ namespace Pubnub
             std::shared_ptr<PresenceService> presence_service;
             std::shared_ptr<RestrictionsService> restrictions_service;
 
-        friend class ChannelService;
+        friend class ::ChannelService;
     };
 };
 
