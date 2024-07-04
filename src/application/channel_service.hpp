@@ -2,7 +2,6 @@
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
 #include "presentation/channel.hpp"
-#include "export.hpp"
 #include "enums.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
@@ -21,7 +20,7 @@ namespace Pubnub
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
-        PN_CHAT_EXPORT ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
+        ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
         Pubnub::ChatChannelData get_channel_data(Pubnub::String channel_id);
 
         Pubnub::Channel create_public_conversation(Pubnub::String channel_id, Pubnub::ChatChannelData data);

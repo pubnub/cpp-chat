@@ -15,6 +15,7 @@ int main() {
     std::string user = "hehehe";
 
     Pubnub::Chat chat(pub_key.c_str(), sub_key.c_str(), user.c_str());
+    Pubnub::Channel channel = chat.create_public_conversation("asasa", Pubnub::ChatChannelData());
 
 
 }

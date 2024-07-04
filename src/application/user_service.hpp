@@ -2,7 +2,6 @@
 #define PN_CHAT_USER_SERVICE_HPP
 
 #include "presentation/user.hpp"
-#include "export.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include <memory>
@@ -16,13 +15,13 @@ class UserEntity;
 class UserService : public std::enable_shared_from_this<UserService>
 {
     public:
-        PN_CHAT_EXPORT UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
+        UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
 
-        PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
-        PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
-        PN_CHAT_EXPORT std::vector<Pubnub::User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
-        PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
-        PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
+        Pubnub::User create_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
+        Pubnub::User get_user(Pubnub::String user_id);
+        std::vector<Pubnub::User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
+        Pubnub::User update_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
+        void delete_user(Pubnub::String user_id);
 
 
     private:
