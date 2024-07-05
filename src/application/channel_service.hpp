@@ -15,6 +15,7 @@ class ChannelEntity;
 namespace Pubnub
 {
     class Message;
+    class Membership;
 }
 
 class ChannelService : public std::enable_shared_from_this<ChannelService>
@@ -53,6 +54,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ChannelEntity create_domain_from_channel_response_data(Pubnub::String json_response_data);
 
         Pubnub::ChatChannelData presentation_data_from_domain(ChannelEntity& channel_entity);
+
+        friend class ::MembershipService;
 };
 
 #endif // PN_CHAT_CHANNEL_SERVICE_HPP

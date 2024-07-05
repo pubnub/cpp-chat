@@ -3,8 +3,10 @@
 
 #include "infra/sync.hpp"
 #include "string.hpp"
+#include "presentation/membership.hpp"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class EntityRepository;
 class PubNub;
@@ -16,10 +18,14 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
     public:
         MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
 
+        std::vector<Pubnub::Membership> get_channel_members(Pubnub::String channel_id, int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
+
+        Pubnub::Membership create_presentation_object(Pubnub::User user, Pubnub::Channel channel);
 
 };
 

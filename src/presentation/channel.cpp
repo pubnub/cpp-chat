@@ -4,6 +4,7 @@
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
+#include "application/membership_service.hpp"
 
 using namespace Pubnub;
 
@@ -86,4 +87,9 @@ std::vector<Message> Channel::get_history(String start_timetoken, String end_tim
 Message Channel::get_message(String timetoken)
 {
     return this->message_service->get_message(timetoken, channel_id());
+}
+
+std::vector<Membership> Channel::get_members(int limit, String start_timetoken, String end_timetoken)
+{
+    return this->membership_service->get_channel_members(channel_id(), limit, start_timetoken, end_timetoken);
 }

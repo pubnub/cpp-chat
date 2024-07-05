@@ -37,6 +37,8 @@ class UserService : public std::enable_shared_from_this<UserService>
         UserEntity create_domain_from_user_response_data(Pubnub::String json_response_data);
 
         Pubnub::ChatUserData presentation_data_from_domain(UserEntity& user_entity);
+
+        friend class ::MembershipService;
 };
 
 #endif // PN_CHAT_USER_SERVICE_HPP
