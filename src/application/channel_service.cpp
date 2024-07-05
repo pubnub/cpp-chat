@@ -237,7 +237,7 @@ Pubnub::Channel ChannelService::create_presentation_object(Pubnub::String channe
         throw std::runtime_error("Can't create channel object, chat service pointer is invalid");
     }
 
-    return Channel(channel_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service);
+    return Channel(channel_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service, chat_service_shared->message_service);
 }
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)

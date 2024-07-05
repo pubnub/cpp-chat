@@ -3,25 +3,17 @@
 
 #include "enums.hpp"
 #include "string.hpp"
+#include "presentation/message_action.hpp"
 #include <vector>
 
 struct MessageEntity {
-        struct MessageActionData
-        {
-            Pubnub::pubnub_message_action_type type;
-            Pubnub::String value;
-            Pubnub::String timetoken;
-            Pubnub::String user_id;
-        };
-
-        Pubnub::pubnub_chat_message_type type;
-        Pubnub::String text;
-        Pubnub::String channel_id;
-        //user_id doesn't work for now, because we don't get this info from pubnub_fetch_history
-        Pubnub::String user_id;
-        //meta doesn't work for now, because we don't get this info from pubnub_fetch_history
-        Pubnub::String meta;
-        std::vector<MessageActionData> message_actions;
+    Pubnub::String timetoken;
+    Pubnub::pubnub_chat_message_type type;
+    Pubnub::String text;
+    Pubnub::String channel_id;
+    Pubnub::String user_id;
+    Pubnub::String meta;
+    std::vector<Pubnub::MessageAction> message_actions;
 };
 
 #endif // PN_CHAT_MESSAGE_ENTITY_HPP
