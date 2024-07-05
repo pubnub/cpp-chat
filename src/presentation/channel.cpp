@@ -105,19 +105,34 @@ std::vector<Membership> Channel::invite_multiple(std::vector<User> users)
 }
 
 
-Pubnub::Channel Channel::pin_message(Pubnub::Message message)
+Channel Channel::pin_message(Message message)
 {
     this->channel_service->pin_message_to_channel(message, *this);
     return *this;
 }
 
-Pubnub::Channel Channel::unpin_message()
+Channel Channel::unpin_message()
 {
     this->channel_service->unpin_message_from_channel(*this);
     return *this;
 }
 
-Pubnub::Message Channel::get_pinned_message()
+Message Channel::get_pinned_message()
 {
     return this->channel_service->get_pinned_message(channel_id());
+}
+
+void Channel::stream_updates(std::function<void(Channel)> channel_callback)
+{
+    this->channel_service->stream_updates_on({*this}, channel_callback);
+}
+
+void Channel::stream_updates_on(std::vector<Channel> channels, std::function<void(Channel)> channel_callback)
+{
+    this->channel_service->stream_updates_on(channels, channel_callback);
+}
+
+void Channel::stream_presence(std::function<void(std::vector<String>)> presence_callback)
+{
+    this->presence_service->stream_presence(channel_id(), presence_callback);
 }

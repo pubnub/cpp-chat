@@ -5,6 +5,7 @@
 #include "string.hpp"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class EntityRepository;
 class PubNub;
@@ -19,6 +20,7 @@ class PresenceService : public std::enable_shared_from_this<PresenceService>
         std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
         std::vector<Pubnub::String> where_present(Pubnub::String user_id);
         bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
+        void stream_presence(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback);
 
     private:
         ThreadSafePtr<PubNub> pubnub;

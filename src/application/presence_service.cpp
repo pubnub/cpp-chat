@@ -77,3 +77,17 @@ bool PresenceService::is_present(Pubnub::String user_id, Pubnub::String channel_
     //int count = std::count(channels.begin(), channels.end(), channel_id);
     return count > 0;
 }
+
+void PresenceService::stream_presence(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback)
+{
+    //Send callback with currently present users
+    std::vector<Pubnub::String> current_users = who_is_present(channel_id);
+    presence_callback(current_users);
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    String presence_channel = channel_id + "-pnpres";
+    pubnub_handle->subscribe_to_channel(presence_channel);
+    
+    //TODO:: CALLBACK  register presence callback here
+}

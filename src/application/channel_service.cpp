@@ -62,9 +62,7 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
     Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, user);
 
-    std::vector<Membership> invitee_memberships;
-    invitee_memberships.push_back(invitee_membership);
-    std::tuple<Channel, Membership, std::vector<Membership>> final_tuple(created_channel, host_membership, invitee_memberships);
+    std::tuple<Channel, Membership, std::vector<Membership>> final_tuple(created_channel, host_membership, {invitee_membership});
 
     return final_tuple;
 }
@@ -391,6 +389,22 @@ Pubnub::Message ChannelService::get_pinned_message(Pubnub::String channel_id)
 
     //TODO: also check here for pinned message in thread channela after implementing threads
     return pinned_message;
+}
+
+void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback)
+{
+    if(channels.empty())
+    {
+        throw std::invalid_argument("Cannot stream channel updates on an empty list");
+    }
+    
+    auto pubnub_handle = this->pubnub->lock();
+
+    for(auto channel : channels)
+    {
+        //TODO:: CALLBACK register channel callback here
+        pubnub_handle->subscribe_to_channel(channel.channel_id());
+    }
 }
 
 String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
