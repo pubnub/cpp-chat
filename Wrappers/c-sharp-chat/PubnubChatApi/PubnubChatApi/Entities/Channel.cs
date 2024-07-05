@@ -109,7 +109,7 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_stop_typing(IntPtr channel);
-        
+
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_channel_pin_message(IntPtr channel, IntPtr message);
 
@@ -118,7 +118,14 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_channel_get_pinned_message(IntPtr channel);
-        
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_create_message_draft_dirty(IntPtr channel,
+            string user_suggestion_source,
+            bool is_typing_indicator_triggered,
+            int user_limit,
+            int channel_limit);
+
         #endregion
 
         /// <summary>
@@ -287,7 +294,7 @@ namespace PubNubChatAPI.Entities
         ///
         public event Action<List<string>> OnPresenceUpdate;
 
-        public event Action<List<string>> OnUsersTyping; 
+        public event Action<List<string>> OnUsersTyping;
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
         {
@@ -332,27 +339,29 @@ namespace PubNubChatAPI.Entities
             {
                 return;
             }
-            if (!eventJson.TryGetValue("value", out var valueString) 
+
+            if (!eventJson.TryGetValue("value", out var valueString)
                 || !bool.TryParse(valueString, out var typingValue))
             {
                 return;
             }
 
             //stop typing
-            if(!typingValue && typingIndicators.ContainsKey(userId))
+            if (!typingValue && typingIndicators.ContainsKey(userId))
             {
                 typingIndicators[userId].Stop();
                 typingIndicators.Remove(userId);
             }
+
             //start typing
-            if(typingValue)
+            if (typingValue)
             {
                 //Stop the old timer
-                if(typingIndicators.TryGetValue(userId, out var typingTimer))
+                if (typingIndicators.TryGetValue(userId, out var typingTimer))
                 {
                     typingTimer.Stop();
                 }
-    
+
                 //Create and start new timer
                 //TODO: Get this from config
                 var newTimer = new Timer(5000);
@@ -364,6 +373,7 @@ namespace PubNubChatAPI.Entities
                 typingIndicators[userId] = newTimer;
                 newTimer.Start();
             }
+
             OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
         }
 
@@ -404,6 +414,16 @@ namespace PubNubChatAPI.Entities
                 pinnedMessage = null;
                 return false;
             }
+        }
+
+        public MessageDraft CreateMessageDraft()
+        {
+            //TODO: hardcoded config
+            var draftPointer = pn_channel_create_message_draft_dirty(
+                pointer, "channel", true, 10, 10);
+            CUtilities.CheckCFunctionResult(draftPointer);
+            //TODO: bit of a hack to use the pointer as an ID
+            return new MessageDraft(draftPointer, draftPointer.ToString());
         }
 
         /// <summary>

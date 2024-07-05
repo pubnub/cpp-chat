@@ -100,6 +100,7 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_user.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_errors.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_message.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_message_draft.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_membership.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_serialization.cpp)
 endif()

@@ -122,5 +122,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_unpin_message(Pubnub::
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_pinned_message(Pubnub::Channel* channel);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
+    char* user_suggestion_source,
+    bool is_typing_indicator_triggered,
+    int user_limit,
+    int channel_limit);
+
 #endif // PN_CHAT_C_CHANNEL_H
 

@@ -131,4 +131,12 @@ public class ChannelTests
         
         await Task.Delay(6000);
     }
+    
+    [Test]
+    public void TestCreateMessageDraft()
+    {
+        var channel = chat.CreatePublicConversation("message_draft_test_channel");
+        var draft = channel.CreateMessageDraft();
+        Assert.True(!string.IsNullOrEmpty(draft.Id));
+    }
 }
