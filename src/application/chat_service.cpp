@@ -46,3 +46,16 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, String
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->publish(channel_id, event_message);
 }
+
+void ChatService::listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback)
+{
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
+    }
+
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->subscribe_to_channel(channel_id);
+
+    //TODO:: CALLBACK - add event callback here
+}

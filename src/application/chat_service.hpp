@@ -4,6 +4,7 @@
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include "enums.hpp"
+#include <functional>
 
 class ChannelService;
 class UserService;
@@ -23,6 +24,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         static std::shared_ptr<EntityRepository> create_entity_repository();
 
         void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
+        void listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback);
 
         std::shared_ptr<ChannelService> channel_service;
         std::shared_ptr<UserService> user_service;

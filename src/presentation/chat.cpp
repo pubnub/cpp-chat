@@ -47,12 +47,12 @@ void Chat::delete_channel(String channel_id)
     this->channel_service->delete_channel(channel_id);
 }
 
-void Chat::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel)
+void Chat::pin_message_to_channel(Message message, Channel channel)
 {
     this->channel_service->pin_message_to_channel(message, channel);
 }
 
-void Chat::unpin_message_from_channel(Pubnub::Channel channel)
+void Chat::unpin_message_from_channel(Channel channel)
 {
     this->channel_service->unpin_message_from_channel(channel);
 }
@@ -67,7 +67,7 @@ User Chat::get_user(String user_id)
     return this->user_service->get_user(user_id);
 }
 
-std::vector<User> Chat::get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end)
+std::vector<User> Chat::get_users(String include, int limit, String start, String end)
 {
     return this->user_service->get_users(include, limit, start, end);
 }
@@ -82,17 +82,17 @@ void Chat::delete_user(String user_id)
     return this->user_service->delete_user(user_id);
 }
 
-std::vector<Pubnub::String> Chat::where_present(Pubnub::String user_id)
+std::vector<String> Chat::where_present(String user_id)
 {
     return this->presence_service->where_present(user_id);
 }
 
-std::vector<Pubnub::String> Chat::who_is_present(Pubnub::String channel_id)
+std::vector<String> Chat::who_is_present(String channel_id)
 {
     return this->presence_service->who_is_present(channel_id);
 }
 
-bool Chat::is_present(Pubnub::String user_id, Pubnub::String channel_id)
+bool Chat::is_present(String user_id, String channel_id)
 {
     return this->presence_service->is_present(user_id, channel_id);
 }
@@ -105,4 +105,9 @@ void Chat::set_restrictions(String user_id, String channel_id, Restriction restr
 void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
 {
     this->chat_service->emit_chat_event(chat_event_type, channel_id, payload);
+}
+
+void Chat::listen_for_events(String channel_id, pubnub_chat_event_type chat_event_type, std::function<void(String)> event_callback)
+{
+    this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
 }
