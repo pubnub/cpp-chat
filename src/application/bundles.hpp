@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "channel_service.hpp"
+#include "membership_service.hpp"
 #include "infra/entity_repository.hpp"
 #include "user_service.hpp"
 #include "chat_service.hpp"
@@ -13,6 +14,7 @@ struct EntityServicesBundle {
     std::weak_ptr<UserService> user_service;
     std::weak_ptr<ChatService> chat_service;
     std::weak_ptr<MessageService> message_service;
+    std::weak_ptr<MembershipService> membership_service;
 };
 
 #endif // PN_CHAT_BUNDLES_HPP

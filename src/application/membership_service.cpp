@@ -154,5 +154,18 @@ Membership MembershipService::create_presentation_object(User user, Channel chan
         throw std::runtime_error("Can't create membership object, chat service pointer is invalid");
     }
 
-    return Membership(user, channel, channel.channel_data().custom_data_json, chat_service_shared, shared_from_this());
+    return Membership(user, channel, chat_service_shared, shared_from_this());
+}
+
+Membership MembershipService::create_membership_object(User user, Channel channel, MembershipEntity membership_entity)
+{
+    if (auto chat = this->chat_service.lock()) {
+        this->entity_repository
+            ->get_membership_entities()
+            .update_or_insert(std::make_pair(user.user_id(), channel.channel_id()), membership_entity);
+
+        return Membership(user, channel, chat, shared_from_this());
+    }
+
+    throw std::runtime_error("Can't create membership, chat service pointer is invalid");
 }

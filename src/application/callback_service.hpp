@@ -43,6 +43,7 @@ class CallbackService {
         std::weak_ptr<UserService> user_service;
         std::weak_ptr<ChatService> chat_service;
         std::weak_ptr<MessageService> message_service;
+        std::weak_ptr<MembershipService> membership_service;
         std::weak_ptr<PresenceService> presence_service;
         std::thread callback_thread;
         std::atomic<bool> thread_run_flag;

@@ -20,6 +20,7 @@ CallbackService::CallbackService(
     message_service(entity_bundle.message_service),
     channel_service(entity_bundle.channel_service),
     user_service(entity_bundle.user_service),
+    membership_service(entity_bundle.membership_service),
     presence_service(presence_service)
 {
     this->callback_thread = std::thread([this, wait_interval]() {
@@ -55,13 +56,6 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
     {
         throw std::runtime_error("message is empty");
     }
-
-//    json message_json = json::parse(message_string);
-//    
-//    if(message_json.is_null())
-//    {
-//        throw std::runtime_error("Failed to parse message into json");
-//    }
 
     // TODO: merge this combination of ifs into something more readable
     if (Parsers::PubnubJson::is_message(message_string)) {
@@ -130,27 +124,6 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             }
         }
     }
-//
-//    //Handle message updates
-//    if(Deserialization::is_message_update_message(message_string))
-//    {
-//        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
-//        if (message_timetoken.front() == '"' && message_timetoken.back() == '"')
-//        {
-//            message_timetoken.erase(0, 1);
-//            message_timetoken.erase(message_timetoken.length() - 1, 1);
-//        }
-//
-//        if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
-//        {
-//            Pubnub::String message_channel;
-//            std::function<void(Pubnub::Message)> callback;
-//            std::tie(message_channel, callback) = this->message_update_callbacks_map[message_timetoken];
-//            // TODO: this should already give message with this new update, make sure it really does.pubnub.cpp
-//            Pubnub::Message message_obj = chat_obj.get_channel(message_channel).get_message(message_timetoken);
-//            callback(message_obj);
-//        }
-//    }
 
     if (Parsers::PubnubJson::is_message_update(message_string)) {
         Pubnub::String message_timetoken = Parsers::PubnubJson::message_update_timetoken(message_string);
@@ -167,32 +140,37 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             }
         }
     }
-//
-//    //Handle message updates
-//    if(Deserialization::is_membership_update_message(message_string))
-//    {
-//        // TODO: All dump() calls should be replaced with unified function that removes quotes from the string
-//        Pubnub::String dumped = message_json["data"]["channel"]["id"].dump();
-//        Pubnub::String membership_channel = Pubnub::String(&dumped.c_str()[1], dumped.length() - 2); 
-//
-//        if(this->membership_callbacks_map.find(membership_channel) != this->membership_callbacks_map.end())
-//        {
-//            Pubnub::String membership_user;
-//            std::function<void(Pubnub::Membership)> callback;
-//            std::tie(membership_user, callback) = this->membership_callbacks_map[membership_channel];
-//
-//            //Make sure this message is related to the user that we are streaming updates for
-//            Pubnub::String user_from_message = message_json["data"]["uuid"]["id"].dump();
-//            Pubnub::String user_from_message_cleaned = Pubnub::String(&user_from_message.c_str()[1], user_from_message.length() - 2);
-//            if(user_from_message_cleaned == membership_user)
-//            {
-//                auto custom_field = Pubnub::String(message_json["custom"].dump());
-//                auto custom_field_cleaned = Pubnub::String(&custom_field.c_str()[1], custom_field.length() - 2);
-//                Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), custom_field_cleaned);
-//                callback(membership_obj);
-//            }
-//        }
-//    }
+
+    if (Parsers::PubnubJson::is_membership_update(message_string)) {
+        auto membership_channel = Parsers::PubnubJson::membership_channel(message_string);
+
+        auto maybe_callback = this->callbacks.get_membership_callbacks().get(membership_channel);
+        if (maybe_callback.has_value()) {
+            Pubnub::String membership_user;
+            std::function<void(Pubnub::Membership)> callback;
+            std::tie(membership_user, callback) = maybe_callback.value();
+
+            //Make sure this message is related to the user that we are streaming updates for
+            auto user_from_message = Parsers::PubnubJson::membership_user(message_string);
+            if(user_from_message == membership_user)
+            {
+                auto custom_field = Parsers::PubnubJson::to_membership(message_string);
+                auto memberships = this->membership_service.lock();
+                auto channels = this->channel_service.lock();
+                auto users = this->user_service.lock();
+                if (memberships && channels && users) {
+                    Pubnub::Membership membership_obj = memberships->create_membership_object(
+                        users->get_user(membership_user),
+                        channels->get_channel(membership_channel),
+                        custom_field
+                    );
+                    callback(membership_obj);
+                } else {
+                    throw std::runtime_error("Membership, channel or user service is not available to call callback");
+                }
+            }
+        }
+    }
 }
 
 

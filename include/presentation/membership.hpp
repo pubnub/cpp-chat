@@ -17,12 +17,11 @@ namespace Pubnub
     PN_CHAT_EXPORT class Membership
     {
         public:
-            Pubnub::String custom_data_json;
             Pubnub::User user;
             Pubnub::Channel channel;
 
         private:
-            Membership(Pubnub::User user, Pubnub::Channel channel, Pubnub::String custom_data_json, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MembershipService> membership_service);
+            Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MembershipService> membership_service);
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<MembershipService> membership_service;
 

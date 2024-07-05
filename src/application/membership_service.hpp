@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_MEMBERSHIP_SERVICE_HPP
 #define PN_CHAT_MEMBERSHIP_SERVICE_HPP
 
+#include "domain/membership_entity.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include "presentation/membership.hpp"
@@ -23,6 +24,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         std::vector<Pubnub::Membership> invite_multiple_to_channel(Pubnub::String channel_id, std::vector<Pubnub::User> users);
     
         Pubnub::Membership create_presentation_object(Pubnub::User user, Pubnub::Channel channel);
+        Pubnub::Membership create_membership_object(Pubnub::User user, Pubnub::Channel channel, MembershipEntity membership_entity);
 
     private:
         ThreadSafePtr<PubNub> pubnub;
