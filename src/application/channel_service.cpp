@@ -1,5 +1,7 @@
 #include "channel_service.hpp"
 #include "chat_service.hpp"
+#include "user_service.hpp"
+#include "membership_service.hpp"
 #include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
@@ -15,7 +17,7 @@ ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<Ent
     chat_service(chat_service)
 {}
 
-Pubnub::ChatChannelData ChannelService::get_channel_data(Pubnub::String channel_id)
+ChatChannelData ChannelService::get_channel_data(String channel_id)
 {
     auto maybe_channel = this->entity_repository->get_channel_entities().get(channel_id);
 
@@ -31,6 +33,76 @@ Channel ChannelService::create_public_conversation(String channel_id, ChatChanne
 {
     data.type = "public";
     return create_channel(channel_id, data);
+}
+
+std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_direct_conversation(User user, String channel_id, ChatChannelData channel_data, String membership_data)
+{
+    //TODO: channel id should be optional and if it's not provided, we should create hashed channel id
+    String final_channel_id = channel_id;
+
+    channel_data.type = "direct";
+    auto created_channel = this->create_channel(final_channel_id, channel_data);
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    //TODO: Add filter when it will be supported in C-Core
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String memberships_response = pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
+
+    json memberships_response_json = json::parse(memberships_response);
+    String channel_data_string = memberships_response_json["data"][0].dump();
+
+    auto chat_service_d = chat_service.lock();
+    if(chat_service_d == nullptr)
+    {
+        throw std::runtime_error("Can't create direct conversation, chat service pointer is invalid");
+    }
+
+    //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
+    User current_user = chat_service_d->user_service->get_user(pubnub_handle->get_user_id());
+
+    Membership host_membership = chat_service_d->membership_service->create_presentation_object(current_user, created_channel);
+    Membership invitee_membership = chat_service_d->membership_service->invite_to_channel(final_channel_id, user);
+
+    std::vector<Membership> invitee_memberships;
+    invitee_memberships.push_back(invitee_membership);
+    std::tuple<Channel, Membership, std::vector<Membership>> final_tuple(created_channel, host_membership, invitee_memberships);
+
+    return final_tuple;
+}
+
+std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_group_conversation(std::vector<User> users, String channel_id, ChatChannelData channel_data, String membership_data)
+{
+    //TODO: channel id should be optional and if it's not provided, we should create hashed channel id
+    String final_channel_id = channel_id;
+
+    channel_data.type = "group";
+    auto created_channel = this->create_channel(final_channel_id, channel_data);
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    //TODO: Add filter when it will be supported in C-Core
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String memberships_response = pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
+
+    json memberships_response_json = json::parse(memberships_response);
+    String channel_data_string = memberships_response_json["data"][0].dump();
+
+    auto chat_service_d = chat_service.lock();
+    if(chat_service_d == nullptr)
+    {
+        throw std::runtime_error("Can't create direct conversation, chat service pointer is invalid");
+    }
+
+    //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
+    User current_user = chat_service_d->user_service->get_user(pubnub_handle->get_user_id());
+
+    Membership host_membership = chat_service_d->membership_service->create_presentation_object(current_user, created_channel);
+    std::vector<Membership> invitee_memberships = chat_service_d->membership_service->invite_multiple_to_channel(final_channel_id, users);
+
+    std::tuple<Channel, Membership, std::vector<Membership>> final_tuple(created_channel, host_membership, invitee_memberships);
+
+    return final_tuple;
 }
 
 Channel ChannelService::create_channel(String channel_id, ChatChannelData data) {
@@ -142,7 +214,7 @@ void ChannelService::delete_channel(String channel_id)
     entity_repository->get_channel_entities().remove(channel_id);
 }
 
-void ChannelService::pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel)
+void ChannelService::pin_message_to_channel(Message message, Channel channel)
 {
     String custom_channel_data;
     channel.channel_data().custom_data_json.empty() ?  custom_channel_data = "{}" :  custom_channel_data = channel.channel_data().custom_data_json;
@@ -157,7 +229,7 @@ void ChannelService::pin_message_to_channel(Pubnub::Message message, Pubnub::Cha
     this->update_channel(channel.channel_id(), new_channel_data);
 }
 
-void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
+void ChannelService::unpin_message_from_channel(Channel channel)
 {
     String custom_channel_data = channel.channel_data().custom_data_json;
     if(!custom_channel_data.empty())
@@ -173,7 +245,7 @@ void ChannelService::unpin_message_from_channel(Pubnub::Channel channel)
     this->update_channel(channel.channel_id(), new_channel_data);
 }
 
-void ChannelService::connect(Pubnub::String channel_id, std::function<void(Message)> message_callback)
+void ChannelService::connect(String channel_id, std::function<void(Message)> message_callback)
 {
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->subscribe_to_channel(channel_id);
@@ -181,7 +253,7 @@ void ChannelService::connect(Pubnub::String channel_id, std::function<void(Messa
     //TODO:: CALLBACK - add callback
 }
 
-void ChannelService::disconnect(Pubnub::String channel_id)
+void ChannelService::disconnect(String channel_id)
 {
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->unsubscribe_from_channel(channel_id);
@@ -189,7 +261,7 @@ void ChannelService::disconnect(Pubnub::String channel_id)
     //TODO:: CALLBACK - remove callback
 }
 
-void ChannelService::join(Pubnub::String channel_id, std::function<void(Message)> message_callback, Pubnub::String additional_params)
+void ChannelService::join(String channel_id, std::function<void(Message)> message_callback, String additional_params)
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String set_object_string = create_set_memberships_object(channel_id, additional_params);
@@ -201,7 +273,7 @@ void ChannelService::join(Pubnub::String channel_id, std::function<void(Message)
     this->connect(channel_id, message_callback);
 }
 
-void ChannelService::leave(Pubnub::String channel_id)
+void ChannelService::leave(String channel_id)
 {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
@@ -212,7 +284,7 @@ void ChannelService::leave(Pubnub::String channel_id)
 	this->disconnect(channel_id);
 }
 
-void ChannelService::send_text(Pubnub::String channel_id, Pubnub::String message, pubnub_chat_message_type message_type, Pubnub::String meta_data)
+void ChannelService::send_text(String channel_id, String message, pubnub_chat_message_type message_type, String meta_data)
 {
     //TODO:: meta_data is not used. Add support for metadata
     auto pubnub_handle = this->pubnub->lock();
@@ -223,22 +295,22 @@ String ChannelService::chat_message_to_publish_string(String message, pubnub_cha
 {
     json message_json;
 	
-	message_json["type"] = Pubnub::chat_message_type_to_string(message_type).c_str();
+	message_json["type"] = chat_message_type_to_string(message_type).c_str();
     message_json["text"] = message.c_str();
 
 	return message_json.dump();
 }
 
-Pubnub::Channel ChannelService::create_presentation_object(Pubnub::String channel_id)
+Channel ChannelService::create_presentation_object(String channel_id)
 {
-    auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
+    auto chat_service_d = chat_service.lock();
+    if(chat_service_d == nullptr)
     {
         throw std::runtime_error("Can't create channel object, chat service pointer is invalid");
     }
 
-    return Channel(channel_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service, 
-                    chat_service_shared->message_service, chat_service_shared->membership_service);
+    return Channel(channel_id, chat_service_d, shared_from_this(), chat_service_d->presence_service, chat_service_d->restrictions_service, 
+                    chat_service_d->message_service, chat_service_d->membership_service);
 }
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)
@@ -255,7 +327,7 @@ ChannelEntity ChannelService::create_domain_from_presentation_data(String channe
     return new_channel_entity;
 }
 
-ChannelEntity ChannelService::create_domain_from_channel_response(Pubnub::String json_response)
+ChannelEntity ChannelService::create_domain_from_channel_response(String json_response)
 {
     json channel_response_json = json::parse(json_response);
 
@@ -274,7 +346,7 @@ ChannelEntity ChannelService::create_domain_from_channel_response(Pubnub::String
     return create_domain_from_channel_response_data(String(channel_data_json.dump()));
 }
 
-ChannelEntity ChannelService::create_domain_from_channel_response_data(Pubnub::String json_response_data)
+ChannelEntity ChannelService::create_domain_from_channel_response_data(String json_response_data)
 {
     json channel_data_json = json::parse(json_response_data);
 
@@ -322,7 +394,7 @@ ChannelEntity ChannelService::create_domain_from_channel_response_data(Pubnub::S
     return new_channel_entity;
 }
 
-Pubnub::ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &channel_entity)
+ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &channel_entity)
 {
     ChatChannelData channel_data;
     channel_data.channel_name = channel_entity.channel_name;

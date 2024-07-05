@@ -25,6 +25,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::ChatChannelData get_channel_data(Pubnub::String channel_id);
 
         Pubnub::Channel create_public_conversation(Pubnub::String channel_id, Pubnub::ChatChannelData data);
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(Pubnub::User user, Pubnub::String channel_id, Pubnub::ChatChannelData channel_data, Pubnub::String membership_data = "");
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(std::vector<Pubnub::User> users, Pubnub::String channel_id, Pubnub::ChatChannelData channel_data, Pubnub::String membership_data = "");
         Pubnub::Channel create_channel(Pubnub::String channel_id, Pubnub::ChatChannelData data);
         Pubnub::Channel get_channel(Pubnub::String channel_id);
         std::vector<Pubnub::Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
@@ -38,6 +40,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void leave(Pubnub::String channel_id);
         void send_text(Pubnub::String channel_id, Pubnub::String message, Pubnub::pubnub_chat_message_type message_type, Pubnub::String meta_data);
 
+        Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
+        
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
@@ -46,7 +50,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         
         Pubnub::String chat_message_to_publish_string(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type);
         
-        Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
         //Creates ChannelEntity from channel response - put the whole response, not only "data" field
         ChannelEntity create_domain_from_channel_response(Pubnub::String json_response);

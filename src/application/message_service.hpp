@@ -20,12 +20,13 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::Message get_message(Pubnub::String timetoken, Pubnub::String channel_id);
         Pubnub::Message create_message(std::pair<Pubnub::String, MessageEntity> message_data);
 
+        Pubnub::Message create_presentation_object(Pubnub::String timetoken);
+        
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
 
-        Pubnub::Message create_presentation_object(Pubnub::String timetoken);
         MessageEntity create_domain_from_presentation_data(Pubnub::String timetoken, Pubnub::ChatMessageData& presentation_data);
         MessageEntity create_domain_from_message_json(Pubnub::String message_json, Pubnub::String channel_id);
 

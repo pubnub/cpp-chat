@@ -27,6 +27,18 @@ Channel Chat::create_public_conversation(String channel_id, ChatChannelData chan
     return this->channel_service->create_public_conversation(channel_id, channel_data);
 }
 
+CreatedChannelWrapper Chat::create_direct_conversation(User user, String channel_id, ChatChannelData channel_data, String membership_data)
+{
+    auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, membership_data);
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), std::get<2>(return_tuple));
+}
+
+CreatedChannelWrapper Chat::create_group_conversation(std::vector<User> users, String channel_id, ChatChannelData channel_data, String membership_data)
+{
+    auto return_tuple = this->channel_service->create_group_conversation(users, channel_id, channel_data, membership_data);
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), std::get<2>(return_tuple));
+}
+
 Channel Chat::get_channel(String channel_id)
 {
     return this->channel_service->get_channel(channel_id);
