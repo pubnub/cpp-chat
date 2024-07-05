@@ -24,6 +24,7 @@ class UserService : public std::enable_shared_from_this<UserService>
         void delete_user(Pubnub::String user_id);
 
         Pubnub::User create_presentation_object(Pubnub::String user_id);
+        Pubnub::User create_user_object(std::pair<Pubnub::String, UserEntity> user_data);
 
     private:
         ThreadSafePtr<PubNub> pubnub;

@@ -1,4 +1,5 @@
 #include "callback_service.hpp"
+#include "application/bundles.hpp"
 #include "infra/serialization.hpp"
 #include "infra/sync.hpp"
 #include "nlohmann/json.hpp"
@@ -7,9 +8,13 @@
 
 using json = nlohmann::json;
 
-CallbackService::CallbackService(ThreadSafePtr<PubNub> pubnub, milliseconds wait_interval) :
+CallbackService::CallbackService(EntityServicesBundle services, ThreadSafePtr<PubNub> pubnub, milliseconds wait_interval) :
     pubnub(pubnub),
-    thread_run_flag(true) 
+    thread_run_flag(true),
+    chat_service(services.chat_service),
+    message_service(services.message_service),
+    channel_service(services.channel_service),
+    user_service(services.user_service)
 {
     this->callback_thread = std::thread([this, wait_interval]() {
         while (this->thread_run_flag.load()) {
@@ -58,10 +63,8 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
         if (maybe_callback.has_value()) {
             auto parsed_message = Parsers::PubnubJson::to_message(message);
             if (auto service = this->message_service.lock()) {
-                auto message = service->create_message_object(parsed_message);
-                maybe_callback.value()(message);
+                maybe_callback.value()(service->create_message_object(parsed_message));
             } else {
-                // TODO: is it a good idea to throw here?
                 throw std::runtime_error("Message service is not available to call callback");
             }
         }
@@ -72,23 +75,25 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
         if (maybe_callback.has_value()) {
             auto parsed_channel = Parsers::PubnubJson::to_channel(message);
             if (auto service = this->channel_service.lock()) {
-                auto channel = service->create_channel_object(parsed_channel);
-                maybe_callback.value()(channel);
+                maybe_callback.value()(service->create_channel_object(parsed_channel));
             } else {
                 throw std::runtime_error("Channel service is not available to call callback");
             }
         }
     }
-//
-//    //Handle user updates
-//    if(Deserialization::is_user_update_message(message_string))
-//    {
-//        if(this->user_callbacks_map.find(message_channel_string) != this->user_callbacks_map.end())
-//        {
-//            this->user_callbacks_map[message_channel_string](
-//                    Deserialization::pubnub_message_to_chat_user(this->chat_obj, message));
-//        }
-//    }
+
+    if (Parsers::PubnubJson::is_user_update(message_string)) {
+        auto maybe_callback = this->callbacks.get_user_callbacks().get(message_channel_string);
+        if (maybe_callback.has_value()) {
+            auto parsed_user = Parsers::PubnubJson::to_user(message);
+            if (auto service = this->user_service.lock()) {
+                maybe_callback.value()(service->create_user_object(parsed_user));
+            } else {
+                throw std::runtime_error("User service is not available to call callback");
+            }
+        }
+    }
+
 //
 //    //Handle events
 //    if(Deserialization::is_event_message(message_string))

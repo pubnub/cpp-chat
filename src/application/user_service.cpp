@@ -231,3 +231,23 @@ Pubnub::ChatUserData UserService::presentation_data_from_domain(UserEntity &user
 
     return user_data;
 }
+
+Pubnub::User UserService::create_user_object(std::pair<Pubnub::String, UserEntity> user_data)
+{
+    if (auto chat = this->chat_service.lock()) {
+        this->entity_repository
+            ->get_user_entities()
+            .update_or_insert(user_data);
+
+        return Pubnub::User(
+            user_data.first,
+            chat,
+            shared_from_this(),
+            chat->presence_service,
+            chat->restrictions_service,
+            chat->membership_service
+       );
+    }
+
+    throw std::runtime_error("Failed to create user object, chat service is not available");
+}
