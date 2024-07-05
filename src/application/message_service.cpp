@@ -149,9 +149,13 @@ ChatMessageData MessageService::presentation_data_from_domain(MessageEntity &mes
 
 Pubnub::Message MessageService::create_message(std::pair<Pubnub::String, MessageEntity> message_data)
 {
-    this->entity_repository
-        ->get_message_entities()
-        .update_or_insert(message_data.first, message_data.second);
+    if (auto chat = this->chat_service.lock()) {
+        this->entity_repository
+            ->get_message_entities()
+            .update_or_insert(message_data.first, message_data.second);
 
-    return Pubnub::Message(message_data.first, nullptr, shared_from_this());
+        return Pubnub::Message(message_data.first, chat, shared_from_this());
+    }
+
+    throw std::runtime_error("Can't create message, chat service pointer is invalid");
 }

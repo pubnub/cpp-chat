@@ -59,6 +59,9 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             if (auto service = this->message_service.lock()) {
                 auto message = service->create_message(parsed_message);
                 maybe_callback.value()(message);
+            } else {
+                // TODO: is it a good idea to throw here?
+                throw std::runtime_error("Message service is not available to call callback");
             }
         }
     }
