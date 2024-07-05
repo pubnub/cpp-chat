@@ -4,6 +4,7 @@
 #include "application/message_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
+#include "application/membership_service.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
@@ -21,6 +22,7 @@ void ChatService::init_services()
     channel_service = std::make_shared<ChannelService>(pubnub, entity_repository, weak_from_this());
     user_service = std::make_shared<UserService>(pubnub, entity_repository, weak_from_this());
     message_service = std::make_shared<MessageService>(pubnub, entity_repository, weak_from_this());
+    membership_service = std::make_shared<MembershipService>(pubnub, entity_repository, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, entity_repository, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, entity_repository, weak_from_this());
 }

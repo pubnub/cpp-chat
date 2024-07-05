@@ -130,7 +130,7 @@ Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
         throw std::runtime_error("Can't create user object, chat service pointer is invalid");
     }
 
-    return User(user_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service);
+    return User(user_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service, chat_service_shared->membership_service);
 }
 
 UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user_id, Pubnub::ChatUserData &presentation_data)

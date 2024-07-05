@@ -14,6 +14,7 @@ class ChatService;
 class PresenceService;
 class RestrictionsService;
 class MessageService;
+class MembershipService;
 
 namespace Pubnub 
 {
@@ -51,7 +52,7 @@ namespace Pubnub
 
         private:
             PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
-                                   std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service);
+                                   std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<MembershipService> membership_service);
             
             Pubnub::String channel_id_internal;
 
@@ -60,6 +61,7 @@ namespace Pubnub
             std::shared_ptr<PresenceService> presence_service;
             std::shared_ptr<RestrictionsService> restrictions_service;
             std::shared_ptr<MessageService> message_service;
+            std::shared_ptr<MembershipService> membership_service;
 
         friend class ::ChannelService;
     };

@@ -11,6 +11,7 @@ class UserService;
 class MessageService;
 class PresenceService;
 class RestrictionsService;
+class MembershipService;
 class EntityRepository;
 class PubNub;
 
@@ -29,6 +30,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<ChannelService> channel_service;
         std::shared_ptr<UserService> user_service;
         std::shared_ptr<MessageService> message_service;
+        std::shared_ptr<MembershipService> membership_service;
         std::shared_ptr<PresenceService> presence_service;
         std::shared_ptr<RestrictionsService> restrictions_service;
     

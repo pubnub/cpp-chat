@@ -7,14 +7,15 @@
 
 using namespace Pubnub;
 
-Channel::Channel(String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service,
-                std::shared_ptr<PresenceService> presence_service, std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service) :
+Channel::Channel(String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
+                std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<MembershipService> membership_service) :
 channel_id_internal(channel_id),
 chat_service(chat_service),
 channel_service(channel_service),
 presence_service(presence_service),
 restrictions_service(restrictions_service),
-message_service(message_service)
+message_service(message_service),
+membership_service(membership_service)
 {}
 
 ChatChannelData Channel::channel_data()

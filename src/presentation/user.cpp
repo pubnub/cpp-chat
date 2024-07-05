@@ -5,13 +5,14 @@
 
 using namespace Pubnub;
 
-User::User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, 
-            std::shared_ptr<PresenceService> presence_service, std::shared_ptr<RestrictionsService> restrictions_service) :
+User::User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service, 
+            std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MembershipService> membership_service) :
 user_id_internal(user_id),
 chat_service(chat_service),
 user_service(user_service),
 presence_service(presence_service),
-restrictions_service(restrictions_service)
+restrictions_service(restrictions_service),
+membership_service(membership_service)
 {}
 
 User User::update(ChatUserData user_data)
