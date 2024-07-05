@@ -10,7 +10,7 @@
 
 class EntityRepository;
 class PubNub;
-class ChannelEntity;
+struct ChannelEntity;
 
 namespace Pubnub
 {
@@ -39,10 +39,16 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void join(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback, Pubnub::String additional_params = "");
         void leave(Pubnub::String channel_id);
         void send_text(Pubnub::String channel_id, Pubnub::String message, Pubnub::pubnub_chat_message_type message_type, Pubnub::String meta_data);
-        Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data);
-
-        Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
+        void start_typing(Pubnub::String channel_id);
+        void stop_typing(Pubnub::String channel_id);
+        void get_typing(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> typing_callback);
         
+        Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data);
+        Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
+
+        //TODO: Move this to config
+        int TYPING_TIMEOUT = 5000;
+
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;

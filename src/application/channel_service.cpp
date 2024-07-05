@@ -5,6 +5,7 @@
 #include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
+#include "infra/timer.hpp"
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 
@@ -52,17 +53,13 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     json memberships_response_json = json::parse(memberships_response);
     String channel_data_string = memberships_response_json["data"][0].dump();
 
-    auto chat_service_d = chat_service.lock();
-    if(chat_service_d == nullptr)
-    {
-        throw std::runtime_error("Can't create direct conversation, chat service pointer is invalid");
-    }
+    auto chat_service_shared = chat_service.lock();
 
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
-    User current_user = chat_service_d->user_service->get_user(pubnub_handle->get_user_id());
+    User current_user = chat_service_shared->user_service->get_user(pubnub_handle->get_user_id());
 
-    Membership host_membership = chat_service_d->membership_service->create_presentation_object(current_user, created_channel);
-    Membership invitee_membership = chat_service_d->membership_service->invite_to_channel(final_channel_id, user);
+    Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
+    Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, user);
 
     std::vector<Membership> invitee_memberships;
     invitee_memberships.push_back(invitee_membership);
@@ -88,17 +85,13 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     json memberships_response_json = json::parse(memberships_response);
     String channel_data_string = memberships_response_json["data"][0].dump();
 
-    auto chat_service_d = chat_service.lock();
-    if(chat_service_d == nullptr)
-    {
-        throw std::runtime_error("Can't create direct conversation, chat service pointer is invalid");
-    }
+    auto chat_service_shared = chat_service.lock();
 
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
-    User current_user = chat_service_d->user_service->get_user(pubnub_handle->get_user_id());
+    User current_user = chat_service_shared->user_service->get_user(pubnub_handle->get_user_id());
 
-    Membership host_membership = chat_service_d->membership_service->create_presentation_object(current_user, created_channel);
-    std::vector<Membership> invitee_memberships = chat_service_d->membership_service->invite_multiple_to_channel(final_channel_id, users);
+    Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
+    std::vector<Membership> invitee_memberships = chat_service_shared->membership_service->invite_multiple_to_channel(final_channel_id, users);
 
     std::tuple<Channel, Membership, std::vector<Membership>> final_tuple(created_channel, host_membership, invitee_memberships);
 
@@ -288,6 +281,95 @@ void ChannelService::send_text(String channel_id, String message, pubnub_chat_me
     pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type));
 }
 
+void ChannelService::start_typing(String channel_id)
+{
+    ChannelEntity channel_entity = entity_repository->get_channel_entities().get(channel_id).value();
+
+    if(presentation_data_from_domain(channel_entity).type == String("public"))
+    {
+        throw std::runtime_error("Typing indicators are not supported in Public chats");
+    }
+    if(channel_entity.typing_sent) return;
+
+    auto chat_service_shared = chat_service.lock();
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    channel_entity.set_typing_sent(true);
+    channel_entity.set_typing_sent_timer(Timer());
+    channel_entity.typing_sent_timer.start(TYPING_TIMEOUT - 1000, [&channel_entity](){
+         channel_entity.set_typing_sent(false);
+    });
+    
+    channel_entity.set_typing_sent(true);
+    String event_payload = String("{\"value\": true, \"userId\": \"") + pubnub_handle->get_user_id() + String("\"}");
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
+}
+
+void ChannelService::stop_typing(String channel_id)
+{
+    ChannelEntity channel_entity = entity_repository->get_channel_entities().get(channel_id).value();
+
+    if(presentation_data_from_domain(channel_entity).type == String("public"))
+    {
+        throw std::runtime_error("Typing indicators are not supported in Public chats");
+    }
+    channel_entity.typing_sent_timer.stop();
+
+    if(!channel_entity.typing_sent) return;
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat_service_shared = chat_service.lock();
+
+    channel_entity.set_typing_sent(false);
+    String event_payload = String("{\"value\": false, \"userId\": \"") + pubnub_handle->get_user_id() + String("\"}");
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
+}
+
+void ChannelService::get_typing(String channel_id, std::function<void(std::vector<String>)> typing_callback)
+{
+    std::function<void(String)> internal_typing_callback = [=](String event_string)
+    {
+        ChannelEntity channel_entity = entity_repository->get_channel_entities().get(channel_id).value();
+
+        json event_json = json::parse(event_string);
+        String user_id = event_json["userId"].dump();
+        user_id.erase(0, 1);
+        user_id.erase(user_id.length() - 1, 1);
+        bool typing_value = event_json["value"];
+        
+        //stop typing
+        if(!typing_value && channel_entity.typing_indicators.find(user_id) != channel_entity.typing_indicators.end())
+        {
+            channel_entity.typing_indicators[user_id].stop();
+            channel_entity.typing_indicators.erase(user_id);
+        }
+        //start typing
+        if(typing_value)
+        {
+            //Stop the old timer
+            if(channel_entity.typing_indicators.find(user_id) != channel_entity.typing_indicators.end())
+            {
+                channel_entity.typing_indicators[user_id].stop();
+            }
+            
+            //Create and start new timer
+            Timer new_timer;
+            new_timer.start(TYPING_TIMEOUT, [=, &channel_entity]()
+            {
+                channel_entity.typing_indicators.erase(user_id);
+                typing_callback(getKeys(channel_entity.typing_indicators));
+            });
+            channel_entity.typing_indicators[user_id] = new_timer;
+        }
+        typing_callback(getKeys(channel_entity.typing_indicators));
+    };
+    auto chat_service_shared = chat_service.lock();
+
+    chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
+}
+
 String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
 {
     json message_json;
@@ -300,14 +382,10 @@ String ChannelService::chat_message_to_publish_string(String message, pubnub_cha
 
 Channel ChannelService::create_presentation_object(String channel_id)
 {
-    auto chat_service_d = chat_service.lock();
-    if(chat_service_d == nullptr)
-    {
-        throw std::runtime_error("Can't create channel object, chat service pointer is invalid");
-    }
+    auto chat_service_shared = chat_service.lock();
 
-    return Channel(channel_id, chat_service_d, shared_from_this(), chat_service_d->presence_service, chat_service_d->restrictions_service, 
-                    chat_service_d->message_service, chat_service_d->membership_service);
+    return Channel(channel_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service, 
+                    chat_service_shared->message_service, chat_service_shared->membership_service);
 }
 
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)

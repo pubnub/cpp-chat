@@ -53,6 +53,9 @@ namespace Pubnub
             PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
             PN_CHAT_EXPORT Pubnub::Membership invite(Pubnub::User user);
             PN_CHAT_EXPORT std::vector<Pubnub::Membership> invite_multiple(std::vector<Pubnub::User> users);
+            PN_CHAT_EXPORT void start_typing();
+            PN_CHAT_EXPORT void stop_typing();
+            PN_CHAT_EXPORT void get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback);
 
         private:
             PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 

@@ -10,7 +10,7 @@
 class EntityRepository;
 class PubNub;
 class ChatService;
-class UserEntity;
+struct UserEntity;
 
 class UserService : public std::enable_shared_from_this<UserService>
 {
