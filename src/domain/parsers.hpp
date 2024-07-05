@@ -27,6 +27,7 @@ namespace Parsers {
         std::pair<ChannelId, ChannelEntity> to_channel(pubnub_v2_message pn_message);
         std::pair<UserId, UserEntity> to_user(pubnub_v2_message pn_message);
         Pubnub::String message_string(pubnub_v2_message pn_message);
+        Pubnub::String event_type(Pubnub::String message_json);
     }
 }
 

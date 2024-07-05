@@ -1,5 +1,6 @@
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
+#include "enums.hpp"
 #include "infra/serialization.hpp"
 #include "infra/sync.hpp"
 #include "nlohmann/json.hpp"
@@ -8,13 +9,18 @@
 
 using json = nlohmann::json;
 
-CallbackService::CallbackService(EntityServicesBundle services, ThreadSafePtr<PubNub> pubnub, milliseconds wait_interval) :
+CallbackService::CallbackService(
+        EntityServicesBundle entity_bundle,
+        std::weak_ptr<PresenceService> presence_service,
+        ThreadSafePtr<PubNub> pubnub,
+        milliseconds wait_interval) :
     pubnub(pubnub),
     thread_run_flag(true),
-    chat_service(services.chat_service),
-    message_service(services.message_service),
-    channel_service(services.channel_service),
-    user_service(services.user_service)
+    chat_service(entity_bundle.chat_service),
+    message_service(entity_bundle.message_service),
+    channel_service(entity_bundle.channel_service),
+    user_service(entity_bundle.user_service),
+    presence_service(presence_service)
 {
     this->callback_thread = std::thread([this, wait_interval]() {
         while (this->thread_run_flag.load()) {
@@ -94,38 +100,36 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
         }
     }
 
-//
-//    //Handle events
-//    if(Deserialization::is_event_message(message_string))
-//    {
-//        if(this->event_callbacks_map.find(message_channel_string) != this->event_callbacks_map.end())
-//        {
-//            //Get event type from callback
-//            Pubnub::pubnub_chat_event_type event_type;
-//            std::function<void(Pubnub::String)> callback;
-//            std::tie(event_type, callback) = this->event_callbacks_map[message_channel_string];
-//
-//            //only send callback if event types ara matching
-//            if(Pubnub::chat_event_type_from_string(message_json["type"].dump()) == event_type)
-//            {
-//                callback(message_string);
-//            }
-//        }
-//    }
-//
-//    //Handle presence
-//    if(Deserialization::is_presence_message(message_string))
-//    {
-//        //get channel name without -pnpres as all presence messages are on channels with -pnpres
-//        Pubnub::String normal_channel_name = message_channel_string;
-//        normal_channel_name.erase(message_channel_string.length() - 7, 7);
-//
-//        if(this->channel_presence_callbacks_map.find(normal_channel_name) != this->channel_presence_callbacks_map.end())
-//        {
-//            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(normal_channel_name);
-//            this->channel_presence_callbacks_map[message_channel_string](current_users);
-//        }
-//    }
+    if (Parsers::PubnubJson::is_event(message_string)) {
+        auto maybe_callback = this->callbacks.get_event_callbacks().get(message_channel_string);
+        if (maybe_callback.has_value()) {
+            auto parsed_event = Parsers::PubnubJson::message_string(message);
+
+            Pubnub::pubnub_chat_event_type event_type;
+            std::function<void(Pubnub::String)> callback;
+            std::tie(event_type, callback) = maybe_callback.value();
+
+            auto message_event_type = Parsers::PubnubJson::event_type(parsed_event);
+            if (Pubnub::chat_event_type_from_string(message_event_type) == event_type) {
+                callback(parsed_event);
+            }
+        }
+    }
+
+    if (Parsers::PubnubJson::is_presence(message_string)) {
+        Pubnub::String normal_channel_name = message_channel_string;
+        auto pnpres_length = strlen("-pnpres");
+        normal_channel_name.erase(message_channel_string.length() - pnpres_length, pnpres_length);
+
+        auto maybe_callback = this->callbacks.get_channel_presence_callbacks().get(normal_channel_name);
+        if (maybe_callback.has_value()) {
+            if (auto service = this->presence_service.lock()) {
+                maybe_callback.value()(service->who_is_present(normal_channel_name));
+            } else {
+                throw std::runtime_error("Presence service is not available to call callback");
+            }
+        }
+    }
 //
 //    //Handle message updates
 //    if(Deserialization::is_message_update_message(message_string))

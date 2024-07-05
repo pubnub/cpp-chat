@@ -2,6 +2,7 @@
 #define PN_CHAT_CALLBACK_SERVICE_HPP
 
 #include "application/bundles.hpp"
+#include "application/presence_service.hpp"
 #include "infra/callbacks_repository.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
@@ -20,6 +21,7 @@ class CallbackService {
     public:
         CallbackService(
                 EntityServicesBundle entity_bundle,
+                std::weak_ptr<PresenceService> channel_service,
                 ThreadSafePtr<PubNub> pubnub,
                 milliseconds wait_interval = milliseconds(PUBNUB_WAIT_INTERVAL_MS)
         );
@@ -41,6 +43,7 @@ class CallbackService {
         std::weak_ptr<UserService> user_service;
         std::weak_ptr<ChatService> chat_service;
         std::weak_ptr<MessageService> message_service;
+        std::weak_ptr<PresenceService> presence_service;
         std::thread callback_thread;
         std::atomic<bool> thread_run_flag;
 };
