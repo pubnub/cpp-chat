@@ -56,6 +56,9 @@ namespace Pubnub
             PN_CHAT_EXPORT void start_typing();
             PN_CHAT_EXPORT void stop_typing();
             PN_CHAT_EXPORT void get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback);
+            PN_CHAT_EXPORT Pubnub::Channel pin_message(Pubnub::Message message);
+            PN_CHAT_EXPORT Pubnub::Channel unpin_message();
+            PN_CHAT_EXPORT Pubnub::Message get_pinned_message();
 
         private:
             PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 

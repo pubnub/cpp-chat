@@ -2,6 +2,7 @@
 #include "chat_service.hpp"
 #include "user_service.hpp"
 #include "membership_service.hpp"
+#include "message_service.hpp"
 #include "presentation/message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
@@ -368,6 +369,28 @@ void ChannelService::get_typing(String channel_id, std::function<void(std::vecto
     auto chat_service_shared = chat_service.lock();
 
     chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
+}
+
+Pubnub::Message ChannelService::get_pinned_message(Pubnub::String channel_id)
+{
+    Channel channel = create_presentation_object(channel_id);
+    json custom_data_json = json::parse(channel.channel_data().custom_data_json);
+    if(!custom_data_json.contains("pinnedMessageTimetoken") || custom_data_json["pinnedMessageTimetoken"].is_null())
+    {
+        //TODO: I don't think we need to throw any error here, but we don't have empty message object.
+        throw std::invalid_argument("there is no any pinned message");
+    }
+
+    String message_timetoken = custom_data_json["pinnedMessageTimetoken"].dump();
+    message_timetoken.erase(0, 1);
+    message_timetoken.erase(message_timetoken.length() - 1, 1);
+
+    auto chat_service_shared = chat_service.lock();
+
+    Pubnub::Message pinned_message = chat_service_shared->message_service->get_message(message_timetoken, channel_id);
+
+    //TODO: also check here for pinned message in thread channela after implementing threads
+    return pinned_message;
 }
 
 String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)

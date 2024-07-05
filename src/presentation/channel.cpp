@@ -103,3 +103,21 @@ std::vector<Membership> Channel::invite_multiple(std::vector<User> users)
 {
     return this->membership_service->invite_multiple_to_channel(channel_id(), users);
 }
+
+
+Pubnub::Channel Channel::pin_message(Pubnub::Message message)
+{
+    this->channel_service->pin_message_to_channel(message, *this);
+    return *this;
+}
+
+Pubnub::Channel Channel::unpin_message()
+{
+    this->channel_service->unpin_message_from_channel(*this);
+    return *this;
+}
+
+Pubnub::Message Channel::get_pinned_message()
+{
+    return this->channel_service->get_pinned_message(channel_id());
+}

@@ -42,7 +42,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void start_typing(Pubnub::String channel_id);
         void stop_typing(Pubnub::String channel_id);
         void get_typing(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> typing_callback);
-        
+        Pubnub::Message get_pinned_message(Pubnub::String channel_id);
+
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data);
         Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
 
