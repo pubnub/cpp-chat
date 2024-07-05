@@ -118,17 +118,14 @@ Channel ChannelService::create_channel(String channel_id, ChatChannelData data) 
         return create_presentation_object(channel_id);
     }
 
-    Channel channel = create_presentation_object(channel_id);
-
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, data);
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string());
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string());
+    }
 
-    //Add channel_entity to repository
-    entity_repository->get_channel_entities().update_or_insert(channel_id, new_channel_entity);
-    
-    return channel;
+    return this->create_channel_object(std::make_pair(channel_id, new_channel_entity));
 }
 
 Channel ChannelService::get_channel(String channel_id)
@@ -405,4 +402,16 @@ ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &cha
     channel_data.type = channel_entity.type;
 
     return channel_data;
+}
+
+Channel ChannelService::create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data)
+{
+    if (auto chat = this->chat_service.lock()) {
+        this->entity_repository->get_channel_entities().update_or_insert(channel_data);
+
+        return Channel(channel_data.first, chat, shared_from_this(), chat->presence_service, chat->restrictions_service, 
+                        chat->message_service, chat->membership_service);
+    } else {
+        throw std::runtime_error("Chat service is not available to create channel object");
+    }
 }

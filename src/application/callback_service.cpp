@@ -52,12 +52,13 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
 //        throw std::runtime_error("Failed to parse message into json");
 //    }
 
+    // TODO: merge this combination of ifs into something more readable
     if (Parsers::PubnubJson::is_message(message_string)) {
         auto maybe_callback = this->callbacks.get_message_callbacks().get(message_channel_string);
         if (maybe_callback.has_value()) {
             auto parsed_message = Parsers::PubnubJson::to_message(message);
             if (auto service = this->message_service.lock()) {
-                auto message = service->create_message(parsed_message);
+                auto message = service->create_message_object(parsed_message);
                 maybe_callback.value()(message);
             } else {
                 // TODO: is it a good idea to throw here?
@@ -66,15 +67,18 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
         }
     }
     
-//    //Handle channel updates
-//    if(Deserialization::is_channel_update_message(message_string))
-//    {
-//        if(this->channel_callbacks_map.find(message_channel_string) != this->channel_callbacks_map.end())
-//        {
-//            this->channel_callbacks_map[message_channel_string](
-//                    Deserialization::pubnub_message_to_chat_channel(this->chat_obj, message));
-//        }
-//    }
+    if (Parsers::PubnubJson::is_channel_update(message_string)) {
+        auto maybe_callback = this->callbacks.get_channel_callbacks().get(message_channel_string);
+        if (maybe_callback.has_value()) {
+            auto parsed_channel = Parsers::PubnubJson::to_channel(message);
+            if (auto service = this->channel_service.lock()) {
+                auto channel = service->create_channel_object(parsed_channel);
+                maybe_callback.value()(channel);
+            } else {
+                throw std::runtime_error("Channel service is not available to call callback");
+            }
+        }
+    }
 //
 //    //Handle user updates
 //    if(Deserialization::is_user_update_message(message_string))

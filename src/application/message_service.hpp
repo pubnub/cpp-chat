@@ -18,7 +18,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
 
         std::vector<Pubnub::Message> get_channel_history(Pubnub::String channel_id, Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
         Pubnub::Message get_message(Pubnub::String timetoken, Pubnub::String channel_id);
-        Pubnub::Message create_message(std::pair<Pubnub::String, MessageEntity> message_data);
+        Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data);
 
         Pubnub::Message create_presentation_object(Pubnub::String timetoken);
         

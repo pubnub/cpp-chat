@@ -36,7 +36,7 @@ std::vector<Message> MessageService::get_channel_history(Pubnub::String channel_
         MessageEntity new_message_entity = create_domain_from_message_json(String(element.dump()), channel_id);
 
         messages.push_back(
-                this->create_message(std::make_pair(String(element["id"]), new_message_entity))
+                this->create_message_object(std::make_pair(String(element["id"]), new_message_entity))
         );
     }
 
@@ -135,7 +135,7 @@ ChatMessageData MessageService::presentation_data_from_domain(MessageEntity &mes
     return message_data;
 }
 
-Pubnub::Message MessageService::create_message(std::pair<Pubnub::String, MessageEntity> message_data)
+Pubnub::Message MessageService::create_message_object(std::pair<Pubnub::String, MessageEntity> message_data)
 {
     if (auto chat = this->chat_service.lock()) {
         this->entity_repository
