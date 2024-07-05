@@ -2,6 +2,7 @@
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
+#include "presentation/message.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -55,9 +56,10 @@ Message MessageService::get_message(String timetoken, Pubnub::String channel_id)
     return messages[0];
 }
 
+// TODO: where is that usefull?
 Message MessageService::create_presentation_object(String timetoken)
 {
- auto chat_service_shared = chat_service.lock();
+    auto chat_service_shared = chat_service.lock();
     if(chat_service_shared == nullptr)
     {
         throw std::runtime_error("Can't create message object, chat service pointer is invalid");
@@ -80,6 +82,7 @@ MessageEntity MessageService::create_domain_from_presentation_data(String timeto
     return new_message_entity;
 }
 
+// TODO: this is domain...
 MessageEntity MessageService::create_domain_from_message_json(String message_json, String channel_id)
 {
     json message_data_json = json::parse(message_json);;
@@ -142,4 +145,13 @@ ChatMessageData MessageService::presentation_data_from_domain(MessageEntity &mes
     message_data.message_actions = message_entity.message_actions;
 
     return message_data;
+}
+
+Pubnub::Message MessageService::create_message(std::pair<Pubnub::String, MessageEntity> message_data)
+{
+    this->entity_repository
+        ->get_message_entities()
+        .update_or_insert(message_data.first, message_data.second);
+
+    return Pubnub::Message(message_data.first, nullptr, shared_from_this());
 }

@@ -33,11 +33,10 @@ namespace Pubnub
         private:
             PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service);
             Pubnub::String timetoken_internal;
-
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<MessageService> message_service;
 
-        friend class MessageService;
+        friend class ::MessageService;
     };
 }
 #endif /* PN_CHAT_MESSAGE_H */
