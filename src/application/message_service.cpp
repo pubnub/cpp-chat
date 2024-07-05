@@ -34,10 +34,10 @@ std::vector<Message> MessageService::get_channel_history(Pubnub::String channel_
     for (auto& element : messages_array_json)
     {
         MessageEntity new_message_entity = create_domain_from_message_json(String(element.dump()), channel_id);
-        Message message = create_presentation_object(String(element["id"]));
 
-        entity_repository->get_message_entities().update_or_insert(String(element["id"]), new_message_entity);
-        messages.push_back(message);
+        messages.push_back(
+                this->create_message(std::make_pair(String(element["id"]), new_message_entity))
+        );
     }
 
     return messages;
@@ -54,18 +54,6 @@ Message MessageService::get_message(String timetoken, Pubnub::String channel_id)
     }
 
     return messages[0];
-}
-
-// TODO: where is that usefull?
-Message MessageService::create_presentation_object(String timetoken)
-{
-    auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Can't create message object, chat service pointer is invalid");
-    }
-
-    return Message(timetoken, chat_service_shared, shared_from_this());
 }
 
 MessageEntity MessageService::create_domain_from_presentation_data(String timetoken, ChatMessageData &presentation_data)
