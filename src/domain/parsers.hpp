@@ -28,6 +28,7 @@ namespace Parsers {
         std::pair<UserId, UserEntity> to_user(pubnub_v2_message pn_message);
         Pubnub::String message_string(pubnub_v2_message pn_message);
         Pubnub::String event_type(Pubnub::String message_json);
+        Pubnub::String message_update_timetoken(Pubnub::String message_json);
     }
 }
 

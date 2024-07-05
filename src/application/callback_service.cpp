@@ -151,6 +151,22 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
 //            callback(message_obj);
 //        }
 //    }
+
+    if (Parsers::PubnubJson::is_message_update(message_string)) {
+        Pubnub::String message_timetoken = Parsers::PubnubJson::message_update_timetoken(message_string);
+        
+        auto maybe_callback = this->callbacks.get_message_update_callbacks().get(message_timetoken);
+        if (maybe_callback.has_value()) {
+            Pubnub::String message_channel;
+            std::function<void(Pubnub::Message)> callback;
+            std::tie(message_channel, callback) = maybe_callback.value();
+            if (auto service = this->channel_service.lock()) {
+                callback(service->get_channel(message_channel).get_message(message_timetoken));
+            } else {
+                throw std::runtime_error("Channel service is not available to call callback");
+            }
+        }
+    }
 //
 //    //Handle message updates
 //    if(Deserialization::is_membership_update_message(message_string))
