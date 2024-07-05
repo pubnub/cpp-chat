@@ -93,3 +93,13 @@ std::vector<Membership> Channel::get_members(int limit, String start_timetoken, 
 {
     return this->membership_service->get_channel_members(channel_id(), limit, start_timetoken, end_timetoken);
 }
+
+Membership Channel::invite(User user)
+{
+    return this->membership_service->invite_to_channel(channel_id(), user);
+}
+
+std::vector<Membership> Channel::invite_multiple(std::vector<User> users)
+{
+    return this->membership_service->invite_multiple_to_channel(channel_id(), users);
+}

@@ -2,6 +2,7 @@
 #include "application/chat_service.hpp"
 #include "application/user_service.hpp"
 #include "application/channel_service.hpp"
+#include "chat_helpers.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -31,16 +32,15 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
 
     json users_array_json = response_json["data"];
 
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Can't get channel members, chat service pointer is invalid");
+    }
 
     std::vector<Membership> memberships;
-
     for (auto& element : users_array_json)
     {
-        auto chat_service_shared = chat_service.lock();
-        if(chat_service_shared == nullptr)
-        {
-            throw std::runtime_error("Can't get channel members, chat service pointer is invalid");
-        }
         //Create user entity, as this user maight be not in the repository yet. If it already is there, it will be updated
         UserEntity user_entity = chat_service_shared->user_service->create_domain_from_user_response_data(String(element["uuid"].dump()));
         String user_id = String(element["uuid"]["id"]);
@@ -55,6 +55,95 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
     }
 
     return memberships;
+}
+
+Membership MembershipService::invite_to_channel(String channel_id, User user)
+{
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Can't invite to channel, chat service pointer is invalid");
+    }
+
+    Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+
+    if(channel.channel_data().type == String("public"))
+    {
+        throw std::runtime_error("Channel invites are not supported in Public chats");
+    }
+
+    //TODO:: check here if user already is on that channel. Requires C-Core filtering
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String set_memeberships_obj = create_set_memberships_object(channel_id, "");
+    String memberships_response = pubnub_handle->set_memberships(user.user_id(), set_memeberships_obj, include_string);
+    
+    json memberships_response_json = json::parse(memberships_response);
+
+    String channel_data_string = memberships_response_json["data"][0].dump();
+
+    String event_payload = "{\"channelType\": \"" + channel.channel_data().type + "\", \"channelId\": \"" + channel_id + "\"}";
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_INVITE, user.user_id(), event_payload);
+
+    //This channel is updated, so we need to update it in entity repository as well
+    ChannelEntity channel_entity = chat_service_shared->channel_service->create_domain_from_channel_response_data(channel_data_string);
+    entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
+    
+    return create_presentation_object(user, channel);
+}
+
+std::vector<Membership> MembershipService::invite_multiple_to_channel(String channel_id, std::vector<User> users)
+{
+    auto chat_service_shared = chat_service.lock();
+    if(chat_service_shared == nullptr)
+    {
+        throw std::runtime_error("Can't invite multiple to channel, chat service pointer is invalid");
+    }
+
+    Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+
+    if(channel.channel_data().type == String("public"))
+    {
+        throw std::runtime_error("Channel invites are not supported in Public chats");
+    }
+
+    //TODO:: check here if users already are on that channel. Requires C-Core filtering
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    std::vector<String> filtered_users_ids;
+
+    for(auto &user : users)
+    {
+        filtered_users_ids.push_back(user.user_id());
+    }
+
+    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
+    String set_members_response = pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
+    
+    std::vector<Pubnub::Membership> invitees_memberships;
+
+    json memberships_response_json = json::parse(set_members_response);
+    json memberships_data_array = memberships_response_json["data"];
+
+    String test = memberships_data_array.dump();
+    
+
+    for (json::iterator single_data_json = memberships_data_array.begin(); single_data_json != memberships_data_array.end(); ++single_data_json) 
+    {
+        User user = chat_service_shared->user_service->create_presentation_object(String(single_data_json.value()["uuid"]["id"]));
+        Membership membership = create_presentation_object(user, channel);
+        invitees_memberships.push_back(membership);
+
+        String event_payload = "{\"channelType\": \"" + channel.channel_data().type + "\", \"channelId\": \"" + channel_id + "\"}";
+        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_INVITE, user.user_id(), event_payload);
+    }
+
+    return invitees_memberships;
+
 }
 
 Membership MembershipService::create_presentation_object(User user, Channel channel)
