@@ -94,10 +94,6 @@ std::vector<Membership> MembershipService::get_user_memberships(String user_id, 
 Membership MembershipService::invite_to_channel(String channel_id, User user)
 {
     auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Can't invite to channel, chat service pointer is invalid");
-    }
 
     Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
 
@@ -131,10 +127,6 @@ Membership MembershipService::invite_to_channel(String channel_id, User user)
 std::vector<Membership> MembershipService::invite_multiple_to_channel(String channel_id, std::vector<User> users)
 {
     auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Can't invite multiple to channel, chat service pointer is invalid");
-    }
 
     Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
 
@@ -158,7 +150,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
     String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
     String set_members_response = pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
     
-    std::vector<Pubnub::Membership> invitees_memberships;
+    std::vector<Membership> invitees_memberships;
 
     json memberships_response_json = json::parse(set_members_response);
     json memberships_data_array = memberships_response_json["data"];
@@ -180,13 +172,44 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
 
 }
 
+Membership MembershipService::update(User user, Channel channel, String custom_object_json)
+{
+    String custom_object_json_string;
+    custom_object_json.empty() ? custom_object_json_string = "{}" : custom_object_json_string = custom_object_json;
+
+    json response_json = json::parse(custom_object_json_string);
+    
+    if(response_json.is_null() || !response_json.is_object())
+    {
+        throw std::invalid_argument("Can't update membership, custom_object_json is not valid json object");
+    }
+    auto pubnub_handle = pubnub->lock();
+
+	String set_memberships_string = String("[{\"channel\": {\"id\": \"") + channel.channel_id() + String("\"}, \"custom\": ") + custom_object_json_string + String("}]");
+    pubnub_handle->set_memberships(user.user_id(), set_memberships_string);
+
+    return create_membership_object(user, channel, create_domain_membership(custom_object_json_string));
+}
+
+void MembershipService::stream_updates_on(std::vector<Membership> memberships, std::function<void(Membership)> membership_callback)
+{
+    if(memberships.empty())
+    {
+        throw std::invalid_argument("Cannot stream memberships updates on an empty list");
+    }
+
+    auto pubnub_handle = pubnub->lock();
+
+    for(auto membership : memberships)
+    {
+        //TODO:: CALLBACK  register membership callback here
+        pubnub_handle->subscribe_to_channel(membership.channel.channel_id());
+    }
+}
+
 Membership MembershipService::create_presentation_object(User user, Channel channel)
 {
     auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Can't create membership object, chat service pointer is invalid");
-    }
 
     return Membership(user, channel, chat_service_shared, shared_from_this());
 }
@@ -202,4 +225,12 @@ Membership MembershipService::create_membership_object(User user, Channel channe
     }
 
     throw std::runtime_error("Can't create membership, chat service pointer is invalid");
+}
+
+MembershipEntity MembershipService::create_domain_membership(String custom_object_json)
+{
+    MembershipEntity new_membership_entity;
+    new_membership_entity.custom_field = custom_object_json;
+    return new_membership_entity;
+    
 }
