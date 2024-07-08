@@ -25,7 +25,8 @@ namespace Pubnub
             MessageDraftConfig draft_config;
 
         private:
-            PN_CHAT_EXPORT MessageDraft::MessageDraft(Pubnub::Channel channel, Pubnub::MessageDraftConfig draft_config, std::shared_ptr<MessageService> message_service);
+            PN_CHAT_EXPORT MessageDraft(Pubnub::Channel channel, Pubnub::MessageDraftConfig draft_config, std::shared_ptr<MessageService> message_service);
+
         
             Pubnub::String previous_value;
             std::map<int, Pubnub::User> mentioned_users;
