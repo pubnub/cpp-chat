@@ -33,6 +33,40 @@ class CallbackService {
             }
         };
 
+         /* CALLBACKS */
+        void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
+        void remove_message_callback(Pubnub::String channel_id);
+
+        void register_message_update_callback(
+                Pubnub::String message_timetoken,
+                Pubnub::String channel_id,
+                std::function<void(Pubnub::Message)> message_update_callback
+        );
+        void remove_message_update_callback(Pubnub::String message_timetoken);
+
+        void register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback);
+        void remove_channel_callback(Pubnub::String channel_id);
+
+        void register_event_callback(
+                Pubnub::String channel_id,
+                Pubnub::pubnub_chat_event_type chat_event_type,
+                std::function<void(Pubnub::String)> event_callback
+        );
+        void remove_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type);
+
+        void register_user_callback(Pubnub::String user_id, std::function<void(Pubnub::User)> user_callback);
+        void remove_user_callback(Pubnub::String user_id);
+
+        void register_channel_presence_callback(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback);
+        void remove_channel_presence_callback(Pubnub::String channel_id);
+
+        void register_membership_callback(
+                Pubnub::String channel_id,
+                Pubnub::String user_id,
+                std::function<void(Pubnub::Membership)> membership_callback
+        );
+        void remove_membership_callback(Pubnub::String channel_id);
+
     private:
         void resolve_callbacks();
         void broadcast_callbacks_from_message(pubnub_v2_message message);

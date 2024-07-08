@@ -32,6 +32,91 @@ CallbackService::CallbackService(
     });
 }
 
+void CallbackService::register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback)
+{
+    this->callbacks.get_message_callbacks().update_or_insert(channel_id, message_callback);
+}
+
+void CallbackService::remove_message_callback(Pubnub::String channel_id)
+{
+    this->callbacks.get_message_callbacks().remove(channel_id);
+}
+
+void CallbackService::register_message_update_callback(
+        Pubnub::String message_timetoken,
+        Pubnub::String channel_id,
+        std::function<void(Pubnub::Message)> message_update_callback
+)
+{
+    this->callbacks.get_message_update_callbacks().update_or_insert(message_timetoken, std::make_pair(channel_id, message_update_callback));
+}
+
+void CallbackService::remove_message_update_callback(Pubnub::String message_timetoken)
+{
+    this->callbacks.get_message_update_callbacks().remove(message_timetoken);
+}
+
+void CallbackService::register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback)
+{
+    this->callbacks.get_channel_callbacks().update_or_insert(channel_id, channel_callback);
+}
+
+void CallbackService::remove_channel_callback(Pubnub::String channel_id)
+{
+    this->callbacks.get_channel_callbacks().remove(channel_id);
+}
+
+void CallbackService::register_event_callback(
+        Pubnub::String channel_id,
+        Pubnub::pubnub_chat_event_type chat_event_type,
+        std::function<void(Pubnub::String)> event_callback
+)
+{
+    //TODO: Storing this in map is not good idea, as someone could listen for 2 types on the same channel. Then only 1 type would work.
+    //But it's not causing any issues in MVP, as only 2 types are supported and type REPORT can only be used with Internal Admin Channel
+    //In MVP we only support these 2 types.
+    this->callbacks.get_event_callbacks().update_or_insert(channel_id, std::make_pair(chat_event_type, event_callback));
+}
+
+void CallbackService::remove_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type)
+{
+    this->callbacks.get_event_callbacks().remove(channel_id);
+}
+
+void CallbackService::register_user_callback(Pubnub::String user_id, std::function<void(Pubnub::User)> user_callback)
+{
+    this->callbacks.get_user_callbacks().update_or_insert(user_id, user_callback);
+}
+
+void CallbackService::remove_user_callback(Pubnub::String user_id)
+{
+    this->callbacks.get_user_callbacks().remove(user_id);
+}
+
+void CallbackService::register_channel_presence_callback(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback)
+{
+    this->callbacks.get_channel_presence_callbacks().update_or_insert(channel_id, presence_callback);
+}
+
+void CallbackService::remove_channel_presence_callback(Pubnub::String channel_id)
+{
+    this->callbacks.get_channel_presence_callbacks().remove(channel_id);
+}
+
+void CallbackService::register_membership_callback(
+        Pubnub::String channel_id,
+        Pubnub::String user_id,
+        std::function<void(Pubnub::Membership)> membership_callback
+)
+{
+    this->callbacks.get_membership_callbacks().update_or_insert(channel_id, std::make_pair(user_id, membership_callback));
+}
+
+void CallbackService::remove_membership_callback(Pubnub::String channel_id)
+{
+    this->callbacks.get_membership_callbacks().remove(channel_id);
+}
+
 void CallbackService::resolve_callbacks() {
     auto messages = [this]{
         auto guard = this->pubnub->lock();
@@ -39,6 +124,7 @@ void CallbackService::resolve_callbacks() {
     }();
 
     for (auto message : messages) {
+        this->broadcast_callbacks_from_message(message);
     }
 }
 
