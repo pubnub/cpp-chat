@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Timers;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
+using PubnubChatApi.Entities.Events;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
@@ -19,7 +19,7 @@ namespace PubNubChatAPI.Entities
     /// A channel is a entity that allows users to publish and receive messages.
     /// </para>
     /// </summary>
-    public class Channel : PointerWrapper
+    public class Channel : UniquePointerWrapper
     {
         #region DLL Imports
 
@@ -422,8 +422,7 @@ namespace PubNubChatAPI.Entities
             var draftPointer = pn_channel_create_message_draft_dirty(
                 pointer, "channel", true, 10, 10);
             CUtilities.CheckCFunctionResult(draftPointer);
-            //TODO: bit of a hack to use the pointer as an ID
-            return new MessageDraft(draftPointer, draftPointer.ToString());
+            return new MessageDraft(draftPointer);
         }
 
         /// <summary>

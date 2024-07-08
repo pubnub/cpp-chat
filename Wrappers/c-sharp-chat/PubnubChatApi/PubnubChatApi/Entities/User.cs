@@ -14,7 +14,7 @@ namespace PubNubChatAPI.Entities
     /// You can get information about the user, update the user's data, delete the user, set restrictions on the user,
     /// </para>
     /// </summary>
-    public class User : PointerWrapper
+    public class User : UniquePointerWrapper
     {
         #region DLL Imports
 

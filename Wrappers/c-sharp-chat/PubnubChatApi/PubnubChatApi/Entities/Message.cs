@@ -14,7 +14,7 @@ namespace PubNubChatAPI.Entities
     /// </summary>
     /// <seealso cref="Chat"/>
     /// <seealso cref="Channel"/>
-    public class Message : PointerWrapper
+    public class Message : UniquePointerWrapper
     {
         #region DLL Imports
 

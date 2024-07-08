@@ -3,7 +3,7 @@ using PubnubChatApi.Entities.Data;
 
 namespace PubNubChatApi.Tests;
 
-public class EventTests
+public class ChatEventTests
 {
     private Chat chat;
     private Channel channel;
@@ -24,9 +24,9 @@ public class EventTests
     [Test]
     public async Task TestReportEvents()
     {
-        chat.OnReportEvent += reportEventJson =>
+        chat.OnReportEvent += reportEvent =>
         {
-            Assert.True(reportEventJson.Contains("some_reason"));
+            Assert.True(reportEvent.Json.Contains("some_reason"));
         };
         chat.StartListeningForReportEvents();
         user.ReportUser("some_reason");
@@ -36,9 +36,9 @@ public class EventTests
     [Test]
     public async Task TestModerationEvents()
     {
-        chat.OnModerationEvent += moderationEventJson =>
+        chat.OnModerationEvent += moderationEvent =>
         {
-            Assert.True(moderationEventJson.Contains("some_reason"));
+            Assert.True(moderationEvent.Json.Contains("some_reason"));
         };
         chat.StartListeningForUserModerationEvents(user.Id);
         user.SetRestriction(channel.Id, new Restriction()

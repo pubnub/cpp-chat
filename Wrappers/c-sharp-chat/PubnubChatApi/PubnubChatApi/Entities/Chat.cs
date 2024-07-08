@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
+using PubnubChatApi.Entities.Events;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -223,10 +224,10 @@ namespace PubNubChatAPI.Entities
         private Dictionary<string, Message> messageWrappers = new();
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
-
-        //TODO: these will be Action<Event>
-        public event Action<string> OnReportEvent;
-        public event Action<string> OnModerationEvent;
+        
+        public event Action<ReportEvent> OnReportEvent;
+        public event Action<ModerationEvent> OnModerationEvent;
+        public event Action<ChatEvent> OnAnyEvent; 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Chat"/> class.
@@ -288,15 +289,22 @@ namespace PubNubChatAPI.Entities
                         var eventData = JsonConvert.DeserializeObject<Dictionary<string, string>>(eventJson);
                         if (eventData != null && eventData.TryGetValue("type", out var eventType))
                         {
-                            //TODO: dumb
+                            //TODO: dumb, will be replaced by getting serialized event pointer + type
                             switch (eventType)
                             {
                                 case "moderation":
-                                    OnModerationEvent?.Invoke(eventJson);
+                                    //TODO: real pointer!
+                                    var moderationEvent = new ModerationEvent(IntPtr.Zero, eventJson);
+                                    OnAnyEvent?.Invoke(moderationEvent);
+                                    OnModerationEvent?.Invoke(moderationEvent);
                                     break;
                                 case "report":
-                                    OnReportEvent?.Invoke(eventJson);
+                                    //TODO: real pointer!
+                                    var reportEvent = new ReportEvent(IntPtr.Zero, eventJson);
+                                    OnAnyEvent?.Invoke(reportEvent);
+                                    OnReportEvent?.Invoke(reportEvent);
                                     break;
+                                //TODO: should this one also be an Event Entity?
                                 case "typing":
                                     if (eventData.TryGetValue("channelId", out var channelId) &&
                                         TryGetChannel(channelId, out var channel))
@@ -1327,6 +1335,7 @@ namespace PubNubChatAPI.Entities
         }
 
         //TODO: full summary
+        //TODO: might turn this into a StartListeningForEvents<T> later
         /// <summary>
         /// Start listening for Report Events.
         /// </summary>

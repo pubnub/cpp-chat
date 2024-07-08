@@ -12,7 +12,7 @@ namespace PubNubChatAPI.Entities
         
         #endregion
         
-        internal MessageDraft(IntPtr pointer, string uniqueId) : base(pointer, uniqueId)
+        internal MessageDraft(IntPtr pointer) : base(pointer)
         {
         }
 

@@ -136,7 +136,14 @@ public class ChannelTests
     public void TestCreateMessageDraft()
     {
         var channel = chat.CreatePublicConversation("message_draft_test_channel");
-        var draft = channel.CreateMessageDraft();
-        Assert.True(!string.IsNullOrEmpty(draft.Id));
+        try
+        {
+            var draft = channel.CreateMessageDraft();
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+            Assert.Fail();
+        }
     }
 }

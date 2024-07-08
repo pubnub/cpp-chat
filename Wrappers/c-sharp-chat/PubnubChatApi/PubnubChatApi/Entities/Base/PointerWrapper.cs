@@ -7,12 +7,9 @@ namespace PubNubChatAPI.Entities
         protected IntPtr pointer;
         internal IntPtr Pointer => pointer;
         
-        public string Id { get; protected set; }
-
-        internal PointerWrapper(IntPtr pointer, string uniqueId)
+        internal PointerWrapper(IntPtr pointer)
         {
             this.pointer = pointer;
-            Id = uniqueId;
         }
 
         internal void UpdatePointer(IntPtr newPointer)
