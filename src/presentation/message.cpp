@@ -1,12 +1,14 @@
 #include "presentation/message.hpp"
 #include "application/message_service.hpp"
+#include "application/channel_service.hpp"
 
 using namespace Pubnub;
 
-Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service) :
+Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service) :
 timetoken_internal(timetoken),
 chat_service(chat_service),
-message_service(message_service)
+message_service(message_service),
+channel_service(channel_service)
 {}
 
 ChatMessageData Message::message_data()
@@ -38,7 +40,8 @@ bool Message::deleted()
 
 void Message::pin()
 {
-
+    Channel channel = this->channel_service->get_channel(message_data().channel_id);
+    this->channel_service->pin_message_to_channel(*this, channel);
 }
 
 void Message::stream_updates(std::function<void(Message)> message_callback)

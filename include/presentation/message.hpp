@@ -10,6 +10,7 @@
 
 class MessageService;
 class ChatService;
+class ChannelService;
 
 namespace Pubnub
 {
@@ -42,10 +43,11 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
 
         private:
-            PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service);
+            PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service);
             Pubnub::String timetoken_internal;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<MessageService> message_service;
+            std::shared_ptr<ChannelService> channel_service;
 
         friend class ::MessageService;
     };

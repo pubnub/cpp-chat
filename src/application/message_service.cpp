@@ -1,4 +1,5 @@
 #include "message_service.hpp"
+#include "chat_service.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -184,7 +185,7 @@ Message MessageService::create_message_object(std::pair<String, MessageEntity> m
             ->get_message_entities()
             .update_or_insert(message_data.first, message_data.second);
 
-        return Message(message_data.first, chat, shared_from_this());
+        return create_presentation_object(message_data.first);
     }
 
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
@@ -194,7 +195,7 @@ Message MessageService::create_presentation_object(String timetoken)
 {
     if(auto chat_service_shared = chat_service.lock())
     {
-        return Message(timetoken, chat_service_shared, shared_from_this());
+        return Message(timetoken, chat_service_shared, shared_from_this(), chat_service_shared->channel_service);
     }
     
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
