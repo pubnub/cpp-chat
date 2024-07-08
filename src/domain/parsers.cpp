@@ -1,5 +1,6 @@
 #include "parsers.hpp"
 #include "nlohmann/json.hpp"
+#include <pubnub_memory_block.h>
 
 using json = nlohmann::json;
 
@@ -57,4 +58,12 @@ bool Parsers::PubnubJson::is_membership_update(Pubnub::String message_json_strin
         message_json["source"] == "objects" && message_json["type"] == "membership";
 }
 
+static Pubnub::String string_from_pn_block(struct pubnub_char_mem_block pn_block)
+{
+    return Pubnub::String(pn_block.ptr, pn_block.size);
+}
 
+std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message(pubnub_v2_message pn_message)
+{
+    
+}
