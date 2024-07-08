@@ -60,7 +60,7 @@ User UserService::get_user(String user_id)
     return user;
 }
 
-std::vector<User> UserService::get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end)
+std::vector<User> UserService::get_users(String include, int limit, String start, String end)
 {
     auto pubnub_handle = this->pubnub->lock();
     String users_response = pubnub_handle->get_all_user_metadata(include, limit, start, end);
@@ -122,7 +122,23 @@ void UserService::delete_user(String user_id)
     entity_repository->get_user_entities().remove(user_id);
 }
 
-Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
+void UserService::stream_updates_on(std::vector<User> users, std::function<void(User)> user_callback)
+{
+    if(users.empty())
+    {
+        throw std::invalid_argument("Cannot stream user updates on an empty list");
+    }
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    for(auto user : users)
+    {
+        //TODO:: CALLBACK register user callback here
+        pubnub_handle->subscribe_to_channel(user.user_id());
+    }
+}
+
+User UserService::create_presentation_object(String user_id)
 {
     auto chat_service_shared = chat_service.lock();
     if(chat_service_shared == nullptr)
@@ -133,7 +149,7 @@ Pubnub::User UserService::create_presentation_object(Pubnub::String user_id)
     return User(user_id, chat_service_shared, shared_from_this(), chat_service_shared->presence_service, chat_service_shared->restrictions_service, chat_service_shared->membership_service);
 }
 
-UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user_id, Pubnub::ChatUserData &presentation_data)
+UserEntity UserService::create_domain_from_presentation_data(String user_id, ChatUserData &presentation_data)
 {
     UserEntity new_user_entity;
     new_user_entity.user_id = user_id;
@@ -147,7 +163,7 @@ UserEntity UserService::create_domain_from_presentation_data(Pubnub::String user
 
     return new_user_entity;
 }
-UserEntity UserService::create_domain_from_user_response(Pubnub::String json_response)
+UserEntity UserService::create_domain_from_user_response(String json_response)
 {
     json user_response_json = json::parse(json_response);
 
@@ -166,7 +182,7 @@ UserEntity UserService::create_domain_from_user_response(Pubnub::String json_res
     return create_domain_from_user_response_data(String(user_data_json.dump()));
 }
 
-UserEntity UserService::create_domain_from_user_response_data(Pubnub::String json_response_data)
+UserEntity UserService::create_domain_from_user_response_data(String json_response_data)
 {
     json user_data_json = json::parse(json_response_data);
 
@@ -218,7 +234,7 @@ UserEntity UserService::create_domain_from_user_response_data(Pubnub::String jso
     return new_user_entity;
 }
 
-Pubnub::ChatUserData UserService::presentation_data_from_domain(UserEntity &user_entity)
+ChatUserData UserService::presentation_data_from_domain(UserEntity &user_entity)
 {
     ChatUserData user_data;
     user_data.user_name = user_entity.user_name;
@@ -232,14 +248,14 @@ Pubnub::ChatUserData UserService::presentation_data_from_domain(UserEntity &user
     return user_data;
 }
 
-Pubnub::User UserService::create_user_object(std::pair<Pubnub::String, UserEntity> user_data)
+User UserService::create_user_object(std::pair<String, UserEntity> user_data)
 {
     if (auto chat = this->chat_service.lock()) {
         this->entity_repository
             ->get_user_entities()
             .update_or_insert(user_data);
 
-        return Pubnub::User(
+        return User(
             user_data.first,
             chat,
             shared_from_this(),

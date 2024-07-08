@@ -6,6 +6,7 @@
 #include "string.hpp"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class EntityRepository;
 class PubNub;
@@ -22,6 +23,7 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::vector<Pubnub::User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
         Pubnub::User update_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
         void delete_user(Pubnub::String user_id);
+        void stream_updates_on(std::vector<Pubnub::User> users, std::function<void(Pubnub::User)> user_callback);
 
         Pubnub::User create_presentation_object(Pubnub::String user_id);
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserEntity> user_data);

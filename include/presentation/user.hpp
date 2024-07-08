@@ -6,6 +6,7 @@
 #include "restrictions.hpp"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class UserService;
 class ChatService;
@@ -15,6 +16,8 @@ class MembershipService;
 
 namespace Pubnub
 {
+    class Membership;
+
     struct ChatUserData
     {
         Pubnub::String user_name = "";
@@ -40,6 +43,12 @@ namespace Pubnub
 
             PN_CHAT_EXPORT void set_restrictions(Pubnub::String channel_id, Pubnub::Restriction restrictions);
             PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
+            PN_CHAT_EXPORT void report(Pubnub::String reason);
+
+            PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+
+            PN_CHAT_EXPORT void stream_updates(std::function<void(User)> user_callback);
+            PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::User> users, std::function<void(Pubnub::User)> user_callback);
 
         private:
             PN_CHAT_EXPORT User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service,

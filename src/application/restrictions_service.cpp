@@ -27,10 +27,6 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
     }
     
     auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Failed to set restrictions, chat_service is invalid");
-    }
 
     auto pubnub_handle = this->pubnub->lock();
 
@@ -129,4 +125,12 @@ Restriction RestrictionsService::get_channel_restrictions(String user_id, String
    }
 
    return FinalRestrictionsData;
+}
+
+void RestrictionsService::report(Pubnub::String user_id, Pubnub::String reason)
+{
+    String payload = String("{\"reason\": \"") + reason + String("\", \"reportedUserId\": \"") + user_id + String("\"}");
+    
+    auto chat_service_shared = chat_service.lock();
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload);
 }

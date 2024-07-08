@@ -2,6 +2,7 @@
 #include "application/user_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
+#include "application/membership_service.hpp"
 
 using namespace Pubnub;
 
@@ -43,4 +44,23 @@ void User::set_restrictions(String channel_id, Restriction restrictions)
 Restriction User::get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, String start, String end)
 {
     return this->restrictions_service->get_channel_restrictions(user_id, channel_id, limit, start, end);
+}
+
+void User::report(String reason)
+{
+    this->restrictions_service->report(user_id(), reason);
+}
+
+std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken)
+{
+    return this->membership_service->get_user_memberships(user_id(), limit, start_timetoken, end_timetoken);
+}
+
+void User::stream_updates(std::function<void(User)> user_callback)
+{
+    this->user_service->stream_updates_on({*this}, user_callback);
+}
+void User::stream_updates_on(std::vector<Pubnub::User> users, std::function<void(User)> user_callback)
+{
+    this->user_service->stream_updates_on(users, user_callback);
 }

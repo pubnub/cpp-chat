@@ -33,10 +33,6 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
     json users_array_json = response_json["data"];
 
     auto chat_service_shared = chat_service.lock();
-    if(chat_service_shared == nullptr)
-    {
-        throw std::runtime_error("Can't get channel members, chat service pointer is invalid");
-    }
 
     std::vector<Membership> memberships;
     for (auto& element : users_array_json)
@@ -50,6 +46,44 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
         //We don't need to add channel to entity repository, as this whole function is called from a channel object - it has to already exist
         Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
         
+        Membership membership = create_presentation_object(user, channel);
+        memberships.push_back(membership);
+    }
+
+    return memberships;
+}
+
+std::vector<Membership> MembershipService::get_user_memberships(String user_id, int limit, String start_timetoken, String end_timetoken)
+{
+    String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
+
+    auto pubnub_handle = this->pubnub->lock();
+    String get_memberships_response = pubnub_handle->get_memberships(user_id, include_string, limit, start_timetoken, end_timetoken);
+
+    json response_json = json::parse(get_memberships_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get memberships, response is incorrect");
+    }
+
+    json channels_array_json = response_json["data"];
+
+    auto chat_service_shared = chat_service.lock();
+
+    std::vector<Membership> memberships;
+    for (auto& element : channels_array_json)
+    {
+        //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
+        ChannelEntity channel_entity = chat_service_shared->channel_service->create_domain_from_channel_response_data(String(element["channel"].dump()));
+        String channel_id = String(element["channel"]["id"]);
+        entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
+
+        Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+
+        //We don't need to add user to entity repository, as this whole function is called from a user object - it has to already exist
+        User user = chat_service_shared->user_service->create_presentation_object(user_id);
+
         Membership membership = create_presentation_object(user, channel);
         memberships.push_back(membership);
     }
