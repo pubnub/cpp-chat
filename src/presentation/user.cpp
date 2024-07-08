@@ -16,6 +16,11 @@ restrictions_service(restrictions_service),
 membership_service(membership_service)
 {}
 
+ChatUserData User::user_data()
+{
+    return user_service->get_user_data(user_id_internal);
+}
+
 User User::update(ChatUserData user_data)
 {
     return this->user_service->update_user(user_id_internal, user_data);

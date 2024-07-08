@@ -6,6 +6,7 @@
 #include "message_action.hpp"
 #include <memory>
 #include <vector>
+#include <functional>
 
 class MessageService;
 class ChatService;
@@ -28,7 +29,17 @@ namespace Pubnub
     {
         public:
             PN_CHAT_EXPORT inline Pubnub::String timetoken(){return timetoken_internal;};
-            //PN_CHAT_EXPORT Pubnub::String message_data();
+            PN_CHAT_EXPORT Pubnub::ChatMessageData message_data();
+
+            PN_CHAT_EXPORT Pubnub::Message edit_text(Pubnub::String new_text);
+            PN_CHAT_EXPORT Pubnub::String text();
+            PN_CHAT_EXPORT Pubnub::Message delete_message();
+            PN_CHAT_EXPORT bool deleted();
+
+            PN_CHAT_EXPORT void pin();
+
+            PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
+            PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
 
         private:
             PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service);

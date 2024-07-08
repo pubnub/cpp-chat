@@ -13,6 +13,18 @@ UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRep
     chat_service(chat_service)
 {}
 
+Pubnub::ChatUserData UserService::get_user_data(Pubnub::String user_id)
+{
+    auto maybe_user = this->entity_repository->get_user_entities().get(user_id);
+
+    if (!maybe_user.has_value()) 
+    {
+        throw std::invalid_argument("Failed to get user data, there is no channel with this id");
+    }
+
+    return presentation_data_from_domain(maybe_user.value());
+}
+
 User UserService::create_user(String user_id, ChatUserData user_data)
 {
     if(user_id.empty())
