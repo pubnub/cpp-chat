@@ -33,7 +33,6 @@ class CallbackService {
             }
         };
 
-         /* CALLBACKS */
         void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
         void remove_message_callback(Pubnub::String channel_id);
 
@@ -67,6 +66,7 @@ class CallbackService {
         );
         void remove_membership_callback(Pubnub::String channel_id);
 
+        void broadcast_messages(std::vector<pubnub_v2_message> messages);
     private:
         void resolve_callbacks();
         void broadcast_callbacks_from_message(pubnub_v2_message message);

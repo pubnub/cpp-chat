@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include "presentation/message.hpp"
+#include <pubnub_helper.h>
 
 using json = nlohmann::json;
 
@@ -117,15 +118,20 @@ void CallbackService::remove_membership_callback(Pubnub::String channel_id)
     this->callbacks.get_membership_callbacks().remove(channel_id);
 }
 
+void CallbackService::broadcast_messages(std::vector<pubnub_v2_message> messages)
+{
+    for (auto message : messages) {
+        this->broadcast_callbacks_from_message(message);
+    }
+}
+
 void CallbackService::resolve_callbacks() {
     auto messages = [this]{
         auto guard = this->pubnub->lock();
         return guard->fetch_messages();
     }();
 
-    for (auto message : messages) {
-        this->broadcast_callbacks_from_message(message);
-    }
+    this->broadcast_messages(messages);
 }
 
 void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message)
