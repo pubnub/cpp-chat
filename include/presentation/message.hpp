@@ -36,6 +36,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::String text();
             PN_CHAT_EXPORT Pubnub::Message delete_message();
             PN_CHAT_EXPORT bool deleted();
+            PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type();
 
             PN_CHAT_EXPORT void pin();
 

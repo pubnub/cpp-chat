@@ -38,6 +38,11 @@ bool Message::deleted()
     return this->message_service->deleted(*this);
 }
 
+Pubnub::pubnub_chat_message_type Message::type()
+{
+    return this->message_data().type;
+}
+
 void Message::pin()
 {
     Channel channel = this->channel_service->get_channel(message_data().channel_id);

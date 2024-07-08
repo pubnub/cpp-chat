@@ -205,7 +205,7 @@ Message MessageService::create_presentation_object(String timetoken)
 
 MessageDraft MessageService::create_message_draft(Channel channel, MessageDraftConfig message_draft_config)
 {
-    return MessageDraft(channel, message_draft_config);
+    return MessageDraft(channel, message_draft_config, shared_from_this());
 }
 
 MessageEntity MessageService::create_domain_from_presentation_data(String timetoken, ChatMessageData &presentation_data)
