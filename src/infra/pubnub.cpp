@@ -41,13 +41,6 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
 
     pubnub_set_blocking_io(this->main_context.get());
     pubnub_set_non_blocking_io(this->long_poll_context.get());
-
-    this->message_thread = std::thread([this] {
-        while (!this->should_stop) {
-            this->resolve_messages();
-            std::this_thread::sleep_for(std::chrono::milliseconds(PUBNUB_WAIT_INTERVAL_MS));
-        }
-    });
 }
 
 void PubNub::publish(const Pubnub::String channel, const Pubnub::String message)
@@ -63,7 +56,7 @@ void PubNub::subscribe_to_channel(const Pubnub::String channel)
 
     for (pubnub_v2_message& message : messages)
     {
-        broadcast_callbacks_from_message(message);
+//        broadcast_callbacks_from_message(message);
     }
 }
 
@@ -149,15 +142,6 @@ std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
     return messages;
 }
 
-void PubNub::resolve_messages() {
-    auto messages = this->fetch_messages();
-
-    for (pubnub_v2_message& message : messages)
-    {
-        broadcast_callbacks_from_message(message);
-    }
-}
-
 std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
 {
     if (this->subscribed_channels.empty() || !this->is_subscribed) {
@@ -186,7 +170,7 @@ void PubNub::unsubscribe_from_channel(Pubnub::String channel)
 
     for (pubnub_v2_message& message : messages) 
     {
-        broadcast_callbacks_from_message(message);
+//        broadcast_callbacks_from_message(message);
     }
 }
 
@@ -488,11 +472,6 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
     return Pubnub::String(add_action_response.ptr, add_action_response.size);
 }
 
-void PubNub::stop_resolving_callbacks()
-{
-    this->should_stop = true;
-}
-
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {
@@ -573,140 +552,6 @@ void PubNub::call_handshake()
 
         }
     }
-}
-
-
-
-void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
-{
-    // if(!message.payload.ptr || !message.channel.ptr)
-    // {
-    //     throw std::runtime_error("received message is invalid");
-    // }
-
-    // Pubnub::String message_string = Pubnub::String(message.payload.ptr, message.payload.size);
-    // Pubnub::String message_channel_string = Pubnub::String(message.channel.ptr, message.channel.size);
-
-    // if(message_string.empty())
-    // {
-    //     throw std::runtime_error("message is empty");
-    // }
-
-    // json message_json = json::parse(message_string);
-    
-    // if(message_json.is_null())
-    // {
-    //     throw std::runtime_error("Failed to parse message into json");
-    // }
-
-    // //Handle chat messages
-    // if(Deserialization::is_chat_message(message_string))
-    // {
-    //     if(this->message_callbacks_map.find(message_channel_string) != this->message_callbacks_map.end())
-    //     {
-    //         this->message_callbacks_map[message_channel_string](
-    //                 Deserialization::pubnub_to_chat_message(this->chat_obj, message));
-    //     }
-    // }
-    
-    // //Handle channel updates
-    // if(Deserialization::is_channel_update_message(message_string))
-    // {
-    //     if(this->channel_callbacks_map.find(message_channel_string) != this->channel_callbacks_map.end())
-    //     {
-    //         this->channel_callbacks_map[message_channel_string](
-    //                 Deserialization::pubnub_message_to_chat_channel(this->chat_obj, message));
-    //     }
-    // }
-
-    // //Handle user updates
-    // if(Deserialization::is_user_update_message(message_string))
-    // {
-    //     if(this->user_callbacks_map.find(message_channel_string) != this->user_callbacks_map.end())
-    //     {
-    //         this->user_callbacks_map[message_channel_string](
-    //                 Deserialization::pubnub_message_to_chat_user(this->chat_obj, message));
-    //     }
-    // }
-
-    // //Handle events
-    // if(Deserialization::is_event_message(message_string))
-    // {
-    //     if(this->event_callbacks_map.find(message_channel_string) != this->event_callbacks_map.end())
-    //     {
-    //         //Get event type from callback
-    //         Pubnub::pubnub_chat_event_type event_type;
-    //         std::function<void(Pubnub::String)> callback;
-    //         std::tie(event_type, callback) = this->event_callbacks_map[message_channel_string];
-
-    //         //only send callback if event types ara matching
-    //         if(Pubnub::chat_event_type_from_string(message_json["type"].dump()) == event_type)
-    //         {
-    //             callback(message_string);
-    //         }
-    //     }
-    // }
-
-    // //Handle presence
-    // if(Deserialization::is_presence_message(message_string))
-    // {
-    //     //get channel name without -pnpres as all presence messages are on channels with -pnpres
-    //     Pubnub::String normal_channel_name = message_channel_string;
-    //     normal_channel_name.erase(message_channel_string.length() - 7, 7);
-
-    //     if(this->channel_presence_callbacks_map.find(normal_channel_name) != this->channel_presence_callbacks_map.end())
-    //     {
-    //         std::vector<Pubnub::String> current_users = chat_obj.who_is_present(normal_channel_name);
-    //         this->channel_presence_callbacks_map[message_channel_string](current_users);
-    //     }
-    // }
-
-    // //Handle message updates
-    // if(Deserialization::is_message_update_message(message_string))
-    // {
-    //     Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
-    //     if (message_timetoken.front() == '"' && message_timetoken.back() == '"')
-    //     {
-    //         message_timetoken.erase(0, 1);
-    //         message_timetoken.erase(message_timetoken.length() - 1, 1);
-    //     }
-
-    //     if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
-    //     {
-    //         Pubnub::String message_channel;
-    //         std::function<void(Pubnub::Message)> callback;
-    //         std::tie(message_channel, callback) = this->message_update_callbacks_map[message_timetoken];
-    //         // TODO: this should already give message with this new update, make sure it really does.pubnub.cpp
-    //         Pubnub::Message message_obj = chat_obj.get_channel(message_channel).get_message(message_timetoken);
-    //         callback(message_obj);
-    //     }
-    // }
-
-    // //Handle message updates
-    // if(Deserialization::is_membership_update_message(message_string))
-    // {
-    //     // TODO: All dump() calls should be replaced with unified function that removes quotes from the string
-    //     Pubnub::String dumped = message_json["data"]["channel"]["id"].dump();
-    //     Pubnub::String membership_channel = Pubnub::String(&dumped.c_str()[1], dumped.length() - 2); 
-
-    //     if(this->membership_callbacks_map.find(membership_channel) != this->membership_callbacks_map.end())
-    //     {
-    //         Pubnub::String membership_user;
-    //         std::function<void(Pubnub::Membership)> callback;
-    //         std::tie(membership_user, callback) = this->membership_callbacks_map[membership_channel];
-
-    //         //Make sure this message is related to the user that we are streaming updates for
-    //         Pubnub::String user_from_message = message_json["data"]["uuid"]["id"].dump();
-    //         Pubnub::String user_from_message_cleaned = Pubnub::String(&user_from_message.c_str()[1], user_from_message.length() - 2);
-    //         if(user_from_message_cleaned == membership_user)
-    //         {
-    //             auto custom_field = Pubnub::String(message_json["custom"].dump());
-    //             auto custom_field_cleaned = Pubnub::String(&custom_field.c_str()[1], custom_field.length() - 2);
-    //             Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), custom_field_cleaned);
-    //             callback(membership_obj);
-    //         }
-    //     }
-    // }
 }
 
 Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()

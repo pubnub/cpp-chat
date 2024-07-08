@@ -30,13 +30,7 @@ namespace Pubnub
 class PubNub {
 public:
     PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
-    ~PubNub(){
-        // TODO: synchronization might fail because of lack of any mutexes
-        this->should_stop = true;
-        if (this->message_thread.joinable()) {
-            this->message_thread.join();
-        }
-    };
+    ~PubNub() = default;
 
     void publish(const Pubnub::String channel, const Pubnub::String message);
     void subscribe_to_channel(const Pubnub::String channel);
@@ -69,9 +63,6 @@ public:
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
     Pubnub::String add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value);
 
-    // TODO: not the greatest way but just for mvp...
-    void stop_resolving_callbacks();
-
 private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
@@ -79,7 +70,6 @@ private:
     void call_handshake();
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
-    void broadcast_callbacks_from_message(pubnub_v2_message message);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
@@ -91,9 +81,6 @@ private:
     std::vector<Pubnub::String> subscribed_channels;
 
     bool is_subscribed = false;
-    bool should_stop = false;
-
-    std::thread message_thread;
 };
 
 #endif // PN_CHAT_INFRA_PUBNUB_HPP
