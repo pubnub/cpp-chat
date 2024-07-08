@@ -11,9 +11,13 @@ class EntityRepository;
 class PubNub;
 class ChatService;
 struct MessageEntity;
+
 namespace Pubnub
 {
     struct MessageAction;
+    class MessageDraft;
+    struct MessageDraftConfig;
+    class Channel;
 }
 
 class MessageService : public std::enable_shared_from_this<MessageService>
@@ -34,6 +38,8 @@ class MessageService : public std::enable_shared_from_this<MessageService>
 
         Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data);
         Pubnub::Message create_presentation_object(Pubnub::String timetoken);
+
+        Pubnub::MessageDraft create_message_draft(Pubnub::Channel channel, Pubnub::MessageDraftConfig message_draft_config);
         
     private:
         ThreadSafePtr<PubNub> pubnub;

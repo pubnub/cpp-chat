@@ -5,6 +5,8 @@
 #include "nlohmann/json.hpp"
 #include "presentation/message.hpp"
 #include "presentation/message_action.hpp"
+#include "presentation/message_draft.hpp"
+#include "presentation/message_draft_config.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -199,6 +201,11 @@ Message MessageService::create_presentation_object(String timetoken)
     }
     
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
+}
+
+MessageDraft MessageService::create_message_draft(Channel channel, MessageDraftConfig message_draft_config)
+{
+    return MessageDraft(channel, message_draft_config);
 }
 
 MessageEntity MessageService::create_domain_from_presentation_data(String timetoken, ChatMessageData &presentation_data)

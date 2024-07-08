@@ -9,6 +9,8 @@
 #include <vector>
 #include <functional>
 
+#include "message_draft_config.hpp"
+
 class ChannelService; 
 class ChatService;
 class PresenceService;
@@ -21,6 +23,7 @@ namespace Pubnub
     class Message;
     class Membership;
     class User;
+    class MessageDraft;
 
     struct ChatChannelData
     {
@@ -62,6 +65,8 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates(std::function<void(Pubnub::Channel)> channel_callback);
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback);
             PN_CHAT_EXPORT void stream_presence(std::function<void(std::vector<Pubnub::String>)> presence_callback);
+
+            PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig());
 
         private:
             PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
