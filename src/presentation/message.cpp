@@ -38,7 +38,7 @@ bool Message::deleted()
     return this->message_service->deleted(*this);
 }
 
-Pubnub::pubnub_chat_message_type Message::type()
+pubnub_chat_message_type Message::type()
 {
     return this->message_data().type;
 }
@@ -47,6 +47,31 @@ void Message::pin()
 {
     Channel channel = this->channel_service->get_channel(message_data().channel_id);
     this->channel_service->pin_message_to_channel(*this, channel);
+}
+
+Message Message::toggle_reaction(String reaction)
+{
+    this->message_service->toggle_reaction(*this, reaction);
+    return *this;
+}
+
+std::vector<MessageAction> Message::reactions()
+{
+    return this->message_service->get_message_reactions(*this);
+}
+
+bool Message::has_user_reaction(String reaction)
+{
+    auto message_reactions = this->message_service->get_message_reactions(*this);
+    for (auto message_reaction : message_reactions)
+    {
+        if(message_reaction.value == reaction)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Message::stream_updates(std::function<void(Message)> message_callback)

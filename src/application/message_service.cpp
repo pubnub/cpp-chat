@@ -164,6 +164,59 @@ Message MessageService::get_message(String timetoken, String channel_id)
     return messages[0];
 }
 
+std::vector<MessageAction> MessageService::get_message_reactions(Message message)
+{
+    std::vector<MessageAction> message_actions;
+    for(auto message_action : message.message_data().message_actions)
+    {
+        if(message_action.type == pubnub_message_action_type::PMAT_Reaction)
+        {
+            message_actions.push_back(message_action);
+        }
+    }
+    return message_actions;
+}
+
+void MessageService::toggle_reaction(Message message, String reaction)
+{
+    auto current_reactions = this->get_message_reactions(message);
+    auto pubnub_handle = pubnub->lock();
+    String current_user_id = pubnub_handle->get_user_id();
+    pubnub_message_action_type action_type = pubnub_message_action_type::PMAT_Reaction;
+
+    ChatMessageData final_message_data = message.message_data();
+
+    bool reaction_removed = false;
+    //If this user already gave reaction to this message, remove it firstly
+    for(int i = 0; i < final_message_data.message_actions.size(); i++)
+    {
+        MessageAction current_meesage_action = final_message_data.message_actions[i];
+        if(current_meesage_action.type == action_type && current_meesage_action.user_id == current_user_id)
+        {
+            pubnub_handle->remove_message_action(message.message_data().channel_id, message.timetoken(), current_meesage_action.timetoken);
+            final_message_data.message_actions.erase(final_message_data.message_actions.begin() + i);
+            reaction_removed = true;
+            break;
+        }
+    }
+
+    //It reaction wasn't removed, add reaction as new message action
+    if(!reaction_removed)
+    {
+        String action_timetoken = pubnub_handle->add_message_action(message.message_data().channel_id, message.timetoken(), message_action_type_to_string(action_type), reaction);
+        MessageAction new_message_action = {action_type, reaction, action_timetoken, current_user_id};
+        final_message_data.message_actions.push_back(new_message_action);
+    }
+
+    //Update entity repository with updated message
+    entity_repository->get_message_entities().update_or_insert(message.timetoken(), create_domain_from_presentation_data(message.timetoken(), final_message_data));
+}
+
+MessageDraft MessageService::create_message_draft(Channel channel, MessageDraftConfig message_draft_config)
+{
+    return MessageDraft(channel, message_draft_config, shared_from_this());
+}
+
 void MessageService::stream_updates_on(std::vector<Message> messages, std::function<void(Message)> message_callback)
 {
     if(messages.empty())
@@ -201,11 +254,6 @@ Message MessageService::create_presentation_object(String timetoken)
     }
     
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
-}
-
-MessageDraft MessageService::create_message_draft(Channel channel, MessageDraftConfig message_draft_config)
-{
-    return MessageDraft(channel, message_draft_config, shared_from_this());
 }
 
 MessageEntity MessageService::create_domain_from_presentation_data(String timetoken, ChatMessageData &presentation_data)

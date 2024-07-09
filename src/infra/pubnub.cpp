@@ -472,6 +472,26 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
     return Pubnub::String(add_action_response.ptr, add_action_response.size);
 }
 
+void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken)
+{
+    //TODO:: pubnub_str_2_chamebl_t could be used instead but it gives Linker error. There should be an easier way to achieve this
+    char* message_timetoken_char = new char[message_timetoken.length() + 1];
+    pubnub_chamebl_t message_timetoken_chamebl;
+    message_timetoken_chamebl.ptr = message_timetoken_char;
+    message_timetoken_chamebl.size = (NULL == message_timetoken_char) ? 0 : message_timetoken.length() + 1;
+
+    char* action_timetoken_char = new char[action_timetoken.length() + 1];
+    pubnub_chamebl_t action_timetoken_chamebl;
+    action_timetoken_chamebl.ptr = action_timetoken_char;
+    action_timetoken_chamebl.size = (NULL == action_timetoken_char) ? 0 : action_timetoken.length() + 1;
+    
+    auto result = pubnub_remove_message_action(this->main_context.get(), channel, message_timetoken_chamebl, action_timetoken_chamebl);
+    this->await_and_handle_error(result);
+
+    delete[] message_timetoken_char;
+    delete[] action_timetoken_char;
+}
+
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {

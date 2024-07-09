@@ -34,12 +34,16 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         std::vector<Pubnub::Message> get_channel_history(Pubnub::String channel_id, Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
         Pubnub::Message get_message(Pubnub::String timetoken, Pubnub::String channel_id);
 
+        std::vector<Pubnub::MessageAction> get_message_reactions(Pubnub::Message message);
+        void toggle_reaction(Pubnub::Message message, Pubnub::String reaction);
+        Pubnub::MessageDraft create_message_draft(Pubnub::Channel channel, Pubnub::MessageDraftConfig message_draft_config);
+        
         void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Pubnub::Message)> message_callback);
+
 
         Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data);
         Pubnub::Message create_presentation_object(Pubnub::String timetoken);
-
-        Pubnub::MessageDraft create_message_draft(Pubnub::Channel channel, Pubnub::MessageDraftConfig message_draft_config);
+ 
         
     private:
         ThreadSafePtr<PubNub> pubnub;
