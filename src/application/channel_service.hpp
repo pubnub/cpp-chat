@@ -56,8 +56,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
-        std::weak_ptr<ChannelService> channel_service;
-
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
         //Creates ChannelEntity from channel response - put the whole response, not only "data" field
