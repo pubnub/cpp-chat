@@ -74,6 +74,11 @@ bool Message::has_user_reaction(String reaction)
     return false;
 }
 
+void Message::forward(Pubnub::String channel_id)
+{
+    this->message_service->forward_message(*this, channel_id);
+}
+
 void Message::stream_updates(std::function<void(Message)> message_callback)
 {
     this->message_service->stream_updates_on({*this}, message_callback);

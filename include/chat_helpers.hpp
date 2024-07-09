@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "extern.hpp"
 #include "export.hpp"
+#include "enums.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -55,6 +56,8 @@ namespace Pubnub
     {
         return b ? "true" : "false";
     };
+
+    Pubnub::String chat_message_to_publish_string(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type);
 
 }
 

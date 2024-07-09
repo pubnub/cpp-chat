@@ -62,6 +62,9 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Channel pin_message(Pubnub::Message message);
             PN_CHAT_EXPORT Pubnub::Channel unpin_message();
             PN_CHAT_EXPORT Pubnub::Message get_pinned_message();
+            PN_CHAT_EXPORT void forward_message(Pubnub::Message message);
+
+
             PN_CHAT_EXPORT void stream_updates(std::function<void(Pubnub::Channel)> channel_callback);
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback);
             PN_CHAT_EXPORT void stream_presence(std::function<void(std::vector<Pubnub::String>)> presence_callback);

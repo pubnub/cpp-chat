@@ -7,6 +7,7 @@
 #include "presentation/message_action.hpp"
 #include "presentation/message_draft.hpp"
 #include "presentation/message_draft_config.hpp"
+#include "chat_helpers.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -210,6 +211,26 @@ void MessageService::toggle_reaction(Message message, String reaction)
 
     //Update entity repository with updated message
     entity_repository->get_message_entities().update_or_insert(message.timetoken(), create_domain_from_presentation_data(message.timetoken(), final_message_data));
+}
+
+void MessageService::forward_message(Message message, String channel_id)
+{  
+    
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("can't forward message, channel_id is empty");
+    }
+
+    auto pubnub_handle = pubnub->lock();
+
+    String current_metadata = message.message_data().meta.empty() ? "{}" : message.message_data().meta;
+
+    json meta_json = json::parse(current_metadata);
+
+    meta_json["originalPublisher"] = message.message_data().user_id;
+    meta_json["originalChannelId"] = message.message_data().channel_id;
+
+    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message.text(), message.type()), meta_json.dump());
 }
 
 MessageDraft MessageService::create_message_draft(Channel channel, MessageDraftConfig message_draft_config)

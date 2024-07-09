@@ -32,7 +32,7 @@ public:
     PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
     ~PubNub() = default;
 
-    void publish(const Pubnub::String channel, const Pubnub::String message);
+    void publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata = "");
     void subscribe_to_channel(const Pubnub::String channel);
     std::vector<pubnub_v2_message> subscribe_to_channel_and_get_messages(const Pubnub::String channel);
     std::vector<Pubnub::String> subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel);

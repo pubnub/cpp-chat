@@ -407,16 +407,6 @@ void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, st
     }
 }
 
-String ChannelService::chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)
-{
-    json message_json;
-	
-	message_json["type"] = chat_message_type_to_string(message_type).c_str();
-    message_json["text"] = message.c_str();
-
-	return message_json.dump();
-}
-
 Channel ChannelService::create_presentation_object(String channel_id)
 {
     auto chat_service_shared = chat_service.lock();

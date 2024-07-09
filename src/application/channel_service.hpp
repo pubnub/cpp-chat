@@ -58,8 +58,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::weak_ptr<ChatService> chat_service;
 
         
-        Pubnub::String chat_message_to_publish_string(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type);
-        
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
         //Creates ChannelEntity from channel response - put the whole response, not only "data" field
         ChannelEntity create_domain_from_channel_response(Pubnub::String json_response);

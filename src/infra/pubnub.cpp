@@ -43,9 +43,14 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     pubnub_set_non_blocking_io(this->long_poll_context.get());
 }
 
-void PubNub::publish(const Pubnub::String channel, const Pubnub::String message)
+void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata)
 {
-    auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
+    //auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
+
+    auto publish_options = pubnub_publish_defopts();
+    publish_options.meta = metadata.c_str();
+
+    auto result = pubnub_publish_ex(main_context.get(), channel.c_str(), message.c_str(), publish_options);
 
     this->await_and_handle_error(result);
 }
@@ -485,7 +490,7 @@ void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::S
     action_timetoken_chamebl.ptr = action_timetoken_char;
     action_timetoken_chamebl.size = (NULL == action_timetoken_char) ? 0 : action_timetoken.length() + 1;
     
-    auto result = pubnub_remove_message_action(this->main_context.get(), channel, message_timetoken_chamebl, action_timetoken_chamebl);
+    auto result = pubnub_remove_message_action(this->main_context.get(), channel.c_str(), message_timetoken_chamebl, action_timetoken_chamebl);
     this->await_and_handle_error(result);
 
     delete[] message_timetoken_char;

@@ -16,6 +16,7 @@ class ChannelService;
 class UserService;
 class PresenceService;
 class RestrictionsService;
+class MessageService;
 
 namespace Pubnub {
 
@@ -73,12 +74,17 @@ namespace Pubnub {
             PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
             PN_CHAT_EXPORT void listen_for_events(Pubnub::String channel_id, pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback);
 
+            /* MESSAGES */
+
+            PN_CHAT_EXPORT void forward_message(Pubnub::Message message, Pubnub::Channel channel);
+
         private:
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<UserService> user_service;
             std::shared_ptr<PresenceService> presence_service;
             std::shared_ptr<RestrictionsService> restrictions_service;
+            std::shared_ptr<MessageService> message_service;
     };
 }
 

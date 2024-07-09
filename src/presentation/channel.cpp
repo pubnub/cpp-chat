@@ -136,3 +136,7 @@ void Channel::stream_presence(std::function<void(std::vector<String>)> presence_
 {
     this->presence_service->stream_presence(channel_id(), presence_callback);
 }
+void Channel::forward_message(Message message)
+{
+    this->message_service->forward_message(message, channel_id_internal);
+}

@@ -42,6 +42,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Message toggle_reaction(Pubnub::String reaction);
             PN_CHAT_EXPORT std::vector<Pubnub::MessageAction> reactions();
             PN_CHAT_EXPORT bool has_user_reaction(Pubnub::String reaction);
+            PN_CHAT_EXPORT void forward(Pubnub::String channel_id);
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);

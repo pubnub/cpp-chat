@@ -4,6 +4,7 @@
 #include "application/user_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
+#include "application/message_service.hpp"
 
 using namespace Pubnub;
 
@@ -20,6 +21,7 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
     user_service = chat_service->user_service;
     presence_service = chat_service->presence_service;
     restrictions_service = chat_service->restrictions_service;
+    message_service = chat_service->message_service;
 }
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
@@ -122,4 +124,9 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, String channe
 void Chat::listen_for_events(String channel_id, pubnub_chat_event_type chat_event_type, std::function<void(String)> event_callback)
 {
     this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
+}
+
+void Chat::forward_message(Message message, Channel channel)
+{
+    this->message_service->forward_message(message, channel.channel_id());
 }

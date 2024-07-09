@@ -36,6 +36,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
 
         std::vector<Pubnub::MessageAction> get_message_reactions(Pubnub::Message message);
         void toggle_reaction(Pubnub::Message message, Pubnub::String reaction);
+        void forward_message(Pubnub::Message message, Pubnub::String channel_id);
         Pubnub::MessageDraft create_message_draft(Pubnub::Channel channel, Pubnub::MessageDraftConfig message_draft_config);
         
         void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Pubnub::Message)> message_callback);
