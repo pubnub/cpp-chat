@@ -14,7 +14,7 @@ struct MessageEntity {
     Pubnub::String meta;
     std::vector<Pubnub::MessageAction> message_actions;
 
-    MessageEntity from_json(Pubnub::String message_json, Pubnub::String channel_id);
+    static MessageEntity from_json(Pubnub::String message_json, Pubnub::String channel_id);
 };
 
 #endif // PN_CHAT_MESSAGE_ENTITY_HPP

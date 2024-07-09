@@ -1,5 +1,6 @@
 #include "message_service.hpp"
 #include "chat_service.hpp"
+#include "domain/message_entity.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -142,7 +143,7 @@ std::vector<Message> MessageService::get_channel_history(String channel_id, Stri
 
     for (auto& element : messages_array_json)
     {
-        MessageEntity new_message_entity = create_domain_from_message_json(String(element.dump()), channel_id);
+        auto new_message_entity = MessageEntity::from_json(String(element.dump()), channel_id);
 
         messages.push_back(
                 this->create_message_object(std::make_pair(String(element["id"]), new_message_entity))

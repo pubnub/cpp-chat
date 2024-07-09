@@ -52,7 +52,6 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         std::weak_ptr<ChatService> chat_service;
 
         MessageEntity create_domain_from_presentation_data(Pubnub::String timetoken, Pubnub::ChatMessageData& presentation_data);
-        MessageEntity create_domain_from_message_json(Pubnub::String message_json, Pubnub::String channel_id);
 
         Pubnub::ChatMessageData presentation_data_from_domain(MessageEntity& message_entity);
 
