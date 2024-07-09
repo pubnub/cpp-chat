@@ -3,6 +3,7 @@
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "presentation/const_values.hpp"
+#include "presentation/message.hpp"
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 
@@ -127,10 +128,23 @@ Restriction RestrictionsService::get_channel_restrictions(String user_id, String
    return FinalRestrictionsData;
 }
 
-void RestrictionsService::report(Pubnub::String user_id, Pubnub::String reason)
+void RestrictionsService::report_user(String user_id, String reason)
 {
     String payload = String("{\"reason\": \"") + reason + String("\", \"reportedUserId\": \"") + user_id + String("\"}");
     
     auto chat_service_shared = chat_service.lock();
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload);
+}
+
+void RestrictionsService::report_message(Message message, String reason)
+{
+    json payload_json = json::object();
+    payload_json["text"] = message.text().c_str();
+    payload_json["reson"] = reason.c_str();
+    payload_json["reportedMessageChannelId"] = message.message_data().channel_id.c_str();
+    payload_json["reportedMessageTimetoken"] = message.timetoken().c_str();
+    payload_json["reportedUserId"] = message.message_data().user_id.c_str();
+
+    auto chat_service_shared = chat_service.lock();
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload_json.dump());
 }

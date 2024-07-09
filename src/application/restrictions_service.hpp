@@ -11,6 +11,11 @@ class EntityRepository;
 class PubNub;
 class ChatService;
 
+namespace Pubnub
+{
+    class Message;
+}
+
 
 class RestrictionsService : public std::enable_shared_from_this<RestrictionsService>
 {
@@ -20,7 +25,8 @@ class RestrictionsService : public std::enable_shared_from_this<RestrictionsServ
         void set_restrictions(Pubnub::String user_id, Pubnub::String channel_id, Pubnub::Restriction restrictions);
         Pubnub::Restriction get_user_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
         Pubnub::Restriction get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
-        void report(Pubnub::String user_id, Pubnub::String reason);
+        void report_user(Pubnub::String user_id, Pubnub::String reason);
+        void report_message(Pubnub::Message message, Pubnub::String reason);
 
     private:
         ThreadSafePtr<PubNub> pubnub;

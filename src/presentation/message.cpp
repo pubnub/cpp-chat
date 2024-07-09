@@ -1,14 +1,17 @@
 #include "presentation/message.hpp"
 #include "application/message_service.hpp"
 #include "application/channel_service.hpp"
+#include "application/restrictions_service.hpp"
 
 using namespace Pubnub;
 
-Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service) :
+Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service,
+                    std::shared_ptr<RestrictionsService> restrictions_service) :
 timetoken_internal(timetoken),
 chat_service(chat_service),
 message_service(message_service),
-channel_service(channel_service)
+channel_service(channel_service),
+restrictions_service(restrictions_service)
 {}
 
 ChatMessageData Message::message_data()
@@ -74,9 +77,14 @@ bool Message::has_user_reaction(String reaction)
     return false;
 }
 
-void Message::forward(Pubnub::String channel_id)
+void Message::forward(String channel_id)
 {
     this->message_service->forward_message(*this, channel_id);
+}
+
+void Message::report(Pubnub::String reason)
+{
+    this->restrictions_service->report_message(*this, reason);
 }
 
 void Message::stream_updates(std::function<void(Message)> message_callback)

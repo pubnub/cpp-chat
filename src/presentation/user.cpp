@@ -53,7 +53,7 @@ Restriction User::get_channel_restrictions(Pubnub::String user_id, Pubnub::Strin
 
 void User::report(String reason)
 {
-    this->restrictions_service->report(user_id(), reason);
+    this->restrictions_service->report_user(user_id(), reason);
 }
 
 std::vector<Pubnub::Membership> User::get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken)

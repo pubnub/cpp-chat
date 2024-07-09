@@ -271,7 +271,7 @@ Message MessageService::create_presentation_object(String timetoken)
 {
     if(auto chat_service_shared = chat_service.lock())
     {
-        return Message(timetoken, chat_service_shared, shared_from_this(), chat_service_shared->channel_service);
+        return Message(timetoken, chat_service_shared, shared_from_this(), chat_service_shared->channel_service, chat_service_shared->restrictions_service);
     }
     
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
