@@ -68,6 +68,7 @@ include_directories(${CURRENT_SOURCE_DIR}/include)
 
 set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/entity_repository.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/callbacks_repository.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
@@ -87,7 +88,8 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/message_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/presence_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/restrictions_service.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp

@@ -1,38 +1,36 @@
 #include "parsers.hpp"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include <pubnub_memory_block.h>
-
-using json = nlohmann::json;
 
 bool Parsers::PubnubJson::is_message(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("text") && message_json.contains("type");
 }
 
 bool Parsers::PubnubJson::is_message_update(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("data") && message_json["source"] == "actions";
 }
 
 bool Parsers::PubnubJson::is_channel_update(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
         message_json["source"] == "objects" && message_json["type"] == "channel";
 }
 
 bool Parsers::PubnubJson::is_user_update(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
         message_json["source"] == "objects" && message_json["type"] == "uuid";
 }
 
 bool Parsers::PubnubJson::is_event(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     if(!message_json.contains("type") || message_json["type"].is_null())
     {
         return false;
@@ -47,13 +45,13 @@ bool Parsers::PubnubJson::is_event(Pubnub::String message_json_string)
 
 bool Parsers::PubnubJson::is_presence(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("action") && message_json.contains("uuid");
 }
 
 bool Parsers::PubnubJson::is_membership_update(Pubnub::String message_json_string)
 {
-    json message_json = json::parse(message_json_string);
+    auto message_json = Json::parse(message_json_string);
     return message_json.contains("source") && message_json.contains("type") &&  message_json.contains("event") && 
         message_json["source"] == "objects" && message_json["type"] == "membership";
 }
@@ -63,7 +61,25 @@ static Pubnub::String string_from_pn_block(struct pubnub_char_mem_block pn_block
     return Pubnub::String(pn_block.ptr, pn_block.size);
 }
 
+static Pubnub::String json_field_from_pn_block(struct pubnub_char_mem_block pn_block, Pubnub::String field)
+{
+    return Json::parse(string_from_pn_block(pn_block))
+        [field]
+        .get_string(field)
+        .value_or(Pubnub::String());
+}
+
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message(pubnub_v2_message pn_message)
 {
-    
+    auto json = Json::parse(string_from_pn_block(pn_message.payload));
+    auto channel_data = json["data"].dump();
+
+//    return std::make_pair(
+//        string_from_pn_block(pn_message.tt),
+//        MessageEntity{
+//            .
+//            
+//        }
+//    );
+//    
 }

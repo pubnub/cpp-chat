@@ -1,5 +1,5 @@
 #include "message_service.hpp"
-#include "chat_service.hpp"
+#include "application/chat_service.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -18,111 +18,7 @@ MessageService::MessageService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<Ent
     chat_service(chat_service)
 {}
 
-ChatMessageData MessageService::get_message_data(String timetoken)
-{
-    auto maybe_message = this->entity_repository->get_message_entities().get(timetoken);
-
-    if (!maybe_message.has_value()) 
-    {
-        throw std::invalid_argument("Failed to get message data, there is no channel with this id");
-    }
-
-    return presentation_data_from_domain(maybe_message.value());
-}
-
-void MessageService::edit_text(Message message, String new_text)
-{
-    if(new_text.empty())
-    {
-        throw std::invalid_argument("Failed to edit text, new_text is empty");
-    }
-
-    pubnub_message_action_type edited_action_type = pubnub_message_action_type::PMAT_Edited;
-
-    auto pubnub_handle = pubnub->lock();
-
-    ChatMessageData message_data = message.message_data();
-
-    //Message action value sent to server has to be in quotation marks
-    String new_text_with_quotations = "\"" + new_text + "\"";
-    String action_timetoken = pubnub_handle->add_message_action(message_data.channel_id, message.timetoken(), message_action_type_to_string(edited_action_type), new_text_with_quotations);
-    
-    //But we store message text without quotations marks
-    message_data.text = new_text;
-    MessageAction edited_message_action;
-    edited_message_action.type = edited_action_type;
-    edited_message_action.value = new_text;
-    edited_message_action.timetoken = action_timetoken;
-    edited_message_action.user_id = message_data.user_id;
-    add_message_action_to_message_data(message_data, edited_message_action);
-
-    //Update this data in entity repository
-    MessageEntity new_message_entity = create_domain_from_presentation_data(message.timetoken(), message_data);
-    entity_repository->get_message_entities().update_or_insert(message.timetoken(), new_message_entity);
-}
-
-String MessageService::text(Message message)
-{
-    String most_recent_edition = message.message_data().text;
-    uint64_t most_recent_timetoken = 1;
-    for(auto message_action : message.message_data().message_actions)
-    {
-        //check if there is any message action of type "edited"
-        if(message_action.type == pubnub_message_action_type::PMAT_Edited)
-        {
-            String current_timetoken_string = message_action.timetoken;
-            current_timetoken_string.erase(0, 1);
-            current_timetoken_string.erase(current_timetoken_string.length() - 1, 1);
-            
-            auto timetoken_value = std::stoull(current_timetoken_string.to_std_string());
-            //check if edition token is newer
-            if(timetoken_value > most_recent_timetoken)
-            {
-                most_recent_timetoken = timetoken_value;
-                most_recent_edition = message_action.value;
-            }
-        }
-    }
-    return most_recent_edition;
-}
-
-void MessageService::delete_message(Message message)
-{
-    pubnub_message_action_type deleted_action_type = pubnub_message_action_type::PMAT_Deleted;
-    String deleted_value = "\"deleted\"";
-   
-    auto pubnub_handle = pubnub->lock();
-
-    ChatMessageData message_data = message.message_data();
-
-    String action_timetoken = pubnub_handle->add_message_action(message_data.channel_id, message.timetoken(), message_action_type_to_string(deleted_action_type), deleted_value);
-
-    MessageAction deleted_message_action;
-    deleted_message_action.type = deleted_action_type;
-    deleted_message_action.value = deleted_value;
-    deleted_message_action.timetoken = action_timetoken;
-    deleted_message_action.user_id = message_data.user_id;
-    add_message_action_to_message_data(message_data, deleted_message_action);
-
-    //Update this data in entity repository
-    MessageEntity new_message_entity = create_domain_from_presentation_data(message.timetoken(), message_data);
-    entity_repository->get_message_entities().update_or_insert(message.timetoken(), new_message_entity);
-}
-
-bool MessageService::deleted(Message message)
-{
-    for(auto message_action : message.message_data().message_actions)
-    {
-        //check if there is any message action of type "deleted"
-        if(message_action.type == pubnub_message_action_type::PMAT_Deleted)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::vector<Message> MessageService::get_channel_history(String channel_id, String start_timetoken, String end_timetoken, int count)
+std::vector<Message> MessageService::get_channel_history(Pubnub::String channel_id, String start_timetoken, String end_timetoken, int count)
 {
     auto pubnub_handle = this->pubnub->lock();
 
@@ -152,7 +48,7 @@ std::vector<Message> MessageService::get_channel_history(String channel_id, Stri
     return messages;
 }
 
-Message MessageService::get_message(String timetoken, String channel_id)
+Message MessageService::get_message(String timetoken, Pubnub::String channel_id)
 {
     auto start_timetoken_int = std::stoull(timetoken.to_std_string()) + 1;
     String start_timetoken = std::to_string(start_timetoken_int);
@@ -269,7 +165,7 @@ Message MessageService::create_message_object(std::pair<String, MessageEntity> m
 
 Message MessageService::create_presentation_object(String timetoken)
 {
-    if(auto chat_service_shared = chat_service.lock())
+    if(auto chat_service_shared = this->chat_service.lock())
     {
         return Message(timetoken, chat_service_shared, shared_from_this(), chat_service_shared->channel_service, chat_service_shared->restrictions_service);
     }
@@ -280,65 +176,12 @@ Message MessageService::create_presentation_object(String timetoken)
 MessageEntity MessageService::create_domain_from_presentation_data(String timetoken, ChatMessageData &presentation_data)
 {
     MessageEntity new_message_entity;
-    new_message_entity.timetoken = timetoken;
     new_message_entity.type = presentation_data.type;
     new_message_entity.text = presentation_data.text;
     new_message_entity.channel_id = presentation_data.channel_id;
     new_message_entity.user_id = presentation_data.user_id;
     new_message_entity.meta = presentation_data.meta;
     new_message_entity.message_actions = presentation_data.message_actions;
-
-    return new_message_entity;
-}
-
-// TODO: this is domain...
-MessageEntity MessageService::create_domain_from_message_json(String message_json, String channel_id)
-{
-    json message_data_json = json::parse(message_json);;
-
-    if(message_data_json.is_null())
-    {
-        throw std::runtime_error("Failed to construct message, message_json is invalid Json");
-    }
-
-    if(!message_data_json.contains("timetoken") && !message_data_json["timetoken"].is_null())
-    {
-        throw std::runtime_error("Failed to construct message, message_json doesn't have  timetoken field");
-    }
-
-    MessageEntity new_message_entity;
-
-    new_message_entity.timetoken = message_data_json["timetoken"].dump();
-    new_message_entity.timetoken.erase(0, 1);
-    new_message_entity.timetoken.erase(new_message_entity.timetoken.length() - 1, 1);
-
-    new_message_entity.channel_id = channel_id;
-
-    if(message_data_json.contains("message") && !message_data_json["message"].is_null())
-    {
-        new_message_entity.text = message_data_json["message"]["text"].dump();
-        new_message_entity.type = chat_message_type_from_string(message_data_json["message"]["type"].dump());
-    }
-    if(message_data_json.contains("actions") && !message_data_json["actions"].is_null())
-    {
-        json message_action_types_json = message_data_json["actions"];
-        for (json::iterator message_action_type = message_action_types_json.begin(); message_action_type != message_action_types_json.end(); ++message_action_type) 
-        {
-            json message_actions_json = message_action_type.value();
-            String message_actions_json_string = message_actions_json.dump();
-            for (json::iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) 
-            {
-                json single_message_action_json = message_action.value();
-                String single_message_action_json_string = single_message_action_json.dump();
-                MessageAction message_action_data;
-                message_action_data.type = message_action_type_from_string(message_action_type.key());
-                message_action_data.value = message_action.key();
-                message_action_data.timetoken = single_message_action_json[0]["actionTimetoken"].dump();
-                message_action_data.user_id = single_message_action_json[0]["uuid"].dump();
-                new_message_entity.message_actions.push_back(message_action_data);
-            }
-        }
-    }
 
     return new_message_entity;
 }
@@ -356,7 +199,3 @@ ChatMessageData MessageService::presentation_data_from_domain(MessageEntity &mes
     return message_data;
 }
 
-void MessageService::add_message_action_to_message_data(ChatMessageData &message_data, MessageAction &message_action)
-{
-    message_data.message_actions.push_back(message_action);
-}
