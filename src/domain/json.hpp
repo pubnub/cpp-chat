@@ -3,6 +3,7 @@
 
 #include "nlohmann/json.hpp"
 #include "string.hpp"
+#include <optional>
 
 class Json {
     public:
