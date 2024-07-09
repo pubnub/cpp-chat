@@ -5,10 +5,12 @@
 #include <map>
 #include <vector>
 
+#include "option.hpp"
 #include "presentation/text_link.hpp"
 #include "presentation/message_draft_config.hpp"
 #include "presentation/channel.hpp"
 #include "presentation/user.hpp"
+#include "presentation/message.hpp"
 
 class MessageService;
 
@@ -24,6 +26,10 @@ namespace Pubnub
             Pubnub::String value;
             MessageDraftConfig draft_config;
 
+            PN_CHAT_EXPORT Pubnub::Message quoted_message();
+            PN_CHAT_EXPORT void add_quote(Pubnub::Message message);
+            PN_CHAT_EXPORT void remove_quote();
+
         private:
             PN_CHAT_EXPORT MessageDraft(Pubnub::Channel channel, Pubnub::MessageDraftConfig draft_config, std::shared_ptr<MessageService> message_service);
 
@@ -32,7 +38,7 @@ namespace Pubnub
             std::map<int, Pubnub::User> mentioned_users;
             std::map<int, Pubnub::Channel> referenced_channels;
             std::vector<TextLink> text_links;
-            //Pubub::Message quoted_message; this requires invalid objects handling as we can't gruarantee this message to be always valid
+            Option<Pubnub::Message> quoted_message_internal;
     
             std::shared_ptr<MessageService> message_service;
 
