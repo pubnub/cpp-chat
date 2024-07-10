@@ -19,13 +19,16 @@ class Json {
                 nlohmann::json::iterator it;
         };
 
+        Json() = default;
         Json(Pubnub::String json);
         Json(nlohmann::json json);
         static Json parse(Pubnub::String json);
 
         Json operator[](Pubnub::String key) const;
         Json operator[](int index) const;
+        Json operator=(Pubnub::String json);
         operator Pubnub::String() const;
+        
         bool contains(Pubnub::String key) const;
         bool is_null() const;
         Pubnub::String dump() const;

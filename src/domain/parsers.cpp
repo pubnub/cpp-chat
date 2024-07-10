@@ -1,5 +1,8 @@
 #include "parsers.hpp"
+#include "domain/channel_entity.hpp"
+#include "enums.hpp"
 #include "json.hpp"
+#include <pubnub_helper.h>
 #include <pubnub_memory_block.h>
 
 bool Parsers::PubnubJson::is_message(Pubnub::String message_json_string)
@@ -64,22 +67,36 @@ static Pubnub::String string_from_pn_block(struct pubnub_char_mem_block pn_block
 static Pubnub::String json_field_from_pn_block(struct pubnub_char_mem_block pn_block, Pubnub::String field)
 {
     return Json::parse(string_from_pn_block(pn_block))
-        [field]
         .get_string(field)
+        .value_or(Pubnub::String());
+}
+
+static Pubnub::String json_field_from_pn_block(struct pubnub_char_mem_block pn_block, Pubnub::String field, Pubnub::String subfield)
+{
+    return Json::parse(string_from_pn_block(pn_block))
+        [field]
+        .get_string(subfield)
         .value_or(Pubnub::String());
 }
 
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message(pubnub_v2_message pn_message)
 {
-    auto json = Json::parse(string_from_pn_block(pn_message.payload));
-    auto channel_data = json["data"].dump();
+    return std::make_pair(
+        string_from_pn_block(pn_message.tt),
+        MessageEntity{
+            // TODO: leak of presentation
+            .type = Pubnub::pubnub_chat_message_type::PCMT_TEXT,
+            .text = json_field_from_pn_block(pn_message.payload, "text"),
+            .channel_id = string_from_pn_block(pn_message.channel),
+            .user_id = string_from_pn_block(pn_message.publisher),
+            .meta = string_from_pn_block(pn_message.metadata),
+            .message_actions = {}
+        }
+    );
+    
+}
 
-//    return std::make_pair(
-//        string_from_pn_block(pn_message.tt),
-//        MessageEntity{
-//            .
-//            
-//        }
-//    );
-//    
+std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> to_channel(pubnub_v2_message pn_message) {
+    auto json = Json::parse(string_from_pn_block(pn_message.payload));
+
 }

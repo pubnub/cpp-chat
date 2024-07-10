@@ -20,6 +20,12 @@ Json Json::operator[](int index) const {
     return Json(json[index]);
 }
 
+// TODO: I'm not sure if it will work
+Json Json::operator=(Pubnub::String json) {
+    this->json = nlohmann::json::parse(json);
+    return *this;
+}
+
 Json::operator Pubnub::String() const {
     return static_cast<std::string>(this->json);
 }

@@ -114,7 +114,7 @@ Channel ChannelService::create_channel(String channel_id, ChatChannelData data) 
 
     {
         auto pubnub_handle = this->pubnub->lock();
-        pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string());
+        pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string(channel_id));
     }
 
     return this->create_channel_object(std::make_pair(channel_id, new_channel_entity));
@@ -181,7 +181,7 @@ Channel ChannelService::update_channel(String channel_id, ChatChannelData channe
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, channel_data);
 
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string());
+    pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string(channel_id));
 
     //Add channel_entity to repository
     entity_repository->get_channel_entities().update_or_insert(channel_id, new_channel_entity);
@@ -418,7 +418,6 @@ Channel ChannelService::create_presentation_object(String channel_id)
 ChannelEntity ChannelService::create_domain_from_presentation_data(String channel_id, ChatChannelData &presentation_data)
 {
     ChannelEntity new_channel_entity;
-    new_channel_entity.channel_id = channel_id;
     new_channel_entity.channel_name = presentation_data.channel_name;
     new_channel_entity.description = presentation_data.description;
     new_channel_entity.custom_data_json = presentation_data.custom_data_json;
@@ -446,54 +445,6 @@ ChannelEntity ChannelService::create_domain_from_channel_response(String json_re
     }
 
     return create_domain_from_channel_response_data(String(channel_data_json.dump()));
-}
-
-ChannelEntity ChannelService::create_domain_from_channel_response_data(String json_response_data)
-{
-    json channel_data_json = json::parse(json_response_data);
-
-    if(channel_data_json.is_null())
-    {
-        throw std::runtime_error("can't create channel from response data, json_response_data is not a correct json");
-    }
-
-    ChannelEntity new_channel_entity;
-
-    if(channel_data_json.contains("id") && !channel_data_json["id"].is_null())
-    {
-        new_channel_entity.channel_id = channel_data_json["id"].dump();
-    }
-    else
-    {
-        throw std::runtime_error("can't create channel from response data, response doesn't have id field");
-    }
-
-    if(channel_data_json.contains("name") && !channel_data_json["name"].is_null())
-    {
-        new_channel_entity.channel_name = channel_data_json["name"].dump();
-    }
-    if(channel_data_json.contains("description") && !channel_data_json["description"].is_null())
-    {
-        new_channel_entity.description = channel_data_json["description"].dump();
-    }
-    if(channel_data_json.contains("custom") && !channel_data_json["custom"].is_null())
-    {
-        new_channel_entity.custom_data_json = channel_data_json["custom"].dump();
-    }
-    if(channel_data_json.contains("updated") && !channel_data_json["updated"].is_null())
-    {
-        new_channel_entity.updated = channel_data_json["updated"].dump();
-    }
-    if(channel_data_json.contains("status") && !channel_data_json["status"].is_null())
-    {
-        new_channel_entity.status = channel_data_json["status"].dump();
-    }
-    if(channel_data_json.contains("type") && !channel_data_json["type"].is_null())
-    {
-        new_channel_entity.type = channel_data_json["type"].dump();
-    }
-
-    return new_channel_entity;
 }
 
 ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &channel_entity)
