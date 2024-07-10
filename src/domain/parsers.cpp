@@ -99,4 +99,8 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> to_channel(pubnub_v2_message pn_message) {
     auto json = Json::parse(string_from_pn_block(pn_message.payload));
 
+    return std::make_pair(
+            json_field_from_pn_block(pn_message.payload, "channel", "id"),
+            ChannelEntity::from_json(json)
+    );
 }
