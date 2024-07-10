@@ -79,6 +79,7 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/user_entity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_entity.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/parsers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp)
 
 set(APP_SOURCES
