@@ -343,7 +343,6 @@ namespace PubNubChatAPI.Entities
                         var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            existingMessageWrapper.UpdatePointer(updatedMessagePointer);
                             existingMessageWrapper.BroadcastMessageUpdate();
                         }
 
@@ -358,7 +357,6 @@ namespace PubNubChatAPI.Entities
                         var id = Channel.GetChannelIdFromPtr(channelPointer);
                         if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
-                            existingChannelWrapper.UpdatePointer(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
                         }
 
@@ -373,7 +371,6 @@ namespace PubNubChatAPI.Entities
                         var id = User.GetUserIdFromPtr(userPointer);
                         if (userWrappers.TryGetValue(id, out var existingUserWrapper))
                         {
-                            existingUserWrapper.UpdatePointer(userPointer);
                             existingUserWrapper.BroadcastUserUpdate();
                         }
 
@@ -388,7 +385,6 @@ namespace PubNubChatAPI.Entities
                         var id = Membership.GetMembershipIdFromPtr(membershipPointer);
                         if (membershipWrappers.TryGetValue(id, out var existingMembershipWrapper))
                         {
-                            existingMembershipWrapper.UpdatePointer(membershipPointer);
                             existingMembershipWrapper.BroadcastMembershipUpdate();
                         }
 
@@ -671,14 +667,7 @@ namespace PubNubChatAPI.Entities
                 updatedData.ChannelStatus,
                 updatedData.ChannelType);
             CUtilities.CheckCFunctionResult(newPointer);
-            if (channelWrappers.TryGetValue(channelId, out var existingChannelWrapper))
-            {
-                existingChannelWrapper.UpdatePointer(newPointer);
-            }
-            else
-            {
-                channelWrappers.Add(channelId, new Channel(this, channelId, newPointer));
-            }
+            channelWrappers.TryAdd(channelId, new Channel(this, channelId, newPointer));
         }
 
         /// <summary>
@@ -1020,14 +1009,7 @@ namespace PubNubChatAPI.Entities
                 updatedData.Status,
                 updatedData.Status);
             CUtilities.CheckCFunctionResult(newPointer);
-            if (userWrappers.TryGetValue(userId, out var existingUserWrapper))
-            {
-                existingUserWrapper.UpdatePointer(newPointer);
-            }
-            else
-            {
-                userWrappers.Add(userId, new User(this, userId, newPointer));
-            }
+            userWrappers.TryAdd(userId, new User(this, userId, newPointer));
         }
 
         /// <summary>
@@ -1398,12 +1380,8 @@ namespace PubNubChatAPI.Entities
                     wrapper = wrappers[id];
                     return true;
                 }
-                //Updating existing wrapper with updated pointer
-                else
-                {
-                    wrapper.UpdatePointer(pointer);
-                    return true;
-                }
+                
+                return true;
             }
             //Adding new user to wrappers cache
             else if (pointer != IntPtr.Zero)

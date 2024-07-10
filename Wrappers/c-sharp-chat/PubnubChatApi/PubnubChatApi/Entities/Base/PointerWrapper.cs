@@ -12,12 +12,6 @@ namespace PubNubChatAPI.Entities
             this.pointer = pointer;
         }
 
-        internal void UpdatePointer(IntPtr newPointer)
-        {
-            DisposePointer();
-            pointer = newPointer;
-        }
-
         protected abstract void DisposePointer();
 
         ~PointerWrapper()
