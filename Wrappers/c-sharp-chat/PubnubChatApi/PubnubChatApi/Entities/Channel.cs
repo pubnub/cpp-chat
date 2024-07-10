@@ -6,7 +6,6 @@ using System.Text;
 using System.Timers;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
-using PubnubChatApi.Entities.Events;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
@@ -375,6 +374,11 @@ namespace PubNubChatAPI.Entities
             }
 
             OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
+        }
+
+        public void ForwardMessage(Message message)
+        {
+            chat.ForwardMessage(message, this);
         }
 
         public void StartTyping()

@@ -1217,6 +1217,17 @@ namespace PubNubChatAPI.Entities
             return TryGetMessage(messageId, messagePointer, out message);
         }
 
+        public void ForwardMessage(Message message, Channel channel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<(Channel channel, Membership membership, int count)> GetUnreadMessageCounts(string startTimeToken,
+            string endTimeToken, string filter, int limit)
+        {
+            throw new NotImplementedException();
+        }
+
         public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens,
             Action<Message> listener)
         {

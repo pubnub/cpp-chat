@@ -244,6 +244,14 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_message_pin(pointer));
         }
 
+        public void ForwardMessage(string channelId)
+        {
+            if (chat.TryGetChannel(channelId, out var channel))
+            {
+                chat.ForwardMessage(this, channel);
+            }
+        }
+
         /// <summary>
         /// Deletes the message.
         /// <para>

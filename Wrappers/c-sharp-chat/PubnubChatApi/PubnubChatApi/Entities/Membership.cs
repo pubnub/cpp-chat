@@ -124,6 +124,21 @@ namespace PubNubChatAPI.Entities
         {
             CUtilities.CheckCFunctionResult(pn_membership_update_dirty(pointer, customJsonObject));
         }
+        
+        public string GetLastReadMessageTimeToken()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void SetLastReadMessage()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetUnreadMessagesCount()
+        {
+            throw new NotImplementedException();
+        }
 
         protected override void DisposePointer()
         {
