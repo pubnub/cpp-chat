@@ -38,6 +38,11 @@ Membership Membership::set_last_read_message(Message message)
     return *this;
 }
 
+int Membership::get_unread_messages_count(Pubnub::Membership membership)
+{
+    return this->membership_service->get_unread_messages_count(*this);
+}
+
 void Membership::stream_updates(std::function<void(Membership)> membership_callback)
 {
     this->membership_service->stream_updates_on({*this}, membership_callback);

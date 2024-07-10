@@ -22,6 +22,7 @@ extern "C" {
 #include <pubnub_subscribe_v2.h>
 #include <pubnub_fetch_history.h>
 #include <pubnub_actions_api.h>
+#include <pubnub_advanced_history.h>
 }
 
 using json = nlohmann::json;
@@ -495,6 +496,22 @@ void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::S
 
     delete[] message_timetoken_char;
     delete[] action_timetoken_char;
+}
+
+int PubNub::message_counts(const Pubnub::String channel, const Pubnub::String timestamp)
+{
+    auto result = pubnub_message_counts(this->main_context.get(), channel.c_str(), timestamp.c_str());
+    this->await_and_handle_error(result);
+
+    int MessageCountsReturn;
+	int get_response = pubnub_get_message_counts(this->main_context.get(), channel.c_str(), &MessageCountsReturn);
+
+    if(get_response >= 0)
+    {
+        return MessageCountsReturn;
+    }
+
+    return 0;
 }
 
 void PubNub::await_and_handle_error(pubnub_res result)

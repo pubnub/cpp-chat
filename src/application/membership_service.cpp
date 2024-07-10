@@ -241,6 +241,12 @@ void MembershipService::set_last_read_message_timetoken(Membership membership, S
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
 }
 
+int MembershipService::get_unread_messages_count(Membership membership)
+{
+    auto pubnub_handle = pubnub->lock();
+    return pubnub_handle->message_counts(membership.channel.channel_id(), this->last_read_message_timetoken(membership));
+}
+
 void MembershipService::stream_updates_on(std::vector<Membership> memberships, std::function<void(Membership)> membership_callback)
 {
     if(memberships.empty())

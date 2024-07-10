@@ -28,6 +28,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         Pubnub::Membership update(Pubnub::User user, Pubnub::Channel channel, Pubnub::String custom_object_json);
         Pubnub::String last_read_message_timetoken(Pubnub::Membership membership);
         void set_last_read_message_timetoken(Pubnub::Membership membership, Pubnub::String timetoken);
+        int get_unread_messages_count(Pubnub::Membership membership);
 
 
         void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Membership)> membership_callback);
