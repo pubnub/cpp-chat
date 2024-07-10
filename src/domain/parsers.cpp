@@ -96,7 +96,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
     
 }
 
-std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> to_channel(pubnub_v2_message pn_message) {
+std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> Parsers::PubnubJson::to_channel(pubnub_v2_message pn_message) {
     auto json = Json::parse(string_from_pn_block(pn_message.payload));
 
     return std::make_pair(
@@ -104,3 +104,13 @@ std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> to_channel(pubnub_v2_me
             ChannelEntity::from_json(json)
     );
 }
+
+std::pair<Prasers::PubnubJson::UserId, UserEntity> Parsers::PubnubJson::to_user(pubnub_v2_message pn_message) {
+    auto json = Json::parse(string_from_pn_block(pn_message.payload));
+
+    return std::make_pair(
+            json_field_from_pn_block(pn_message.payload, "uuid", "id"),
+            UserEntity::from_json(json)
+    );
+}
+

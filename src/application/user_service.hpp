@@ -35,8 +35,6 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::weak_ptr<ChatService> chat_service;
 
         UserEntity create_domain_from_presentation_data(Pubnub::String user_id, Pubnub::ChatUserData& presentation_data);
-        //Creates ChannelEntity from user response - put the whole response, not only "data" field
-        UserEntity create_domain_from_user_response(Pubnub::String json_response);
         //Creates ChannelEntity from user response "data" field
         UserEntity create_domain_from_user_response_data(Pubnub::String json_response_data);
 

@@ -61,9 +61,9 @@ User UserService::get_user(String user_id)
     auto pubnub_handle = this->pubnub->lock();
     String user_response = pubnub_handle->get_user_metadata(user_id);
 
-    json response_json = json::parse(user_response);
+    Json response_json = Json::parse(user_response);
 
-    UserEntity new_user_entity = create_domain_from_user_response(user_response);
+    UserEntity new_user_entity = UserEntity::from_json(user_response);
     User user = create_presentation_object(user_id);
 
     //Add or update user_entity to repository
@@ -77,19 +77,19 @@ std::vector<User> UserService::get_users(String include, int limit, String start
     auto pubnub_handle = this->pubnub->lock();
     String users_response = pubnub_handle->get_all_user_metadata(include, limit, start, end);
 
-    json response_json = json::parse(users_response);
+    Json response_json = Json::parse(users_response);
 
     if(response_json.is_null())
     {
         throw std::runtime_error("can't get users, response is incorrect");
     }
 
-    json user_data_array_json = response_json["data"];
+    Json user_data_array_json = response_json["data"];
     std::vector<User> users;
    
-   for (auto& element : user_data_array_json)
+   for (auto element : user_data_array_json)
    {
-        UserEntity new_user_entity = create_domain_from_user_response_data(String(element.dump()));
+        UserEntity new_user_entity = UserEntity::from_json(element.dump());
         User user = create_presentation_object(String(element["id"]));
 
         entity_repository->get_user_entities().update_or_insert(String(element["id"]), new_user_entity);
@@ -164,7 +164,6 @@ User UserService::create_presentation_object(String user_id)
 UserEntity UserService::create_domain_from_presentation_data(String user_id, ChatUserData &presentation_data)
 {
     UserEntity new_user_entity;
-    new_user_entity.user_id = user_id;
     new_user_entity.user_name = presentation_data.user_name;
     new_user_entity.external_id = presentation_data.external_id;
     new_user_entity.profile_url = presentation_data.profile_url;
@@ -172,76 +171,6 @@ UserEntity UserService::create_domain_from_presentation_data(String user_id, Cha
     new_user_entity.custom_data_json = presentation_data.custom_data_json;
     new_user_entity.status = presentation_data.status;
     new_user_entity.type = presentation_data.type;
-
-    return new_user_entity;
-}
-UserEntity UserService::create_domain_from_user_response(String json_response)
-{
-    json user_response_json = json::parse(json_response);
-
-    if(user_response_json.is_null())
-    {
-        throw std::runtime_error("can't create user from response, response is incorrect");
-    }
-
-    json user_data_json = user_response_json["data"][0];
-
-    if(user_data_json.is_null())
-    {
-        throw std::runtime_error("can't create user from response, response doesn't have data field");
-    }
-
-    return create_domain_from_user_response_data(String(user_data_json.dump()));
-}
-
-UserEntity UserService::create_domain_from_user_response_data(String json_response_data)
-{
-    json user_data_json = json::parse(json_response_data);
-
-    if(user_data_json.is_null())
-    {
-        throw std::runtime_error("can't create user from response data, json_response_data is not a correct json");
-    }
-
-    UserEntity new_user_entity;
-
-    if(user_data_json.contains("id") && !user_data_json["id"].is_null())
-    {
-        new_user_entity.user_id = user_data_json["id"].dump();
-    }
-    else
-    {
-        throw std::runtime_error("can't create user from response data, response doesn't have id field");
-    }
-
-    if(user_data_json.contains("name") && !user_data_json["name"].is_null())
-    {
-        new_user_entity.user_name = user_data_json["name"].dump();
-    }
-    if(user_data_json.contains("externalId") && !user_data_json["externalId"].is_null())
-    {
-        new_user_entity.external_id = user_data_json["externalId"].dump();
-    }
-    if(user_data_json.contains("profileUrl") && !user_data_json["profileUrl"].is_null())
-    {
-        new_user_entity.profile_url = user_data_json["profileUrl"].dump();
-    }
-    if(user_data_json.contains("email") && !user_data_json["email"].is_null())
-    {
-        new_user_entity.email = user_data_json["email"].dump();
-    }
-    if(user_data_json.contains("custom") && !user_data_json["custom"].is_null())
-    {
-        new_user_entity.custom_data_json = user_data_json["custom"];
-    }
-    if(user_data_json.contains("status") && !user_data_json["status"].is_null())
-    {
-        new_user_entity.status = user_data_json["status"].dump();
-    }
-    if(user_data_json.contains("type") && !user_data_json["type"].is_null())
-    {
-        new_user_entity.type = user_data_json["type"].dump();
-    }
 
     return new_user_entity;
 }

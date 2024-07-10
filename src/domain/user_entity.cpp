@@ -1,13 +1,9 @@
 #include "user_entity.hpp"
-#include "nlohmann/json.hpp"
-
-using json = nlohmann::json;
+#include "domain/json.hpp"
 
 Pubnub::String UserEntity::get_user_metadata_json_string()
 {
-    json user_data_json;
-
-    user_data_json["id"] = user_id.c_str();
+    Json user_data_json;
 
     if(!user_name.empty())
     {
@@ -39,5 +35,17 @@ Pubnub::String UserEntity::get_user_metadata_json_string()
     }
 
     return user_data_json.dump();
+}
+
+UserEntity UserEntity::from_json(Json user_json) {
+    return UserEntity{
+        user_json.get_string("name").value_or(Pubnub::String()),
+        user_json.get_string("externalId").value_or(Pubnub::String()),
+        user_json.get_string("profileUrl").value_or(Pubnub::String()),
+        user_json.get_string("email").value_or(Pubnub::String()),
+        user_json.get_string("custom").value_or(Pubnub::String()),
+        user_json.get_string("status").value_or(Pubnub::String()),
+        user_json.get_string("type").value_or(Pubnub::String())
+    };
 }
 

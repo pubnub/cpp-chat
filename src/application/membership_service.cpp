@@ -35,22 +35,22 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
     auto pubnub_handle = this->pubnub->lock();
     String get_channel_members_response = pubnub_handle->get_channel_members(channel_id, include_string, limit, start_timetoken, end_timetoken);
 
-    json response_json = json::parse(get_channel_members_response);
+    Json response_json = Json::parse(get_channel_members_response);
 
     if(response_json.is_null())
     {
         throw std::runtime_error("can't get members, response is incorrect");
     }
 
-    json users_array_json = response_json["data"];
+    Json users_array_json = response_json["data"];
 
     auto chat_service_shared = chat_service.lock();
 
     std::vector<Membership> memberships;
-    for (auto& element : users_array_json)
+    for (auto element : users_array_json)
     {
         //Create user entity, as this user maight be not in the repository yet. If it already is there, it will be updated
-        UserEntity user_entity = chat_service_shared->user_service->create_domain_from_user_response_data(String(element["uuid"].dump()));
+        UserEntity user_entity = UserEntity::from_json(element["uuid"].dump());
         String user_id = String(element["uuid"]["id"]);
         entity_repository->get_user_entities().update_or_insert(user_id, user_entity);
 
