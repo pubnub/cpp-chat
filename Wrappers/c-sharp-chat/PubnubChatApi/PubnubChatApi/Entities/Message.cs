@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -250,6 +252,21 @@ namespace PubNubChatAPI.Entities
             {
                 chat.ForwardMessage(this, channel);
             }
+        }
+
+        public List<MessageAction> Reactions()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasUserReaction(string reactionValue)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void ToggleReaction(string reactionValue)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

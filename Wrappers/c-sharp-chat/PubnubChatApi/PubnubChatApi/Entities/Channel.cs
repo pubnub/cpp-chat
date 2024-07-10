@@ -585,7 +585,7 @@ namespace PubNubChatAPI.Entities
         public void SendText(string message)
         {
             CUtilities.CheckCFunctionResult(pn_channel_send_text(pointer, message,
-                (byte)pubnub_chat_message_type.PCMT_TEXT, string.Empty));
+                (byte)PubnubChatMessageType.Text, string.Empty));
         }
 
         /// <summary>
