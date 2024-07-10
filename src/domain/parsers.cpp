@@ -85,12 +85,12 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
         string_from_pn_block(pn_message.tt),
         MessageEntity{
             // TODO: leak of presentation
-            .type = Pubnub::pubnub_chat_message_type::PCMT_TEXT,
-            .text = json_field_from_pn_block(pn_message.payload, "text"),
-            .channel_id = string_from_pn_block(pn_message.channel),
-            .user_id = string_from_pn_block(pn_message.publisher),
-            .meta = string_from_pn_block(pn_message.metadata),
-            .message_actions = {}
+            Pubnub::pubnub_chat_message_type::PCMT_TEXT,
+            json_field_from_pn_block(pn_message.payload, "text"),
+            string_from_pn_block(pn_message.channel),
+            string_from_pn_block(pn_message.publisher),
+            string_from_pn_block(pn_message.metadata),
+            {}
         }
     );
     
