@@ -19,16 +19,22 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
     public:
         MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
 
+        Pubnub::String get_membership_custom_data(Pubnub::String user_id, Pubnub::String channel_id);
         std::vector<Pubnub::Membership> get_channel_members(Pubnub::String channel_id, int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
         std::vector<Pubnub::Membership> get_user_memberships(Pubnub::String user_id, int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
         Pubnub::Membership invite_to_channel(Pubnub::String channel_id, Pubnub::User user);
         std::vector<Pubnub::Membership> invite_multiple_to_channel(Pubnub::String channel_id, std::vector<Pubnub::User> users);
     
         Pubnub::Membership update(Pubnub::User user, Pubnub::Channel channel, Pubnub::String custom_object_json);
+        Pubnub::String last_read_message_timetoken(Pubnub::Membership membership);
+        void set_last_read_message_timetoken(Pubnub::Membership membership, Pubnub::String timetoken);
+
+
         void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Membership)> membership_callback);
 
         Pubnub::Membership create_presentation_object(Pubnub::User user, Pubnub::Channel channel);
         Pubnub::Membership create_membership_object(Pubnub::User user, Pubnub::Channel channel, MembershipEntity membership_entity);
+
 
     private:
         ThreadSafePtr<PubNub> pubnub;

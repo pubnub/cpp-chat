@@ -16,6 +16,18 @@ MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_p
     chat_service(chat_service)
 {}
 
+String MembershipService::get_membership_custom_data(String user_id, String channel_id)
+{
+    auto maybe_membership = this->entity_repository->get_membership_entities().get(std::pair<String, String>(user_id, channel_id));
+
+    if (!maybe_membership.has_value()) 
+    {
+        throw std::invalid_argument("Failed to get membership data, there is no memebrship with these user and channel ids");
+    }
+
+    return maybe_membership.value().custom_field;
+}
+
 std::vector<Membership> MembershipService::get_channel_members(String channel_id, int limit, String start_timetoken, String end_timetoken)
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
@@ -189,6 +201,44 @@ Membership MembershipService::update(User user, Channel channel, String custom_o
     pubnub_handle->set_memberships(user.user_id(), set_memberships_string);
 
     return create_membership_object(user, channel, create_domain_membership(custom_object_json_string));
+}
+
+String MembershipService::last_read_message_timetoken(Membership membership)
+{
+    String custom_data = membership.custom_data();
+    if(custom_data.empty())
+    {
+        return String();
+    }
+    
+    json custom_data_json = json::parse(custom_data);
+
+    if(custom_data_json.contains("lastReadMessageTimetoken") && !custom_data_json["lastReadMessageTimetoken"].is_null())
+    {
+        return String(custom_data_json["lastReadMessageTimetoken"]);
+    }
+    
+    return String();
+}
+
+void MembershipService::set_last_read_message_timetoken(Membership membership, String timetoken)
+{
+    String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
+
+    json custom_data_json = json::parse(custom_data);
+    custom_data_json["lastReadMessageTimetoken"] = timetoken;
+    membership.update(custom_data_json.dump());
+
+    //Update entity repository with updated membership
+    MembershipEntity new_membership_entity = create_domain_membership(custom_data_json.dump());
+    entity_repository->get_membership_entities().update_or_insert(std::pair<String, String>(membership.user.user_id(), membership.channel.channel_id()), new_membership_entity);
+
+    //TODO:: in js chat here is check in access manager if event can be sent
+
+    auto chat_service_shared = this->chat_service.lock();
+
+    String event_payload = String("{\"messageTimetoken\": \"") + timetoken + String("\"}");
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
 }
 
 void MembershipService::stream_updates_on(std::vector<Membership> memberships, std::function<void(Membership)> membership_callback)

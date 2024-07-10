@@ -14,6 +14,7 @@ class MembershipService;
 
 namespace Pubnub
 {
+    class Message;
 
     PN_CHAT_EXPORT class Membership
     {
@@ -21,9 +22,14 @@ namespace Pubnub
             Pubnub::User user;
             Pubnub::Channel channel;
 
-            PN_CHAT_EXPORT Membership update(Pubnub::String custom_object_json);
+            PN_CHAT_EXPORT Pubnub::String custom_data();
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(Membership)> membership_callback);
+            PN_CHAT_EXPORT Pubnub::Membership update(Pubnub::String custom_object_json);
+            PN_CHAT_EXPORT Pubnub::String last_read_message_timetoken();
+            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message_timetoken(Pubnub::String timetoken);
+            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message(Pubnub::Message message);
+
+            PN_CHAT_EXPORT void stream_updates(std::function<void(Pubnub::Membership)> membership_callback);
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Membership)> membership_callback);
 
         private:
