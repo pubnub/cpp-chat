@@ -87,7 +87,7 @@ std::vector<Membership> MembershipService::get_user_memberships(String user_id, 
     for (auto& element : channels_array_json)
     {
         //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
-        ChannelEntity channel_entity = chat_service_shared->channel_service->create_domain_from_channel_response_data(String(element["channel"].dump()));
+        ChannelEntity channel_entity = ChannelEntity::from_json(String(element["channel"].dump()));
         String channel_id = String(element["channel"]["id"]);
         entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
 
@@ -130,7 +130,7 @@ Membership MembershipService::invite_to_channel(String channel_id, User user)
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_INVITE, user.user_id(), event_payload);
 
     //This channel is updated, so we need to update it in entity repository as well
-    ChannelEntity channel_entity = chat_service_shared->channel_service->create_domain_from_channel_response_data(channel_data_string);
+    ChannelEntity channel_entity = ChannelEntity::from_json(channel_data_string);
     entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
     
     return create_presentation_object(user, channel);

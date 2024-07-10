@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHANNEL_ENTITY_HPP
 #define PN_CHAT_CHANNEL_ENTITY_HPP
 
+#include "domain/json.hpp"
 #include "string.hpp"
 #include "infra/timer.hpp"
 #include <map>
@@ -22,7 +23,7 @@ struct ChannelEntity {
 
     //This is equivalent of channel_data_to_json from the old channel obj
     Pubnub::String get_channel_metadata_json_string(Pubnub::String channel_id);
-    static ChannelEntity from_json(Pubnub::String channel_json);
+    static ChannelEntity from_json(Json channel_json);
 };
 
 #endif // PN_CHAT_CHANNEL_ENTITY_HPP

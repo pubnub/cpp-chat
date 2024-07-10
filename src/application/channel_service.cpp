@@ -1,5 +1,6 @@
 #include "channel_service.hpp"
 #include "chat_service.hpp"
+#include "domain/json.hpp"
 #include "user_service.hpp"
 #include "membership_service.hpp"
 #include "message_service.hpp"
@@ -146,19 +147,19 @@ std::vector<Channel> ChannelService::get_channels(String include, int limit, Str
     auto pubnub_handle = this->pubnub->lock();
     String channels_response = pubnub_handle->get_all_channels_metadata(include, limit, start, end);
 
-    json response_json = json::parse(channels_response);
+    Json response_json = Json::parse(channels_response);
 
     if(response_json.is_null())
     {
         throw std::runtime_error("can't get channels, response is incorrect");
     }
 
-    json channel_data_array_json = response_json["data"];
+    Json channel_data_array_json = response_json["data"];
     std::vector<Channel> Channels;
    
-   for (auto& element : channel_data_array_json)
+   for (auto element : channel_data_array_json)
    {
-        ChannelEntity new_channel_entity = create_domain_from_channel_response_data(String(element.dump()));
+        ChannelEntity new_channel_entity = ChannelEntity::from_json(element.dump());
         Channel channel = create_presentation_object(String(element["id"]));
 
         entity_repository->get_channel_entities().update_or_insert(String(element["id"]), new_channel_entity);
@@ -430,21 +431,21 @@ ChannelEntity ChannelService::create_domain_from_presentation_data(String channe
 
 ChannelEntity ChannelService::create_domain_from_channel_response(String json_response)
 {
-    json channel_response_json = json::parse(json_response);
+    Json channel_response_json = Json::parse(json_response);
 
     if(channel_response_json.is_null())
     {
         throw std::runtime_error("can't create channel from response, response is incorrect");
     }
 
-    json channel_data_json = channel_response_json["data"][0];
+    Json channel_data_json = channel_response_json["data"][0];
 
     if(channel_data_json.is_null())
     {
         throw std::runtime_error("can't create channel from response, response doesn't have data field");
     }
 
-    return create_domain_from_channel_response_data(String(channel_data_json.dump()));
+    return ChannelEntity::from_json(channel_data_json);
 }
 
 ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &channel_entity)

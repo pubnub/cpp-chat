@@ -44,7 +44,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void get_typing(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> typing_callback);
         Pubnub::Message get_pinned_message(Pubnub::String channel_id);
         void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback);
-        
 
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data);
         Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
@@ -60,8 +59,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
         //Creates ChannelEntity from channel response - put the whole response, not only "data" field
         ChannelEntity create_domain_from_channel_response(Pubnub::String json_response);
-        //Creates ChannelEntity from channel response "data" field
-        ChannelEntity create_domain_from_channel_response_data(Pubnub::String json_response_data);
 
         Pubnub::ChatChannelData presentation_data_from_domain(ChannelEntity& channel_entity);
 
