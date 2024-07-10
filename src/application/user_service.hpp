@@ -19,6 +19,8 @@ class UserService : public std::enable_shared_from_this<UserService>
         UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
         Pubnub::ChatUserData get_user_data(Pubnub::String user_id);
 
+        Pubnub::User get_current_user();
+
         Pubnub::User create_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
         Pubnub::User get_user(Pubnub::String user_id);
         std::vector<Pubnub::User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);

@@ -40,7 +40,7 @@ Membership Membership::set_last_read_message(Message message)
 
 int Membership::get_unread_messages_count(Pubnub::Membership membership)
 {
-    return this->membership_service->get_unread_messages_count(*this);
+    return this->membership_service->get_unread_messages_count_one_channel(*this);
 }
 
 void Membership::stream_updates(std::function<void(Membership)> membership_callback)

@@ -63,7 +63,7 @@ public:
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
     Pubnub::String add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value);
     void remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken);
-    int message_counts(const Pubnub::String channel, const Pubnub::String timestamp);
+    std::map<Pubnub::String, int, Pubnub::StringComparer> message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps);
 
 private:
     void await_and_handle_error(pubnub_res result);
@@ -72,6 +72,7 @@ private:
     void call_handshake();
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
+    Pubnub::String get_comma_sep_string_from_vector(std::vector<Pubnub::String> vector_of_strings);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;

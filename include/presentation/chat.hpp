@@ -17,6 +17,7 @@ class UserService;
 class PresenceService;
 class RestrictionsService;
 class MessageService;
+class MembershipService;
 
 namespace Pubnub {
 
@@ -37,6 +38,14 @@ namespace Pubnub {
         host_membership(in_host_membership)
         {}
     };
+
+    struct UnreadMessageWrapper
+    {
+        Pubnub::Channel channel;
+        Pubnub::Membership membership;
+        int count;
+    };
+
 
     class Chat {
         public:
@@ -77,6 +86,7 @@ namespace Pubnub {
             /* MESSAGES */
 
             PN_CHAT_EXPORT void forward_message(Pubnub::Message message, Pubnub::Channel channel);
+            PN_CHAT_EXPORT std::vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(Pubnub::String start_timetoken, Pubnub::String end_timetoken, Pubnub::String filter = "", int limit = 0);
 
         private:
             std::shared_ptr<ChatService> chat_service;
@@ -85,6 +95,7 @@ namespace Pubnub {
             std::shared_ptr<PresenceService> presence_service;
             std::shared_ptr<RestrictionsService> restrictions_service;
             std::shared_ptr<MessageService> message_service;
+            std::shared_ptr<MembershipService> membership_service;
     };
 }
 

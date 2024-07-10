@@ -241,10 +241,55 @@ void MembershipService::set_last_read_message_timetoken(Membership membership, S
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
 }
 
-int MembershipService::get_unread_messages_count(Membership membership)
+int MembershipService::get_unread_messages_count_one_channel(Membership membership)
 {
     auto pubnub_handle = pubnub->lock();
-    return pubnub_handle->message_counts(membership.channel.channel_id(), this->last_read_message_timetoken(membership));
+    auto message_counts_map =  pubnub_handle->message_counts({membership.channel.channel_id()}, {this->last_read_message_timetoken(membership)});
+
+    return message_counts_map[membership.channel.channel_id()];
+}
+
+std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(Pubnub::String start_timetoken, Pubnub::String end_timetoken, Pubnub::String filter, int limit)
+{
+    auto pubnub_handle = pubnub->lock();
+    auto chat_service_shared = chat_service.lock();
+    std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> return_tuples;
+
+    User current_user = chat_service_shared->user_service->get_current_user();
+    //TODO:: pass filter here when it will be supported in C-Core
+    auto user_memberships = current_user.get_memberships(limit, start_timetoken, end_timetoken);
+
+    if(user_memberships.size() == 0)
+    {
+        return return_tuples;
+    }
+
+    std::vector<String> channels;
+    std::vector<String> timetokens;
+
+    for(auto &membership : user_memberships)
+    {
+        channels.push_back(membership.channel.channel_id());
+        String last_timetoken = this->last_read_message_timetoken(membership);
+        if(last_timetoken.empty())
+        {
+            last_timetoken = "0";
+        }
+        timetokens.push_back(last_timetoken);
+    }
+
+    std::map<Pubnub::String, int, StringComparer> messages_counts_response = pubnub_handle->message_counts(channels, timetokens);
+
+    for(auto &membership : user_memberships)
+    {
+        if(messages_counts_response.find(membership.channel.channel_id()) != messages_counts_response.end())
+        {
+            std::tuple<Pubnub::Channel, Pubnub::Membership, int> return_tuple(membership.channel, membership, messages_counts_response[membership.channel.channel_id()]);
+            return_tuples.push_back(return_tuple);
+        }
+    }
+
+    return return_tuples;
 }
 
 void MembershipService::stream_updates_on(std::vector<Membership> memberships, std::function<void(Membership)> membership_callback)

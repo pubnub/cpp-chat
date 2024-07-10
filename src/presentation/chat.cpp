@@ -5,6 +5,7 @@
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
+#include "application/membership_service.hpp"
 
 using namespace Pubnub;
 
@@ -22,6 +23,7 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
     presence_service = chat_service->presence_service;
     restrictions_service = chat_service->restrictions_service;
     message_service = chat_service->message_service;
+    membership_service = chat_service->membership_service;
 }
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
@@ -129,4 +131,18 @@ void Chat::listen_for_events(String channel_id, pubnub_chat_event_type chat_even
 void Chat::forward_message(Message message, Channel channel)
 {
     this->message_service->forward_message(message, channel.channel_id());
+}
+
+std::vector<UnreadMessageWrapper> Chat::get_unread_message_counts(String start_timetoken, String end_timetoken, String filter, int limit)
+{
+    auto tuples = this->membership_service->get_all_unread_messages_counts(start_timetoken, end_timetoken, filter, limit);
+
+    std::vector<UnreadMessageWrapper> return_wrappers;
+    for(auto &tuple : tuples)
+    {
+        UnreadMessageWrapper wrapper = {std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple)};
+        return_wrappers.push_back(wrapper);
+    }
+
+    return return_wrappers;
 }

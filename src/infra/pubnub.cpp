@@ -498,20 +498,19 @@ void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::S
     delete[] action_timetoken_char;
 }
 
-int PubNub::message_counts(const Pubnub::String channel, const Pubnub::String timestamp)
+std::map<Pubnub::String, int, Pubnub::StringComparer> PubNub::message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps)
 {
-    auto result = pubnub_message_counts(this->main_context.get(), channel.c_str(), timestamp.c_str());
+    std::map<Pubnub::String, int, Pubnub::StringComparer> final_map;
+    auto result = pubnub_message_counts(this->main_context.get(), get_comma_sep_string_from_vector(channels).c_str(), get_comma_sep_string_from_vector(timestamps).c_str());
     this->await_and_handle_error(result);
 
-    int MessageCountsReturn;
-	int get_response = pubnub_get_message_counts(this->main_context.get(), channel.c_str(), &MessageCountsReturn);
-
-    if(get_response >= 0)
+    for(auto &channel : channels)
     {
-        return MessageCountsReturn;
+        int MessageCountsReturn;
+	    int get_response = pubnub_get_message_counts(this->main_context.get(), channel.c_str(), &MessageCountsReturn);
+        final_map[channel] = get_response >= 0 ? MessageCountsReturn : 0;
     }
-
-    return 0;
+    return final_map;
 }
 
 void PubNub::await_and_handle_error(pubnub_res result)
@@ -610,4 +609,18 @@ Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()
     return current_channels;
 }
 
+Pubnub::String PubNub::get_comma_sep_string_from_vector(std::vector<Pubnub::String> vector_of_strings)
+{
+    Pubnub::String final_string;
+    for (const auto& element : vector_of_strings) 
+    {
+        final_string += element + ",";
+    }
+    if(!final_string.empty())
+    {
+        final_string.erase(final_string.length() - 1, 1);
+    }
+    
+    return final_string;
+}
 

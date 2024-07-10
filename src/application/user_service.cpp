@@ -13,7 +13,7 @@ UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRep
     chat_service(chat_service)
 {}
 
-Pubnub::ChatUserData UserService::get_user_data(Pubnub::String user_id)
+ChatUserData UserService::get_user_data(String user_id)
 {
     auto maybe_user = this->entity_repository->get_user_entities().get(user_id);
 
@@ -23,6 +23,13 @@ Pubnub::ChatUserData UserService::get_user_data(Pubnub::String user_id)
     }
 
     return presentation_data_from_domain(maybe_user.value());
+}
+
+User UserService::get_current_user()
+{
+    auto pubnub_handle = pubnub->lock();
+
+    return create_presentation_object(pubnub_handle->get_user_id());
 }
 
 User UserService::create_user(String user_id, ChatUserData user_data)
