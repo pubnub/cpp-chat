@@ -66,7 +66,7 @@ public class MessageTests
     {
         channel.OnMessageReceived += async message =>
         {
-            message.DeleteMessage();
+            message.Delete();
 
             await Task.Delay(2000);
             
@@ -82,7 +82,7 @@ public class MessageTests
     {
         channel.OnMessageReceived += async message =>
         {
-            message.PinMessage();
+            message.Pin();
 
             await Task.Delay(2000);
             

@@ -628,7 +628,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while deleting the channel.</exception>
-        public void DeleteChannel()
+        public void Delete()
         {
             chat.DeleteChannel(Id);
         }

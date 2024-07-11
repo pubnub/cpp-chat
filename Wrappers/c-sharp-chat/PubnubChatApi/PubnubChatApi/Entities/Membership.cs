@@ -135,7 +135,7 @@ namespace PubNubChatAPI.Entities
             throw new NotImplementedException();
         }
 
-        public int GetUnreadMessagesCounts()
+        public int GetUnreadMessagesCount()
         {
             throw new NotImplementedException();
         }

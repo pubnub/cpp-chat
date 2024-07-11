@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using PubnubChatApi.Entities.Data;
+using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -151,7 +152,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        //TODO: format to list?
+        //TODO: format to list? We have the struct for it now
         //TODO: REMOVE THAT
         public string MessageActions
         {
@@ -171,8 +172,7 @@ namespace PubNubChatAPI.Entities
         /// </para>
         /// </summary>
         /// <seealso cref="pubnub_chat_message_type"/>
-        // TODO: enum
-        public int DataType => pn_message_get_data_type(pointer);
+        public PubnubChatMessageType Type => (PubnubChatMessageType)pn_message_get_data_type(pointer);
         
         private Chat chat;
 
@@ -193,7 +193,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="EditMessageText"/>
-        /// <seealso cref="DeleteMessage"/>
+        /// <seealso cref="Delete"/>
         public event Action<Message> OnMessageUpdated; 
         
         internal Message(Chat chat, IntPtr messagePointer, string timeToken) : base(messagePointer, timeToken)
@@ -241,12 +241,17 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(newPointer);
         }
 
-        public void PinMessage()
+        public void Pin()
         {
             CUtilities.CheckCFunctionResult(pn_message_pin(pointer));
         }
 
-        public void ForwardMessage(string channelId)
+        public void Report(string reason)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Forward(string channelId)
         {
             if (chat.TryGetChannel(channelId, out var channel))
             {
@@ -286,7 +291,7 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <seealso cref="IsDeleted"/>
         /// <seealso cref="OnMessageUpdated"/>
-        public void DeleteMessage()
+        public void Delete()
         {
             CUtilities.CheckCFunctionResult(pn_message_delete_message(pointer));
         }
