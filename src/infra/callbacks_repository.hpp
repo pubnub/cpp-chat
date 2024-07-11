@@ -10,9 +10,9 @@
 
 class CallbacksRepository {
     template <typename T>
-    using FunctionRepository = Repository<Pubnub::String, std::function<void(T)>>;
+    using FunctionRepository = Repository<Pubnub::String, std::function<void(T)>, Pubnub::StringComparer>;
     template <typename T, typename U>
-    using TupleFunctionRepository = Repository<Pubnub::String, std::tuple<T, std::function<void(U)>>>;
+    using TupleFunctionRepository = Repository<Pubnub::String, std::tuple<T, std::function<void(U)>>, Pubnub::StringComparer>;
 
     public:
         CallbacksRepository() = default;

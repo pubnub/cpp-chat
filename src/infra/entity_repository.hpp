@@ -6,6 +6,7 @@
 #include "domain/channel_entity.hpp"
 #include "domain/message_entity.hpp"
 #include "repository.hpp"
+#include "string.hpp"
 
 class EntityRepository {
     using ChannelId = Pubnub::String;
@@ -14,15 +15,16 @@ class EntityRepository {
     public: 
         EntityRepository();
 
-        Repository<Pubnub::String, UserEntity>& get_user_entities();
-        Repository<Pubnub::String, ChannelEntity>& get_channel_entities();
-        Repository<Pubnub::String, MessageEntity>& get_message_entities();
+        Repository<Pubnub::String, UserEntity, Pubnub::StringComparer>& get_user_entities();
+        Repository<Pubnub::String, ChannelEntity, Pubnub::StringComparer>& get_channel_entities();
+        Repository<Pubnub::String, MessageEntity, Pubnub::StringComparer>& get_message_entities();
+        // todo: comparer
         Repository<std::pair<UserId, ChannelId>, MembershipEntity>& get_membership_entities();
 
      private:
-        Repository<Pubnub::String, UserEntity> user_entities;
-        Repository<Pubnub::String, ChannelEntity> channel_entities;
-        Repository<Pubnub::String, MessageEntity> message_entities;
+        Repository<Pubnub::String, UserEntity, Pubnub::StringComparer> user_entities;
+        Repository<Pubnub::String, ChannelEntity, Pubnub::StringComparer> channel_entities;
+        Repository<Pubnub::String, MessageEntity, Pubnub::StringComparer> message_entities;
         Repository<std::pair<UserId, ChannelId>, MembershipEntity> membership_entities;
 };
 

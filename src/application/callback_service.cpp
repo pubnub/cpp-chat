@@ -131,7 +131,7 @@ void CallbackService::resolve_callbacks() {
         return guard->fetch_messages();
     }();
 
-    this->broadcast_messages({});
+    this->broadcast_messages(messages);
 }
 
 void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message)
