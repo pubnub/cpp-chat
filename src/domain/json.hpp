@@ -34,6 +34,9 @@ class Json {
         Pubnub::String dump() const;
         std::optional<Pubnub::String> get_string(Pubnub::String key) const;
 
+        void insert_or_update(Pubnub::String key, Json value);
+        void insert_or_update(Pubnub::String key, Pubnub::String value);
+
         Iterator begin();
         Iterator end();
     private:

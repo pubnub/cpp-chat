@@ -7,31 +7,25 @@ Pubnub::String ChannelEntity::get_channel_metadata_json_string(Pubnub::String ch
 {
     Json channel_data_json;
 
-    channel_data_json["id"] = channel_id;
-    if(!channel_name.empty())
-    {
-        channel_data_json["name"] = channel_name;
+    channel_data_json.insert_or_update("id", channel_id);
+    if(!channel_name.empty()) {
+        channel_data_json.insert_or_update("name", channel_name);
     }
-    if(!description.empty())
-    {
-        channel_data_json["description"] = description.c_str();
+    if(!description.empty()) {
+        channel_data_json.insert_or_update("description", description);
     }
-    if(!custom_data_json.empty())
-    {
-        json custom_json = json::parse(custom_data_json);
-        channel_data_json["custom"] = custom_json;
+    if(!custom_data_json.empty()) {
+        Json custom_json = Json::parse(custom_data_json);
+        channel_data_json.insert_or_update("custom", custom_json);
     }
-    if(!updated.empty())
-    {
-        channel_data_json["updated"] = updated.c_str();
+    if(!updated.empty()) {
+        channel_data_json.insert_or_update("updated", updated);
     }
-    if(!status.empty())
-    {
-        channel_data_json["status"] = status.c_str();
+    if(!status.empty()) {
+        channel_data_json.insert_or_update("status", status);
     }
-    if(!type.empty())
-    {
-        channel_data_json["type"] = type.c_str();
+    if(!type.empty()) {
+        channel_data_json.insert_or_update("type", type);
     }
 
     return channel_data_json.dump();

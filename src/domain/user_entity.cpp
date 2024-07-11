@@ -5,33 +5,27 @@ Pubnub::String UserEntity::get_user_metadata_json_string()
 {
     Json user_data_json;
 
-    if(!user_name.empty())
-    {
-        user_data_json["name"] = user_name.c_str();
+    if(!user_name.empty()) {
+        user_data_json.insert_or_update("name", user_name);
     }
-    if(!external_id.empty())
-    {
-        user_data_json["externalId"] = user_name.c_str();
+    if(!external_id.empty()) {
+        user_data_json.insert_or_update("externalId", external_id);
     }
-    if(!profile_url.empty())
-    {
-        user_data_json["profileUrl"] = profile_url.c_str();
+    if(!profile_url.empty()) {
+        user_data_json.insert_or_update("profileUrl", profile_url);
     }
-    if(!email.empty())
-    {
-        user_data_json["email"] = email.c_str();
+    if(!email.empty()) {
+        user_data_json.insert_or_update("email", email);
     }
-    if(!custom_data_json.empty())
-    {
-        user_data_json["custom"] = custom_data_json.c_str();
+    if(!custom_data_json.empty()) {
+        Json custom_json = Json::parse(custom_data_json);
+        user_data_json.insert_or_update("custom", custom_json);
     }
-    if(!status.empty())
-    {
-        user_data_json["status"] = status.c_str();
+    if(!status.empty()) {
+        user_data_json.insert_or_update("status", status);
     }
-    if(!type.empty())
-    {
-        user_data_json["type"] = type.c_str();
+    if(!type.empty()) {
+        user_data_json.insert_or_update("type", type);
     }
 
     return user_data_json.dump();

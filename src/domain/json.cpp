@@ -51,6 +51,14 @@ std::optional<Pubnub::String> Json::get_string(Pubnub::String key) const {
     return std::nullopt;
 }
 
+void Json::insert_or_update(Pubnub::String key, Json value) {
+    this->json[key] = value.json;
+}
+
+void Json::insert_or_update(Pubnub::String key, Pubnub::String value) {
+    this->json[key] = value.c_str();
+}
+
 Json::Iterator Json::begin() {
     return Json::Iterator(this->json.begin());
 }
