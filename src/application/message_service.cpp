@@ -154,6 +154,12 @@ std::vector<Message> MessageService::get_channel_history(String channel_id, Stri
     {
         auto new_message_entity = MessageEntity::from_json(String(element.dump()), channel_id);
 
+        // TODO: validate if this continue is correct
+        if (element["id"].is_null())
+        {
+            continue;
+        }
+
         messages.push_back(
                 this->create_message_object(std::make_pair(String(element["id"]), new_message_entity))
         );
