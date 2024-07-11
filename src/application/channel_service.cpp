@@ -311,9 +311,8 @@ void ChannelService::leave(String channel_id)
 
 void ChannelService::send_text(String channel_id, String message, pubnub_chat_message_type message_type, String meta_data)
 {
-    //TODO:: meta_data is not used. Add support for metadata
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type));
+    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type), meta_data);
 }
 
 void ChannelService::start_typing(String channel_id)
