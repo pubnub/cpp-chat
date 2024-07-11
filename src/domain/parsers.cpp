@@ -93,7 +93,6 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
             {}
         }
     );
-    
 }
 
 std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> Parsers::PubnubJson::to_channel(pubnub_v2_message pn_message) {
@@ -114,3 +113,32 @@ std::pair<Parsers::PubnubJson::UserId, UserEntity> Parsers::PubnubJson::to_user(
     );
 }
 
+MembershipEntity Parsers::PubnubJson::membership_from_string(Pubnub::String message_json) {
+    auto json = Json::parse(message_json);
+
+    return MembershipEntity::from_json(json);
+}
+
+Pubnub::String Parsers::PubnubJson::to_string(pubnub_v2_message pn_message) {
+    return string_from_pn_block(pn_message.payload);
+}
+
+Pubnub::String Parsers::PubnubJson::event_type(Pubnub::String message_json) {
+    return Json::parse(message_json)["type"];
+}
+
+Pubnub::String Parsers::PubnubJson::message_update_timetoken(Pubnub::String message_json) {
+    return Json::parse(message_json)["data"]["messageTimetoken"];
+}
+
+Pubnub::String Parsers::PubnubJson::membership_channel(Pubnub::String message_json) {
+    return Json::parse(message_json)["data"]["channel"]["id"];
+}
+
+Pubnub::String Parsers::PubnubJson::membership_user(Pubnub::String message_json) {
+    return Json::parse(message_json)["data"]["uuid"]["id"];
+}
+
+Pubnub::String Parsers::PubnubJson::membership_custom_field(Pubnub::String message_json) {
+    return Json::parse(message_json)["custom"];
+}

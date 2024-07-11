@@ -189,7 +189,7 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
     if (Parsers::PubnubJson::is_event(message_string)) {
         auto maybe_callback = this->callbacks.get_event_callbacks().get(message_channel_string);
         if (maybe_callback.has_value()) {
-            auto parsed_event = Parsers::PubnubJson::message_string(message);
+            auto parsed_event = Parsers::PubnubJson::to_string(message);
 
             Pubnub::pubnub_chat_event_type event_type;
             std::function<void(Pubnub::String)> callback;
@@ -246,7 +246,7 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             auto user_from_message = Parsers::PubnubJson::membership_user(message_string);
             if(user_from_message == membership_user)
             {
-                auto custom_field = Parsers::PubnubJson::to_membership(message_string);
+                auto custom_field = Parsers::PubnubJson::membership_from_string(message_string);
                 auto memberships = this->membership_service.lock();
                 auto channels = this->channel_service.lock();
                 auto users = this->user_service.lock();
