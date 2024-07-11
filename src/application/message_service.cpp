@@ -41,13 +41,17 @@ void MessageService::edit_text(Message message, String new_text)
 
     pubnub_message_action_type edited_action_type = pubnub_message_action_type::PMAT_Edited;
 
-    auto pubnub_handle = pubnub->lock();
 
     ChatMessageData message_data = message.message_data();
 
     //Message action value sent to server has to be in quotation marks
     String new_text_with_quotations = "\"" + new_text + "\"";
-    String action_timetoken = pubnub_handle->add_message_action(message_data.channel_id, message.timetoken(), message_action_type_to_string(edited_action_type), new_text_with_quotations);
+
+    auto timetoken = message.timetoken();
+    auto action_timetoken = [this, message_data, timetoken, edited_action_type, new_text_with_quotations] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(edited_action_type), new_text_with_quotations);
+    }();
     
     //But we store message text without quotations marks
     message_data.text = new_text;
@@ -93,11 +97,14 @@ void MessageService::delete_message(Message message)
     pubnub_message_action_type deleted_action_type = pubnub_message_action_type::PMAT_Deleted;
     String deleted_value = "\"deleted\"";
    
-    auto pubnub_handle = pubnub->lock();
 
     ChatMessageData message_data = message.message_data();
 
-    String action_timetoken = pubnub_handle->add_message_action(message_data.channel_id, message.timetoken(), message_action_type_to_string(deleted_action_type), deleted_value);
+    auto timetoken = message.timetoken();
+    auto action_timetoken = [this, message_data, timetoken, deleted_action_type, deleted_value] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->add_message_action(message_data.channel_id, timetoken, message_action_type_to_string(deleted_action_type), deleted_value);
+    }();
 
     MessageAction deleted_message_action;
     deleted_message_action.type = deleted_action_type;
@@ -126,9 +133,10 @@ bool MessageService::deleted(Message message)
 
 std::vector<Message> MessageService::get_channel_history(String channel_id, String start_timetoken, String end_timetoken, int count)
 {
-    auto pubnub_handle = this->pubnub->lock();
-
-    String fetch_history_response = pubnub_handle->fetch_history(channel_id, start_timetoken, end_timetoken, count);
+    auto fetch_history_response = [this, channel_id, start_timetoken, end_timetoken, count] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->fetch_history(channel_id, start_timetoken, end_timetoken, count);
+    }();
 
     json response_json = json::parse(fetch_history_response);
 
@@ -223,7 +231,6 @@ void MessageService::forward_message(Message message, String channel_id)
         throw std::invalid_argument("can't forward message, channel_id is empty");
     }
 
-    auto pubnub_handle = pubnub->lock();
 
     String current_metadata = message.message_data().meta.empty() ? "{}" : message.message_data().meta;
 
@@ -232,6 +239,7 @@ void MessageService::forward_message(Message message, String channel_id)
     meta_json["originalPublisher"] = message.message_data().user_id;
     meta_json["originalChannelId"] = message.message_data().channel_id;
 
+    auto pubnub_handle = pubnub->lock();
     pubnub_handle->publish(channel_id, chat_message_to_publish_string(message.text(), message.type()), meta_json.dump());
 }
 

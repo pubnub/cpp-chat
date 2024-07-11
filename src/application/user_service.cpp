@@ -28,9 +28,12 @@ ChatUserData UserService::get_user_data(String user_id)
 
 User UserService::get_current_user()
 {
-    auto pubnub_handle = pubnub->lock();
+    auto user_id = [this] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->get_user_id();
+    }();
 
-    return create_presentation_object(pubnub_handle->get_user_id());
+    return create_presentation_object(user_id);
 }
 
 User UserService::create_user(String user_id, ChatUserData user_data)
@@ -50,8 +53,10 @@ User UserService::create_user(String user_id, ChatUserData user_data)
 
     UserEntity new_user_entity = create_domain_from_presentation_data(user_id, user_data);
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+    }
 
     //Add user_entity to repository
     entity_repository->get_user_entities().update_or_insert(user_id, new_user_entity);
@@ -66,8 +71,10 @@ User UserService::get_user(String user_id)
         throw std::invalid_argument("Failed to get user, user_id is empty");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
-    String user_response = pubnub_handle->get_user_metadata(user_id);
+    auto user_response = [this, user_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_user_metadata(user_id);
+    }();
 
     Json response_json = Json::parse(user_response);
 
@@ -82,8 +89,10 @@ User UserService::get_user(String user_id)
 
 std::vector<User> UserService::get_users(String include, int limit, String start, String end)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    String users_response = pubnub_handle->get_all_user_metadata(include, limit, start, end);
+    auto users_response = [this, include, limit, start, end] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_all_user_metadata(include, limit, start, end);
+    }();
 
     Json response_json = Json::parse(users_response);
 
@@ -119,8 +128,10 @@ User UserService::update_user(String user_id, ChatUserData user_data)
 
     UserEntity new_user_entity = create_domain_from_presentation_data(user_id, user_data);
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+    }
 
     //Add userentity to repository
     entity_repository->get_user_entities().update_or_insert(user_id, new_user_entity);
@@ -135,8 +146,10 @@ void UserService::delete_user(String user_id)
         throw std::invalid_argument("Failed to delete user, user_id is empty");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->remove_user_metadata(user_id);
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->remove_user_metadata(user_id);
+    }
 
     //Also remove this user from entities repository
     entity_repository->get_user_entities().remove(user_id);

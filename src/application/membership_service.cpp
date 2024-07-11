@@ -150,7 +150,6 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
 
     //TODO:: check here if users already are on that channel. Requires C-Core filtering
 
-    auto pubnub_handle = this->pubnub->lock();
 
     std::vector<String> filtered_users_ids;
 
@@ -161,7 +160,11 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
 
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
-    String set_members_response = pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
+
+    auto set_members_response = [this, channel_id, set_memebers_obj, include_string] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
+    }();
     
     std::vector<Membership> invitees_memberships;
 
@@ -196,10 +199,13 @@ Membership MembershipService::update(User user, Channel channel, String custom_o
     {
         throw std::invalid_argument("Can't update membership, custom_object_json is not valid json object");
     }
-    auto pubnub_handle = pubnub->lock();
 
 	String set_memberships_string = String("[{\"channel\": {\"id\": \"") + channel.channel_id() + String("\"}, \"custom\": ") + custom_object_json_string + String("}]");
-    pubnub_handle->set_memberships(user.user_id(), set_memberships_string);
+
+    {
+        auto pubnub_handle = pubnub->lock();
+        pubnub_handle->set_memberships(user.user_id(), set_memberships_string);
+    }
 
     return create_membership_object(user, channel, create_domain_membership(custom_object_json_string));
 }
@@ -252,7 +258,6 @@ int MembershipService::get_unread_messages_count_one_channel(Membership membersh
 
 std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(Pubnub::String start_timetoken, Pubnub::String end_timetoken, Pubnub::String filter, int limit)
 {
-    auto pubnub_handle = pubnub->lock();
     auto chat_service_shared = chat_service.lock();
     std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> return_tuples;
 
@@ -279,7 +284,10 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
         timetokens.push_back(last_timetoken);
     }
 
-    std::map<Pubnub::String, int, StringComparer> messages_counts_response = pubnub_handle->message_counts(channels, timetokens);
+    auto messages_counts_response = [this, channels, timetokens] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->message_counts(channels, timetokens);
+    }();
 
     for(auto &membership : user_memberships)
     {

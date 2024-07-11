@@ -72,8 +72,10 @@ void ChatService::listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_ch
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
-    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    auto messages = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    }();
 
     // TODO: C ABI way
 #ifndef PN_CHAT_C_ABI

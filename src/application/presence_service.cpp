@@ -15,8 +15,10 @@ PresenceService::PresenceService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<E
 
 std::vector<Pubnub::String> PresenceService::who_is_present(Pubnub::String channel_id)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    String here_now_response = pubnub_handle->here_now(channel_id);
+    auto here_now_response = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->here_now(channel_id);
+    }();
 
     json response_json = json::parse(here_now_response);
 
@@ -39,8 +41,10 @@ std::vector<Pubnub::String> PresenceService::who_is_present(Pubnub::String chann
 
 std::vector<String> PresenceService::where_present(String user_id)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    String where_now_response = pubnub_handle->where_now(user_id);
+    auto where_now_response = [this, user_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->where_now(user_id);
+    }();
 
     json response_json = json::parse(where_now_response);
 

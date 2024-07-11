@@ -46,20 +46,21 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
 
     channel_data.type = "direct";
     auto created_channel = this->create_channel(final_channel_id, channel_data);
+    Pubnub::String user_id;
 
-    auto pubnub_handle = this->pubnub->lock();
+    {
+        auto pubnub_handle = this->pubnub->lock();
 
-    //TODO: Add filter when it will be supported in C-Core
-    String include_string = "totalCount,customFields,channelFields,customChannelFields";
-    String memberships_response = pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
-
-    json memberships_response_json = json::parse(memberships_response);
-    String channel_data_string = memberships_response_json["data"][0].dump();
+        //TODO: Add filter when it will be supported in C-Core
+        String include_string = "totalCount,customFields,channelFields,customChannelFields";
+        user_id = pubnub_handle->get_user_id();
+        pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
+    }
 
     auto chat_service_shared = chat_service.lock();
 
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
-    User current_user = chat_service_shared->user_service->get_user(pubnub_handle->get_user_id());
+    User current_user = chat_service_shared->user_service->get_user(user_id);
 
     Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
     Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, user);
@@ -77,19 +78,20 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     channel_data.type = "group";
     auto created_channel = this->create_channel(final_channel_id, channel_data);
 
-    auto pubnub_handle = this->pubnub->lock();
+    Pubnub::String user_id;
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        user_id = pubnub_handle->get_user_id();
 
-    //TODO: Add filter when it will be supported in C-Core
-    String include_string = "totalCount,customFields,channelFields,customChannelFields";
-    String memberships_response = pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
-
-    json memberships_response_json = json::parse(memberships_response);
-    String channel_data_string = memberships_response_json["data"][0].dump();
+        //TODO: Add filter when it will be supported in C-Core
+        String include_string = "totalCount,customFields,channelFields,customChannelFields";
+        String memberships_response = pubnub_handle->set_memberships(user_id, create_set_memberships_object(final_channel_id), include_string);
+    }
 
     auto chat_service_shared = chat_service.lock();
 
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
-    User current_user = chat_service_shared->user_service->get_user(pubnub_handle->get_user_id());
+    User current_user = chat_service_shared->user_service->get_user(user_id);
 
     Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
     std::vector<Membership> invitee_memberships = chat_service_shared->membership_service->invite_multiple_to_channel(final_channel_id, users);
@@ -131,8 +133,10 @@ Channel ChannelService::get_channel(String channel_id)
 
     //We don't try to get this channel from entity repository here, as channel data could be updated on the server
 
-    auto pubnub_handle = this->pubnub->lock();
-    String channel_response = pubnub_handle->get_channel_metadata(channel_id);
+    auto channel_response = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_channel_metadata(channel_id);
+    }();
 
     ChannelEntity new_channel_entity = create_domain_from_channel_response(channel_response);
     Channel channel = create_presentation_object(channel_id);
@@ -145,8 +149,10 @@ Channel ChannelService::get_channel(String channel_id)
 
 std::vector<Channel> ChannelService::get_channels(String include, int limit, String start, String end)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    String channels_response = pubnub_handle->get_all_channels_metadata(include, limit, start, end);
+    auto channels_response = [this, include, limit, start, end] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_all_channels_metadata(include, limit, start, end);
+    }();
 
     Json response_json = Json::parse(channels_response);
 
@@ -182,8 +188,10 @@ Channel ChannelService::update_channel(String channel_id, ChatChannelData channe
 
     ChannelEntity new_channel_entity = create_domain_from_presentation_data(channel_id, channel_data);
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string(channel_id));
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_channel_metadata(channel_id, new_channel_entity.get_channel_metadata_json_string(channel_id));
+    }
 
     //Add channel_entity to repository
     entity_repository->get_channel_entities().update_or_insert(channel_id, new_channel_entity);
@@ -198,8 +206,10 @@ void ChannelService::delete_channel(String channel_id)
         throw std::invalid_argument("Failed to delete channel, channel_id is empty");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->remove_channel_metadata(channel_id);
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->remove_channel_metadata(channel_id);
+    }
 
     //Also remove this channel from entities repository
     entity_repository->get_channel_entities().remove(channel_id);
@@ -238,8 +248,10 @@ void ChannelService::unpin_message_from_channel(Channel channel)
 
 void ChannelService::connect(String channel_id, std::function<void(Message)> message_callback)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    auto messages = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    }();
 
     // TODO: C ABI way
 #ifndef PN_CHAT_C_ABI
@@ -255,8 +267,8 @@ void ChannelService::connect(String channel_id, std::function<void(Message)> mes
 
 void ChannelService::disconnect(String channel_id)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
+      auto pubnub_handle = this->pubnub->lock();
+      auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
 
      // TODO: C ABI way
 #ifndef PN_CHAT_C_ABI
@@ -275,9 +287,11 @@ void ChannelService::join(String channel_id, std::function<void(Message)> messag
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String set_object_string = create_set_memberships_object(channel_id, additional_params);
 
-    auto pubnub_handle = this->pubnub->lock();
-    String user_id = pubnub_handle->get_user_id();
-    pubnub_handle->set_memberships(user_id, set_object_string);
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        String user_id = pubnub_handle->get_user_id();
+        pubnub_handle->set_memberships(user_id, set_object_string);
+    }
 
     this->connect(channel_id, message_callback);
 }
@@ -286,9 +300,11 @@ void ChannelService::leave(String channel_id)
 {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
-    auto pubnub_handle = this->pubnub->lock();
-    String user_id = pubnub_handle->get_user_id();
-    pubnub_handle->remove_memberships(user_id, remove_object_string);
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        String user_id = pubnub_handle->get_user_id();
+        pubnub_handle->remove_memberships(user_id, remove_object_string);
+    }
 
 	this->disconnect(channel_id);
 }
@@ -312,7 +328,10 @@ void ChannelService::start_typing(String channel_id)
 
     auto chat_service_shared = chat_service.lock();
 
-    auto pubnub_handle = this->pubnub->lock();
+    auto user_id = [this] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_user_id();
+    }();
 
     channel_entity.set_typing_sent(true);
     channel_entity.set_typing_sent_timer(Timer());
@@ -321,7 +340,7 @@ void ChannelService::start_typing(String channel_id)
     });
     
     channel_entity.set_typing_sent(true);
-    String event_payload = String("{\"value\": true, \"userId\": \"") + pubnub_handle->get_user_id() + String("\"}");
+    String event_payload = String("{\"value\": true, \"userId\": \"") + user_id + String("\"}");
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
 }
 
@@ -337,12 +356,15 @@ void ChannelService::stop_typing(String channel_id)
 
     if(!channel_entity.typing_sent) return;
 
-    auto pubnub_handle = this->pubnub->lock();
+    auto user_id = [this] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_user_id();
+    }();
 
     auto chat_service_shared = chat_service.lock();
 
     channel_entity.set_typing_sent(false);
-    String event_payload = String("{\"value\": false, \"userId\": \"") + pubnub_handle->get_user_id() + String("\"}");
+    String event_payload = String("{\"value\": false, \"userId\": \"") + user_id + String("\"}");
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
 }
 

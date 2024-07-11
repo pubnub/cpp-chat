@@ -55,9 +55,10 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
 
 Restriction RestrictionsService::get_user_restrictions(String user_id, String channel_id, int limit, String start, String end)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    String get_restrictions_response = pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, start, end);
-
+    auto get_restrictions_response = [this, user_id, limit, start, end] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, start, end);
+    }();
     json response_json = json::parse(get_restrictions_response);
 
     if(response_json.is_null())
@@ -92,10 +93,12 @@ Restriction RestrictionsService::get_user_restrictions(String user_id, String ch
 
 Restriction RestrictionsService::get_channel_restrictions(String user_id, String channel_id, int limit, String start, String end)
 {
-    auto pubnub_handle = this->pubnub->lock();
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 
-    String get_restrictions_response = pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, start, end);
+    auto get_restrictions_response = [this, full_channel_id, limit, start, end] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, start, end);
+    }();
 
     json response_json = json::parse(get_restrictions_response);
 
