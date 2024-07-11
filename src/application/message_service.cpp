@@ -9,6 +9,7 @@
 #include "presentation/message_draft.hpp"
 #include "presentation/message_draft_config.hpp"
 #include "chat_helpers.hpp"
+#include "callback_service.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -248,10 +249,20 @@ void MessageService::stream_updates_on(std::vector<Message> messages, std::funct
 
     auto pubnub_handle = pubnub->lock();
 
-    for(auto message : messages)
-    {
-        //TODO:: CALLBACK register message update callback here
-        pubnub_handle->subscribe_to_channel(message.message_data().channel_id);
+#ifndef PN_CHAT_C_ABI
+    if (auto chat = this->chat_service.lock()) {
+#endif
+        for(auto message : messages)
+        {
+            auto pn_messages = pubnub_handle->subscribe_to_channel_and_get_messages(message.message_data().channel_id);
+
+            // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+            // First broadcast messages because they're not related to the new callback
+            chat->callback_service->broadcast_messages(pn_messages);
+            chat->callback_service->register_message_callback(message.timetoken(), message_callback);
+        }
+#endif
     }
 }
 

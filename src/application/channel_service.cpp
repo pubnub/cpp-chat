@@ -10,6 +10,7 @@
 #include "infra/timer.hpp"
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
+#include "application/callback_service.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -238,17 +239,35 @@ void ChannelService::unpin_message_from_channel(Channel channel)
 void ChannelService::connect(String channel_id, std::function<void(Message)> message_callback)
 {
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->subscribe_to_channel(channel_id);
+    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
 
-    //TODO:: CALLBACK - add callback
+    // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+    if (auto chat = this->chat_service.lock()) {
+        // First broadcast messages because they're not related to the new callback
+        chat->callback_service->broadcast_messages(messages);
+        chat->callback_service->register_message_callback(channel_id, message_callback);
+    } else {
+        throw std::runtime_error("Chat service is not available to connect to channel");
+    }
+#endif // PN_CHAT_C_ABI
 }
 
 void ChannelService::disconnect(String channel_id)
 {
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->unsubscribe_from_channel(channel_id);
+    auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
 
-    //TODO:: CALLBACK - remove callback
+     // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+    if (auto chat = this->chat_service.lock()) {
+        chat->callback_service->broadcast_messages(messages);
+        chat->callback_service->remove_message_callback(channel_id);
+    } else {
+        throw std::runtime_error("Chat service is not available to connect to channel");
+    }
+#endif // PN_CHAT_C_ABI
+   
 }
 
 void ChannelService::join(String channel_id, std::function<void(Message)> message_callback, String additional_params)
@@ -401,10 +420,21 @@ void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, st
     
     auto pubnub_handle = this->pubnub->lock();
 
-    for(auto channel : channels)
-    {
-        //TODO:: CALLBACK register channel callback here
-        pubnub_handle->subscribe_to_channel(channel.channel_id());
+#ifndef PN_CHAT_C_ABI
+    // chat is not needed in C ABI to stream updates
+    if (auto chat = this->chat_service.lock()) {
+#endif // PN_CHAT_C_ABI
+        for(auto channel : channels)
+        {
+            auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel.channel_id());
+
+            // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+            // First broadcast messages because they're not related to the new callback 
+            chat->callback_service->broadcast_messages(messages);
+            chat->callback_service->register_channel_callback(channel.channel_id(), channel_callback);
+        }
+#endif // PN_CHAT_C_ABI
     }
 }
 

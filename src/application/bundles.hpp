@@ -4,7 +4,6 @@
 #include <memory>
 #include "channel_service.hpp"
 #include "membership_service.hpp"
-#include "infra/entity_repository.hpp"
 #include "user_service.hpp"
 #include "chat_service.hpp"
 #include "message_service.hpp"

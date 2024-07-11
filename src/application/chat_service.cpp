@@ -73,7 +73,12 @@ void ChatService::listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_ch
     }
 
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->subscribe_to_channel(channel_id);
+    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
 
-    //TODO:: CALLBACK - add event callback here
+    // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+    // First broadcast messages because they're not related to the new callback
+    this->callback_service->broadcast_messages(messages);
+    this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
+#endif
 }

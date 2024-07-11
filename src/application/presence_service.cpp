@@ -2,6 +2,7 @@
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
+#include "callback_service.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -87,7 +88,14 @@ void PresenceService::stream_presence(Pubnub::String channel_id, std::function<v
     auto pubnub_handle = this->pubnub->lock();
 
     String presence_channel = channel_id + "-pnpres";
-    pubnub_handle->subscribe_to_channel(presence_channel);
-    
-    //TODO:: CALLBACK  register presence callback here
+    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(presence_channel);
+
+    // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+    if (auto chat = this->chat_service.lock())
+    {
+        chat->callback_service->broadcast_messages(messages);
+        chat->callback_service->register_channel_presence_callback(channel_id, presence_callback);
+    }
+#endif
 }

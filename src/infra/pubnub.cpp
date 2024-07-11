@@ -56,16 +56,6 @@ void PubNub::publish(const Pubnub::String channel, const Pubnub::String message,
     this->await_and_handle_error(result);
 }
 
-void PubNub::subscribe_to_channel(const Pubnub::String channel)
-{
-    auto messages = this->subscribe_to_channel_and_get_messages(channel);
-
-    for (pubnub_v2_message& message : messages)
-    {
-//        broadcast_callbacks_from_message(message);
-    }
-}
-
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
     if (this->is_subscribed_to_channel(channel)) {
@@ -86,6 +76,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(con
     return messages;
 }
 
+// TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel)
 {
     std::vector<pubnub_v2_message> pubnub_messages = this->subscribe_to_channel_and_get_messages(channel);
@@ -135,6 +126,7 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
     return messages;
 }
 
+// TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
 {
     std::vector<pubnub_v2_message> pubnub_messages = this->fetch_messages();
@@ -168,16 +160,6 @@ std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
     };
 
     return messages;
-}
-
-void PubNub::unsubscribe_from_channel(Pubnub::String channel)
-{
-    auto messages = this->unsubscribe_from_channel_and_get_messages(channel);
-
-    for (pubnub_v2_message& message : messages) 
-    {
-//        broadcast_callbacks_from_message(message);
-    }
 }
 
 std::vector<pubnub_v2_message> PubNub::unsubscribe_from_channel_and_get_messages(Pubnub::String channel) {

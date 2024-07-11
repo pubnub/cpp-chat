@@ -3,6 +3,7 @@
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
+#include "callback_service.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -150,10 +151,19 @@ void UserService::stream_updates_on(std::vector<User> users, std::function<void(
 
     auto pubnub_handle = this->pubnub->lock();
 
-    for(auto user : users)
-    {
-        //TODO:: CALLBACK register user callback here
-        pubnub_handle->subscribe_to_channel(user.user_id());
+#ifndef PN_CHAT_C_ABI
+    if (auto chat = this->chat_service.lock()) {
+#endif
+        for(auto user : users)
+        {
+            auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(user.user_id());
+
+            // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+            chat->callback_service->broadcast_messages(messages);
+            chat->callback_service->register_user_callback(user.user_id(), user_callback);
+        }
+#endif
     }
 }
 
