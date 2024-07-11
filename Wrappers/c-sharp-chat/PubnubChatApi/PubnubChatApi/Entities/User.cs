@@ -196,7 +196,7 @@ namespace PubNubChatAPI.Entities
         /// };
         /// </code>
         /// </example>
-        /// <seealso cref="UpdateUser"/>
+        /// <seealso cref="Update"/>
         /// <seealso cref="User"/>
         public event Action<User> OnUserUpdated;
 
@@ -237,7 +237,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="ChatUserData"/>
-        public void UpdateUser(ChatUserData updatedData)
+        public void Update(ChatUserData updatedData)
         {
             chat.UpdateUser(Id, updatedData);
         }

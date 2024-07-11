@@ -610,7 +610,7 @@ namespace PubNubChatAPI.Entities
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while updating the channel.</exception>
         /// <seealso cref="OnChannelUpdate"/>
         /// <seealso cref="ChatChannelData"/>
-        public void UpdateChannel(ChatChannelData updatedData)
+        public void Update(ChatChannelData updatedData)
         {
             chat.UpdateChannel(Id, updatedData);
         }
