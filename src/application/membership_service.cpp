@@ -33,8 +33,10 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
 
-    auto pubnub_handle = this->pubnub->lock();
-    String get_channel_members_response = pubnub_handle->get_channel_members(channel_id, include_string, limit, start_timetoken, end_timetoken);
+    auto get_channel_members_response = [this, channel_id, include_string, limit, start_timetoken, end_timetoken] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_channel_members(channel_id, include_string, limit, start_timetoken, end_timetoken);
+    }();
 
     Json response_json = Json::parse(get_channel_members_response);
 
@@ -70,8 +72,10 @@ std::vector<Membership> MembershipService::get_user_memberships(String user_id, 
 {
     String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
 
-    auto pubnub_handle = this->pubnub->lock();
-    String get_memberships_response = pubnub_handle->get_memberships(user_id, include_string, limit, start_timetoken, end_timetoken);
+    auto get_memberships_response = [this, user_id, include_string, limit, start_timetoken, end_timetoken] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_memberships(user_id, include_string, limit, start_timetoken, end_timetoken);
+    }();
 
     json response_json = json::parse(get_memberships_response);
 
@@ -117,11 +121,15 @@ Membership MembershipService::invite_to_channel(String channel_id, User user)
 
     //TODO:: check here if user already is on that channel. Requires C-Core filtering
 
-    auto pubnub_handle = this->pubnub->lock();
 
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
     String set_memeberships_obj = create_set_memberships_object(channel_id, "");
-    String memberships_response = pubnub_handle->set_memberships(user.user_id(), set_memeberships_obj, include_string);
+
+    auto user_id = user.user_id();
+    auto memberships_response = [this, user_id, set_memeberships_obj, include_string] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->set_memberships(user_id, set_memeberships_obj, include_string);
+    }();
     
     json memberships_response_json = json::parse(memberships_response);
 

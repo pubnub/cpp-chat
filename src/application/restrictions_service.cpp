@@ -29,7 +29,6 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
     
     auto chat_service_shared = chat_service.lock();
 
-    auto pubnub_handle = this->pubnub->lock();
 
 	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
 	String restrictions_channel = INTERNAL_MODERATION_PREFIX + channel_id;
@@ -38,7 +37,10 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
 	if(!restrictions.ban && !restrictions.mute)
 	{
 		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}}]");
-        pubnub_handle->remove_members(restrictions_channel, remove_member_string);
+        {
+            auto pubnub_handle = this->pubnub->lock();
+            pubnub_handle->remove_members(restrictions_channel, remove_member_string);
+        }
 		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + restrictions.reason + String("\"}");
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
 		return;
@@ -46,7 +48,10 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
 
 	//Ban or mute the user
 	String params_string = String("{\"ban\": ") + bool_to_string(restrictions.ban) + String(", \"mute\": ") + bool_to_string(restrictions.mute) + String(", \"reason\": \"") + restrictions.reason + String("\"}");
-    pubnub_handle->set_members(restrictions_channel, create_set_members_object(user_id, params_string));
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_members(restrictions_channel, create_set_members_object(user_id, params_string));
+    }
     String restriction_text;
     restrictions.ban ? restriction_text = "banned" : "muted";
 	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + restrictions.reason + String("\"}");
