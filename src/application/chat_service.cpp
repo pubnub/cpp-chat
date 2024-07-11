@@ -1,10 +1,12 @@
 #include "chat_service.hpp"
+#include "application/bundles.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
 #include "application/message_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/membership_service.hpp"
+#include "application/callback_service.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
@@ -25,6 +27,20 @@ void ChatService::init_services()
     membership_service = std::make_shared<MembershipService>(pubnub, entity_repository, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, entity_repository, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, entity_repository, weak_from_this());
+#ifndef PN_CHAT_C_ABI
+    auto service_bundle = EntityServicesBundle{
+        channel_service,
+        user_service,
+        weak_from_this(),
+        message_service,
+        membership_service,
+    };
+    this->callback_service = std::make_shared<CallbackService>(
+        service_bundle,
+        presence_service,
+        pubnub
+    );
+#endif
 }
 
 ThreadSafePtr<PubNub> ChatService::create_pubnub(String publish_key, String subscribe_key, String user_id)

@@ -6,6 +6,7 @@
 #include "enums.hpp"
 #include <functional>
 
+class CallbackService;
 class ChannelService;
 class UserService;
 class MessageService;
@@ -33,6 +34,9 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<MembershipService> membership_service;
         std::shared_ptr<PresenceService> presence_service;
         std::shared_ptr<RestrictionsService> restrictions_service;
+#ifndef PN_CHAT_C_ABI
+        std::shared_ptr<CallbackService> callback_service;
+#endif
     
     private:
         ThreadSafePtr<PubNub> pubnub;

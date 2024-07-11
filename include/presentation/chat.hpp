@@ -1,6 +1,9 @@
 #ifndef PN_CHAT_CHAT_HPP
 #define PN_CHAT_CHAT_HPP
 
+#ifndef PN_CHAT_C_ABI
+#include "application/callback_service.hpp"
+#endif
 #include "string.hpp"
 #include "presentation/channel.hpp"
 #include "presentation/message.hpp"
@@ -96,6 +99,10 @@ namespace Pubnub {
             std::shared_ptr<RestrictionsService> restrictions_service;
             std::shared_ptr<MessageService> message_service;
             std::shared_ptr<MembershipService> membership_service;
+#ifndef PN_CHAT_C_ABI
+            std::shared_ptr<CallbackService> callback_service;
+#endif
+
     };
 }
 

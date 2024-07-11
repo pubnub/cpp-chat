@@ -24,6 +24,9 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
     restrictions_service = chat_service->restrictions_service;
     message_service = chat_service->message_service;
     membership_service = chat_service->membership_service;
+#ifndef PN_CHAT_C_ABI
+    callback_service = chat_service->callback_service;
+#endif
 }
 
 Channel Chat::create_public_conversation(String channel_id, ChatChannelData channel_data)
