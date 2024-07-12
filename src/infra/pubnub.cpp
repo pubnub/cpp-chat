@@ -72,7 +72,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_me
         }
     }
 
-    if (new_channels) {
+    if (!new_channels) {
         return {};
     }
 
