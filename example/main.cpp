@@ -100,10 +100,12 @@ int main() {
     //GET CHANNEL HISTORY
     std::cout <<  std::endl;
     std::cout <<"GET HISTORY: " <<  std::endl;
-    std::vector<Pubnub::Message> history_messages = channel.get_history("17386132136530924", "17086132136530924", 5);
+    std::vector<Pubnub::Message> history_messages = channel.get_history("99999999999999999", "00000000000000000", 5);
+    Pubnub::String message_token;
     for(auto history_message : history_messages)
     {
         std::cout <<"history message: " <<  history_message.message_data().text << std::endl;
+        message_token = history_message.timetoken();
     }
 
 
@@ -116,16 +118,16 @@ int main() {
 
     // TODO: this seems to not work
 //    Pubnub::String message_token = "17207041559619450";
-//    Pubnub::Message message_from_get = channel.get_message(message_token);
-//    std::cout <<"Message from get: " <<  message_from_get.text() << std::endl;
-//    std::cout <<  std::endl;
-//
-//    //STREAM MESSAGE UPDATES
-//    auto message_update_callback = [](Pubnub::Message message){
-//        std::cout << "message update received: " << message.text() << std::endl;
-//        std::cout << std::endl;
-//    };
-//    message_from_get.stream_updates(message_update_callback);
+    Pubnub::Message message_from_get = channel.get_message(message_token);
+    std::cout <<"Message from get: " <<  message_from_get.text() << std::endl;
+    std::cout <<  std::endl;
+
+    //STREAM MESSAGE UPDATES
+    auto message_update_callback = [](Pubnub::Message message){
+        std::cout << "message update received: " << message.text() << std::endl;
+        std::cout << std::endl;
+    };
+    message_from_get.stream_updates(message_update_callback);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 

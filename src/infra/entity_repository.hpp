@@ -18,7 +18,6 @@ class EntityRepository {
         Repository<Pubnub::String, UserEntity, Pubnub::StringComparer>& get_user_entities();
         Repository<Pubnub::String, ChannelEntity, Pubnub::StringComparer>& get_channel_entities();
         Repository<Pubnub::String, MessageEntity, Pubnub::StringComparer>& get_message_entities();
-        // todo: comparer
         Repository<std::pair<UserId, ChannelId>, MembershipEntity>& get_membership_entities();
 
      private:
