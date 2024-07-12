@@ -32,7 +32,7 @@ Pubnub::String UserEntity::get_user_metadata_json_string()
 }
 
 UserEntity UserEntity::from_json(Json user_json) {
-    auto user = UserEntity{
+    return UserEntity{
         user_json.get_string("name").value_or(Pubnub::String()),
         user_json.get_string("externalId").value_or(Pubnub::String()),
         user_json.get_string("profileUrl").value_or(Pubnub::String()),
@@ -41,7 +41,5 @@ UserEntity UserEntity::from_json(Json user_json) {
         user_json.get_string("status").value_or(Pubnub::String()),
         user_json.get_string("type").value_or(Pubnub::String())
     };
-
-    return user;
 }
 

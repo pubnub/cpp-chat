@@ -100,13 +100,12 @@ std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> Parsers::PubnubJson::to
 
     return std::make_pair(
             json_field_from_pn_block(pn_message.payload, "data", "id"),
-            ChannelEntity::from_json(json)
+            ChannelEntity::from_json(json["data"])
     );
 }
 
 std::pair<Parsers::PubnubJson::UserId, UserEntity> Parsers::PubnubJson::to_user(pubnub_v2_message pn_message) {
-    auto to_parse = string_from_pn_block(pn_message.payload);
-    auto json = Json::parse(to_parse);
+    auto json = Json::parse(string_from_pn_block(pn_message.payload));
 
     return std::make_pair(
             json_field_from_pn_block(pn_message.payload, "data", "id"),
