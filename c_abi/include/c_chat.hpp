@@ -2,8 +2,8 @@
 #define PN_CHAT_C_CHAT_HPP
 
 #include "chat.hpp"
-#include "export.hpp"
-#include "extern.hpp"
+#include "helpers/export.hpp"
+#include "helpers/extern.hpp"
 #include "chat/channel.hpp"
 #include "chat/user.hpp"
 #include "c_errors.hpp"

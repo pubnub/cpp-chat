@@ -3,8 +3,8 @@
 
 #include "chat.hpp"
 #include "chat/user.hpp"
-#include "export.hpp"
-#include "extern.hpp"
+#include "helpers/export.hpp"
+#include "helpers/extern.hpp"
 #include "c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_user_create_dirty(

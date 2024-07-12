@@ -2,8 +2,8 @@
 #define CHAT_HELPERS_HPP
 
 #include "string.hpp"
-#include "extern.hpp"
-#include "export.hpp"
+#include "helpers/extern.hpp"
+#include "helpers/export.hpp"
 #include "enums.hpp"
 #include <vector>
 #include <string>

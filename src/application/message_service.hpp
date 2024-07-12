@@ -1,7 +1,7 @@
 #ifndef PN_CHAT_MESSAGE_SERVICE_HPP
 #define PN_CHAT_MESSAGE_SERVICE_HPP
 
-#include "presentation/message.hpp"
+#include "message.hpp"
 #include "infra/sync.hpp"
 #include <memory>
 #include <vector>

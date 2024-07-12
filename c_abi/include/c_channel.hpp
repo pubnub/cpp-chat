@@ -3,8 +3,8 @@
 
 #include "chat.hpp"
 #include "chat/channel.hpp"
-#include "export.hpp"
-#include "extern.hpp"
+#include "helpers/export.hpp"
+#include "helpers/extern.hpp"
 #include "c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_delete(Pubnub::Channel* channel);

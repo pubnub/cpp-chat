@@ -4,7 +4,7 @@
 #include "domain/membership_entity.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
-#include "presentation/membership.hpp"
+#include "membership.hpp"
 #include <memory>
 #include <vector>
 #include <functional>

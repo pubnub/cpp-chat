@@ -1,5 +1,5 @@
-#include "presentation/membership.hpp"
-#include "presentation/message.hpp"
+#include "membership.hpp"
+#include "message.hpp"
 #include "application/membership_service.hpp"
 
 using namespace Pubnub;

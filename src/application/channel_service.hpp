@@ -1,7 +1,7 @@
 #ifndef PN_CHAT_CHANNEL_SERVICE_HPP
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
-#include "presentation/channel.hpp"
+#include "channel.hpp"
 #include "enums.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"

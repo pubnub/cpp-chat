@@ -2,9 +2,9 @@
 #define PN_CHAT_MEMBERSHIP_H
 
 #include "string.hpp"
-#include "export.hpp"
-#include "presentation/user.hpp"
-#include "presentation/channel.hpp"
+#include "helpers/export.hpp"
+#include "user.hpp"
+#include "channel.hpp"
 #include <memory>
 #include <vector>
 #include <functional>

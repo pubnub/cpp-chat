@@ -1,4 +1,4 @@
-#include "presentation/message.hpp"
+#include "message.hpp"
 #include "application/message_service.hpp"
 #include "application/channel_service.hpp"
 #include "application/restrictions_service.hpp"

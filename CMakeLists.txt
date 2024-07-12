@@ -31,6 +31,7 @@ endif()
 option(RUN_TESTS "Run tests" OFF)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/pubnub_chat)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
 
 include(FetchContent)
@@ -93,7 +94,6 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp)
 
 set(SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/user.cpp

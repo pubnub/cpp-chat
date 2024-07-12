@@ -4,7 +4,7 @@
 #include "user_service.hpp"
 #include "membership_service.hpp"
 #include "message_service.hpp"
-#include "presentation/message.hpp"
+#include "message.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/timer.hpp"

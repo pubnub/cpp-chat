@@ -1,10 +1,10 @@
 #ifndef PN_CHAT_CALLBACKS_REPOSITORY_HPP
 #define PN_CHAT_CALLBACKS_REPOSITORY_HPP
 
-#include "presentation/message.hpp"
-#include "presentation/channel.hpp"
-#include "presentation/user.hpp"
-#include "presentation/membership.hpp"
+#include "message.hpp"
+#include "channel.hpp"
+#include "user.hpp"
+#include "membership.hpp"
 #include "infra/repository.hpp"
 #include "string.hpp"
 

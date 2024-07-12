@@ -1,8 +1,8 @@
 #ifndef PN_C_ERRORS_HPP
 #define PN_C_ERRORS_HPP
 
-#include "export.hpp"
-#include "extern.hpp"
+#include "helpers/export.hpp"
+#include "helpers/extern.hpp"
 
 typedef int PnCResult;
 #define PN_C_OK 0

@@ -2,7 +2,7 @@
 #define PN_CHAT_MESSAGE_H
 
 #include "string.hpp"
-#include "export.hpp"
+#include "helpers/export.hpp"
 #include "message_action.hpp"
 #include <memory>
 #include <vector>

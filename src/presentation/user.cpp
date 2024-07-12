@@ -1,4 +1,4 @@
-#include "presentation/user.hpp"
+#include "user.hpp"
 #include "application/user_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"

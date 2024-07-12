@@ -2,7 +2,7 @@
 #define PN_CHAT_CHANNEL_HPP
 
 #include "string.hpp"
-#include "export.hpp"
+#include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "enums.hpp"
 #include <memory>

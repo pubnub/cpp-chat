@@ -3,8 +3,8 @@
 
 #include "chat/message_draft.hpp"
 #include "chat/user.hpp"
-#include "export.hpp"
-#include "extern.hpp"
+#include "helpers/export.hpp"
+#include "helpers/extern.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_draft_delete(Pubnub::MessageDraft* message_draft);
 

@@ -5,7 +5,7 @@
 #include "infra/sync.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
-#include "presentation/message.hpp"
+#include "message.hpp"
 #include <pubnub_helper.h>
 
 using json = nlohmann::json;

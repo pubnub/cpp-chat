@@ -1,7 +1,7 @@
 #ifndef PN_STRING_H
 #define PN_STRING_H
 
-#include "export.hpp"
+#include "helpers/export.hpp"
 #include <cstddef>
 #include <ostream>
 #include <string>

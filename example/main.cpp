@@ -1,7 +1,7 @@
-#include "presentation/chat.hpp"
-#include "presentation/channel.hpp"
-#include "presentation/restrictions.hpp"
-#include "presentation/user.hpp"
+#include "pubnub_chat/chat.hpp"
+#include "pubnub_chat/channel.hpp"
+#include "pubnub_chat/restrictions.hpp"
+#include "pubnub_chat/user.hpp"
 
 #include "enums.hpp"
 #include <chrono>

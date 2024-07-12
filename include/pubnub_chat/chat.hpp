@@ -5,10 +5,10 @@
 #include "application/callback_service.hpp"
 #endif
 #include "string.hpp"
-#include "presentation/channel.hpp"
-#include "presentation/message.hpp"
-#include "presentation/user.hpp"
-#include "presentation/membership.hpp"
+#include "channel.hpp"
+#include "message.hpp"
+#include "user.hpp"
+#include "membership.hpp"
 #include "restrictions.hpp"
 #include <memory>
 #include <vector>

@@ -1,5 +1,5 @@
-#include "presentation/channel.hpp"
-#include "presentation/message.hpp"
+#include "channel.hpp"
+#include "message.hpp"
 #include "application/channel_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"

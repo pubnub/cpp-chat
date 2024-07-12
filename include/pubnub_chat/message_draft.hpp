@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "option.hpp"
-#include "presentation/text_link.hpp"
-#include "presentation/message_draft_config.hpp"
-#include "presentation/channel.hpp"
-#include "presentation/user.hpp"
-#include "presentation/message.hpp"
+#include "text_link.hpp"
+#include "message_draft_config.hpp"
+#include "channel.hpp"
+#include "user.hpp"
+#include "message.hpp"
 
 class MessageService;
 

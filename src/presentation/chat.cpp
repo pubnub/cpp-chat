@@ -1,4 +1,4 @@
-#include "presentation/chat.hpp"
+#include "chat.hpp"
 #include "application/chat_service.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"

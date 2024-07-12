@@ -2,7 +2,7 @@
 #define PN_CHAT_RESTRICTIONS_SERVICE_HPP
 
 #include "infra/sync.hpp"
-#include "presentation/restrictions.hpp"
+#include "restrictions.hpp"
 #include "string.hpp"
 #include <memory>
 #include <vector>

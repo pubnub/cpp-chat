@@ -2,9 +2,9 @@
 #define PN_CHAT_SERIALIZATION_H
 
 #include "string.hpp"
-#include "presentation/channel.hpp"
-#include "presentation/message.hpp"
-#include "presentation/user.hpp"
+#include "channel.hpp"
+#include "message.hpp"
+#include "user.hpp"
 #include <pubnub_helper.h>
 
 namespace Serialization {

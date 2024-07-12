@@ -1,7 +1,7 @@
 #ifndef PN_CHAT_USER_SERVICE_HPP
 #define PN_CHAT_USER_SERVICE_HPP
 
-#include "presentation/user.hpp"
+#include "user.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include <memory>
