@@ -104,6 +104,20 @@ std::vector<Membership> Channel::invite_multiple(std::vector<User> users)
     return this->membership_service->invite_multiple_to_channel(channel_id(), users);
 }
 
+void Channel::start_typing()
+{
+    this->channel_service->start_typing(channel_id_internal);
+}
+
+void Channel::stop_typing()
+{
+    this->channel_service->stop_typing(channel_id_internal);
+}
+
+void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing_callback)
+{
+    this->channel_service->get_typing(channel_id_internal, typing_callback);
+}
 
 Channel Channel::pin_message(Message message)
 {

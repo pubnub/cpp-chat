@@ -13,7 +13,7 @@ struct UserEntity {
     Pubnub::String status;
     Pubnub::String type;
 
-    Pubnub::String get_user_metadata_json_string();
+    Pubnub::String get_user_metadata_json_string(Pubnub::String user_id);
     static UserEntity from_json(Json user_json);
 };
 

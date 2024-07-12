@@ -1,10 +1,11 @@
 #include "user_entity.hpp"
 #include "domain/json.hpp"
 
-Pubnub::String UserEntity::get_user_metadata_json_string()
+Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
 {
     Json user_data_json;
 
+    user_data_json.insert_or_update("id", user_id);
     if(!user_name.empty()) {
         user_data_json.insert_or_update("name", user_name);
     }

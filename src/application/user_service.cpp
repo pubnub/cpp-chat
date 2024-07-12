@@ -55,7 +55,7 @@ User UserService::create_user(String user_id, ChatUserData user_data)
 
     {
         auto pubnub_handle = this->pubnub->lock();
-        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string(user_id));
     }
 
     //Add user_entity to repository
@@ -130,7 +130,7 @@ User UserService::update_user(String user_id, ChatUserData user_data)
 
     {
         auto pubnub_handle = this->pubnub->lock();
-        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string());
+        pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string(user_id));
     }
 
     //Add userentity to repository
