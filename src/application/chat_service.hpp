@@ -3,20 +3,40 @@
 
 #include "infra/sync.hpp"
 #include "string.hpp"
-#include "export.hpp"
+#include "enums.hpp"
+#include <functional>
 
+class CallbackService;
 class ChannelService;
+class UserService;
+class MessageService;
+class PresenceService;
+class RestrictionsService;
+class MembershipService;
 class EntityRepository;
 class PubNub;
 
-class ChatService {
+class ChatService : public std::enable_shared_from_this<ChatService>
+{
     public:
-        PN_CHAT_EXPORT ChatService(ThreadSafePtr<PubNub> pubnub);
+        ChatService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository);
+        void init_services();
 
-        PN_CHAT_EXPORT static ThreadSafePtr<PubNub> create_pubnub(
-                Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
+        static ThreadSafePtr<PubNub> create_pubnub(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
+        static std::shared_ptr<EntityRepository> create_entity_repository();
 
-    std::shared_ptr<ChannelService> channel_service;
+        void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
+        void listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback);
+
+        std::shared_ptr<ChannelService> channel_service;
+        std::shared_ptr<UserService> user_service;
+        std::shared_ptr<MessageService> message_service;
+        std::shared_ptr<MembershipService> membership_service;
+        std::shared_ptr<PresenceService> presence_service;
+        std::shared_ptr<RestrictionsService> restrictions_service;
+#ifndef PN_CHAT_C_ABI
+        std::shared_ptr<CallbackService> callback_service;
+#endif
     
     private:
         ThreadSafePtr<PubNub> pubnub;

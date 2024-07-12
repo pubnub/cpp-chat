@@ -68,6 +68,7 @@ include_directories(${CURRENT_SOURCE_DIR}/include)
 
 set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/entity_repository.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/callbacks_repository.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
@@ -77,21 +78,34 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/channel_entity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/user_entity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_entity.cpp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/parsers.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp)
+
+set(APP_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/channel_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/user_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/message_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/presence_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/restrictions_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/channel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/user.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/message_draft.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/membership.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat/chat_helpers.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/channel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/user.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message_draft.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/membership.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )
 
 if(${ENABLE_C_ABI})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-D PN_CHAT_C_ABI")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/c_abi/include)
     set(SOURCES
         ${SOURCES}
@@ -108,7 +122,8 @@ endif()
 set(SOURCES
     ${SOURCES}
     ${INFRA_SOURCES}
-    ${DOMAIN_SOURCES})
+    ${DOMAIN_SOURCES}
+    ${APP_SOURCES})
 
 add_library(pubnub-chat SHARED ${SOURCES})
 

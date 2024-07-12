@@ -1,10 +1,10 @@
 #include "infra/pubnub.hpp"
 #include "infra/serialization.hpp"
-#include "chat.hpp"
-#include "chat/message.hpp"
-#include "chat/channel.hpp"
-#include "chat/user.hpp"
-#include "chat/membership.hpp"
+#include "presentation/chat.hpp"
+//#include "presentation/message.hpp"
+//#include "presentation/channel.hpp"
+//#include "presentation/user.hpp"
+//#include "presentation/membership.hpp"
 #include "nlohmann/json.hpp"
 #include <thread>
 #include <vector>
@@ -22,12 +22,12 @@ extern "C" {
 #include <pubnub_subscribe_v2.h>
 #include <pubnub_fetch_history.h>
 #include <pubnub_actions_api.h>
+#include <pubnub_advanced_history.h>
 }
 
 using json = nlohmann::json;
 
-PubNub::PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
-    chat_obj(in_chat),
+PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
     publish_key(publish_key),
     subscribe_key(subscribe_key),
     user_id(secret_key),
@@ -42,30 +42,18 @@ PubNub::PubNub(Pubnub::Chat& in_chat, const Pubnub::String publish_key, const Pu
 
     pubnub_set_blocking_io(this->main_context.get());
     pubnub_set_non_blocking_io(this->long_poll_context.get());
-
-    this->message_thread = std::thread([this] {
-        while (!this->should_stop) {
-            this->resolve_messages();
-            std::this_thread::sleep_for(std::chrono::milliseconds(PUBNUB_WAIT_INTERVAL_MS));
-        }
-    });
 }
 
-void PubNub::publish(const Pubnub::String channel, const Pubnub::String message)
+void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata)
 {
-    auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
+    //auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
+
+    auto publish_options = pubnub_publish_defopts();
+    publish_options.meta = metadata.c_str();
+
+    auto result = pubnub_publish_ex(main_context.get(), channel.c_str(), message.c_str(), publish_options);
 
     this->await_and_handle_error(result);
-}
-
-void PubNub::subscribe_to_channel(const Pubnub::String channel)
-{
-    auto messages = this->subscribe_to_channel_and_get_messages(channel);
-
-    for (pubnub_v2_message& message : messages)
-    {
-        broadcast_callbacks_from_message(message);
-    }
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
@@ -88,6 +76,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(con
     return messages;
 }
 
+// TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel)
 {
     std::vector<pubnub_v2_message> pubnub_messages = this->subscribe_to_channel_and_get_messages(channel);
@@ -137,6 +126,7 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
     return messages;
 }
 
+// TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
 {
     std::vector<pubnub_v2_message> pubnub_messages = this->fetch_messages();
@@ -148,15 +138,6 @@ std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
     }
 
     return messages;
-}
-
-void PubNub::resolve_messages() {
-    auto messages = this->fetch_messages();
-
-    for (pubnub_v2_message& message : messages)
-    {
-        broadcast_callbacks_from_message(message);
-    }
 }
 
 std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
@@ -179,16 +160,6 @@ std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
     };
 
     return messages;
-}
-
-void PubNub::unsubscribe_from_channel(Pubnub::String channel)
-{
-    auto messages = this->unsubscribe_from_channel_and_get_messages(channel);
-
-    for (pubnub_v2_message& message : messages) 
-    {
-        broadcast_callbacks_from_message(message);
-    }
 }
 
 std::vector<pubnub_v2_message> PubNub::unsubscribe_from_channel_and_get_messages(Pubnub::String channel) {
@@ -489,86 +460,39 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
     return Pubnub::String(add_action_response.ptr, add_action_response.size);
 }
 
-void PubNub::register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback)
+void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken)
 {
-    this->message_callbacks_map[channel_id] = message_callback;
+    //TODO:: pubnub_str_2_chamebl_t could be used instead but it gives Linker error. There should be an easier way to achieve this
+    char* message_timetoken_char = new char[message_timetoken.length() + 1];
+    pubnub_chamebl_t message_timetoken_chamebl;
+    message_timetoken_chamebl.ptr = message_timetoken_char;
+    message_timetoken_chamebl.size = (NULL == message_timetoken_char) ? 0 : message_timetoken.length() + 1;
+
+    char* action_timetoken_char = new char[action_timetoken.length() + 1];
+    pubnub_chamebl_t action_timetoken_chamebl;
+    action_timetoken_chamebl.ptr = action_timetoken_char;
+    action_timetoken_chamebl.size = (NULL == action_timetoken_char) ? 0 : action_timetoken.length() + 1;
+    
+    auto result = pubnub_remove_message_action(this->main_context.get(), channel.c_str(), message_timetoken_chamebl, action_timetoken_chamebl);
+    this->await_and_handle_error(result);
+
+    delete[] message_timetoken_char;
+    delete[] action_timetoken_char;
 }
 
-void PubNub::remove_message_callback(Pubnub::String channel_id)
+std::map<Pubnub::String, int, Pubnub::StringComparer> PubNub::message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps)
 {
-    this->message_callbacks_map.erase(channel_id);
-}
+    std::map<Pubnub::String, int, Pubnub::StringComparer> final_map;
+    auto result = pubnub_message_counts(this->main_context.get(), get_comma_sep_string_from_vector(channels).c_str(), get_comma_sep_string_from_vector(timestamps).c_str());
+    this->await_and_handle_error(result);
 
-void PubNub::register_message_update_callback(Pubnub::String message_timetoken, Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_update_callback)
-{
-    auto callback_tuple = std::make_tuple(channel_id, message_update_callback);
-    this->message_update_callbacks_map[message_timetoken] = callback_tuple;
-}
-
-void PubNub::remove_message_update_callback(Pubnub::String message_timetoken)
-{
-    this->message_update_callbacks_map.erase(message_timetoken);
-}
-
-void PubNub::register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback)
-{
-    this->channel_callbacks_map[channel_id] = channel_callback;
-}
-
-void PubNub::remove_channel_callback(Pubnub::String channel_id)
-{
-    this->channel_callbacks_map.erase(channel_id);
-}
-
-void PubNub::register_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback)
-{
-    //TODO: Storing this in map is not good idea, as someone could listen for 2 types on the same channel. Then only 1 type would work.
-    //But it's not causing any issues in MVP, as only 2 types are supported and type REPORT can only be used with Internal Admin Channel
-    //In MVP we only support these 2 types.
-
-    std::tuple<Pubnub::pubnub_chat_event_type, std::function<void(Pubnub::String)>> callback_tuple = std::make_tuple(chat_event_type, event_callback);
-    this->event_callbacks_map[channel_id] = callback_tuple;
-}
-
-void PubNub::remove_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type)
-{
-    //TODO: The same as above, this shouldn't be a map
-    this->event_callbacks_map.erase(channel_id);
-}
-
-void PubNub::register_user_callback(Pubnub::String user_id, std::function<void(Pubnub::User)> user_callback)
-{
-    this->user_callbacks_map[user_id] = user_callback;
-}
-
-void PubNub::remove_user_callback(Pubnub::String user_id)
-{
-    this->user_callbacks_map.erase(user_id);
-}
-
-void PubNub::register_channel_presence_callback(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback)
-{
-    this->channel_presence_callbacks_map[channel_id] = presence_callback;
-}
-void PubNub::remove_channel_presence_callback(Pubnub::String channel_id)
-{
-    this->channel_presence_callbacks_map.erase(channel_id);
-}
-
-void PubNub::register_membership_callback(Pubnub::String channel_id, Pubnub::String user_id, std::function<void(Pubnub::Membership)> membership_callback)
-{
-    auto callback_tuple = std::make_tuple(user_id, membership_callback);
-    this->membership_callbacks_map[channel_id] = callback_tuple;
-}
-
-void PubNub::remove_membership_callback(Pubnub::String channel_id)
-{
-    this->membership_callbacks_map.erase(channel_id);
-}
-
-void PubNub::stop_resolving_callbacks()
-{
-    this->should_stop = true;
+    for(auto &channel : channels)
+    {
+        int MessageCountsReturn;
+	    int get_response = pubnub_get_message_counts(this->main_context.get(), channel.c_str(), &MessageCountsReturn);
+        final_map[channel] = get_response >= 0 ? MessageCountsReturn : 0;
+    }
+    return final_map;
 }
 
 void PubNub::await_and_handle_error(pubnub_res result)
@@ -653,140 +577,6 @@ void PubNub::call_handshake()
     }
 }
 
-
-
-void PubNub::broadcast_callbacks_from_message(pubnub_v2_message message)
-{
-    if(!message.payload.ptr || !message.channel.ptr)
-    {
-        throw std::runtime_error("received message is invalid");
-    }
-
-    Pubnub::String message_string = Pubnub::String(message.payload.ptr, message.payload.size);
-    Pubnub::String message_channel_string = Pubnub::String(message.channel.ptr, message.channel.size);
-
-    if(message_string.empty())
-    {
-        throw std::runtime_error("message is empty");
-    }
-
-    json message_json = json::parse(message_string);
-    
-    if(message_json.is_null())
-    {
-        throw std::runtime_error("Failed to parse message into json");
-    }
-
-    //Handle chat messages
-    if(Deserialization::is_chat_message(message_string))
-    {
-        if(this->message_callbacks_map.find(message_channel_string) != this->message_callbacks_map.end())
-        {
-            this->message_callbacks_map[message_channel_string](
-                    Deserialization::pubnub_to_chat_message(this->chat_obj, message));
-        }
-    }
-    
-    //Handle channel updates
-    if(Deserialization::is_channel_update_message(message_string))
-    {
-        if(this->channel_callbacks_map.find(message_channel_string) != this->channel_callbacks_map.end())
-        {
-            this->channel_callbacks_map[message_channel_string](
-                    Deserialization::pubnub_message_to_chat_channel(this->chat_obj, message));
-        }
-    }
-
-    //Handle user updates
-    if(Deserialization::is_user_update_message(message_string))
-    {
-        if(this->user_callbacks_map.find(message_channel_string) != this->user_callbacks_map.end())
-        {
-            this->user_callbacks_map[message_channel_string](
-                    Deserialization::pubnub_message_to_chat_user(this->chat_obj, message));
-        }
-    }
-
-    //Handle events
-    if(Deserialization::is_event_message(message_string))
-    {
-        if(this->event_callbacks_map.find(message_channel_string) != this->event_callbacks_map.end())
-        {
-            //Get event type from callback
-            Pubnub::pubnub_chat_event_type event_type;
-            std::function<void(Pubnub::String)> callback;
-            std::tie(event_type, callback) = this->event_callbacks_map[message_channel_string];
-
-            //only send callback if event types ara matching
-            if(Pubnub::chat_event_type_from_string(message_json["type"].dump()) == event_type)
-            {
-                callback(message_string);
-            }
-        }
-    }
-
-    //Handle presence
-    if(Deserialization::is_presence_message(message_string))
-    {
-        //get channel name without -pnpres as all presence messages are on channels with -pnpres
-        Pubnub::String normal_channel_name = message_channel_string;
-        normal_channel_name.erase(message_channel_string.length() - 7, 7);
-
-        if(this->channel_presence_callbacks_map.find(normal_channel_name) != this->channel_presence_callbacks_map.end())
-        {
-            std::vector<Pubnub::String> current_users = chat_obj.who_is_present(normal_channel_name);
-            this->channel_presence_callbacks_map[message_channel_string](current_users);
-        }
-    }
-
-    //Handle message updates
-    if(Deserialization::is_message_update_message(message_string))
-    {
-        Pubnub::String message_timetoken = message_json["data"]["messageTimetoken"].dump();
-        if (message_timetoken.front() == '"' && message_timetoken.back() == '"')
-        {
-            message_timetoken.erase(0, 1);
-            message_timetoken.erase(message_timetoken.length() - 1, 1);
-        }
-
-        if(this->message_update_callbacks_map.find(message_timetoken) != this->message_update_callbacks_map.end())
-        {
-            Pubnub::String message_channel;
-            std::function<void(Pubnub::Message)> callback;
-            std::tie(message_channel, callback) = this->message_update_callbacks_map[message_timetoken];
-            // TODO: this should already give message with this new update, make sure it really does.pubnub.cpp
-            Pubnub::Message message_obj = chat_obj.get_channel(message_channel).get_message(message_timetoken);
-            callback(message_obj);
-        }
-    }
-
-    //Handle message updates
-    if(Deserialization::is_membership_update_message(message_string))
-    {
-        // TODO: All dump() calls should be replaced with unified function that removes quotes from the string
-        Pubnub::String dumped = message_json["data"]["channel"]["id"].dump();
-        Pubnub::String membership_channel = Pubnub::String(&dumped.c_str()[1], dumped.length() - 2); 
-
-        if(this->membership_callbacks_map.find(membership_channel) != this->membership_callbacks_map.end())
-        {
-            Pubnub::String membership_user;
-            std::function<void(Pubnub::Membership)> callback;
-            std::tie(membership_user, callback) = this->membership_callbacks_map[membership_channel];
-
-            //Make sure this message is related to the user that we are streaming updates for
-            Pubnub::String user_from_message = message_json["data"]["uuid"]["id"].dump();
-            Pubnub::String user_from_message_cleaned = Pubnub::String(&user_from_message.c_str()[1], user_from_message.length() - 2);
-            if(user_from_message_cleaned == membership_user)
-            {
-                auto custom_field = Pubnub::String(message_json["custom"].dump());
-                auto custom_field_cleaned = Pubnub::String(&custom_field.c_str()[1], custom_field.length() - 2);
-                Pubnub::Membership membership_obj = Pubnub::Membership(chat_obj, chat_obj.get_channel(membership_channel), chat_obj.get_user(membership_user), custom_field_cleaned);
-                callback(membership_obj);
-            }
-        }
-    }
-}
-
 Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()
 {
     Pubnub::String current_channels;
@@ -801,4 +591,18 @@ Pubnub::String PubNub::get_comma_sep_channels_to_subscribe()
     return current_channels;
 }
 
+Pubnub::String PubNub::get_comma_sep_string_from_vector(std::vector<Pubnub::String> vector_of_strings)
+{
+    Pubnub::String final_string;
+    for (const auto& element : vector_of_strings) 
+    {
+        final_string += element + ",";
+    }
+    if(!final_string.empty())
+    {
+        final_string.erase(final_string.length() - 1, 1);
+    }
+    
+    return final_string;
+}
 

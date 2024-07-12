@@ -6,10 +6,10 @@
 #include <utility>
 #include "sync.hpp"
 
-template <typename Key, typename Value>
+template <typename Key, typename Value, typename Compare = std::less<Key>>
 class Repository {
     public:
-        Repository(): data(std::map<Key, Value>()) {}
+        Repository(): data(std::map<Key, Value, Compare>()) {}
         ~Repository() = default;
 
         void update_or_insert(Key key, Value value) {
@@ -42,9 +42,9 @@ class Repository {
         };
 
     private:
-        Mutex<std::map<Key, Value>> data;
+        Mutex<std::map<Key, Value, Compare>> data;
 
-        bool exists(Key key, std::map<Key, Value> data) {
+        bool exists(Key key, std::map<Key, Value, Compare> data) {
             return data.find(key) != data.end();
         };
 };

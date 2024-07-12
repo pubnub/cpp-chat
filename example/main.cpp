@@ -1,15 +1,15 @@
-#include "chat.hpp"
-#include "chat/message.hpp"
-#include "chat/membership.hpp"
-#include "chat/user.hpp"
-#include "chat/channel.hpp"
+#include "presentation/chat.hpp"
+#include "presentation/channel.hpp"
+#include "presentation/restrictions.hpp"
+#include "presentation/user.hpp"
+
 #include "enums.hpp"
 #include <chrono>
+#include <string>
 #include <iostream>
 #include <thread>
 
 int main() {
-    
     std::string pub_key = "pub-c-79961364-c3e6-4e48-8d8d-fe4f34e228bf";
     std::string sub_key = "sub-c-2b4db8f2-c025-4a76-9e23-326123298667";
     std::string user = "hehehe";
@@ -55,20 +55,20 @@ int main() {
 
     //DELETE CHANNEL
     //channel_to_delete.delete_channel();
-    chat.delete_channel(channel_to_delete.get_channel_id());
+    chat.delete_channel(channel_to_delete.channel_id());
 
     //GET CHANNELS TEST
     std::cout << "get channels, you shouldn't see channel to delete here!!" << std::endl;
     std::vector<Pubnub::Channel> channels = chat.get_channels("", 30, "1728181488", "1708181488");
     for(auto received_channel : channels)
     {
-        std::cout << "get channels, channel: " << received_channel.get_channel_id() << std::endl;
+        std::cout << "get channels, channel: " << received_channel.channel_id() << std::endl;
     }
     std::cout << std::endl;
 
     //STREAM CHANNEL UPDATES
     auto channel_callback = [](Pubnub::Channel channel){ 
-        Pubnub::String message_on_update = "channel update callback. channel name: " + channel.get_channel_data().channel_name; 
+        Pubnub::String message_on_update = "channel update callback. channel name: " + channel.channel_data().channel_name; 
         std::cout << message_on_update << std::endl;
     };
     channel.stream_updates(channel_callback);
@@ -77,7 +77,7 @@ int main() {
     std::vector<Pubnub::Membership> memberships = channel.get_members(3, "17386132136530924", "17086132136530924");
         for(auto membership : memberships)
     {
-        std::cout << "get memberships. membership user:  " << membership.get_user_id() <<  " channel: " << membership.get_channel_id() << std::endl;
+        std::cout << "get memberships. membership user:  " << membership.user.user_id() <<  " channel: " << membership.channel.channel_id() << std::endl;
     }
     std::cout << std::endl;
 
@@ -92,7 +92,7 @@ int main() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     //SET RESTRICTIONS FROM CHANNEL
-    Pubnub::PubnubRestrictionsData restrictions_data;
+    Pubnub::Restriction restrictions_data;
     restrictions_data.mute = true;
     restrictions_data.reason = "bo tak";
     channel.set_restrictions(user, restrictions_data);
@@ -100,10 +100,12 @@ int main() {
     //GET CHANNEL HISTORY
     std::cout <<  std::endl;
     std::cout <<"GET HISTORY: " <<  std::endl;
-    std::vector<Pubnub::Message> history_messages = channel.get_history("17386132136530924", "17086132136530924", 5);
+    std::vector<Pubnub::Message> history_messages = channel.get_history("99999999999999999", "00000000000000000", 5);
+    Pubnub::String message_token;
     for(auto history_message : history_messages)
     {
-        std::cout <<"history message: " <<  history_message.get_message_data().text << std::endl;
+        std::cout <<"history message: " <<  history_message.message_data().text << std::endl;
+        message_token = history_message.timetoken();
     }
 
 
@@ -114,7 +116,8 @@ int main() {
     //GET MESSAGE
     std::cout <<  std::endl;
 
-    Pubnub::String message_token = "17186347059205817";
+    // TODO: this seems to not work
+//    Pubnub::String message_token = "17207041559619450";
     Pubnub::Message message_from_get = channel.get_message(message_token);
     std::cout <<"Message from get: " <<  message_from_get.text() << std::endl;
     std::cout <<  std::endl;
@@ -156,21 +159,21 @@ int main() {
 
     //STREAM USER UPDATES
     auto user_callback = [](Pubnub::User user){
-        std::cout << "user update callback. User name:  " << user.get_user_data().user_name << std::endl;
+        std::cout << "user update callback. User name:  " << user.user_data().user_name << std::endl;
         std::cout << std::endl;
     };
     chat_user.stream_updates(user_callback);
 
     //DELETE USER
     //user_to_delete.delete_user();
-    chat.delete_user(user_to_delete.get_user_id());
+    chat.delete_user(user_to_delete.user_id());
 
     //GET_USERS
     std::cout << "get users, you shouldn't see user to delete here!!" << std::endl;
     std::vector<Pubnub::User> users = chat.get_users("", 10, "1738181488", "1718361914");
     for(auto received_user : users)
     {
-        std::cout << "get users, user: " << received_user.get_user_id() << std::endl;
+        std::cout << "get users, user: " << received_user.user_id() << std::endl;
     }
     std::cout << std::endl;
 
@@ -188,12 +191,12 @@ int main() {
     std::cout << std::endl;
 
     //IS PRESENT ON
-    bool is_user_present = chat_user.is_present_on(channel.get_channel_id());
-    std::cout << "is present on (should be true): " << is_user_present << std::endl;
+    bool is_user_present = chat_user.is_present_on(channel.channel_id());
+    std::cout << chat_user.user_id() << " is present on "<< channel.channel_id() <<" (should be true): " << is_user_present << std::endl;
     
     //IS PRESENT
-    bool is_user_present_in_chnnel = channel.is_present(chat_user.get_user_id());
-    std::cout << "is present (should be true): " << is_user_present_in_chnnel << std::endl;
+    bool is_user_present_in_chnnel = channel.is_present(chat_user.user_id());
+    std::cout << chat_user.user_id() << " is present on " << channel.channel_id() << " (should be true): " << is_user_present_in_chnnel << std::endl;
 
     //REPORT USER
     chat_user.report("a o tak o sobie");
@@ -210,7 +213,7 @@ int main() {
 
     //update channel from chat
     channel_data.channel_name = "updated from chat";
-    chat.update_channel(channel.get_channel_id(), channel_data);
+    chat.update_channel(channel.channel_id(), channel_data);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -227,7 +230,7 @@ int main() {
 
     //update user from chat
     user_data.user_name = "user updated from chat";
-    chat.update_user(chat_user.get_user_id(),  user_data);
+    chat.update_user(chat_user.user_id(),  user_data);
 
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -248,6 +251,5 @@ int main() {
 
     std::cout << "end of main" << std::endl;
     
-
 
 }
