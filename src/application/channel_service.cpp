@@ -445,18 +445,23 @@ void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, st
     // chat is not needed in C ABI to stream updates
     if (auto chat = this->chat_service.lock()) {
 #endif // PN_CHAT_C_ABI
+        std::vector<Pubnub::String> channels_ids;
+
         for(auto channel : channels)
         {
-            auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(channel.channel_id());
-
-            // TODO: C ABI way
+            channels_ids.push_back(channel.channel_id());
 #ifndef PN_CHAT_C_ABI
-            // First broadcast messages because they're not related to the new callback 
-            chat->callback_service->broadcast_messages(messages);
             chat->callback_service->register_channel_callback(channel.channel_id(), channel_callback);
-        }
 #endif // PN_CHAT_C_ABI
+        }
+        
+        auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channels_ids);
+
+        // TODO: C ABI way
+#ifndef PN_CHAT_C_ABI
+        chat->callback_service->broadcast_messages(messages);
     }
+#endif // PN_CHAT_C_ABI
 }
 
 Channel ChannelService::create_presentation_object(String channel_id)

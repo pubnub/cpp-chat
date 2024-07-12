@@ -58,7 +58,21 @@ void PubNub::publish(const Pubnub::String channel, const Pubnub::String message,
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
-    if (this->is_subscribed_to_channel(channel)) {
+    return this->subscribe_to_multiple_channels_and_get_messages({channel});
+}
+
+std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_messages(const std::vector<Pubnub::String> channels)
+{
+    bool new_channels = false;
+
+    for (const auto& channel : channels) {
+        if (!this->is_subscribed_to_channel(channel)) {
+            this->subscribed_channels.push_back(channel);
+            new_channels = true;
+        }
+    }
+
+    if (new_channels) {
         return {};
     }
 
@@ -68,7 +82,6 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(con
         messages = this->pause_subscription_and_get_messages();
     }
 
-    this->subscribed_channels.push_back(channel);
     this->call_handshake();
     this->is_subscribed = true;
     this->call_subscribe();
