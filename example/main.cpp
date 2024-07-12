@@ -192,11 +192,11 @@ int main() {
 
     //IS PRESENT ON
     bool is_user_present = chat_user.is_present_on(channel.channel_id());
-    std::cout << "is present on (should be true): " << is_user_present << std::endl;
+    std::cout << chat_user.user_id() << " is present on "<< channel.channel_id() <<" (should be true): " << is_user_present << std::endl;
     
     //IS PRESENT
     bool is_user_present_in_chnnel = channel.is_present(chat_user.user_id());
-    std::cout << "is present (should be true): " << is_user_present_in_chnnel << std::endl;
+    std::cout << chat_user.user_id() << " is present on " << channel.channel_id() << " (should be true): " << is_user_present_in_chnnel << std::endl;
 
     //REPORT USER
     chat_user.report("a o tak o sobie");
