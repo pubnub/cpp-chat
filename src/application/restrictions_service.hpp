@@ -32,7 +32,6 @@ class RestrictionsService : public std::enable_shared_from_this<RestrictionsServ
         ThreadSafePtr<PubNub> pubnub;
         std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
-
 };
 
 #endif // PN_CHAT_RESTRICTIONS_SERVICE_HPP

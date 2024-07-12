@@ -99,24 +99,25 @@ std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> Parsers::PubnubJson::to
     auto json = Json::parse(string_from_pn_block(pn_message.payload));
 
     return std::make_pair(
-            json_field_from_pn_block(pn_message.payload, "channel", "id"),
+            json_field_from_pn_block(pn_message.payload, "data", "id"),
             ChannelEntity::from_json(json)
     );
 }
 
 std::pair<Parsers::PubnubJson::UserId, UserEntity> Parsers::PubnubJson::to_user(pubnub_v2_message pn_message) {
-    auto json = Json::parse(string_from_pn_block(pn_message.payload));
+    auto to_parse = string_from_pn_block(pn_message.payload);
+    auto json = Json::parse(to_parse);
 
     return std::make_pair(
-            json_field_from_pn_block(pn_message.payload, "uuid", "id"),
-            UserEntity::from_json(json)
+            json_field_from_pn_block(pn_message.payload, "data", "id"),
+            UserEntity::from_json(json["data"])
     );
 }
 
 MembershipEntity Parsers::PubnubJson::membership_from_string(Pubnub::String message_json) {
     auto json = Json::parse(message_json);
 
-    return MembershipEntity::from_json(json);
+    return MembershipEntity::from_json(json["data"]);
 }
 
 Pubnub::String Parsers::PubnubJson::to_string(pubnub_v2_message pn_message) {
