@@ -1,6 +1,8 @@
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 
+#include <chrono>
+
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -61,6 +63,15 @@ String chat_message_to_publish_string(String message, pubnub_chat_message_type m
     message_json["text"] = message.c_str();
 
 	return message_json.dump();
+}
+
+String get_now_timetoken()
+{
+    auto now = std::chrono::system_clock::now();
+    auto epoch = now.time_since_epoch();
+    long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
+
+    return String(std::to_string(nanoseconds));
 }
 
 }

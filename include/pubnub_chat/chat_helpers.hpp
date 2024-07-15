@@ -59,6 +59,8 @@ namespace Pubnub
 
     Pubnub::String chat_message_to_publish_string(Pubnub::String message, Pubnub::pubnub_chat_message_type message_type);
 
+    Pubnub::String get_now_timetoken();
+
 }
 
 #endif /* CHAT_HELPERS_HPP */

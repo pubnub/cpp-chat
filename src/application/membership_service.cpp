@@ -142,7 +142,9 @@ Membership MembershipService::invite_to_channel(String channel_id, User user)
     ChannelEntity channel_entity = ChannelEntity::from_json(channel_data_string);
     entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
     
-    return create_presentation_object(user, channel);
+    Membership membership_object = create_presentation_object(user, channel);
+    membership_object.set_last_read_message_timetoken(get_now_timetoken());
+    return membership_object;
 }
 
 std::vector<Membership> MembershipService::invite_multiple_to_channel(String channel_id, std::vector<User> users)
@@ -181,11 +183,11 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
 
     String test = memberships_data_array.dump();
     
-
     for (json::iterator single_data_json = memberships_data_array.begin(); single_data_json != memberships_data_array.end(); ++single_data_json) 
     {
         User user = chat_service_shared->user_service->create_presentation_object(String(single_data_json.value()["uuid"]["id"]));
         Membership membership = create_presentation_object(user, channel);
+        membership.set_last_read_message_timetoken(get_now_timetoken());
         invitees_memberships.push_back(membership);
 
         String event_payload = "{\"channelType\": \"" + channel.channel_data().type + "\", \"channelId\": \"" + channel_id + "\"}";
@@ -193,7 +195,6 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
     }
 
     return invitees_memberships;
-
 }
 
 Membership MembershipService::update(User user, Channel channel, String custom_object_json)
