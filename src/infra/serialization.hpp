@@ -6,6 +6,7 @@
 #include "message.hpp"
 #include "user.hpp"
 #include <pubnub_helper.h>
+#include <chat.hpp>
 
 namespace Serialization {
 }

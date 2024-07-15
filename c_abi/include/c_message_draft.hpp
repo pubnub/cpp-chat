@@ -1,8 +1,8 @@
 #ifndef PN_CHAT_C_MESSAGE_DRAFT_H
 #define PN_CHAT_C_MESSAGE_DRAFT_H
 
-#include "chat/message_draft.hpp"
-#include "chat/user.hpp"
+#include "message_draft.hpp"
+#include "user.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 

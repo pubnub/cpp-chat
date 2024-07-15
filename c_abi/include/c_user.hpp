@@ -2,7 +2,7 @@
 #define PN_CHAT_C_USER_HPP
 
 #include "chat.hpp"
-#include "chat/user.hpp"
+#include "user.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 #include "c_errors.hpp"

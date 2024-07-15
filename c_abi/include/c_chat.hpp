@@ -4,8 +4,8 @@
 #include "chat.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
-#include "chat/channel.hpp"
-#include "chat/user.hpp"
+#include "channel.hpp"
+#include "user.hpp"
 #include "c_errors.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(

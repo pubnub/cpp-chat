@@ -55,31 +55,31 @@ PnCTribool pn_message_deleted(Pubnub::Message* message) {
 }
 
 void pn_message_get_timetoken(Pubnub::Message* message, char* result) {
-    auto timetoken = message->get_timetoken();
+    auto timetoken = message->timetoken();
     strcpy(result, timetoken.c_str());
 }
 
 int pn_message_get_data_type(Pubnub::Message* message) {
-    return message->get_message_data().type;
+    return message->message_data().type;
 }
 
 void pn_message_get_data_text(Pubnub::Message* message, char* result) {
-    auto data_text = message->get_message_data().text;
+    auto data_text = message->message_data().text;
     strcpy(result, data_text.c_str());
 }
 
 void pn_message_get_data_channel_id(Pubnub::Message* message, char* result) {
-    auto data_channel_id = message->get_message_data().channel_id;
+    auto data_channel_id = message->message_data().channel_id;
     strcpy(result, data_channel_id.c_str());
 }
 
 void pn_message_get_data_user_id(Pubnub::Message* message, char* result) {
-    auto data_user_id = message->get_message_data().user_id;
+    auto data_user_id = message->message_data().user_id;
     strcpy(result, data_user_id.c_str());
 }
 
 void pn_message_get_data_meta(Pubnub::Message* message, char* result) {
-    auto data_meta = message->get_message_data().meta;
+    auto data_meta = message->message_data().meta;
     strcpy(result, data_meta.c_str());
 }
 

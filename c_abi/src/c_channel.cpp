@@ -1,11 +1,11 @@
 #include "c_channel.hpp"
-#include "callbacks.hpp"
 #include "chat.hpp"
-#include "chat/message.hpp"
-#include "chat/message_draft.hpp"
+#include "message.hpp"
+#include "message_draft.hpp"
 #include "c_errors.hpp"
 #include "nlohmann/json.hpp"
-#include "chat/membership.hpp"
+#include "membership.hpp"
+#include "restrictions.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -118,7 +118,9 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
     try {
-        auto messages = channel->connect_and_get_messages();
+        // TODO:
+        //auto messages = channel->connect_and_get_messages();
+        auto messages = std::vector<Pubnub::String>();
         auto jsonised = jsonize_messages2(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
@@ -145,7 +147,9 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
 
 PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* messages_json) {
     try {
-        auto messages = channel->join_and_get_messages(additional_params);
+        // TODO:
+        //auto messages = channel->join_and_get_messages(additional_params);
+        auto messages = std::vector<Pubnub::String>();
         auto jsonised = jsonize_messages2(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
@@ -189,7 +193,7 @@ PnCResult pn_channel_set_restrictions(
         bool mute,
         const char* reason
         ) {
-    Pubnub::PubnubRestrictionsData restrictions;
+    Pubnub::Restriction restrictions;
     restrictions.ban = ban;
     restrictions.mute = mute;
     restrictions.reason = reason;
@@ -226,7 +230,7 @@ void pn_channel_get_channel_id(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto channel_id = channel->get_channel_id();
+    auto channel_id = channel->channel_id();
     strcpy(result, channel_id.c_str());
 }
 
@@ -234,7 +238,7 @@ void pn_channel_get_data_channel_name(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto channel_name = channel->get_channel_data().channel_name;
+    auto channel_name = channel->channel_data().channel_name;
     strcpy(result, channel_name.c_str());
 }
 
@@ -242,7 +246,7 @@ void pn_channel_get_data_description(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto description = channel->get_channel_data().description;
+    auto description = channel->channel_data().description;
     strcpy(result, description.c_str());
 }
 
@@ -250,7 +254,7 @@ void pn_channel_get_data_custom_data_json(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto custom_data_json = channel->get_channel_data().custom_data_json;
+    auto custom_data_json = channel->channel_data().custom_data_json;
     strcpy(result, custom_data_json.c_str());
 }
 
@@ -258,7 +262,7 @@ void pn_channel_get_data_updated(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto updated = channel->get_channel_data().updated;
+    auto updated = channel->channel_data().updated;
     strcpy(result, updated.c_str());
 }
 
@@ -266,7 +270,7 @@ void pn_channel_get_data_status(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto status = channel->get_channel_data().status;
+    auto status = channel->channel_data().status;
     strcpy(result, status.c_str());
 }
 
@@ -274,7 +278,7 @@ void pn_channel_get_data_type(
         Pubnub::Channel* channel,
         char* result
         ) {
-    auto type = channel->get_channel_data().type;
+    auto type = channel->channel_data().type;
     strcpy(result, type.c_str());
 }
 
@@ -304,7 +308,7 @@ PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
 }
 
 // TODO: utils
-static void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
+static void restrictions_to_json(nlohmann::json& j, const Pubnub::Restriction& data) {
     j = nlohmann::json{
         {"ban", data.ban},
         {"mute", data.mute},

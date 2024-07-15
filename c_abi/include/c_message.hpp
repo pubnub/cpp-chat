@@ -1,7 +1,7 @@
 #ifndef PN_CHAT_C_MESSAGE_H
 #define PN_CHAT_C_MESSAGE_H
 
-#include "chat/message.hpp"
+#include "message.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 #include "c_errors.hpp"

@@ -149,3 +149,12 @@ std::vector<UnreadMessageWrapper> Chat::get_unread_message_counts(String start_t
 
     return return_wrappers;
 }
+
+#ifdef PN_CHAT_C_ABI
+
+ChatService* Chat::get_chat_service()
+{
+    return chat_service.get();
+}
+
+#endif

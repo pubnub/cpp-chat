@@ -1,34 +1,36 @@
 #include "c_user.hpp"
 #include "c_errors.hpp"
-#include "chat/user.hpp"
+#include "restrictions.hpp"
+#include "user.hpp"
 #include "nlohmann/json.hpp"
-#include "chat/membership.hpp"
+#include "membership.hpp"
 #include <sstream>
 
-Pubnub::User* pn_user_create_dirty(
-        Pubnub::Chat* chat,
-        const char* user_id,
-        const char* user_data_json,
-        const char* user_name,
-        const char* external_id,
-        const char* profile_url,
-        const char* email,
-        const char* custom_data_json,
-        const char* status,
-        const char* type) {
-    Pubnub::Chat& chat_obj = *chat;
-    Pubnub::ChatUserData user_data;
-
-    user_data.user_name = user_name;
-    user_data.external_id = external_id;
-    user_data.profile_url = profile_url;
-    user_data.email = email;
-    user_data.custom_data_json = custom_data_json;
-    user_data.status = status;
-    user_data.type = type;
-
-    return new Pubnub::User(chat_obj, user_id, user_data);
-}
+//TODO: is that even needed?
+//Pubnub::User* pn_user_create_dirty(
+//        Pubnub::Chat* chat,
+//        const char* user_id,
+//        const char* user_data_json,
+//        const char* user_name,
+//        const char* external_id,
+//        const char* profile_url,
+//        const char* email,
+//        const char* custom_data_json,
+//        const char* status,
+//        const char* type) {
+//    Pubnub::Chat& chat_obj = *chat;
+//    Pubnub::ChatUserData user_data;
+//
+//    user_data.user_name = user_name;
+//    user_data.external_id = external_id;
+//    user_data.profile_url = profile_url;
+//    user_data.email = email;
+//    user_data.custom_data_json = custom_data_json;
+//    user_data.status = status;
+//    user_data.type = type;
+//
+//    return new Pubnub::User(chat_obj, user_id, user_data);
+//}
 
 void pn_user_destroy(Pubnub::User* user) {
     delete user;
@@ -83,7 +85,7 @@ PnCResult pn_user_set_restrictions(
         bool ban_user,
         bool mute_user,
         const char* reason) {
-    Pubnub::PubnubRestrictionsData restrictions;
+    Pubnub::Restriction restrictions;
     restrictions.ban = ban_user;
     restrictions.mute = mute_user;
     restrictions.reason = reason;
@@ -156,47 +158,47 @@ PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id) {
 }
 
 void pn_user_get_user_id(Pubnub::User* user, char* result) {
-    auto user_id = user->get_user_id();
+    auto user_id = user->user_id();
     strcpy(result, user_id.c_str());
 }
 
 void pn_user_get_data_user_name(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().user_name;
+    auto user_data = user->user_data().user_name;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_external_id(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().external_id;
+    auto user_data = user->user_data().external_id;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_profile_url(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().profile_url;
+    auto user_data = user->user_data().profile_url;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_email(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().email;
+    auto user_data = user->user_data().email;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_custom_data_json(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().custom_data_json;
+    auto user_data = user->user_data().custom_data_json;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_status(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().status;
+    auto user_data = user->user_data().status;
     strcpy(result, user_data.c_str());
 }
 
 void pn_user_get_data_type(Pubnub::User* user, char* result) {
-    auto user_data = user->get_user_data().type;
+    auto user_data = user->user_data().type;
     strcpy(result, user_data.c_str());
 }
 
 // TODO: utils
-static void restrictions_to_json(nlohmann::json& j, const Pubnub::PubnubRestrictionsData& data) {
+static void restrictions_to_json(nlohmann::json& j, const Pubnub::Restriction& data) {
     j = nlohmann::json{
         {"ban", data.ban},
         {"mute", data.mute},

@@ -1,7 +1,9 @@
 #include "c_chat.hpp"
 #include "c_channel.hpp"
-#include "chat/channel.hpp"
+#include "channel.hpp"
 #include "c_errors.hpp"
+#include "chat.hpp"
+#include "restrictions.hpp"
 #include <pubnub_helper.h>
 #include <string>
 #include <sstream>
@@ -13,7 +15,6 @@ Pubnub::Chat* pn_chat_new(
 
     try {
         auto* chat = new Pubnub::Chat(publish, subscribe, user_id);
-        chat->get_pubnub_context().stop_resolving_callbacks();
         return chat;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -115,7 +116,7 @@ PnCResult pn_chat_set_restrictions(
         bool ban, 
         bool mute,
         const char* reason) {
-    Pubnub::PubnubRestrictionsData restrictions;
+    Pubnub::Restriction restrictions;
     restrictions.ban = ban;
     restrictions.mute= mute;
     restrictions.reason = reason;
@@ -255,7 +256,9 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
 
 PnCResult pn_chat_get_updates(Pubnub::Chat *chat, char* messages_json) {
     try {
-        auto messages = chat->get_pubnub_context().fetch_messages();
+        // TODO:
+        //auto messages = chat->get_pubnub_context().fetch_messages();
+        auto messages = std::vector<pubnub_v2_message>();
         auto jsonised = move_message_to_heap(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
@@ -407,7 +410,9 @@ PnCResult pn_chat_listen_for_events(
         const char* channel_id,
         char* result) {
     try {
-        auto events = chat->listen_for_events_and_get_last_messages(channel_id);
+        // TODO:
+        //auto events = chat->listen_for_events_and_get_last_messages(channel_id);
+        auto events = std::vector<Pubnub::String>();
 
         if (events.size() == 0) {
             memcpy(result, "[]\0", 3);

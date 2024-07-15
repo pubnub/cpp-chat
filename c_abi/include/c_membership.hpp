@@ -1,8 +1,9 @@
 #ifndef PN_CHAT_C_MEMBERSHIP_H
 #define PN_CHAT_C_MEMBERSHIP_H
 
-#include "chat/membership.hpp"
-#include "chat/user.hpp"
+#include "chat.hpp"
+#include "membership.hpp"
+#include "user.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 

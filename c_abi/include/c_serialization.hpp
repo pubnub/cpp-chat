@@ -1,9 +1,9 @@
 #ifndef PN_CHAT_C_SERIALIZATION_H
 #define PN_CHAT_C_SERIALIZATION_H
 
-#include "chat/channel.hpp"
-#include "chat/message.hpp"
-#include "chat/user.hpp"
+#include "channel.hpp"
+#include "message.hpp"
+#include "user.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 #include "c_errors.hpp"

@@ -1,33 +1,37 @@
-#include "chat/membership.hpp"
+// TODO: this file is a 
+#include "domain/parsers.hpp"
+#include "membership.hpp"
 #include "infra/serialization.hpp"
 #include "c_serialization.hpp"
 #include "c_errors.hpp"
-#include "chat/channel.hpp"
-#include "chat/message.hpp"
-#include "chat/user.hpp"
+#include "channel.hpp"
+#include "message.hpp"
+#include "user.hpp"
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
 #include "string.hpp"
 #include <iostream>
 #include <pubnub_helper.h>
+#include "application/chat_service.hpp"
+#include "application/message_service.hpp"
 
 extern "C" {
     #include <pubnub_api_types.h>
     #include <pubnub_helper.h>
 }
 
-
 using json = nlohmann::json;
 
 Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* message) {
-    if (!Deserialization::is_chat_message(Pubnub::String(message->payload.ptr, message->payload.size))) {
+    if (!Parsers::PubnubJson::is_message(Pubnub::String(message->payload.ptr, message->payload.size))) {
         pn_c_set_error_message("Message is not a chat message");
 
         return PN_C_ERROR_PTR;
     }
 
     try {
-        return new Pubnub::Message(Deserialization::pubnub_to_chat_message(*chat, *message));
+        auto parsed_message = Parsers::PubnubJson::to_message(*message);
+        return new Pubnub::Message(chat->get_chat_service()->message_service->create_message_object(parsed_message));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

@@ -101,6 +101,9 @@ namespace Pubnub {
             std::shared_ptr<MembershipService> membership_service;
 #ifndef PN_CHAT_C_ABI
             std::shared_ptr<CallbackService> callback_service;
+#else
+        public:
+            ChatService* get_chat_service();
 #endif
 
     };
