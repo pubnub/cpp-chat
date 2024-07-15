@@ -49,7 +49,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
 
-        private:
+        protected:
             PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service,
                                     std::shared_ptr<RestrictionsService> restrictions_service);
             Pubnub::String timetoken_internal;

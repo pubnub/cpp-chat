@@ -5,6 +5,8 @@
 #include "membership_service.hpp"
 #include "message_service.hpp"
 #include "message.hpp"
+#include "pubnub_chat/thread_channel.hpp"
+#include "const_values.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/timer.hpp"
@@ -46,7 +48,7 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
 
     channel_data.type = "direct";
     auto created_channel = this->create_channel(final_channel_id, channel_data);
-    Pubnub::String user_id;
+    String user_id;
 
     {
         auto pubnub_handle = this->pubnub->lock();
@@ -78,7 +80,7 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     channel_data.type = "group";
     auto created_channel = this->create_channel(final_channel_id, channel_data);
 
-    Pubnub::String user_id;
+    String user_id;
     {
         auto pubnub_handle = this->pubnub->lock();
         user_id = pubnub_handle->get_user_id();
@@ -421,7 +423,7 @@ void ChannelService::get_typing(String channel_id, std::function<void(std::vecto
     chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
 }
 
-Pubnub::Message ChannelService::get_pinned_message(Pubnub::String channel_id)
+Message ChannelService::get_pinned_message(String channel_id)
 {
     Channel channel = create_presentation_object(channel_id);
     json custom_data_json = json::parse(channel.channel_data().custom_data_json);
@@ -437,13 +439,13 @@ Pubnub::Message ChannelService::get_pinned_message(Pubnub::String channel_id)
 
     auto chat_service_shared = chat_service.lock();
 
-    Pubnub::Message pinned_message = chat_service_shared->message_service->get_message(message_timetoken, channel_id);
+    Message pinned_message = chat_service_shared->message_service->get_message(message_timetoken, channel_id);
 
     //TODO: also check here for pinned message in thread channela after implementing threads
     return pinned_message;
 }
 
-void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback)
+void ChannelService::stream_updates_on(std::vector<Channel> channels, std::function<void(Channel)> channel_callback)
 {
     if(channels.empty())
     {
@@ -456,7 +458,7 @@ void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, st
     // chat is not needed in C ABI to stream updates
     if (auto chat = this->chat_service.lock()) {
 #endif // PN_CHAT_C_ABI
-        std::vector<Pubnub::String> channels_ids;
+        std::vector<String> channels_ids;
 
         for(auto channel : channels)
         {
@@ -473,6 +475,27 @@ void ChannelService::stream_updates_on(std::vector<Pubnub::Channel> channels, st
         chat->callback_service->broadcast_messages(messages);
     }
 #endif // PN_CHAT_C_ABI
+}
+
+String ChannelService::get_thread_id(Message message)
+{
+    return MESSAGE_THREAD_ID_PREFIX + "_" + message.message_data().channel_id + "_" + message.timetoken();
+}
+
+ThreadChannel ChannelService::create_thread_channel(Message message)
+{
+    if(string_starts_with(message.message_data().channel_id, MESSAGE_THREAD_ID_PREFIX))
+    {
+        throw std::invalid_argument("Only one level of thread nesting is allowed");
+    }
+
+    if(message.deleted())
+    {
+        throw std::invalid_argument("You cannot create threads on deleted messages");
+    }
+
+    throw std::runtime_error("I will continue work here");
+
 }
 
 Channel ChannelService::create_presentation_object(String channel_id)
@@ -528,7 +551,7 @@ ChatChannelData ChannelService::presentation_data_from_domain(ChannelEntity &cha
     return channel_data;
 }
 
-Channel ChannelService::create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data)
+Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> channel_data)
 {
     if (auto chat = this->chat_service.lock()) {
         this->entity_repository->get_channel_entities().update_or_insert(channel_data);

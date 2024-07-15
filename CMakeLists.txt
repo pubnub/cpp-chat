@@ -100,6 +100,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/message_draft.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/membership.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_channel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )
