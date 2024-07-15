@@ -318,6 +318,7 @@ void ChannelService::send_text(String channel_id, String message, pubnub_chat_me
 void ChannelService::start_typing(String channel_id)
 {
     ChannelEntity channel_entity = entity_repository->get_channel_entities().get(channel_id).value();
+    String saved_channel_id = channel_id;
 
     if(presentation_data_from_domain(channel_entity).type == String("public"))
     {
@@ -334,11 +335,15 @@ void ChannelService::start_typing(String channel_id)
 
     channel_entity.set_typing_sent(true);
     channel_entity.set_typing_sent_timer(Timer());
-    channel_entity.typing_sent_timer.start(TYPING_TIMEOUT - 1000, [&channel_entity](){
-         channel_entity.set_typing_sent(false);
+    entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
+
+    channel_entity.typing_sent_timer.start(TYPING_TIMEOUT - 1000, [=]()
+    {
+        ChannelEntity timer_channel_entity = entity_repository->get_channel_entities().get(saved_channel_id).value();
+        timer_channel_entity.set_typing_sent(false);
+        entity_repository->get_channel_entities().update_or_insert(saved_channel_id, timer_channel_entity);
     });
-    
-    channel_entity.set_typing_sent(true);
+
     String event_payload = String("{\"value\": true, \"userId\": \"") + user_id + String("\"}");
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
 }
@@ -363,6 +368,7 @@ void ChannelService::stop_typing(String channel_id)
     auto chat_service_shared = chat_service.lock();
 
     channel_entity.set_typing_sent(false);
+    entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
     String event_payload = String("{\"value\": false, \"userId\": \"") + user_id + String("\"}");
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, event_payload);
 }
@@ -371,6 +377,7 @@ void ChannelService::get_typing(String channel_id, std::function<void(std::vecto
 {
     std::function<void(String)> internal_typing_callback = [=](String event_string)
     {
+        String saved_channel_id = channel_id;
         ChannelEntity channel_entity = entity_repository->get_channel_entities().get(channel_id).value();
 
         json event_json = json::parse(event_string);
@@ -384,6 +391,7 @@ void ChannelService::get_typing(String channel_id, std::function<void(std::vecto
         {
             channel_entity.typing_indicators[user_id].stop();
             channel_entity.typing_indicators.erase(user_id);
+            entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
         }
         //start typing
         if(typing_value)
@@ -396,12 +404,15 @@ void ChannelService::get_typing(String channel_id, std::function<void(std::vecto
             
             //Create and start new timer
             Timer new_timer;
-            new_timer.start(TYPING_TIMEOUT, [=, &channel_entity]()
+            new_timer.start(TYPING_TIMEOUT, [=]()
             {
-                channel_entity.typing_indicators.erase(user_id);
-                typing_callback(getKeys(channel_entity.typing_indicators));
+                ChannelEntity timer_channel_entity = entity_repository->get_channel_entities().get(saved_channel_id).value();
+                timer_channel_entity.typing_indicators.erase(user_id);
+                typing_callback(getKeys(timer_channel_entity.typing_indicators));
+                entity_repository->get_channel_entities().update_or_insert(channel_id, timer_channel_entity);
             });
             channel_entity.typing_indicators[user_id] = new_timer;
+            entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
         }
         typing_callback(getKeys(channel_entity.typing_indicators));
     };
