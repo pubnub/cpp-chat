@@ -447,6 +447,8 @@ Pubnub::String PubNub::fetch_history(
     options.end = end_timetoken;
     options.include_message_actions = true;
     options.include_meta = true;
+    options.include_user_id = true;
+    options.include_message_type = true;
 
     auto result = pubnub_fetch_history(this->main_context.get(), channel, options);
 
@@ -474,19 +476,31 @@ Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pu
 void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken)
 {
     //TODO:: pubnub_str_2_chamebl_t could be used instead but it gives Linker error. There should be an easier way to achieve this
-    char* message_timetoken_char = new char[message_timetoken.length() + 1];
+    
+    Pubnub::String msg_timetoken_with_quotes = Pubnub::String("\"") + message_timetoken + Pubnub::String("\"");
+    Pubnub::String action_timetoken_with_quotes = Pubnub::String("\"") + action_timetoken + Pubnub::String("\"");
+  
+    // Allocate memory for message_timetoken_char and copy the content
+    char* message_timetoken_char = new char[msg_timetoken_with_quotes.length() + 1];
+    std::strcpy(message_timetoken_char, msg_timetoken_with_quotes.c_str());
+
     pubnub_chamebl_t message_timetoken_chamebl;
     message_timetoken_chamebl.ptr = message_timetoken_char;
-    message_timetoken_chamebl.size = (NULL == message_timetoken_char) ? 0 : message_timetoken.length() + 1;
+    message_timetoken_chamebl.size = msg_timetoken_with_quotes.length();
 
-    char* action_timetoken_char = new char[action_timetoken.length() + 1];
+    // Allocate memory for action_timetoken_char and copy the content
+    char* action_timetoken_char = new char[action_timetoken_with_quotes.length() + 1];
+    std::strcpy(action_timetoken_char, action_timetoken_with_quotes.c_str());
+
     pubnub_chamebl_t action_timetoken_chamebl;
     action_timetoken_chamebl.ptr = action_timetoken_char;
-    action_timetoken_chamebl.size = (NULL == action_timetoken_char) ? 0 : action_timetoken.length() + 1;
-    
+    action_timetoken_chamebl.size = action_timetoken_with_quotes.length();
+
+    // Perform the action
     auto result = pubnub_remove_message_action(this->main_context.get(), channel.c_str(), message_timetoken_chamebl, action_timetoken_chamebl);
     this->await_and_handle_error(result);
 
+    // Clean up allocated memory
     delete[] message_timetoken_char;
     delete[] action_timetoken_char;
 }

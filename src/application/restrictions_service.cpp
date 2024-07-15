@@ -5,7 +5,7 @@
 #include "const_values.hpp"
 #include "message.hpp"
 #include "chat_helpers.hpp"
-#include "nlohmann/json.hpp"
+#include "domain/json.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -146,13 +146,18 @@ void RestrictionsService::report_user(String user_id, String reason)
 
 void RestrictionsService::report_message(Message message, String reason)
 {
-    json payload_json = json::object();
-    payload_json["text"] = message.text().c_str();
-    payload_json["reson"] = reason.c_str();
-    payload_json["reportedMessageChannelId"] = message.message_data().channel_id.c_str();
-    payload_json["reportedMessageTimetoken"] = message.timetoken().c_str();
-    payload_json["reportedUserId"] = message.message_data().user_id.c_str();
-
+    Json payload_json = json::object();
+    payload_json.insert_or_update("text", message.text().c_str());
+    payload_json.insert_or_update("reason", reason.c_str());
+    payload_json.insert_or_update("reportedMessageChannelId", message.message_data().channel_id.c_str());
+    payload_json.insert_or_update("reportedMessageTimetoken", message.timetoken().c_str());
+    //TODO:: remove this if statement when get_history is fixed and returns message user's id correctly;
+    if (!message.message_data().user_id.empty())
+    {
+        payload_json.insert_or_update("reportedUserId", message.message_data().user_id.c_str());
+    }
+    
+    
     auto chat_service_shared = chat_service.lock();
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload_json.dump());
 }

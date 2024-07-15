@@ -34,7 +34,7 @@ MessageEntity MessageEntity::from_json(Pubnub::String message_json, Pubnub::Stri
             for (Json::Iterator message_action = message_actions_json.begin(); message_action != message_actions_json.end(); ++message_action) 
             {
                 Json single_message_action_json = message_action.value();
-                Pubnub::String single_message_action_json_string = single_message_action_json;
+                Pubnub::String single_message_action_json_string = single_message_action_json.dump();
                 // TODO: leak...
                 Pubnub::MessageAction message_action_data;
                 message_action_data.type = message_action_type_from_string(message_action_type.key());
