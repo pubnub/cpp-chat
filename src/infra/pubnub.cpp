@@ -46,10 +46,8 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
 
 void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata)
 {
-    //auto result = pubnub_publish(main_context.get(), channel.c_str(), message.c_str());
-
     auto publish_options = pubnub_publish_defopts();
-    publish_options.meta = metadata.c_str();
+    metadata.empty() ?  publish_options.meta = NULL : publish_options.meta = metadata;
 
     auto result = pubnub_publish_ex(main_context.get(), channel.c_str(), message.c_str(), publish_options);
 
@@ -524,11 +522,23 @@ void PubNub::await_and_handle_error(pubnub_res result)
 
 bool PubNub::is_subscribed_to_channel(const Pubnub::String channel)
 {
+    for (auto subscribed_channel : this->subscribed_channels)
+    {
+        if (subscribed_channel == channel)
+        {
+            return true;
+        }
+    }
+
+    return false;
+
+    //TODO:: use this when we solve string coparison for vectors
+    /*
     return std::find(
             this->subscribed_channels.begin(),
             this->subscribed_channels.end(),
             channel
-    ) != this->subscribed_channels.end();
+    ) != this->subscribed_channels.end();*/
 }
 
 void PubNub::cancel_previous_subscription()
