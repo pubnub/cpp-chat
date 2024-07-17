@@ -2,6 +2,6 @@
 
 MembershipEntity MembershipEntity::from_json(Json membership_json) {
     return MembershipEntity{
-        membership_json.get_string("custom").value_or(Pubnub::String())
+        membership_json.contains("custom") ? membership_json["custom"].dump() : Pubnub::String()
     };
 }

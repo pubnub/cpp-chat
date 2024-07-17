@@ -38,7 +38,7 @@ UserEntity UserEntity::from_json(Json user_json) {
         user_json.get_string("externalId").value_or(Pubnub::String()),
         user_json.get_string("profileUrl").value_or(Pubnub::String()),
         user_json.get_string("email").value_or(Pubnub::String()),
-        user_json.get_string("custom").value_or(Pubnub::String()),
+        user_json.contains("custom") ? user_json["custom"].dump() : Pubnub::String(),
         user_json.get_string("status").value_or(Pubnub::String()),
         user_json.get_string("type").value_or(Pubnub::String())
     };

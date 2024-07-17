@@ -35,7 +35,7 @@ ChannelEntity ChannelEntity::from_json(Json channel_json) {
     return ChannelEntity{
         channel_json.get_string("name").value_or(Pubnub::String()),
         channel_json.get_string("description").value_or(Pubnub::String()),
-        channel_json.get_string("custom").value_or(Pubnub::String()),
+        channel_json.contains("custom") ? channel_json["custom"].dump() : Pubnub::String(),
         channel_json.get_string("updated").value_or(Pubnub::String()),
         channel_json.get_string("status").value_or(Pubnub::String()),
         channel_json.get_string("type").value_or(Pubnub::String())
