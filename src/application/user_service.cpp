@@ -78,7 +78,10 @@ User UserService::get_user(String user_id)
 
     Json response_json = Json::parse(user_response);
 
-    UserEntity new_user_entity = UserEntity::from_json(user_response);
+    //In most responses this data field is an array but in some cases (for example in get_channel) it's just an object.
+    Json user_data_json = response_json["data"].is_array() ? response_json["data"][0] : response_json["data"];
+
+    UserEntity new_user_entity = UserEntity::from_json(user_data_json);
     User user = create_presentation_object(user_id);
 
     //Add or update user_entity to repository
