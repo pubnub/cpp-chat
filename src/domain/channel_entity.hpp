@@ -7,7 +7,6 @@
 #include <map>
 
 struct ChannelEntity {
-    Pubnub::String channel_id = "";
     Pubnub::String channel_name = "";
     Pubnub::String description = "";
     Pubnub::String custom_data_json = "";
