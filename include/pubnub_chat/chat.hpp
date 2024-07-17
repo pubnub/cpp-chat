@@ -1,9 +1,6 @@
 #ifndef PN_CHAT_CHAT_HPP
 #define PN_CHAT_CHAT_HPP
 
-#ifndef PN_CHAT_C_ABI
-#include "application/callback_service.hpp"
-#endif
 #include "string.hpp"
 #include "channel.hpp"
 #include "message.hpp"
@@ -21,6 +18,10 @@ class PresenceService;
 class RestrictionsService;
 class MessageService;
 class MembershipService;
+
+#ifndef PN_CHAT_C_ABI
+class CallbackService;
+#endif
 
 namespace Pubnub {
 
