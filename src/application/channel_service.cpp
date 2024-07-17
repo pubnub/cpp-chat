@@ -528,7 +528,8 @@ ChannelEntity ChannelService::create_domain_from_channel_response(String json_re
         throw std::runtime_error("can't create channel from response, response is incorrect");
     }
 
-    Json channel_data_json = channel_response_json["data"][0];
+    //In most responses this data field is an array but in some cases (for example in get_channel) it's just an object.
+    Json channel_data_json = channel_response_json["data"].is_array() ? channel_response_json["data"][0] : channel_response_json["data"];
 
     if(channel_data_json.is_null())
     {
