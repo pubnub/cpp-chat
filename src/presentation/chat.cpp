@@ -6,14 +6,14 @@
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
 #include "application/membership_service.hpp"
+#include "application/dao/channel_dao.hpp"
 
 using namespace Pubnub;
 
 Chat::Chat(String publish_key, String subscribe_key, String user_id) :
     chat_service(
             std::make_shared<ChatService>(
-                ChatService::create_pubnub(publish_key, subscribe_key, user_id),
-                ChatService::create_entity_repository()
+                ChatService::create_pubnub(publish_key, subscribe_key, user_id)
             )
         )
 {
@@ -68,12 +68,12 @@ void Chat::delete_channel(String channel_id)
 
 void Chat::pin_message_to_channel(Message message, Channel channel)
 {
-    this->channel_service->pin_message_to_channel(message, channel);
+    channel.pin_message(message);
 }
 
 void Chat::unpin_message_from_channel(Channel channel)
 {
-    this->channel_service->unpin_message_from_channel(channel);
+    channel.unpin_message();
 }
 
 User Chat::create_user(String user_id, ChatUserData user_data)
