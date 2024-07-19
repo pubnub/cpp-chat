@@ -42,10 +42,23 @@ Pubnub::String Json::dump() const {
     return this->json.dump();
 }
 
+void Json::erase(Pubnub::String key) {
+    this->json.erase(key);
+}
+
 std::optional<Pubnub::String> Json::get_string(Pubnub::String key) const {
     if(this->json.contains(key) && this->json[key].is_string() && !this->json[key].is_null())
     {
         return std::optional(this->json[key].get<std::string>());
+    }
+
+    return std::nullopt;
+}
+
+std::optional<bool> Json::get_bool(Pubnub::String key) const {
+    if(this->json.contains(key) && this->json[key].is_boolean() && !this->json[key].is_null())
+    {
+        return std::optional(this->json[key].get<bool>());
     }
 
     return std::nullopt;

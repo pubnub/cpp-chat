@@ -17,6 +17,7 @@ class PresenceService;
 class RestrictionsService;
 class MessageService;
 class MembershipService;
+class ChannelDAO;
 
 namespace Pubnub 
 {
@@ -37,8 +38,11 @@ namespace Pubnub
 
     class Channel {
         public:
-            PN_CHAT_EXPORT inline Pubnub::String channel_id(){return channel_id_internal;};
-            PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data();
+            PN_CHAT_EXPORT Channel(const Channel& other);
+            PN_CHAT_EXPORT ~Channel();
+
+            PN_CHAT_EXPORT Pubnub::String channel_id() const;
+            PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data() const;
 
             PN_CHAT_EXPORT Pubnub::Channel update(ChatChannelData in_additional_channel_data);
             PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback);
@@ -71,12 +75,19 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig());
 
-        protected:
-            PN_CHAT_EXPORT Channel(Pubnub::String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
-                                   std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<MembershipService> membership_service);
+        private:
+            PN_CHAT_EXPORT Channel(
+                    Pubnub::String channel_id,
+                    std::shared_ptr<ChatService> chat_service,
+                    std::shared_ptr<ChannelService> channel_service,
+                    std::shared_ptr<PresenceService> presence_service,
+                    std::shared_ptr<RestrictionsService> restrictions_service,
+                    std::shared_ptr<MessageService> message_service,
+                    std::shared_ptr<MembershipService> membership_service,
+                    std::unique_ptr<ChannelDAO> data);
             
             Pubnub::String channel_id_internal;
-
+            std::unique_ptr<ChannelDAO> data;
             std::shared_ptr<ChannelService> channel_service;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<PresenceService> presence_service;

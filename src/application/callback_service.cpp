@@ -27,6 +27,7 @@ CallbackService::CallbackService(
     this->callback_thread = std::thread([this, wait_interval]() {
         while (this->thread_run_flag.load()) {
             this->resolve_callbacks();
+            this->resolve_timers(wait_interval);
             // TODO: should we sleep in tests?
             std::this_thread::sleep_for(wait_interval);
         }
@@ -132,6 +133,10 @@ void CallbackService::resolve_callbacks() {
     }();
 
     this->broadcast_messages(messages);
+}
+
+void CallbackService::resolve_timers(milliseconds wait_interval) {
+
 }
 
 void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message)

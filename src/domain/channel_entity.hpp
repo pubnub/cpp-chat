@@ -5,8 +5,12 @@
 #include "string.hpp"
 #include "infra/timer.hpp"
 #include <map>
+#include <utility>
 
 struct ChannelEntity {
+    using ChannelId = Pubnub::String;
+    using MessageTimetoken = Pubnub::String;
+
     Pubnub::String channel_name = "";
     Pubnub::String description = "";
     Pubnub::String custom_data_json = "";
@@ -14,16 +18,14 @@ struct ChannelEntity {
     Pubnub::String status = "";
     Pubnub::String type = "";
 
-    bool typing_sent = false;
-    Timer typing_sent_timer;
-    std::map<Pubnub::String, Timer, Pubnub::StringComparer> typing_indicators;
-
-    inline void set_typing_sent(bool value) {typing_sent = value;};
-    inline void set_typing_sent_timer(Timer value) {typing_sent_timer = value;};
+    ChannelEntity pin_message(std::pair<ChannelId, MessageTimetoken> channel_message) const;
+    ChannelEntity unpin_message() const;
 
     //This is equivalent of channel_data_to_json from the old channel obj
-    Pubnub::String get_channel_metadata_json_string(Pubnub::String channel_id);
+    Pubnub::String get_channel_metadata_json_string(Pubnub::String channel_id) const;
+
     static ChannelEntity from_json(Json channel_json);
+    static ChannelEntity from_channel_response(Json response);
 };
 
 #endif // PN_CHAT_CHANNEL_ENTITY_HPP

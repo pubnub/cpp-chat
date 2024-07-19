@@ -2,6 +2,7 @@
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
 #include "channel.hpp"
+#include "domain/channel_entity.hpp"
 #include "enums.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
@@ -22,51 +23,46 @@ namespace Pubnub
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
-        ChannelService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
-        Pubnub::ChatChannelData get_channel_data(Pubnub::String channel_id);
+        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
 
-        Pubnub::Channel create_public_conversation(Pubnub::String channel_id, Pubnub::ChatChannelData data);
-        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(Pubnub::User user, Pubnub::String channel_id, Pubnub::ChatChannelData channel_data, Pubnub::String membership_data = "");
-        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(std::vector<Pubnub::User> users, Pubnub::String channel_id, Pubnub::ChatChannelData channel_data, Pubnub::String membership_data = "");
-        Pubnub::Channel create_channel(Pubnub::String channel_id, Pubnub::ChatChannelData data);
-        Pubnub::Channel get_channel(Pubnub::String channel_id);
-        std::vector<Pubnub::Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
-        Pubnub::Channel update_channel(Pubnub::String channel_id, Pubnub::ChatChannelData channel_data);
-        void delete_channel(Pubnub::String channel_id);
-        void pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel);
-        void unpin_message_from_channel(Pubnub::Channel channel);
-        void connect(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
-        void disconnect(Pubnub::String channel_id);
-        void join(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback, Pubnub::String additional_params = "");
-        void leave(Pubnub::String channel_id);
-        void send_text(Pubnub::String channel_id, Pubnub::String message, Pubnub::pubnub_chat_message_type message_type, Pubnub::String meta_data);
-        void start_typing(Pubnub::String channel_id);
-        void stop_typing(Pubnub::String channel_id);
-        void get_typing(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> typing_callback);
-        Pubnub::Message get_pinned_message(Pubnub::String channel_id);
+        Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
+        Pubnub::Channel create_channel(const Pubnub::String& channel_id, const ChannelEntity&& channel_entity) const;
+        Pubnub::Channel get_channel(const Pubnub::String& channel_id) const;
+        std::vector<Pubnub::Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+        Pubnub::Channel update_channel(const Pubnub::String& channel_id, ChannelDAO channel_data) const;
+        void delete_channel(const Pubnub::String& channel_id) const;
+        Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
+        Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
+        void connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
+        void disconnect(const Pubnub::String& channel_id) const;
+        void join(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
+        void leave(const Pubnub::String& channel_id) const;
+        void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String& meta_data) const;
+        void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
+        void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
+        void get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
+        Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         
-        void stream_updates_on(std::vector<Pubnub::Channel> channels, std::function<void(Pubnub::Channel)> channel_callback);
+        void stream_updates_on(const std::vector<Pubnub::String>& channel_ids, std::function<void(Pubnub::Channel)> channel_callback) const;
 
         /* THREADS */
         Pubnub::String get_thread_id(Pubnub::Message message);
         Pubnub::ThreadChannel create_thread_channel(Pubnub::Message message);
 
-
-
-        Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data);
-        Pubnub::Channel create_presentation_object(Pubnub::String channel_id);
+        Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data) const;
+        Pubnub::Channel create_presentation_object(Pubnub::String channel_id, ChannelDAO channel_data);
 
         //TODO: Move this to config
         int TYPING_TIMEOUT = 5000;
+        int TYPING_TIMEOUT_DIFFERENCE = 1000;
 
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
-        //Creates ChannelEntity from channel response - put the whole response, not only "data" field
-        ChannelEntity create_domain_from_channel_response(Pubnub::String json_response);
 
         Pubnub::ChatChannelData presentation_data_from_domain(ChannelEntity& channel_entity);
 

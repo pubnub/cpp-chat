@@ -69,6 +69,7 @@ class CallbackService {
         void broadcast_messages(std::vector<pubnub_v2_message> messages);
     private:
         void resolve_callbacks();
+        void resolve_timers(milliseconds wait_interval);
         void broadcast_callbacks_from_message(pubnub_v2_message message);
 
         CallbacksRepository callbacks;

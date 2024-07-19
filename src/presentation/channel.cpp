@@ -1,32 +1,47 @@
 #include "channel.hpp"
 #include "message.hpp"
+#include "application/dao/channel_dao.hpp"
 #include "application/channel_service.hpp"
 #include "application/presence_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
 #include "application/membership_service.hpp"
+#include <algorithm>
 
 using namespace Pubnub;
 
 Channel::Channel(String channel_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<PresenceService> presence_service, 
-                std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<MembershipService> membership_service) :
-channel_id_internal(channel_id),
-chat_service(chat_service),
-channel_service(channel_service),
-presence_service(presence_service),
-restrictions_service(restrictions_service),
-message_service(message_service),
-membership_service(membership_service)
+        std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<MembershipService> membership_service, std::unique_ptr<ChannelDAO> data) :
+    channel_id_internal(channel_id),
+    chat_service(chat_service),
+    channel_service(channel_service),
+    presence_service(presence_service),
+    restrictions_service(restrictions_service),
+    message_service(message_service),
+    membership_service(membership_service),
+    data(std::move(data))
 {}
 
-ChatChannelData Channel::channel_data()
-{
-    return channel_service->get_channel_data(channel_id_internal);
+Channel::Channel(const Channel& other) :
+    channel_id_internal(other.channel_id_internal),
+    chat_service(other.chat_service),
+    channel_service(other.channel_service),
+    presence_service(other.presence_service),
+    restrictions_service(other.restrictions_service),
+    message_service(other.message_service),
+    membership_service(other.membership_service),
+    data(std::make_unique<ChannelDAO>(other.data->to_channel_data()))
+{}
+
+Channel::~Channel() = default;
+
+ChatChannelData Channel::channel_data() const {
+    return this->data->to_channel_data();
 }
 
 Channel Channel::update(ChatChannelData in_additional_channel_data)
 {
-    return this->channel_service->update_channel(channel_id_internal, in_additional_channel_data);
+    return this->channel_service->update_channel(channel_id_internal, ChannelDAO(in_additional_channel_data));
 }
 
 void Channel::connect(std::function<void(Message)> message_callback) 
@@ -121,14 +136,12 @@ void Channel::get_typing(std::function<void(std::vector<Pubnub::String>)> typing
 
 Channel Channel::pin_message(Message message)
 {
-    this->channel_service->pin_message_to_channel(message, *this);
-    return *this;
+    return this->channel_service->pin_message_to_channel(message, *this);
 }
 
 Channel Channel::unpin_message()
 {
-    this->channel_service->unpin_message_from_channel(*this);
-    return *this;
+    return this->channel_service->unpin_message_from_channel(*this);
 }
 
 Message Channel::get_pinned_message()
@@ -138,12 +151,19 @@ Message Channel::get_pinned_message()
 
 void Channel::stream_updates(std::function<void(Channel)> channel_callback)
 {
-    this->channel_service->stream_updates_on({*this}, channel_callback);
+    this->channel_service->stream_updates_on({this->channel_id()}, channel_callback);
 }
 
 void Channel::stream_updates_on(std::vector<Channel> channels, std::function<void(Channel)> channel_callback)
 {
-    this->channel_service->stream_updates_on(channels, channel_callback);
+    std::vector<Pubnub::String> channel_ids(channels.size());
+    std::transform(
+            channels.begin(),
+            channels.end(),
+            channel_ids.begin(),
+            [](Channel channel) { return channel.channel_id(); }
+        );
+    this->channel_service->stream_updates_on(channel_ids, channel_callback);
 }
 
 void Channel::stream_presence(std::function<void(std::vector<String>)> presence_callback)

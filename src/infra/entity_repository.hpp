@@ -1,3 +1,4 @@
+// TODO: not used but removed until final decision about object synchronization
 #ifndef PN_CHAT_ENTITY_REPOSITORY_HPP
 #define PN_CHAT_ENTITY_REPOSITORY_HPP
 

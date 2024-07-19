@@ -30,7 +30,7 @@ namespace Pubnub
     class Message
     {
         public:
-            PN_CHAT_EXPORT inline Pubnub::String timetoken(){return timetoken_internal;};
+            PN_CHAT_EXPORT inline Pubnub::String timetoken() const {return timetoken_internal;};
             PN_CHAT_EXPORT Pubnub::ChatMessageData message_data();
 
             PN_CHAT_EXPORT Pubnub::Message edit_text(Pubnub::String new_text);

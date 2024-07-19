@@ -33,8 +33,10 @@ class Json {
         bool is_null() const;
         Pubnub::String dump() const;
         std::optional<Pubnub::String> get_string(Pubnub::String key) const;
+        std::optional<bool> get_bool(Pubnub::String key) const;
         bool is_array() const;
         bool is_object() const;
+        void erase(Pubnub::String key);
 
         void insert_or_update(Pubnub::String key, Json value);
         void insert_or_update(Pubnub::String key, Pubnub::String value);
