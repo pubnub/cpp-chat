@@ -1,5 +1,7 @@
 #include "user_entity.hpp"
 #include "domain/json.hpp"
+#include <utility>
+#include <vector>
 
 Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
 {
@@ -44,3 +46,20 @@ UserEntity UserEntity::from_json(Json user_json) {
     };
 }
 
+UserEntity UserEntity::from_user_response(Json response) {
+    //In most responses this data field is an array but in some cases (for example in get_user) it's just an object.
+    Json user_data_json = response["data"].is_array() ? response["data"][0] : response["data"];
+
+    return UserEntity::from_json(user_data_json);
+}
+
+std::vector<std::pair<UserEntity::UserId, UserEntity>> UserEntity::from_user_list_response(Json response) {
+    std::vector<std::pair<UserEntity::UserId, UserEntity>> users;
+
+    for(auto user : response["data"]) {
+        users.emplace_back(user.get_string("id"), UserEntity::from_json(user.dump()));
+    }
+
+    return users;
+
+}

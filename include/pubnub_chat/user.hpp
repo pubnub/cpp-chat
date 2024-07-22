@@ -13,6 +13,7 @@ class ChatService;
 class PresenceService;
 class RestrictionsService;
 class MembershipService;
+class UserDAO;
 
 namespace Pubnub
 {
@@ -29,39 +30,46 @@ namespace Pubnub
         Pubnub::String type = "";
     };
 
-
     class User
     {
         public:
-            PN_CHAT_EXPORT inline Pubnub::String user_id(){return user_id_internal;};
-            PN_CHAT_EXPORT Pubnub::ChatUserData user_data();
+            PN_CHAT_EXPORT User(const User& other);
+            PN_CHAT_EXPORT ~User();
 
-            PN_CHAT_EXPORT Pubnub::User update(Pubnub::ChatUserData user_data);
-            PN_CHAT_EXPORT void delete_user();
-            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present();
-            PN_CHAT_EXPORT bool is_present_on(Pubnub::String channel_id);
+            PN_CHAT_EXPORT Pubnub::String user_id() const;
+            PN_CHAT_EXPORT Pubnub::ChatUserData user_data() const;
 
-            PN_CHAT_EXPORT void set_restrictions(Pubnub::String channel_id, Pubnub::Restriction restrictions);
-            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
-            PN_CHAT_EXPORT void report(Pubnub::String reason);
+            PN_CHAT_EXPORT Pubnub::User update(const Pubnub::ChatUserData& user_data) const;
+            PN_CHAT_EXPORT void delete_user() const;
+            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present() const;
+            PN_CHAT_EXPORT bool is_present_on(const Pubnub::String& channel_id) const;
 
-            PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, Pubnub::String start_timetoken, Pubnub::String end_timetoken);
+            PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
+            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(User)> user_callback);
-            PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::User> users, std::function<void(Pubnub::User)> user_callback);
+            PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+
+            PN_CHAT_EXPORT void stream_updates(std::function<void(const User&)> user_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::User>& users, std::function<void(const Pubnub::User&)> user_callback) const;
 
         private:
-            PN_CHAT_EXPORT User(Pubnub::String user_id, std::shared_ptr<ChatService> chat_service, std::shared_ptr<UserService> user_service, std::shared_ptr<PresenceService> presence_service,
-                                std::shared_ptr<RestrictionsService> restrictions_service, std::shared_ptr<MembershipService> membership_service);
+            PN_CHAT_EXPORT User(
+                    Pubnub::String user_id,
+                    std::shared_ptr<ChatService> chat_service,
+                    std::shared_ptr<UserService> user_service,
+                    std::shared_ptr<PresenceService> presence_service,
+                    std::shared_ptr<RestrictionsService> restrictions_service,
+                    std::shared_ptr<MembershipService> membership_service,
+                    std::unique_ptr<UserDAO> data);
             
             Pubnub::String user_id_internal;
-
+            std::unique_ptr<UserDAO> data;
             std::shared_ptr<UserService> user_service;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<PresenceService> presence_service;
             std::shared_ptr<RestrictionsService> restrictions_service;
             std::shared_ptr<MembershipService> membership_service;
-
 
         friend class ::UserService;
     };

@@ -2,6 +2,7 @@
 #include "application/message_service.hpp"
 #include "application/channel_service.hpp"
 #include "application/restrictions_service.hpp"
+#include "application/dao/message_dao.hpp"
 
 using namespace Pubnub;
 
@@ -14,58 +15,60 @@ channel_service(channel_service),
 restrictions_service(restrictions_service)
 {}
 
-ChatMessageData Message::message_data()
-{
-    return this->message_service->get_message_data(timetoken());
+Message::Message(const Message& other) :
+timetoken_internal(other.timetoken_internal),
+chat_service(other.chat_service),
+message_service(other.message_service),
+channel_service(other.channel_service),
+restrictions_service(other.restrictions_service),
+data(std::make_unique<MessageDAO>(other.data->to_message_data()))
+{}
+
+Message::~Message() = default;
+
+String Message::timetoken() const {
+    return this->timetoken_internal;
 }
 
-Message Message::edit_text(String new_text)
-{
-    this->message_service->edit_text(*this, new_text);
-    return *this;
+ChatMessageData Message::message_data() const {
+    return this->data->to_message_data();
 }
 
-String Message::text()
-{
-    return this->message_service->text(*this);
+Message Message::edit_text(const String& new_text) const {
+    return this->message_service->edit_text(this->timetoken(), *this->data, new_text);
 }
 
-Message Message::delete_message()
-{
-    this->message_service->delete_message(*this);
-    return *this;
+String Message::text() const {
+    return this->message_service->text(*this->data);
 }
 
-bool Message::deleted()
-{
-    return this->message_service->deleted(*this);
+Message Message::delete_message() const {
+    return this->message_service->delete_message(*this->data, this->timetoken());
 }
 
-pubnub_chat_message_type Message::type()
-{
+bool Message::deleted() const {
+    return this->message_service->deleted(*this->data);
+}
+
+pubnub_chat_message_type Message::type() const {
     return this->message_data().type;
 }
 
-void Message::pin()
-{
+void Message::pin() const {
     Channel channel = this->channel_service->get_channel(message_data().channel_id);
-    this->channel_service->pin_message_to_channel(*this, channel);
+    channel.pin_message(*this);
 }
 
-Message Message::toggle_reaction(String reaction)
-{
-    this->message_service->toggle_reaction(*this, reaction);
-    return *this;
+Message Message::toggle_reaction(const String& reaction) const {
+    return this->message_service->toggle_reaction(this->timetoken(), *this->data, reaction);
 }
 
-std::vector<MessageAction> Message::reactions()
-{
-    return this->message_service->get_message_reactions(*this);
+std::vector<MessageAction> Message::reactions() const {
+    return this->message_service->get_message_reactions(*this->data);
 }
 
-bool Message::has_user_reaction(String reaction)
-{
-    auto message_reactions = this->message_service->get_message_reactions(*this);
+bool Message::has_user_reaction(const String& reaction) const {
+    auto message_reactions = this->message_service->get_message_reactions(*this->data);
     for (auto message_reaction : message_reactions)
     {
         if(message_reaction.value == reaction)
@@ -77,22 +80,18 @@ bool Message::has_user_reaction(String reaction)
     return false;
 }
 
-void Message::forward(String channel_id)
-{
+void Message::forward(const String& channel_id) const {
     this->message_service->forward_message(*this, channel_id);
 }
 
-void Message::report(Pubnub::String reason)
-{
+void Message::report(const Pubnub::String& reason) const {
     this->restrictions_service->report_message(*this, reason);
 }
 
-void Message::stream_updates(std::function<void(Message)> message_callback)
-{
+void Message::stream_updates(std::function<void(const Message&)> message_callback) const {
     this->message_service->stream_updates_on({*this}, message_callback);
 }
 
-void Message::stream_updates_on(std::vector<Message> messages, std::function<void(Message)> message_callback)
-{
+void Message::stream_updates_on(const std::vector<Message>& messages, std::function<void(const Message&)> message_callback) const {
     this->message_service->stream_updates_on(messages, message_callback);
 }

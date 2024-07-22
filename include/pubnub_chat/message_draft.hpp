@@ -31,7 +31,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void remove_quote();
 
         private:
-            PN_CHAT_EXPORT MessageDraft(Pubnub::Channel channel, Pubnub::MessageDraftConfig draft_config, std::shared_ptr<MessageService> message_service);
+            PN_CHAT_EXPORT MessageDraft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& draft_config, std::shared_ptr<MessageService> message_service);
 
         
             Pubnub::String previous_value;

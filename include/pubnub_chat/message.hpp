@@ -12,6 +12,7 @@ class MessageService;
 class ChatService;
 class ChannelService;
 class RestrictionsService;
+class MessageDAO;
 
 namespace Pubnub
 {
@@ -30,29 +31,40 @@ namespace Pubnub
     class Message
     {
         public:
-            PN_CHAT_EXPORT inline Pubnub::String timetoken() const {return timetoken_internal;};
-            PN_CHAT_EXPORT Pubnub::ChatMessageData message_data();
+            PN_CHAT_EXPORT Message(const Message& other);
+            PN_CHAT_EXPORT ~Message();
 
-            PN_CHAT_EXPORT Pubnub::Message edit_text(Pubnub::String new_text);
-            PN_CHAT_EXPORT Pubnub::String text();
-            PN_CHAT_EXPORT Pubnub::Message delete_message();
-            PN_CHAT_EXPORT bool deleted();
-            PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type();
+            PN_CHAT_EXPORT Pubnub::String timetoken() const;
+            PN_CHAT_EXPORT Pubnub::ChatMessageData message_data() const;
 
-            PN_CHAT_EXPORT void pin();
-            PN_CHAT_EXPORT Pubnub::Message toggle_reaction(Pubnub::String reaction);
-            PN_CHAT_EXPORT std::vector<Pubnub::MessageAction> reactions();
-            PN_CHAT_EXPORT bool has_user_reaction(Pubnub::String reaction);
-            PN_CHAT_EXPORT void forward(Pubnub::String channel_id);
-            PN_CHAT_EXPORT void report(Pubnub::String reason);
+            PN_CHAT_EXPORT Pubnub::Message edit_text(const Pubnub::String& new_text) const;
+            PN_CHAT_EXPORT Pubnub::String text() const;
+            PN_CHAT_EXPORT Pubnub::Message delete_message() const;
+            PN_CHAT_EXPORT bool deleted() const;
+            PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type() const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(Message)> message_callback);
-            PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Message)> message_callback);
+            PN_CHAT_EXPORT void pin() const;
+            PN_CHAT_EXPORT Pubnub::Message toggle_reaction(const Pubnub::String& reaction) const;
+            PN_CHAT_EXPORT std::vector<Pubnub::MessageAction> reactions() const;
+            PN_CHAT_EXPORT bool has_user_reaction(const Pubnub::String& reaction) const;
+            PN_CHAT_EXPORT void forward(const Pubnub::String& channel_id) const;
+            PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-        protected:
-            PN_CHAT_EXPORT Message(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service,
-                                    std::shared_ptr<RestrictionsService> restrictions_service);
+            PN_CHAT_EXPORT void stream_updates(std::function<void(const Message&)> message_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Message>& messages, std::function<void(const Message&)> message_callback) const;
+
+        private:
+            PN_CHAT_EXPORT Message(
+                    Pubnub::String timetoken,
+                    std::shared_ptr<ChatService> chat_service,
+                    std::shared_ptr<MessageService> message_service,
+                    std::shared_ptr<ChannelService> channel_service,
+                    std::shared_ptr<RestrictionsService> restrictions_service,
+                    std::unique_ptr<MessageDAO> data
+                );
+
             Pubnub::String timetoken_internal;
+            std::unique_ptr<MessageDAO> data;
             std::shared_ptr<ChatService> chat_service;
             std::shared_ptr<MessageService> message_service;
             std::shared_ptr<ChannelService> channel_service;

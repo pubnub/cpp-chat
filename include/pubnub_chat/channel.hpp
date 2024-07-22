@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHANNEL_HPP
 #define PN_CHAT_CHANNEL_HPP
 
+#include "application/dao/user_dao.hpp"
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
@@ -94,6 +95,7 @@ namespace Pubnub
             std::shared_ptr<RestrictionsService> restrictions_service;
             std::shared_ptr<MessageService> message_service;
             std::shared_ptr<MembershipService> membership_service;
+            std::unique_ptr<UserDAO> user_data;
 
         friend class ::ChannelService;
     };

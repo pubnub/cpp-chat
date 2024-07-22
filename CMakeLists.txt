@@ -92,7 +92,9 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/restrictions_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp

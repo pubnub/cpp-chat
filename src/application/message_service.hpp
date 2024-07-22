@@ -23,40 +23,30 @@ namespace Pubnub
 class MessageService : public std::enable_shared_from_this<MessageService>
 {
     public:
-        MessageService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
-        Pubnub::ChatMessageData get_message_data(Pubnub::String timetoken);
+        MessageService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
 
-        void edit_text(Pubnub::Message message, Pubnub::String new_text);
-        Pubnub::String text(Pubnub::Message message);
-        void delete_message(Pubnub::Message message);
-        bool deleted(Pubnub::Message message);
+        Pubnub::Message edit_text(const Pubnub::String& timetoken, const MessageDAO& message_data, const Pubnub::String& new_text) const;
+        Pubnub::String text(const MessageDAO& message) const;
+        Pubnub::Message delete_message(const MessageDAO& message, const Pubnub::String& timetoken) const;
+        bool deleted(const MessageDAO& message) const;
 
-        std::vector<Pubnub::Message> get_channel_history(Pubnub::String channel_id, Pubnub::String start_timetoken, Pubnub::String end_timetoken, int count);
-        Pubnub::Message get_message(Pubnub::String timetoken, Pubnub::String channel_id);
+        std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
+        Pubnub::Message get_message(const Pubnub::String& timetoken, const Pubnub::String& channel_id) const;
 
-        std::vector<Pubnub::MessageAction> get_message_reactions(Pubnub::Message message);
-        void toggle_reaction(Pubnub::Message message, Pubnub::String reaction);
-        void forward_message(Pubnub::Message message, Pubnub::String channel_id);
-        Pubnub::MessageDraft create_message_draft(Pubnub::Channel channel, Pubnub::MessageDraftConfig message_draft_config);
+        std::vector<Pubnub::MessageAction> get_message_reactions(const MessageDAO& message) const;
+        Pubnub::Message toggle_reaction(const Pubnub::String& timetoken, const MessageDAO& message, const Pubnub::String& reaction) const;
+        void forward_message(const Pubnub::Message& message, const Pubnub::String& channel_id) const;
+        Pubnub::MessageDraft create_message_draft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& message_draft_config) const;
         
-        void stream_updates_on(std::vector<Pubnub::Message> messages, std::function<void(Pubnub::Message)> message_callback);
+        void stream_updates_on(const std::vector<Pubnub::Message>& messages, std::function<void(const Pubnub::Message&)> message_callback) const;
 
+        Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data) const;
 
-        Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data);
-        Pubnub::Message create_presentation_object(Pubnub::String timetoken);
- 
-        
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::shared_ptr<EntityRepository> entity_repository;
         std::weak_ptr<ChatService> chat_service;
 
-        MessageEntity create_domain_from_presentation_data(Pubnub::String timetoken, Pubnub::ChatMessageData& presentation_data);
-
         Pubnub::ChatMessageData presentation_data_from_domain(MessageEntity& message_entity);
-
-        void add_message_action_to_message_data(Pubnub::ChatMessageData& message_data, Pubnub::MessageAction& message_action);
-
 };
 
 #endif // PN_CHAT_MESSAGE_SERVICE_HPP
