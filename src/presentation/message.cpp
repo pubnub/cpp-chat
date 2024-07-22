@@ -6,13 +6,13 @@
 
 using namespace Pubnub;
 
-Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service,
-                    std::shared_ptr<RestrictionsService> restrictions_service) :
+Message::Message(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<RestrictionsService> restrictions_service, std::unique_ptr<MessageDAO> data) :
 timetoken_internal(timetoken),
 chat_service(chat_service),
 message_service(message_service),
 channel_service(channel_service),
-restrictions_service(restrictions_service)
+restrictions_service(restrictions_service),
+data(std::move(data))
 {}
 
 Message::Message(const Message& other) :
@@ -23,6 +23,17 @@ channel_service(other.channel_service),
 restrictions_service(other.restrictions_service),
 data(std::make_unique<MessageDAO>(other.data->to_message_data()))
 {}
+
+Message& Message::operator=(const Message& other) {
+    this->timetoken_internal = other.timetoken_internal;
+    this->chat_service = other.chat_service;
+    this->message_service = other.message_service;
+    this->channel_service = other.channel_service;
+    this->restrictions_service = other.restrictions_service;
+    this->data = std::make_unique<MessageDAO>(other.data->to_message_data());
+
+    return *this;
+}
 
 Message::~Message() = default;
 

@@ -57,7 +57,7 @@ std::vector<std::pair<UserEntity::UserId, UserEntity>> UserEntity::from_user_lis
     std::vector<std::pair<UserEntity::UserId, UserEntity>> users;
 
     for(auto user : response["data"]) {
-        users.emplace_back(user.get_string("id"), UserEntity::from_json(user.dump()));
+        users.push_back(std::make_pair(user["id"], UserEntity::from_json(user.dump())));
     }
 
     return users;

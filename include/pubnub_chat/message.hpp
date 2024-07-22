@@ -32,6 +32,7 @@ namespace Pubnub
     {
         public:
             PN_CHAT_EXPORT Message(const Message& other);
+            PN_CHAT_EXPORT Message& operator=(const Message& other);
             PN_CHAT_EXPORT ~Message();
 
             PN_CHAT_EXPORT Pubnub::String timetoken() const;
