@@ -17,8 +17,7 @@ MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_p
     chat_service(chat_service)
 {}
 
-String MembershipService::get_membership_custom_data(String user_id, String channel_id)
-{
+String MembershipService::get_membership_custom_data(const String& user_id, const String& channel_id) const {
     auto maybe_membership = this->entity_repository->get_membership_entities().get(std::pair<String, String>(user_id, channel_id));
 
     if (!maybe_membership.has_value()) 
@@ -29,8 +28,7 @@ String MembershipService::get_membership_custom_data(String user_id, String chan
     return maybe_membership.value().custom_field;
 }
 
-std::vector<Membership> MembershipService::get_channel_members(String channel_id, int limit, String start_timetoken, String end_timetoken)
-{
+std::vector<Membership> MembershipService::get_channel_members(const String& channel_id, int limit, const String& start_timetoken, const String& end_timetoken) const {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, start_timetoken, end_timetoken] {
@@ -68,8 +66,7 @@ std::vector<Membership> MembershipService::get_channel_members(String channel_id
     return memberships;
 }
 
-std::vector<Membership> MembershipService::get_user_memberships(String user_id, int limit, String start_timetoken, String end_timetoken)
-{
+std::vector<Membership> MembershipService::get_user_memberships(const String& user_id, int limit, const String& start_timetoken, const String& end_timetoken) const {
     String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
 
     auto get_memberships_response = [this, user_id, include_string, limit, start_timetoken, end_timetoken] {
@@ -108,8 +105,7 @@ std::vector<Membership> MembershipService::get_user_memberships(String user_id, 
     return memberships;
 }
 
-Membership MembershipService::invite_to_channel(String channel_id, User user)
-{
+Membership MembershipService::invite_to_channel(const String& channel_id, const User& user) const {
     auto chat_service_shared = chat_service.lock();
 
     Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
@@ -147,7 +143,7 @@ Membership MembershipService::invite_to_channel(String channel_id, User user)
     return membership_object;
 }
 
-std::vector<Membership> MembershipService::invite_multiple_to_channel(String channel_id, std::vector<User> users)
+std::vector<Membership> MembershipService::invite_multiple_to_channel(const String& channel_id, const std::vector<User>& users)
 {
     auto chat_service_shared = chat_service.lock();
 
@@ -197,8 +193,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(String cha
     return invitees_memberships;
 }
 
-Membership MembershipService::update(User user, Channel channel, String custom_object_json)
-{
+Membership MembershipService::update(const User& user, const Channel& channel, const String& custom_object_json) const {
     String custom_object_json_string;
     custom_object_json.empty() ? custom_object_json_string = "{}" : custom_object_json_string = custom_object_json;
 
@@ -219,8 +214,7 @@ Membership MembershipService::update(User user, Channel channel, String custom_o
     return create_membership_object(user, channel, create_domain_membership(custom_object_json_string));
 }
 
-String MembershipService::last_read_message_timetoken(Membership membership)
-{
+String MembershipService::last_read_message_timetoken(const Membership& membership) const {
     String custom_data = membership.custom_data();
     if(custom_data.empty())
     {
@@ -237,8 +231,7 @@ String MembershipService::last_read_message_timetoken(Membership membership)
     return String();
 }
 
-void MembershipService::set_last_read_message_timetoken(Membership membership, String timetoken)
-{
+void MembershipService::set_last_read_message_timetoken(const Membership& membership, const String& timetoken) const {
     String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
 
     json custom_data_json = json::parse(custom_data);
@@ -257,16 +250,14 @@ void MembershipService::set_last_read_message_timetoken(Membership membership, S
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
 }
 
-int MembershipService::get_unread_messages_count_one_channel(Membership membership)
-{
+int MembershipService::get_unread_messages_count_one_channel(const Membership& membership) const {
     auto pubnub_handle = pubnub->lock();
     auto message_counts_map =  pubnub_handle->message_counts({membership.channel.channel_id()}, {this->last_read_message_timetoken(membership)});
 
     return message_counts_map[membership.channel.channel_id()];
 }
 
-std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(Pubnub::String start_timetoken, Pubnub::String end_timetoken, Pubnub::String filter, int limit)
-{
+std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter, int limit) const {
     auto chat_service_shared = chat_service.lock();
     std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> return_tuples;
 
@@ -310,7 +301,7 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
     return return_tuples;
 }
 
-void MembershipService::stream_updates_on(std::vector<Membership> memberships, std::function<void(Membership)> membership_callback)
+void MembershipService::stream_updates_on(const std::vector<Membership>& memberships, std::function<void(const Membership&)> membership_callback)
 {
     if(memberships.empty())
     {
@@ -335,15 +326,13 @@ void MembershipService::stream_updates_on(std::vector<Membership> memberships, s
     }
 }
 
-Membership MembershipService::create_presentation_object(User user, Channel channel)
-{
+Membership MembershipService::create_presentation_object(const User& user, const Channel& channel) const {
     auto chat_service_shared = chat_service.lock();
 
     return Membership(user, channel, chat_service_shared, shared_from_this());
 }
 
-Membership MembershipService::create_membership_object(User user, Channel channel, MembershipEntity membership_entity)
-{
+Membership MembershipService::create_membership_object(const User& user, const Channel& channel, const MembershipEntity& membership_entity) const {
     if (auto chat = this->chat_service.lock()) {
         this->entity_repository
             ->get_membership_entities()
@@ -355,8 +344,7 @@ Membership MembershipService::create_membership_object(User user, Channel channe
     throw std::runtime_error("Can't create membership, chat service pointer is invalid");
 }
 
-MembershipEntity MembershipService::create_domain_membership(String custom_object_json)
-{
+MembershipEntity MembershipService::create_domain_membership(const String& custom_object_json) const {
     MembershipEntity new_membership_entity;
     new_membership_entity.custom_field = custom_object_json;
     return new_membership_entity;
