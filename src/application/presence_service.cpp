@@ -1,4 +1,5 @@
 #include "presence_service.hpp"
+#include "domain/presence.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -13,8 +14,7 @@ PresenceService::PresenceService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<E
     chat_service(chat_service)
 {}
 
-std::vector<Pubnub::String> PresenceService::who_is_present(Pubnub::String channel_id)
-{
+std::vector<Pubnub::String> PresenceService::who_is_present(const Pubnub::String& channel_id) const {
     auto here_now_response = [this, channel_id] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->here_now(channel_id);
@@ -27,20 +27,15 @@ std::vector<Pubnub::String> PresenceService::who_is_present(Pubnub::String chann
         throw std::runtime_error("can't get who is present, response is incorrect");
     }
 
-    json uuids_array_json = response_json["uuids"];
-
-    std::vector<String> user_ids;
-   
-    for (json::iterator it = uuids_array_json.begin(); it != uuids_array_json.end(); ++it) 
+    if (response_json["uuids"].is_null())
     {
-        user_ids.push_back(static_cast<String>(*it));
+        return {};
     }
     
-    return user_ids;
+    return Presence::users_from_response(response_json);
 }
 
-std::vector<String> PresenceService::where_present(String user_id)
-{
+std::vector<String> PresenceService::where_present(const String& user_id) const {
     auto where_now_response = [this, user_id] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->where_now(user_id);
@@ -53,21 +48,20 @@ std::vector<String> PresenceService::where_present(String user_id)
         throw std::runtime_error("can't get where present, response is incorrect");
     }
 
-    json response_payload_json = response_json["payload"];
-    json channels_array_json = response_payload_json["channels"];
-
-    std::vector<String> channel_ids;
-   
-    for (json::iterator it = channels_array_json.begin(); it != channels_array_json.end(); ++it) 
+    if(response_json["payload"].is_null())
     {
-        channel_ids.push_back(static_cast<String>(*it));
+        throw std::runtime_error("can't get where present, payload is incorrect");
     }
-    
-    return channel_ids;
+
+    if(response_json["payload"]["channels"].is_null())
+    {
+        return {};
+    }
+
+    return Presence::channels_from_response(response_json);
 }
 
-bool PresenceService::is_present(Pubnub::String user_id, Pubnub::String channel_id)
-{
+bool PresenceService::is_present(const Pubnub::String& user_id, const Pubnub::String& channel_id) const {
     std::vector<String> channels = this->where_present(user_id);
     //TODO: we should us std::count here, but it didn't work
     int count = 0;
@@ -83,7 +77,7 @@ bool PresenceService::is_present(Pubnub::String user_id, Pubnub::String channel_
     return count > 0;
 }
 
-void PresenceService::stream_presence(Pubnub::String channel_id, std::function<void(std::vector<Pubnub::String>)> presence_callback)
+void PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback)
 {
     //Send callback with currently present users
     std::vector<Pubnub::String> current_users = who_is_present(channel_id);

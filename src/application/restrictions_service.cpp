@@ -16,7 +16,7 @@ RestrictionsService::RestrictionsService(ThreadSafePtr<PubNub> pubnub, std::shar
     chat_service(chat_service)
 {}
 
-void RestrictionsService::set_restrictions(String user_id, String channel_id, Restriction restrictions)
+void RestrictionsService::set_restrictions(const String& user_id, const String& channel_id, Restriction restrictions)
 {
     if(user_id.empty())
     {
@@ -58,8 +58,7 @@ void RestrictionsService::set_restrictions(String user_id, String channel_id, Re
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
 }
 
-Restriction RestrictionsService::get_user_restrictions(String user_id, String channel_id, int limit, String start, String end)
-{
+Restriction RestrictionsService::get_user_restrictions(const String& user_id, const String& channel_id, int limit, const String& start, const String& end) const {
     auto get_restrictions_response = [this, user_id, limit, start, end] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, start, end);
@@ -96,8 +95,7 @@ Restriction RestrictionsService::get_user_restrictions(String user_id, String ch
    return FinalRestrictionsData;
 }
 
-Restriction RestrictionsService::get_channel_restrictions(String user_id, String channel_id, int limit, String start, String end)
-{
+Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, int limit, const String& start, const String& end) const {
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 
     auto get_restrictions_response = [this, full_channel_id, limit, start, end] {
@@ -136,15 +134,14 @@ Restriction RestrictionsService::get_channel_restrictions(String user_id, String
    return FinalRestrictionsData;
 }
 
-void RestrictionsService::report_user(String user_id, String reason)
-{
+void RestrictionsService::report_user(const String& user_id, const String& reason) const {
     String payload = String("{\"reason\": \"") + reason + String("\", \"reportedUserId\": \"") + user_id + String("\"}");
     
     auto chat_service_shared = chat_service.lock();
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload);
 }
 
-void RestrictionsService::report_message(Message message, String reason)
+void RestrictionsService::report_message(const Message& message, const String& reason) const
 {
     Json payload_json = json::object();
     payload_json.insert_or_update("text", message.text().c_str());

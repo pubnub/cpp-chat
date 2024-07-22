@@ -22,11 +22,11 @@ class RestrictionsService : public std::enable_shared_from_this<RestrictionsServ
     public:
         RestrictionsService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
 
-        void set_restrictions(Pubnub::String user_id, Pubnub::String channel_id, Pubnub::Restriction restrictions);
-        Pubnub::Restriction get_user_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
-        Pubnub::Restriction get_channel_restrictions(Pubnub::String user_id, Pubnub::String channel_id, int limit, Pubnub::String start, Pubnub::String end);
-        void report_user(Pubnub::String user_id, Pubnub::String reason);
-        void report_message(Pubnub::Message message, Pubnub::String reason);
+        void set_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
+        Pubnub::Restriction get_user_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+        Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+        void report_user(const Pubnub::String& user_id, const Pubnub::String& reason) const;
+        void report_message(const Pubnub::Message& message, const Pubnub::String& reason) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;
