@@ -17,8 +17,7 @@ ChatService::ChatService(ThreadSafePtr<PubNub> pubnub):
 pubnub(pubnub)
 {}
 
-void ChatService::init_services()
-{
+void ChatService::init_services() {
     channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this());
     user_service = std::make_shared<UserService>(pubnub, weak_from_this());
     message_service = std::make_shared<MessageService>(pubnub, weak_from_this());
@@ -41,13 +40,11 @@ void ChatService::init_services()
 #endif
 }
 
-ThreadSafePtr<PubNub> ChatService::create_pubnub(String publish_key, String subscribe_key, String user_id)
-{
+ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, const String& subscribe_key, const String& user_id) {
     return std::make_shared<Mutex<PubNub>>(publish_key, subscribe_key, user_id);
 }
 
-void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, String channel_id, String payload)
-{
+void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload) const {
     //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
 	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
@@ -58,8 +55,7 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, String
     pubnub_handle->publish(channel_id, event_message);
 }
 
-void ChatService::listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback)
-{
+void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");

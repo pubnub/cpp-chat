@@ -3,7 +3,7 @@
 
 using namespace Pubnub;
 
-MessageDraft::MessageDraft(const Channel& channel, const MessageDraftConfig& draft_config, std::shared_ptr<MessageService> message_service) :
+MessageDraft::MessageDraft(const Channel& channel, const MessageDraftConfig& draft_config, std::shared_ptr<const MessageService> message_service) :
 channel(channel),
 draft_config(draft_config),
 message_service(message_service)

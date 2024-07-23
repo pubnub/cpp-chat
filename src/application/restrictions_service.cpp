@@ -10,14 +10,12 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-RestrictionsService::RestrictionsService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
+RestrictionsService::RestrictionsService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository),
     chat_service(chat_service)
 {}
 
-void RestrictionsService::set_restrictions(const String& user_id, const String& channel_id, Restriction restrictions)
-{
+void RestrictionsService::set_restrictions(const String& user_id, const String& channel_id, const Restriction& restrictions) const {
     if(user_id.empty())
     {
         throw std::invalid_argument("Failed to set restrictions, user_id is empty");

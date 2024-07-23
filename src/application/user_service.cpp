@@ -5,13 +5,13 @@
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
 #include "callback_service.hpp"
+#include <memory>
 
 using namespace Pubnub;
 using json = nlohmann::json;
 
-UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
+UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository),
     chat_service(chat_service)
 {}
 
@@ -154,7 +154,7 @@ User UserService::create_user_object(std::pair<String, UserDAO> user_data) const
             chat->presence_service,
             chat->restrictions_service,
             chat->membership_service,
-            std::make_unique(user_data.second)
+            std::make_unique<UserDAO>(user_data.second)
        );
     }
 

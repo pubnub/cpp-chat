@@ -44,7 +44,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
 
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::weak_ptr<ChatService> chat_service;
+        std::weak_ptr<const ChatService> chat_service;
 
         Pubnub::ChatMessageData presentation_data_from_domain(MessageEntity& message_entity);
 };

@@ -31,7 +31,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void remove_quote();
 
         private:
-            PN_CHAT_EXPORT MessageDraft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& draft_config, std::shared_ptr<MessageService> message_service);
+            PN_CHAT_EXPORT MessageDraft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& draft_config, std::shared_ptr<const MessageService> message_service);
 
         
             Pubnub::String previous_value;
@@ -40,7 +40,7 @@ namespace Pubnub
             std::vector<TextLink> text_links;
             Option<Pubnub::Message> quoted_message_internal;
     
-            std::shared_ptr<MessageService> message_service;
+            std::shared_ptr<const MessageService> message_service;
 
             friend class ::MessageService;
     };

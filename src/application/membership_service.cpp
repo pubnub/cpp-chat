@@ -1,5 +1,6 @@
 #include "membership_service.hpp"
 #include "application/chat_service.hpp"
+#include "application/dao/user_dao.hpp"
 #include "application/user_service.hpp"
 #include "application/channel_service.hpp"
 #include "chat_helpers.hpp"
@@ -7,28 +8,17 @@
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
 #include "callback_service.hpp"
+#include "application/dao/channel_dao.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
 
-MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
+MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<const ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository),
     chat_service(chat_service)
 {}
 
-String MembershipService::get_membership_custom_data(const String& user_id, const String& channel_id) const {
-    auto maybe_membership = this->entity_repository->get_membership_entities().get(std::pair<String, String>(user_id, channel_id));
-
-    if (!maybe_membership.has_value()) 
-    {
-        throw std::invalid_argument("Failed to get membership data, there is no memebrship with these user and channel ids");
-    }
-
-    return maybe_membership.value().custom_field;
-}
-
-std::vector<Membership> MembershipService::get_channel_members(const String& channel_id, int limit, const String& start_timetoken, const String& end_timetoken) const {
+std::vector<Membership> MembershipService::get_channel_members(const String& channel_id, const ChannelDAO& channel_data, int limit, const String& start_timetoken, const String& end_timetoken) const {
     String include_string = "totalCount,customFields,channelFields,customChannelFields";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, start_timetoken, end_timetoken] {
@@ -47,17 +37,15 @@ std::vector<Membership> MembershipService::get_channel_members(const String& cha
 
     auto chat_service_shared = chat_service.lock();
 
+    // TODO: domain
     std::vector<Membership> memberships;
     for (auto element : users_array_json)
     {
-        //Create user entity, as this user maight be not in the repository yet. If it already is there, it will be updated
         UserEntity user_entity = UserEntity::from_json(element["uuid"].dump());
         String user_id = String(element["uuid"]["id"]);
-        entity_repository->get_user_entities().update_or_insert(user_id, user_entity);
-
-        User user = chat_service_shared->user_service->create_presentation_object(user_id);
+        User user = chat_service_shared->user_service->create_user_object({user_id, user_entity});
         //We don't need to add channel to entity repository, as this whole function is called from a channel object - it has to already exist
-        Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+        Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
         
         Membership membership = create_presentation_object(user, channel);
         memberships.push_back(membership);
@@ -66,7 +54,7 @@ std::vector<Membership> MembershipService::get_channel_members(const String& cha
     return memberships;
 }
 
-std::vector<Membership> MembershipService::get_user_memberships(const String& user_id, int limit, const String& start_timetoken, const String& end_timetoken) const {
+std::vector<Membership> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, int limit, const String& start_timetoken, const String& end_timetoken) const {
     String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
 
     auto get_memberships_response = [this, user_id, include_string, limit, start_timetoken, end_timetoken] {
@@ -91,12 +79,11 @@ std::vector<Membership> MembershipService::get_user_memberships(const String& us
         //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
         ChannelEntity channel_entity = ChannelEntity::from_json(String(element["channel"].dump()));
         String channel_id = String(element["channel"]["id"]);
-        entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
 
-        Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+        Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_entity});
 
         //We don't need to add user to entity repository, as this whole function is called from a user object - it has to already exist
-        User user = chat_service_shared->user_service->create_presentation_object(user_id);
+        User user = chat_service_shared->user_service->create_user_object({user_id, user_data.to_entity()});
 
         Membership membership = create_presentation_object(user, channel);
         memberships.push_back(membership);
@@ -105,10 +92,10 @@ std::vector<Membership> MembershipService::get_user_memberships(const String& us
     return memberships;
 }
 
-Membership MembershipService::invite_to_channel(const String& channel_id, const User& user) const {
+Membership MembershipService::invite_to_channel(const String& channel_id, const ChannelDAO& channel_data, const User& user) const {
     auto chat_service_shared = chat_service.lock();
 
-    Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+    Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
 
     if(channel.channel_data().type == String("public"))
     {
@@ -136,18 +123,17 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
 
     //This channel is updated, so we need to update it in entity repository as well
     ChannelEntity channel_entity = ChannelEntity::from_json(channel_data_string);
-    entity_repository->get_channel_entities().update_or_insert(channel_id, channel_entity);
     
     Membership membership_object = create_presentation_object(user, channel);
     membership_object.set_last_read_message_timetoken(get_now_timetoken());
     return membership_object;
 }
 
-std::vector<Membership> MembershipService::invite_multiple_to_channel(const String& channel_id, const std::vector<User>& users)
+std::vector<Membership> MembershipService::invite_multiple_to_channel(const String& channel_id, const ChannelDAO& channel_data, const std::vector<User>& users) const
 {
     auto chat_service_shared = chat_service.lock();
 
-    Channel channel = chat_service_shared->channel_service->create_presentation_object(channel_id);
+    Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
 
     if(channel.channel_data().type == String("public"))
     {
@@ -172,6 +158,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
         return pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
     }();
     
+    // TODO: domain...
     std::vector<Membership> invitees_memberships;
 
     json memberships_response_json = json::parse(set_members_response);

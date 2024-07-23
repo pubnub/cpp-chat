@@ -194,7 +194,7 @@ Message MessageService::create_message_object(std::pair<String, MessageEntity> m
                 shared_from_this(),
                 chat->channel_service,
                 chat->restrictions_service,
-                MessageDAO(message_data.second)
+                std::make_unique<MessageDAO>(message_data.second)
         );
     }
 

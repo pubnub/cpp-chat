@@ -9,11 +9,11 @@
 #include "message_service.hpp"
 
 struct EntityServicesBundle {
-    std::weak_ptr<ChannelService> channel_service;
-    std::weak_ptr<UserService> user_service;
-    std::weak_ptr<ChatService> chat_service;
-    std::weak_ptr<MessageService> message_service;
-    std::weak_ptr<MembershipService> membership_service;
+    std::weak_ptr<const ChannelService> channel_service;
+    std::weak_ptr<const UserService> user_service;
+    std::weak_ptr<const ChatService> chat_service;
+    std::weak_ptr<const MessageService> message_service;
+    std::weak_ptr<const MembershipService> membership_service;
 };
 
 #endif // PN_CHAT_BUNDLES_HPP

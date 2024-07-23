@@ -20,12 +20,12 @@ class ChannelDAO {
         const ChannelEntity& get_entity() const;
 
         // TODO: chrono...
-        void start_typing(int miliseconds);
-        void stop_typing();
-        void start_typing_indicator(const Pubnub::String& user_id, int miliseconds, std::function<void(const std::vector<Pubnub::String>&)> on_timeout);
-        void stop_typing_indicator(const Pubnub::String& user_id);
+        void start_typing(int miliseconds) const;
+        void stop_typing() const;
+        void start_typing_indicator(const Pubnub::String& user_id, int miliseconds, std::function<void(const std::vector<Pubnub::String>&)> on_timeout) const;
+        void stop_typing_indicator(const Pubnub::String& user_id) const;
         std::vector<Pubnub::String> get_typing_indicators() const;
-        void remove_typing_indicator(const Pubnub::String& user_id);
+        void remove_typing_indicator(const Pubnub::String& user_id) const;
         bool is_typing_sent() const;
         bool contains_typing_indicator(const Pubnub::String& user_id) const;
     private:
@@ -33,8 +33,8 @@ class ChannelDAO {
 
         const ChannelEntity channel_entity;
         mutable Mutex<Typing> typing;
-        Timer typing_timer;
-        std::map<Pubnub::String, Timer, Pubnub::StringComparer> indicators_timers;
+        mutable Timer typing_timer;
+        mutable std::map<Pubnub::String, Timer, Pubnub::StringComparer> indicators_timers;
 };
 
 #endif // PN_CHAT_CHANNEL_DAO_HPP

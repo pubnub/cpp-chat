@@ -22,17 +22,17 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         ChatService(ThreadSafePtr<PubNub> pubnub);
         void init_services();
 
-        static ThreadSafePtr<PubNub> create_pubnub(Pubnub::String publish_key, Pubnub::String subscribe_key, Pubnub::String user_id);
+        static ThreadSafePtr<PubNub> create_pubnub(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id);
 
-        void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
-        void listen_for_events(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback);
+        void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
+        void listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const;
 
-        std::shared_ptr<ChannelService> channel_service;
-        std::shared_ptr<UserService> user_service;
-        std::shared_ptr<MessageService> message_service;
-        std::shared_ptr<MembershipService> membership_service;
-        std::shared_ptr<PresenceService> presence_service;
-        std::shared_ptr<RestrictionsService> restrictions_service;
+        std::shared_ptr<const ChannelService> channel_service;
+        std::shared_ptr<const UserService> user_service;
+        std::shared_ptr<const MessageService> message_service;
+        std::shared_ptr<const MembershipService> membership_service;
+        std::shared_ptr<const PresenceService> presence_service;
+        std::shared_ptr<const RestrictionsService> restrictions_service;
 #ifndef PN_CHAT_C_ABI
         std::shared_ptr<CallbackService> callback_service;
 #endif

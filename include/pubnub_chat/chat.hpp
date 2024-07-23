@@ -57,49 +57,49 @@ namespace Pubnub {
 
             /* CHANNELS */
 
-            PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(Pubnub::String channel_id, ChatChannelData channel_data);
-            PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(Pubnub::User user, Pubnub::String channel_id, ChatChannelData channel_data, Pubnub::String membership_data = "");
-            PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(std::vector<Pubnub::User> users, Pubnub::String channel_id, ChatChannelData channel_data, Pubnub::String membership_data = "");
-            PN_CHAT_EXPORT Channel get_channel(Pubnub::String channel_id);
-            PN_CHAT_EXPORT std::vector<Channel> get_channels(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
-            PN_CHAT_EXPORT Pubnub::Channel update_channel(Pubnub::String channel_id, ChatChannelData channel_data);
-            PN_CHAT_EXPORT void delete_channel(Pubnub::String channel_id);
-            PN_CHAT_EXPORT void pin_message_to_channel(Pubnub::Message message, Pubnub::Channel channel);
-            PN_CHAT_EXPORT void unpin_message_from_channel(Pubnub::Channel channel);
+            PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
+            PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
+            PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
+            PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
+            PN_CHAT_EXPORT std::vector<Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
+            PN_CHAT_EXPORT void delete_channel(const Pubnub::String& channel_id) const;
+            PN_CHAT_EXPORT void pin_message_to_channel(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
+            PN_CHAT_EXPORT void unpin_message_from_channel(const Pubnub::Channel& channel) const;
 
             /* USERS */
 
-            PN_CHAT_EXPORT Pubnub::User create_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
-            PN_CHAT_EXPORT Pubnub::User get_user(Pubnub::String user_id);
-            PN_CHAT_EXPORT std::vector<User> get_users(Pubnub::String include, int limit, Pubnub::String start, Pubnub::String end);
-            PN_CHAT_EXPORT Pubnub::User update_user(Pubnub::String user_id, Pubnub::ChatUserData user_data);
-            PN_CHAT_EXPORT void delete_user(Pubnub::String user_id);
+            PN_CHAT_EXPORT Pubnub::User create_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
+            PN_CHAT_EXPORT Pubnub::User get_user(const Pubnub::String& user_id) const;
+            PN_CHAT_EXPORT std::vector<User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT Pubnub::User update_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
+            PN_CHAT_EXPORT void delete_user(const Pubnub::String& user_id) const;
 
             /* PRESENCE */
 
-            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(Pubnub::String user_id);
-            PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(Pubnub::String channel_id);
-            PN_CHAT_EXPORT bool is_present(Pubnub::String user_id, Pubnub::String channel_id);
+            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(const Pubnub::String& user_id) const;
+            PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(const Pubnub::String& channel_id) const;
+            PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id, const Pubnub::String& channel_id) const;
 
             /* MODERATION */
 
-            PN_CHAT_EXPORT void set_restrictions(Pubnub::String user_id, Pubnub::String channel_id, Pubnub::Restriction restrictions);
-            PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, Pubnub::String channel_id, Pubnub::String payload);
-            PN_CHAT_EXPORT void listen_for_events(Pubnub::String channel_id, pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::String)> event_callback);
+            PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
+            PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
+            PN_CHAT_EXPORT void listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const;
 
             /* MESSAGES */
 
-            PN_CHAT_EXPORT void forward_message(Pubnub::Message message, Pubnub::Channel channel);
-            PN_CHAT_EXPORT std::vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(Pubnub::String start_timetoken, Pubnub::String end_timetoken, Pubnub::String filter = "", int limit = 0);
+            PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
+            PN_CHAT_EXPORT std::vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0);
 
         private:
-            std::shared_ptr<ChatService> chat_service;
-            std::shared_ptr<ChannelService> channel_service;
-            std::shared_ptr<UserService> user_service;
-            std::shared_ptr<PresenceService> presence_service;
-            std::shared_ptr<RestrictionsService> restrictions_service;
-            std::shared_ptr<MessageService> message_service;
-            std::shared_ptr<MembershipService> membership_service;
+            std::shared_ptr<const ChatService> chat_service;
+            std::shared_ptr<const ChannelService> channel_service;
+            std::shared_ptr<const UserService> user_service;
+            std::shared_ptr<const PresenceService> presence_service;
+            std::shared_ptr<const RestrictionsService> restrictions_service;
+            std::shared_ptr<const MessageService> message_service;
+            std::shared_ptr<const MembershipService> membership_service;
 #ifndef PN_CHAT_C_ABI
             std::shared_ptr<CallbackService> callback_service;
 #else

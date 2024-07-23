@@ -1,6 +1,8 @@
 #ifndef PN_CHAT_MEMBERSHIP_SERVICE_HPP
 #define PN_CHAT_MEMBERSHIP_SERVICE_HPP
 
+#include "application/dao/channel_dao.hpp"
+#include "application/dao/user_dao.hpp"
 #include "domain/membership_entity.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
@@ -17,13 +19,13 @@ class ChatService;
 class MembershipService : public std::enable_shared_from_this<MembershipService>
 {
     public:
-        MembershipService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
+        MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<const ChatService> chat_service);
 
         Pubnub::String get_membership_custom_data(const Pubnub::String& user_id, const Pubnub::String& channel_id) const;
-        std::vector<Pubnub::Membership> get_channel_members(const Pubnub::String& channel_id, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
-        std::vector<Pubnub::Membership> get_user_memberships(const Pubnub::String& user_id, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
-        Pubnub::Membership invite_to_channel(const Pubnub::String& channel_id, const Pubnub::User& user) const;
-        std::vector<Pubnub::Membership> invite_multiple_to_channel(const Pubnub::String& channel_id, const std::vector<Pubnub::User>& users) const;
+        std::vector<Pubnub::Membership> get_channel_members(const Pubnub::String& channel_id, const ChannelDAO& channel_data, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+        std::vector<Pubnub::Membership> get_user_memberships(const Pubnub::String& user_id, const UserDAO& user_data, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+        Pubnub::Membership invite_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::User& user) const;
+        std::vector<Pubnub::Membership> invite_multiple_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const std::vector<Pubnub::User>& users) const;
     
         Pubnub::Membership update(const Pubnub::User& user, const Pubnub::Channel& channel, const Pubnub::String& custom_object_json) const;
         Pubnub::String last_read_message_timetoken(const Pubnub::Membership& membership) const;
@@ -40,8 +42,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
 
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::shared_ptr<EntityRepository> entity_repository;
-        std::weak_ptr<ChatService> chat_service;
+        std::weak_ptr<const ChatService> chat_service;
 
         MembershipEntity create_domain_membership(const Pubnub::String& custom_object_json) const;
 

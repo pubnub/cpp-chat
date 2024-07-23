@@ -60,7 +60,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::weak_ptr<ChatService> chat_service;
+        std::weak_ptr<const ChatService> chat_service;
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
 

@@ -21,7 +21,7 @@ class CallbackService {
     public:
         CallbackService(
                 EntityServicesBundle entity_bundle,
-                std::weak_ptr<PresenceService> channel_service,
+                std::weak_ptr<const PresenceService> channel_service,
                 ThreadSafePtr<PubNub> pubnub,
                 milliseconds wait_interval = milliseconds(PUBNUB_WAIT_INTERVAL_MS)
         );
@@ -74,12 +74,12 @@ class CallbackService {
 
         CallbacksRepository callbacks;
         ThreadSafePtr<PubNub> pubnub;
-        std::weak_ptr<ChannelService> channel_service;
-        std::weak_ptr<UserService> user_service;
-        std::weak_ptr<ChatService> chat_service;
-        std::weak_ptr<MessageService> message_service;
-        std::weak_ptr<MembershipService> membership_service;
-        std::weak_ptr<PresenceService> presence_service;
+        std::weak_ptr<const ChannelService> channel_service;
+        std::weak_ptr<const UserService> user_service;
+        std::weak_ptr<const ChatService> chat_service;
+        std::weak_ptr<const MessageService> message_service;
+        std::weak_ptr<const MembershipService> membership_service;
+        std::weak_ptr<const PresenceService> presence_service;
         std::thread callback_thread;
         std::atomic<bool> thread_run_flag;
 };

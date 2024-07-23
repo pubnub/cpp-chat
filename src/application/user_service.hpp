@@ -17,7 +17,7 @@ struct UserEntity;
 class UserService : public std::enable_shared_from_this<UserService>
 {
     public:
-        UserService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service);
+        UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
 
         Pubnub::User get_current_user() const;
 
@@ -32,8 +32,7 @@ class UserService : public std::enable_shared_from_this<UserService>
 
     private:
         ThreadSafePtr<PubNub> pubnub;
-        std::shared_ptr<EntityRepository> entity_repository;
-        std::weak_ptr<ChatService> chat_service;
+        std::weak_ptr<const ChatService> chat_service;
 
         friend class ::MembershipService;
 };

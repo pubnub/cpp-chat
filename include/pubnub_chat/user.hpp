@@ -56,20 +56,20 @@ namespace Pubnub
         private:
             PN_CHAT_EXPORT User(
                     Pubnub::String user_id,
-                    std::shared_ptr<ChatService> chat_service,
-                    std::shared_ptr<UserService> user_service,
-                    std::shared_ptr<PresenceService> presence_service,
-                    std::shared_ptr<RestrictionsService> restrictions_service,
-                    std::shared_ptr<MembershipService> membership_service,
+                    std::shared_ptr<const ChatService> chat_service,
+                    std::shared_ptr<const UserService> user_service,
+                    std::shared_ptr<const PresenceService> presence_service,
+                    std::shared_ptr<const RestrictionsService> restrictions_service,
+                    std::shared_ptr<const MembershipService> membership_service,
                     std::unique_ptr<UserDAO> data);
             
             Pubnub::String user_id_internal;
             std::unique_ptr<UserDAO> data;
-            std::shared_ptr<UserService> user_service;
-            std::shared_ptr<ChatService> chat_service;
-            std::shared_ptr<PresenceService> presence_service;
-            std::shared_ptr<RestrictionsService> restrictions_service;
-            std::shared_ptr<MembershipService> membership_service;
+            std::shared_ptr<const UserService> user_service;
+            std::shared_ptr<const ChatService> chat_service;
+            std::shared_ptr<const PresenceService> presence_service;
+            std::shared_ptr<const RestrictionsService> restrictions_service;
+            std::shared_ptr<const MembershipService> membership_service;
 
         friend class ::UserService;
     };

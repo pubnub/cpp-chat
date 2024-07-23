@@ -8,9 +8,8 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-PresenceService::PresenceService(ThreadSafePtr<PubNub> pubnub, std::shared_ptr<EntityRepository> entity_repository, std::weak_ptr<ChatService> chat_service):
+PresenceService::PresenceService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service):
     pubnub(pubnub),
-    entity_repository(entity_repository),
     chat_service(chat_service)
 {}
 
@@ -77,7 +76,7 @@ bool PresenceService::is_present(const Pubnub::String& user_id, const Pubnub::St
     return count > 0;
 }
 
-void PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback)
+void PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const
 {
     //Send callback with currently present users
     std::vector<Pubnub::String> current_users = who_is_present(channel_id);

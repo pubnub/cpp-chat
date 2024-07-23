@@ -57,19 +57,19 @@ namespace Pubnub
         private:
             PN_CHAT_EXPORT Message(
                     Pubnub::String timetoken,
-                    std::shared_ptr<ChatService> chat_service,
-                    std::shared_ptr<MessageService> message_service,
-                    std::shared_ptr<ChannelService> channel_service,
-                    std::shared_ptr<RestrictionsService> restrictions_service,
+                    std::shared_ptr<const ChatService> chat_service,
+                    std::shared_ptr<const MessageService> message_service,
+                    std::shared_ptr<const ChannelService> channel_service,
+                    std::shared_ptr<const RestrictionsService> restrictions_service,
                     std::unique_ptr<MessageDAO> data
                 );
 
             Pubnub::String timetoken_internal;
             std::unique_ptr<MessageDAO> data;
-            std::shared_ptr<ChatService> chat_service;
-            std::shared_ptr<MessageService> message_service;
-            std::shared_ptr<ChannelService> channel_service;
-            std::shared_ptr<RestrictionsService> restrictions_service;
+            std::shared_ptr<const ChatService> chat_service;
+            std::shared_ptr<const MessageService> message_service;
+            std::shared_ptr<const ChannelService> channel_service;
+            std::shared_ptr<const RestrictionsService> restrictions_service;
 
         friend class ::MessageService;
     };
