@@ -321,10 +321,6 @@ Membership MembershipService::create_presentation_object(const User& user, const
 
 Membership MembershipService::create_membership_object(const User& user, const Channel& channel, const MembershipEntity& membership_entity) const {
     if (auto chat = this->chat_service.lock()) {
-        this->entity_repository
-            ->get_membership_entities()
-            .update_or_insert(std::make_pair(user.user_id(), channel.channel_id()), membership_entity);
-
         return Membership(user, channel, chat, shared_from_this());
     }
 

@@ -1,14 +1,16 @@
 #include "membership.hpp"
 #include "message.hpp"
 #include "application/membership_service.hpp"
+#include "application/dao/membership_dao.hpp"
 
 using namespace Pubnub;
 
-Membership::Membership(User user, Channel channel, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MembershipService> membership_service) :
+Membership::Membership(User user, Channel channel, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MembershipService> membership_service, std::unique_ptr<MembershipDAO> data) :
 user(user),
 channel(channel),
 chat_service(chat_service),
-membership_service(membership_service)
+membership_service(membership_service),
+data(std::move(data))
 {}
 
 String Membership::custom_data()

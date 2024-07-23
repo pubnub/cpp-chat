@@ -11,6 +11,7 @@
 
 class ChatService;
 class MembershipService;
+class MembershipDAO;
 
 namespace Pubnub
 {
@@ -34,10 +35,10 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Membership)> membership_callback);
 
         private:
-            Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MembershipService> membership_service);
+            Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MembershipService> membership_service, std::unique_ptr<MembershipDAO> data);
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const MembershipService> membership_service;
-
+            std::unique_ptr<MembershipDAO> data;
 
             friend class ::MembershipService;
     
