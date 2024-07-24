@@ -48,10 +48,12 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void stream_updates_on(const std::vector<Pubnub::String>& channel_ids, std::function<void(Pubnub::Channel)> channel_callback) const;
 
         /* THREADS */
-        Pubnub::String get_thread_id(Pubnub::Message message);
-        Pubnub::ThreadChannel create_thread_channel(Pubnub::Message message);
+        Pubnub::String get_thread_id(const Pubnub::Message& message);
+        Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message);
+        Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message);
 
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data) const;
+        Pubnub::ThreadChannel create_thread_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data, Pubnub::Message parent_message) const;
         Pubnub::Channel create_presentation_object(Pubnub::String channel_id, ChannelDAO channel_data);
 
         //TODO: Move this to config

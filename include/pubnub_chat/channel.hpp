@@ -76,7 +76,7 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig()) const;
 
-        private:
+        protected:
             PN_CHAT_EXPORT Channel(
                     Pubnub::String channel_id,
                     std::shared_ptr<const ChatService> chat_service,

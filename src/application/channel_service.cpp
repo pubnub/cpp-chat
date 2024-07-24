@@ -387,12 +387,12 @@ void ChannelService::stream_updates_on(const std::vector<Pubnub::String>& channe
 #endif // PN_CHAT_C_ABI
 }
 
-String ChannelService::get_thread_id(Message message)
+String ChannelService::get_thread_id(const Pubnub::Message& message)
 {
     return MESSAGE_THREAD_ID_PREFIX + "_" + message.message_data().channel_id + "_" + message.timetoken();
 }
 
-ThreadChannel ChannelService::create_thread_channel(Message message)
+ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& message)
 {
     if(string_starts_with(message.message_data().channel_id, MESSAGE_THREAD_ID_PREFIX))
     {
@@ -404,8 +404,52 @@ ThreadChannel ChannelService::create_thread_channel(Message message)
         throw std::invalid_argument("You cannot create threads on deleted messages");
     }
 
-    throw std::runtime_error("I will continue work here");
+    String thread_id = this->get_thread_id(message);
+    bool is_existing_thread = true;
 
+    try 
+    {
+        this->get_channel(thread_id);
+    }
+    catch (...)
+    {
+        //If there is error in getting channel it means that there is no such channel
+        is_existing_thread = false;
+    }
+
+    if(is_existing_thread)
+    {
+        throw std::runtime_error("Thread for this message already exists");
+    }
+
+    String thread_description = String("Thread on channel ") + message.message_data().channel_id + String(" with message timetoken ") + message.timetoken();
+
+    ChatChannelData thread_channel_data;
+    thread_channel_data.description = thread_description;
+    ChannelDAO channel_dao(thread_channel_data);
+
+    auto channel_entity = channel_dao.to_entity();
+
+    auto new_thread_channel = create_thread_channel_object({thread_id, channel_entity}, message);
+
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->set_channel_metadata(thread_id, channel_entity.get_channel_metadata_json_string(thread_id));
+        String message_action_value = String("{\"value\": \"}") + thread_id + String("\"}");
+        pubnub_handle->add_message_action(message.message_data().channel_id, message.timetoken(), "threadRootId", message_action_value);
+    }
+    //TODO:: this code is very complex here in JS CHAT. Check with Piotr if it does everything that it should do.
+
+    return new_thread_channel;
+
+}
+
+ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message)
+{
+    String thread_id = this->get_thread_id(message);
+
+    throw std::runtime_error("I will continue work here");
+    
 }
 
 Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> channel_data) const
@@ -423,5 +467,25 @@ Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> c
             );
     } else {
         throw std::runtime_error("Chat service is not available to create channel object");
+    }
+}
+
+ThreadChannel ChannelService::create_thread_channel_object(std::pair<String, ChannelEntity> channel_data, Pubnub::Message parent_message) const
+{
+    if (auto chat = this->chat_service.lock()) {
+        return ThreadChannel(
+                channel_data.first,
+                chat,
+                shared_from_this(),
+                chat->presence_service,
+                chat->restrictions_service,
+                chat->message_service,
+                chat->membership_service,
+                std::make_unique<ChannelDAO>(channel_data.second),
+                parent_message.message_data().channel_id,
+                parent_message
+            );
+    } else {
+        throw std::runtime_error("Chat service is not available to create thread channel object");
     }
 }
