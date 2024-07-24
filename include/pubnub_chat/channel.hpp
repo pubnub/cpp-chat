@@ -1,7 +1,6 @@
 #ifndef PN_CHAT_CHANNEL_HPP
 #define PN_CHAT_CHANNEL_HPP
 
-#include "application/dao/user_dao.hpp"
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
