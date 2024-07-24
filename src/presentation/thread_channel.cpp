@@ -19,3 +19,24 @@ Channel(channel_id, chat_service, channel_service, presence_service, restriction
 parent_channel_id(parent_channel_id),
 parent_message(parent_message)
 {}
+
+
+ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
+{
+    if(this == &other)
+    {
+        return *this;
+    }
+    this->channel_id_internal = other.channel_id_internal;
+    this->data = std::make_unique<::ChannelDAO>(other.data->to_channel_data());
+    this->channel_service = other.channel_service;
+    this->chat_service = other.chat_service;
+    this->presence_service = other.presence_service;
+    this->restrictions_service = other.restrictions_service;
+    this->message_service = other.message_service;
+    this->membership_service = other.membership_service;
+    this->parent_channel_id = other.parent_channel_id;
+    this->parent_message = other.parent_message;
+
+    return *this;
+};

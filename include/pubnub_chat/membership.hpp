@@ -26,6 +26,8 @@ namespace Pubnub
             PN_CHAT_EXPORT Membership(const Membership& other);
             PN_CHAT_EXPORT ~Membership();
 
+            PN_CHAT_EXPORT Pubnub::Membership& operator =(const Pubnub::Membership& other);
+
             PN_CHAT_EXPORT Pubnub::String custom_data() const;
 
             PN_CHAT_EXPORT Pubnub::Membership update(const Pubnub::String& custom_object_json) const;

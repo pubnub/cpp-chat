@@ -40,7 +40,7 @@ Channel::Channel(const Channel& other) :
     data(std::make_unique<ChannelDAO>(other.data->to_channel_data()))
 {}
 
-Pubnub::Channel& Pubnub::Channel::operator =(const Pubnub::Channel& other)
+Channel& Channel::operator =(const Channel& other)
 {
     if(this == &other)
     {
@@ -141,7 +141,7 @@ void Channel::stop_typing() const {
     this->channel_service->stop_typing(this->channel_id_internal, *this->data);
 }
 
-void Channel::get_typing(std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const {
+void Channel::get_typing(std::function<void(const std::vector<String>&)> typing_callback) const {
     this->channel_service->get_typing(this->channel_id_internal, *this->data, typing_callback);
 }
 
@@ -162,7 +162,7 @@ void Channel::stream_updates(std::function<void(const Channel&)> channel_callbac
 }
 
 void Channel::stream_updates_on(const std::vector<Channel>& channels, std::function<void(const Channel&)> channel_callback) const {
-    std::vector<Pubnub::String> channel_ids(channels.size());
+    std::vector<String> channel_ids(channels.size());
     std::transform(
             channels.begin(),
             channels.end(),

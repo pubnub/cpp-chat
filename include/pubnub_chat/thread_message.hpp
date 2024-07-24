@@ -12,9 +12,11 @@ namespace Pubnub
 
         private:
             PN_CHAT_EXPORT ThreadMessage(Pubnub::String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service,
-                                    std::shared_ptr<RestrictionsService> restrictions_service, Pubnub::String parent_channel_id);
+                                    std::shared_ptr<RestrictionsService> restrictions_service, std::unique_ptr<MessageDAO> data, Pubnub::String parent_channel_id);
 
             Pubnub::String parent_channel_id;
+
+            PN_CHAT_EXPORT ThreadMessage& operator=(const ThreadMessage& other);
       
     };
 };

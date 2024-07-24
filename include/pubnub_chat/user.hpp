@@ -36,6 +36,8 @@ namespace Pubnub
             PN_CHAT_EXPORT User(const User& other);
             PN_CHAT_EXPORT ~User();
 
+            PN_CHAT_EXPORT Pubnub::User& operator =(const Pubnub::User& other);
+
             PN_CHAT_EXPORT Pubnub::String user_id() const;
             PN_CHAT_EXPORT Pubnub::ChatUserData user_data() const;
 

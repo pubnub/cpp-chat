@@ -27,6 +27,23 @@ membership_service(other.membership_service),
 data(std::make_unique<UserDAO>(other.data->to_user_data()))
 {}
 
+User& User::operator =(const User& other)
+{
+    if(this == &other)
+    {
+        return *this;
+    }
+    this->user_id_internal = other.user_id_internal;
+    this->data = std::make_unique<::UserDAO>(other.data->to_user_data());
+    this->user_service = other.user_service;
+    this->chat_service = other.chat_service;
+    this->presence_service = other.presence_service;
+    this->restrictions_service = other.restrictions_service;
+    this->membership_service = other.membership_service;
+
+    return *this;
+};
+
 User::~User() = default;
 
 Pubnub::String User::user_id() const {

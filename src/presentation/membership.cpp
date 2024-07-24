@@ -21,6 +21,21 @@ membership_service(other.membership_service),
 data(std::make_unique<MembershipDAO>(other.data->to_custom_data()))
 {}
 
+Membership& Membership::operator =(const Membership& other)
+{
+    if(this == &other)
+    {
+        return *this;
+    }
+    this->user = other.user;
+    this->channel = other.channel;
+    this->data = std::make_unique<::MembershipDAO>(other.data->to_custom_data());
+    this->chat_service = other.chat_service;
+    this->membership_service = other.membership_service;
+
+    return *this;
+};
+
 Membership::~Membership() = default;
 
 String Membership::custom_data() const {
@@ -43,7 +58,7 @@ Membership Membership::set_last_read_message(const Message& message) const {
     return this->membership_service->set_last_read_message_timetoken(*this, message.timetoken());
 }
 
-int Membership::get_unread_messages_count(const Pubnub::Membership& membership) const {
+int Membership::get_unread_messages_count(const Membership& membership) const {
     return this->membership_service->get_unread_messages_count_one_channel(*this);
 }
 

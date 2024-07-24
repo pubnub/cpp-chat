@@ -5,7 +5,27 @@
 using namespace Pubnub;
 
 
-//ThreadMessage::ThreadMessage(String timetoken, std::shared_ptr<ChatService> chat_service, std::shared_ptr<MessageService> message_service, std::shared_ptr<ChannelService> channel_service, std::shared_ptr<RestrictionsService> restrictions_service, String parent_channel_id) :
-//Message(timetoken, chat_service, message_service, channel_service, restrictions_service, std::make_unique<MessageDAO>()),
-//parent_channel_id(parent_channel_id)
-//{}
+ThreadMessage::ThreadMessage(
+        String timetoken, 
+        std::shared_ptr<ChatService> chat_service, 
+        std::shared_ptr<MessageService> message_service, 
+        std::shared_ptr<ChannelService> channel_service, 
+        std::shared_ptr<RestrictionsService> restrictions_service,
+        std::unique_ptr<MessageDAO> data, 
+        String parent_channel_id) :
+Message(timetoken, chat_service, message_service, channel_service, restrictions_service, std::move(data)),
+parent_channel_id(parent_channel_id)
+{}
+
+
+ThreadMessage& ThreadMessage::operator=(const ThreadMessage& other) {
+    this->timetoken_internal = other.timetoken_internal;
+    this->chat_service = other.chat_service;
+    this->message_service = other.message_service;
+    this->channel_service = other.channel_service;
+    this->restrictions_service = other.restrictions_service;
+    this->data = std::make_unique<MessageDAO>(other.data->to_message_data());
+    this->parent_channel_id = other.parent_channel_id;
+
+    return *this;
+}

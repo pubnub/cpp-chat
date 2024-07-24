@@ -24,6 +24,8 @@ namespace Pubnub
                     Pubnub::String parent_channel_id, 
                     Pubnub::Message parent_message);
 
+            PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
+
             Pubnub::String parent_channel_id;
             Pubnub::Message parent_message;
 

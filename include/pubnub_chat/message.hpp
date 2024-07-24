@@ -54,7 +54,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Message&)> message_callback) const;
             PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Message>& messages, std::function<void(const Message&)> message_callback) const;
 
-        private:
+        protected:
             PN_CHAT_EXPORT Message(
                     Pubnub::String timetoken,
                     std::shared_ptr<const ChatService> chat_service,
