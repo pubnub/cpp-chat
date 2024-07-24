@@ -66,7 +66,7 @@ void User::report(const String& reason) const {
 }
 
 std::vector<Pubnub::Membership> User::get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const {
-    return this->membership_service->get_user_memberships(user_id(), limit, start_timetoken, end_timetoken);
+    return this->membership_service->get_user_memberships(user_id(), *this->data, limit, start_timetoken, end_timetoken);
 }
 
 void User::stream_updates(std::function<void(const User&)> user_callback) const {

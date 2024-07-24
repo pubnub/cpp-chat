@@ -54,8 +54,8 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
     User current_user = chat_service_shared->user_service->get_user(user_id);
 
-    Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
-    Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, user);
+    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel);
+    Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, *created_channel.data, user);
 
     return std::make_tuple(created_channel, host_membership, std::vector<Membership>{invitee_membership});
 }
@@ -83,8 +83,8 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
     User current_user = chat_service_shared->user_service->get_user(user_id);
 
-    Membership host_membership = chat_service_shared->membership_service->create_presentation_object(current_user, created_channel);
-    std::vector<Membership> invitee_memberships = chat_service_shared->membership_service->invite_multiple_to_channel(final_channel_id, users);
+    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel);
+    std::vector<Membership> invitee_memberships = chat_service_shared->membership_service->invite_multiple_to_channel(final_channel_id, *created_channel.data, users);
 
     return std::make_tuple(created_channel, host_membership, invitee_memberships);
 }

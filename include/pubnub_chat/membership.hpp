@@ -23,16 +23,19 @@ namespace Pubnub
             Pubnub::User user;
             Pubnub::Channel channel;
 
-            PN_CHAT_EXPORT Pubnub::String custom_data();
+            PN_CHAT_EXPORT Membership(const Membership& other);
+            PN_CHAT_EXPORT ~Membership();
 
-            PN_CHAT_EXPORT Pubnub::Membership update(Pubnub::String custom_object_json);
-            PN_CHAT_EXPORT Pubnub::String last_read_message_timetoken();
-            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message_timetoken(Pubnub::String timetoken);
-            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message(Pubnub::Message message);
-            PN_CHAT_EXPORT int get_unread_messages_count(Pubnub::Membership membership);
+            PN_CHAT_EXPORT Pubnub::String custom_data() const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(Pubnub::Membership)> membership_callback);
-            PN_CHAT_EXPORT void stream_updates_on(std::vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Membership)> membership_callback);
+            PN_CHAT_EXPORT Pubnub::Membership update(const Pubnub::String& custom_object_json) const;
+            PN_CHAT_EXPORT Pubnub::String last_read_message_timetoken() const;
+            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message_timetoken(const Pubnub::String& timetoken) const;
+            PN_CHAT_EXPORT Pubnub::Membership set_last_read_message(const Pubnub::Message& message) const;
+            PN_CHAT_EXPORT int get_unread_messages_count(const Pubnub::Membership& membership) const;
+
+            PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Membership&)> membership_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Membership>& memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
 
         private:
             Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MembershipService> membership_service, std::unique_ptr<MembershipDAO> data);

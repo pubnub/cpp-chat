@@ -3,6 +3,7 @@
 
 #include "domain/membership_entity.hpp"
 #include "string.hpp"
+
 class MembershipDAO {
     public:
         MembershipDAO(const Pubnub::String& custom_data);

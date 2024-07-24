@@ -99,16 +99,16 @@ Message Channel::get_message(const String& timetoken) const {
 }
 
 std::vector<Membership> Channel::get_members(int limit, const String& start_timetoken, const String& end_timetoken) const {
-    return this->membership_service->get_channel_members(channel_id(), limit, start_timetoken, end_timetoken);
+    return this->membership_service->get_channel_members(channel_id(), *this->data, limit, start_timetoken, end_timetoken);
 }
 
 Membership Channel::invite(const User& user) const {
-    return this->membership_service->invite_to_channel(channel_id(), user);
+    return this->membership_service->invite_to_channel(channel_id(), *this->data, user);
 }
 
 std::vector<Membership> Channel::invite_multiple(const std::vector<User>& users) const
 {
-    return this->membership_service->invite_multiple_to_channel(channel_id(), users);
+    return this->membership_service->invite_multiple_to_channel(channel_id(), *this->data, users);
 }
 
 void Channel::start_typing() const {
