@@ -11,14 +11,14 @@ namespace Pubnub {
             public:
                 Vector() = default;
 
-                Vector(std::initializer_list<T> list) {
+                Vector(std::initializer_list<T> list) : Vector() {
                     reserve(list.size());
                     for (auto&& item : list) {
                         push_back(item);
                     }
                 }
 
-                Vector(std::vector<T>&& vec) {
+                Vector(std::vector<T>&& vec) : Vector() {
                     reserve(vec.size());
                     for (auto&& item : vec) {
                         push_back(std::move(item));
@@ -28,7 +28,7 @@ namespace Pubnub {
                 //Vector(const Vector& other) = default;
 
                 // Copy constructor
-                Vector(const Vector& other) {
+                Vector(const Vector& other) : Vector() {
                     reserve(other.len);
                     len = other.len;
                     std::copy(other.data, other.data + other.len, data);
@@ -37,7 +37,7 @@ namespace Pubnub {
                 //Vector(Vector&& other) = default;
 
                 // Move constructor
-                Vector(Vector&& other) noexcept
+                Vector(Vector&& other) 
                     : data(other.data), len(other.len), cap(other.cap) {
                     other.data = nullptr;
                     other.len = 0;
@@ -49,9 +49,9 @@ namespace Pubnub {
                 // Copy assignment operator
                 Vector& operator=(const Vector& other) {
                     if (this != &other) {
-                        T* newData = new T[other.cap];
+                        T* newData = (T*)malloc(other.cap * sizeof(T));
                         std::copy(other.data, other.data + other.len, newData);
-                        delete[] data;
+                        free(data);
                         data = newData;
                         len = other.len;
                         cap = other.cap;
@@ -64,7 +64,7 @@ namespace Pubnub {
                 // Move assignment operator
                 Vector& operator=(Vector&& other) noexcept {
                     if (this != &other) {
-                        delete[] data;
+                        free(data);
                         data = other.data;
                         len = other.len;
                         cap = other.cap;
@@ -76,7 +76,7 @@ namespace Pubnub {
                 }
 
                 ~Vector() {
-                    delete[] data;
+                    free(data);
                 }
 
                 void push_back(const T& value) {
@@ -96,7 +96,11 @@ namespace Pubnub {
                     for (std::size_t i = 0; i < len; ++i) {
                         new_data[i] = data[i];
                     }
-                    delete[] data;
+
+                    if (data != nullptr) {
+                        free(data);
+                    }
+
                     data = new_data;
                     cap = new_capacity;
                 }
