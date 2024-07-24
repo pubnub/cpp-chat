@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 CallbackService::CallbackService(
         EntityServicesBundle entity_bundle,
-        std::weak_ptr<PresenceService> presence_service,
+        std::weak_ptr<const PresenceService> presence_service,
         ThreadSafePtr<PubNub> pubnub,
         milliseconds wait_interval) :
     pubnub(pubnub),
