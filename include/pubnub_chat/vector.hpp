@@ -49,7 +49,7 @@ namespace Pubnub {
                 // Copy assignment operator
                 Vector& operator=(const Vector& other) {
                     if (this != &other) {
-                        T* newData = (T*)malloc(other.cap * sizeof(T));
+                        T* newData = (T*)calloc(other.cap, sizeof(T));
                         std::copy(other.data, other.data + other.len, newData);
                         free(data);
                         data = newData;
@@ -92,7 +92,7 @@ namespace Pubnub {
                         return;
                     }
 
-                    T* new_data = (T*)malloc(new_capacity * sizeof(T));
+                    T* new_data = (T*)calloc(new_capacity , sizeof(T));
                     for (std::size_t i = 0; i < len; ++i) {
                         new_data[i] = data[i];
                     }
