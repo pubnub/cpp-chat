@@ -6,19 +6,18 @@
 
 namespace Pubnub {
 
-    template <typename T>
         class Vector {
             public:
                 Vector() = default;
 
-                Vector(std::initializer_list<T> list) {
+                Vector(std::initializer_list<int> list) {
                     reserve(list.size());
                     for (auto&& item : list) {
                         push_back(item);
                     }
                 }
 
-                Vector(std::vector<T>&& vec) {
+                Vector(std::vector<int>&& vec) {
                     reserve(vec.size());
                     for (auto&& item : vec) {
                         push_back(std::move(item));
@@ -37,7 +36,7 @@ namespace Pubnub {
                     delete[] data;
                 }
 
-                void push_back(const T& value) {
+                void push_back(const int& value) {
                     if (len == cap) {
                         reserve(calculate_capacity(len + 1));
                     }
@@ -50,7 +49,7 @@ namespace Pubnub {
                         return;
                     }
 
-                    T* new_data = new T[new_capacity];
+                    int* new_data = new int[new_capacity];
                     for (std::size_t i = 0; i < len; ++i) {
                         new_data[i] = data[i];
                     }
@@ -59,11 +58,11 @@ namespace Pubnub {
                     cap = new_capacity;
                 }
 
-                T& operator[](std::size_t index) {
+                int& operator[](std::size_t index) {
                     return data[index];
                 }
 
-                const T& operator[](std::size_t index) const {
+                const int& operator[](std::size_t index) const {
                     return data[index];
                 }
 
@@ -75,40 +74,40 @@ namespace Pubnub {
                     return cap;
                 }
 
-                T* begin() {
+                int* begin() {
                     return data;
                 }
 
-                T* end() {
+                int* end() {
                     return data + len;
                 }
 
-                const T* begin() const {
+                const int* begin() const {
                     return data;
                 }
 
-                const T* end() const {
+                const int* end() const {
                     return data + len;
                 }
 
-                const T& front() const {
+                const int& front() const {
                     return data[0];
                 }
 
-                const T& back() const {
+                const int& back() const {
                     return data[len - 1];
                 }
 
-                T& front() {
+                int& front() {
                     return data[0];
                 }
 
-                T& back() {
+                int& back() {
                     return data[len - 1];
                 }
 
-                std::vector<T> into_std_vector() {
-                    std::vector<T> std_vec(data, data + len);
+                std::vector<int> into_std_vector() {
+                    std::vector<int> std_vec(data, data + len);
 
                     data = nullptr;
                     len = 0;
@@ -127,7 +126,7 @@ namespace Pubnub {
                 }
 
 
-                T* data = nullptr;
+                int* data = nullptr;
                 std::size_t len = 0;
                 std::size_t cap = 0;
         };
