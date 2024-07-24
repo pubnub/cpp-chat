@@ -33,8 +33,8 @@ class ChannelDAO {
 
         const ChannelEntity channel_entity;
         mutable Mutex<Typing> typing;
-        mutable Timer typing_timer;
-        mutable std::map<Pubnub::String, Timer, Pubnub::StringComparer> indicators_timers;
+        mutable Mutex<Timer> typing_timer;
+        mutable Mutex<std::map<Pubnub::String, Timer, Pubnub::StringComparer>> indicators_timers;
 };
 
 #endif // PN_CHAT_CHANNEL_DAO_HPP
