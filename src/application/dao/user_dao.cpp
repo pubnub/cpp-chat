@@ -1,4 +1,5 @@
 #include "user_dao.hpp"
+#include "domain/user_entity.hpp"
 
 UserDAO::UserDAO(const UserEntity user_entity) :
     user_entity(std::move(user_entity))
@@ -28,4 +29,16 @@ UserEntity UserDAO::to_entity() const {
 
 const UserEntity& UserDAO::get_entity() const {
     return this->user_entity;
+}
+
+UserEntity UserDAO::entity_from_user_data(const Pubnub::ChatUserData& user_data) {
+    return UserEntity{
+        user_data.user_name,
+        user_data.external_id,
+        user_data.profile_url,
+        user_data.email,
+        user_data.custom_data_json,
+        user_data.status,
+        user_data.type
+    };
 }

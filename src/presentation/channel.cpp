@@ -42,6 +42,10 @@ Channel::Channel(const Channel& other) :
 
 Channel::~Channel() = default;
 
+String Channel::channel_id() const {
+    return this->channel_id_internal;
+}
+
 ChatChannelData Channel::channel_data() const {
     return this->data->to_channel_data();
 }

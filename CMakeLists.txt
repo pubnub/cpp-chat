@@ -82,7 +82,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/membership_entity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/parsers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -95,7 +96,8 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp

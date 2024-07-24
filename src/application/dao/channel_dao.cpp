@@ -26,6 +26,10 @@ ChannelEntity ChannelDAO::to_entity() const {
     return this->channel_entity;
 }
 
+const ChannelEntity& ChannelDAO::get_entity() const {
+    return this->channel_entity;
+}
+
 void ChannelDAO::start_typing(int miliseconds) const  {
     this->typing.lock()->start();
 
