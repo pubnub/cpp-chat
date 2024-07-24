@@ -65,7 +65,7 @@ namespace Pubnub {
             PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
-            PN_CHAT_EXPORT std::vector<Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
             PN_CHAT_EXPORT void delete_channel(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT void pin_message_to_channel(const Pubnub::Message& message, const Pubnub::Channel& channel) const;

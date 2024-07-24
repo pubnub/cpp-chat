@@ -211,7 +211,7 @@ void PubNub::set_channel_metadata(const Pubnub::String channel, const Pubnub::St
     auto result = pubnub_set_channelmetadata(
             this->main_context.get(),
             channel,
-            NULL,
+            "custom",
             metadata
     );
 
@@ -314,7 +314,7 @@ void PubNub::set_user_metadata(const Pubnub::String user_id, const Pubnub::Strin
     auto result = pubnub_set_uuidmetadata(
             this->main_context.get(),
             user_id,
-            NULL,
+            "custom",
             metadata
     );
 

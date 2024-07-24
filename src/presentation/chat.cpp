@@ -85,8 +85,8 @@ Channel Chat::get_channel(const String& channel_id) const
     return this->channel_service->get_channel(channel_id);
 }
 
-std::vector<Channel> Chat::get_channels(const String& include, int limit, const String& start, const String& end) const {
-    return this->channel_service->get_channels(include, limit, start, end);
+Pubnub::Vector<Channel> Chat::get_channels(const String& include, int limit, const String& start, const String& end) const {
+    return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channels(include, limit, start, end)));
 }
 
 Channel Chat::update_channel(const String& channel_id, const ChatChannelData& channel_data) const {
