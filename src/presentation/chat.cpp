@@ -8,6 +8,8 @@
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
 
+#include <iostream>
+
 using namespace Pubnub;
 
 Chat::Chat(String publish_key, String subscribe_key, String user_id) :
@@ -29,6 +31,39 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
 #ifndef PN_CHAT_C_ABI
     callback_service = chat_service->callback_service;
 #endif
+}
+
+Pubnub::Vector<int> Pubnub::Chat::TestVector()
+{
+    Pubnub::Vector<int> return_vector = {1, 2, 3};
+
+    for(auto elem : return_vector)
+    {
+        std::cout << "vector: " << elem << std::endl;
+    }
+
+    return return_vector;
+}
+
+Pubnub::Vector<int> Pubnub::Chat::TestVector2(int param)
+{
+    Pubnub::Vector<int> return_vector = {1, 2, 3};
+    return_vector.push_back(param);
+
+    for(auto elem : return_vector)
+    {
+        std::cout << "vector: " << elem << std::endl;
+    }
+
+    return return_vector;
+}
+
+Pubnub::Vector<Pubnub::String> Pubnub::Chat::TestVectorString()
+{
+    Pubnub::Vector<Pubnub::String> return_vector;
+    return_vector.push_back(String("first elem"));
+    return_vector.push_back(String("second elem"));
+    return return_vector;
 }
 
 Channel Chat::create_public_conversation(const String& channel_id, const ChatChannelData& channel_data) const {

@@ -25,13 +25,55 @@ namespace Pubnub {
                     }
                 }
 
-                Vector(const Vector& other) = default;
+                //Vector(const Vector& other) = default;
 
-                Vector(Vector&& other) = default;
+                // Copy constructor
+                Vector(const Vector& other) {
+                    reserve(other.len);
+                    len = other.len;
+                    std::copy(other.data, other.data + other.len, data);
+                }
 
-                Vector& operator=(const Vector& other) = default;
+                //Vector(Vector&& other) = default;
 
-                Vector& operator=(Vector&& other) = default;
+                // Move constructor
+                Vector(Vector&& other) noexcept
+                    : data(other.data), len(other.len), cap(other.cap) {
+                    other.data = nullptr;
+                    other.len = 0;
+                    other.cap = 0;
+                }
+
+                //Vector& operator=(const Vector& other) = default;
+
+                // Copy assignment operator
+                Vector& operator=(const Vector& other) {
+                    if (this != &other) {
+                        T* newData = new T[other.cap];
+                        std::copy(other.data, other.data + other.len, newData);
+                        delete[] data;
+                        data = newData;
+                        len = other.len;
+                        cap = other.cap;
+                    }
+                    return *this;
+                }
+
+                //Vector& operator=(Vector&& other) = default;
+
+                // Move assignment operator
+                Vector& operator=(Vector&& other) noexcept {
+                    if (this != &other) {
+                        delete[] data;
+                        data = other.data;
+                        len = other.len;
+                        cap = other.cap;
+                        other.data = nullptr;
+                        other.len = 0;
+                        other.cap = 0;
+                    }
+                    return *this;
+                }
 
                 ~Vector() {
                     delete[] data;
@@ -50,7 +92,7 @@ namespace Pubnub {
                         return;
                     }
 
-                    T* new_data = new T[new_capacity];
+                    T* new_data = (T*)malloc(new_capacity * sizeof(T));
                     for (std::size_t i = 0; i < len; ++i) {
                         new_data[i] = data[i];
                     }

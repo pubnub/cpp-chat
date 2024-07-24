@@ -7,6 +7,7 @@
 #include "user.hpp"
 #include "membership.hpp"
 #include "restrictions.hpp"
+#include "vector.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -55,6 +56,9 @@ namespace Pubnub {
         public:
             PN_CHAT_EXPORT Chat(String publish_key, String subscribe_key, String user_id);
 
+            PN_CHAT_EXPORT Pubnub::Vector<int> TestVector();
+            PN_CHAT_EXPORT Pubnub::Vector<int> TestVector2(int param);
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> TestVectorString();
             /* CHANNELS */
 
             PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;

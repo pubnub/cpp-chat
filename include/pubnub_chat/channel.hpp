@@ -41,6 +41,8 @@ namespace Pubnub
             PN_CHAT_EXPORT Channel(const Channel& other);
             PN_CHAT_EXPORT ~Channel();
 
+            PN_CHAT_EXPORT Pubnub::Channel& Pubnub::Channel::operator =(const Pubnub::Channel& other);
+
             PN_CHAT_EXPORT Pubnub::String channel_id() const;
             PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data() const;
 

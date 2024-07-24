@@ -40,6 +40,24 @@ Channel::Channel(const Channel& other) :
     data(std::make_unique<ChannelDAO>(other.data->to_channel_data()))
 {}
 
+Pubnub::Channel& Pubnub::Channel::operator =(const Pubnub::Channel& other)
+{
+    if(this == &other)
+    {
+        return *this;
+    }
+    this->channel_id_internal = other.channel_id_internal;
+    this->data = std::make_unique<::ChannelDAO>(other.data->to_channel_data());
+    this->channel_service = other.channel_service;
+    this->chat_service = other.chat_service;
+    this->presence_service = other.presence_service;
+    this->restrictions_service = other.restrictions_service;
+    this->message_service = other.message_service;
+    this->membership_service = other.membership_service;
+
+    return *this;
+};
+
 Channel::~Channel() = default;
 
 String Channel::channel_id() const {
