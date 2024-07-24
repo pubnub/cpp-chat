@@ -36,19 +36,17 @@ bool Typing::contains_typing_indicator(const Pubnub::String& user_id) const {
 Pubnub::String Typing::payload(const Pubnub::String& user_id, bool is_typing) {
     Pubnub::String typing = is_typing ? "true" : "false";
 
-    return "{\"value\": " + typing +", \"user_id\": \"" + user_id + "\"}";
+    return "{\"value\": " + typing +", \"userId\": \"" + user_id + "\"}";
 }
 
 std::optional<std::pair<Typing::UserId, bool>> Typing::typing_user_from_payload(const Json& payload) {
-    auto json = Json::parse(payload);
-
-    if(!json.contains("userId")) {
+    if(!payload.contains("userId")) {
         return std::nullopt;
     }
 
-    if(!json.contains("value")) {
+    if(!payload.contains("value")) {
         return std::nullopt;
     }
 
-    return std::make_pair(json.get_string("userId").value(), json.get_bool("value").value());
+    return std::make_pair(payload.get_string("userId").value(), payload.get_bool("value").value());
 }

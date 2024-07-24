@@ -1,5 +1,9 @@
 #include "infra/timer.hpp"
 
+Timer::~Timer()
+{
+    this->stop();
+}
 
 void Timer::start(int duration_ms, std::function<void()> callback) 
 {

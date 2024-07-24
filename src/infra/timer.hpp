@@ -9,6 +9,7 @@ class Timer
 {
     public:
     Timer() = default;
+    ~Timer();
 
     void start(int duration_ms, std::function<void()> callback);
 
