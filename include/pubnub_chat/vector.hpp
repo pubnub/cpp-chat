@@ -177,13 +177,13 @@ namespace Pubnub {
                     return std_vec;
                 }
             private:
-                std::size_t calculate_capacity(std::size_t len) const {
+                std::size_t calculate_capacity(std::size_t length) const {
                     // For calculating the capacity we used the Rust's formula
                     // for the Vec's capacity calculation
                     // https://doc.rust-lang.org/1.61.0/src/alloc/raw_vec.rs.html#394
                     auto doubled_capacity = this->cap * 2;
 
-                    return doubled_capacity > len ? doubled_capacity : len;
+                    return doubled_capacity > length ? doubled_capacity : length;
                 }
 
 
