@@ -131,7 +131,8 @@ Membership Channel::invite(const User& user) const {
 
 Pubnub::Vector<Membership> Channel::invite_multiple(Pubnub::Vector<User> users) const
 {
-    return Pubnub::Vector<Membership>(std::move(this->membership_service->invite_multiple_to_channel(channel_id(), *this->data, users.into_std_vector())));
+    auto users_std = users.into_std_vector();
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->invite_multiple_to_channel(channel_id(), *this->data, users_std)));
 }
 
 void Channel::start_typing() const {

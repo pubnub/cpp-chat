@@ -179,7 +179,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
         });
 
         if(user == users.end()) {
-            throw std::runtime_error("Can't find user in users list");
+            continue;
         }
 
         // TODO: no custom data?
