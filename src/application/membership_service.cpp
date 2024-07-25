@@ -236,7 +236,7 @@ Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Memb
     String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
 
     json custom_data_json = json::parse(custom_data);
-    custom_data_json["lastReadMessageTimetoken"] = timetoken;
+    custom_data_json["lastReadMessageTimetoken"] = timetoken.c_str();
     Pubnub::Membership new_membership = membership.update(custom_data_json.dump());
 
     //TODO:: in js chat here is check in access manager if event can be sent
