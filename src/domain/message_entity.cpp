@@ -26,7 +26,8 @@ MessageEntity MessageEntity::from_json(Pubnub::String message_json, Pubnub::Stri
 
     if(message_data_json.contains("message") && !message_data_json["message"].is_null())
     {
-        new_message_entity.text = message_data_json["message"]["text"];
+        Json message_json = message_data_json["message"];
+        new_message_entity.text = message_json.get_string("text").value_or(Pubnub::String(""));
         new_message_entity.type = chat_message_type_from_string(message_data_json["message"]["type"].dump());
     }
     if(message_data_json.contains("actions") && !message_data_json["actions"].is_null())
