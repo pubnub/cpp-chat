@@ -47,13 +47,13 @@ namespace Pubnub
 
             PN_CHAT_EXPORT void pin() const;
             PN_CHAT_EXPORT Pubnub::Message toggle_reaction(const Pubnub::String& reaction) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::MessageAction> reactions() const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::MessageAction> reactions() const;
             PN_CHAT_EXPORT bool has_user_reaction(const Pubnub::String& reaction) const;
             PN_CHAT_EXPORT void forward(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Message&)> message_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Message>& messages, std::function<void(const Message&)> message_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(const Message&)> message_callback) const;
 
         protected:
             PN_CHAT_EXPORT Message(

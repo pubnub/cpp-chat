@@ -79,8 +79,8 @@ Message Message::toggle_reaction(const String& reaction) const {
     return this->message_service->toggle_reaction(this->timetoken(), *this->data, reaction);
 }
 
-std::vector<MessageAction> Message::reactions() const {
-    return this->message_service->get_message_reactions(*this->data);
+Pubnub::Vector<MessageAction> Message::reactions() const {
+    return Pubnub::Vector<MessageAction>(std::move(this->message_service->get_message_reactions(*this->data)));
 }
 
 bool Message::has_user_reaction(const String& reaction) const {
@@ -108,6 +108,6 @@ void Message::stream_updates(std::function<void(const Message&)> message_callbac
     this->message_service->stream_updates_on({*this}, message_callback);
 }
 
-void Message::stream_updates_on(const std::vector<Message>& messages, std::function<void(const Message&)> message_callback) const {
-    this->message_service->stream_updates_on(messages, message_callback);
+void Message::stream_updates_on(Pubnub::Vector<Message> messages, std::function<void(const Message&)> message_callback) const {
+    this->message_service->stream_updates_on(messages.into_std_vector(), message_callback);
 }

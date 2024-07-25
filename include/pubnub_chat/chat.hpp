@@ -30,9 +30,9 @@ namespace Pubnub {
     {
         Pubnub::Channel created_channel;
         Pubnub::Membership host_membership;
-        std::vector<Pubnub::Membership> invitees_memberships;
+        Pubnub::Vector<Pubnub::Membership> invitees_memberships;
 
-        CreatedChannelWrapper(Pubnub::Channel in_channel, Pubnub::Membership in_host_membership, std::vector<Pubnub::Membership> in_invitees_memberships) :
+        CreatedChannelWrapper(Pubnub::Channel in_channel, Pubnub::Membership in_host_membership, Pubnub::Vector<Pubnub::Membership> in_invitees_memberships) :
         created_channel(in_channel),
         host_membership(in_host_membership),
         invitees_memberships(in_invitees_memberships)
@@ -56,14 +56,11 @@ namespace Pubnub {
         public:
             PN_CHAT_EXPORT Chat(String publish_key, String subscribe_key, String user_id);
 
-            PN_CHAT_EXPORT Pubnub::Vector<int> TestVector();
-            PN_CHAT_EXPORT Pubnub::Vector<int> TestVector2(int param);
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> TestVectorString();
             /* CHANNELS */
 
             PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
-            PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
+            PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(Pubnub::Vector<Pubnub::User> users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT Pubnub::Vector<Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
@@ -75,14 +72,14 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT Pubnub::User create_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT Pubnub::User get_user(const Pubnub::String& user_id) const;
-            PN_CHAT_EXPORT std::vector<User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT Pubnub::Vector<User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT Pubnub::User update_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT void delete_user(const Pubnub::String& user_id) const;
 
             /* PRESENCE */
 
-            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present(const Pubnub::String& user_id) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present(const Pubnub::String& channel_id) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> where_present(const Pubnub::String& user_id) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> who_is_present(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id, const Pubnub::String& channel_id) const;
 
             /* MODERATION */
@@ -94,7 +91,7 @@ namespace Pubnub {
             /* MESSAGES */
 
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0);
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0);
 
         private:
             std::shared_ptr<const ChatService> chat_service;

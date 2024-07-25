@@ -37,7 +37,7 @@ namespace Pubnub
             PN_CHAT_EXPORT int get_unread_messages_count(const Pubnub::Membership& membership) const;
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Membership&)> membership_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Membership>& memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Membership> memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
 
         private:
             Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MembershipService> membership_service, std::unique_ptr<MembershipDAO> data);

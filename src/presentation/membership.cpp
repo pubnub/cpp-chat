@@ -66,6 +66,6 @@ void Membership::stream_updates(std::function<void(const Membership&)> membershi
     this->membership_service->stream_updates_on({*this}, membership_callback);
 }
 
-void Membership::stream_updates_on(const std::vector<Membership>& memberships, std::function<void(const Membership&)> membership_callback) const {
-    this->membership_service->stream_updates_on(memberships, membership_callback);
+void Membership::stream_updates_on(Pubnub::Vector<Membership> memberships, std::function<void(const Membership&)> membership_callback) const {
+    this->membership_service->stream_updates_on(memberships.into_std_vector(), membership_callback);
 }

@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
+#include "vector.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -43,17 +44,17 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::User update(const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT void delete_user() const;
-            PN_CHAT_EXPORT std::vector<Pubnub::String> where_present() const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> where_present() const;
             PN_CHAT_EXPORT bool is_present_on(const Pubnub::String& channel_id) const;
 
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
             PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-            PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const User&)> user_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::User>& users, std::function<void(const Pubnub::User&)> user_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(const Pubnub::User&)> user_callback) const;
 
         private:
             PN_CHAT_EXPORT User(

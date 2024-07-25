@@ -33,51 +33,18 @@ Chat::Chat(String publish_key, String subscribe_key, String user_id) :
 #endif
 }
 
-Pubnub::Vector<int> Pubnub::Chat::TestVector()
-{
-    Pubnub::Vector<int> return_vector = {1, 2, 3};
-
-    for(auto elem : return_vector)
-    {
-        std::cout << "vector: " << elem << std::endl;
-    }
-
-    return return_vector;
-}
-
-Pubnub::Vector<int> Pubnub::Chat::TestVector2(int param)
-{
-    Pubnub::Vector<int> return_vector = {1, 2, 3};
-    return_vector.push_back(param);
-
-    for(auto elem : return_vector)
-    {
-        std::cout << "vector: " << elem << std::endl;
-    }
-
-    return return_vector;
-}
-
-Pubnub::Vector<Pubnub::String> Pubnub::Chat::TestVectorString()
-{
-    Pubnub::Vector<Pubnub::String> return_vector;
-    return_vector.push_back(String("first elem"));
-    return_vector.push_back(String("second elem"));
-    return return_vector;
-}
-
 Channel Chat::create_public_conversation(const String& channel_id, const ChatChannelData& channel_data) const {
     return this->channel_service->create_public_conversation(channel_id, channel_data);
 }
 
 CreatedChannelWrapper Chat::create_direct_conversation(const User& user, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
     auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, membership_data);
-    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), std::get<2>(return_tuple));
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
 
-CreatedChannelWrapper Chat::create_group_conversation(const std::vector<User>& users, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
-    auto return_tuple = this->channel_service->create_group_conversation(users, channel_id, channel_data, membership_data);
-    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), std::get<2>(return_tuple));
+CreatedChannelWrapper Chat::create_group_conversation(Pubnub::Vector<User> users, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
+    auto return_tuple = this->channel_service->create_group_conversation(users.into_std_vector(), channel_id, channel_data, membership_data);
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
 
 Channel Chat::get_channel(const String& channel_id) const
@@ -113,8 +80,8 @@ User Chat::get_user(const String& user_id) const {
     return this->user_service->get_user(user_id);
 }
 
-std::vector<User> Chat::get_users(const String& include, int limit, const String& start, const String& end) const {
-    return this->user_service->get_users(include, limit, start, end);
+Pubnub::Vector<User> Chat::get_users(const String& include, int limit, const String& start, const String& end) const {
+    return Pubnub::Vector<User>(std::move(this->user_service->get_users(include, limit, start, end)));
 }
 
 User Chat::update_user(const String& user_id, const ChatUserData& user_data) const {
@@ -125,12 +92,12 @@ void Chat::delete_user(const String& user_id) const {
     return this->user_service->delete_user(user_id);
 }
 
-std::vector<String> Chat::where_present(const String& user_id) const {
-    return this->presence_service->where_present(user_id);
+Pubnub::Vector<String> Chat::where_present(const String& user_id) const {
+    return Pubnub::Vector<String>(std::move(this->presence_service->where_present(user_id)));
 }
 
-std::vector<String> Chat::who_is_present(const String& channel_id) const {
-    return this->presence_service->who_is_present(channel_id);
+Pubnub::Vector<String> Chat::who_is_present(const String& channel_id) const {
+    return Pubnub::Vector<String>(std::move(this->presence_service->who_is_present(channel_id)));
 }
 
 bool Chat::is_present(const String& user_id, const String& channel_id) const {
@@ -153,7 +120,7 @@ void Chat::forward_message(const Message& message, const Channel& channel) const
     this->message_service->forward_message(message, channel.channel_id());
 }
 
-std::vector<UnreadMessageWrapper> Chat::get_unread_message_counts(const String& start_timetoken, const String& end_timetoken, const String& filter, int limit)
+Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_message_counts(const String& start_timetoken, const String& end_timetoken, const String& filter, int limit)
 {
     auto tuples = this->membership_service->get_all_unread_messages_counts(start_timetoken, end_timetoken, filter, limit);
 
@@ -164,7 +131,7 @@ std::vector<UnreadMessageWrapper> Chat::get_unread_message_counts(const String& 
         return_wrappers.push_back(wrapper);
     }
 
-    return return_wrappers;
+    return Pubnub::Vector<UnreadMessageWrapper>(std::move(return_wrappers));
 }
 
 #ifdef PN_CHAT_C_ABI

@@ -96,8 +96,8 @@ void Channel::send_text(const String& message, pubnub_chat_message_type message_
     this->channel_service->send_text(channel_id_internal, message, message_type, meta_data);
 }
 
-std::vector<String> Channel::who_is_present() const {
-    return this->presence_service->who_is_present(channel_id_internal);
+Pubnub::Vector<String> Channel::who_is_present() const {
+    return Pubnub::Vector<String>(std::move(this->presence_service->who_is_present(channel_id_internal)));
 }
 
 bool Channel::is_present(const String& user_id) const {
@@ -121,17 +121,17 @@ Message Channel::get_message(const String& timetoken) const {
     return message;
 }
 
-std::vector<Membership> Channel::get_members(int limit, const String& start_timetoken, const String& end_timetoken) const {
-    return this->membership_service->get_channel_members(channel_id(), *this->data, limit, start_timetoken, end_timetoken);
+Pubnub::Vector<Membership> Channel::get_members(int limit, const String& start_timetoken, const String& end_timetoken) const {
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_channel_members(channel_id(), *this->data, limit, start_timetoken, end_timetoken)));
 }
 
 Membership Channel::invite(const User& user) const {
     return this->membership_service->invite_to_channel(channel_id(), *this->data, user);
 }
 
-std::vector<Membership> Channel::invite_multiple(const std::vector<User>& users) const
+Pubnub::Vector<Membership> Channel::invite_multiple(Pubnub::Vector<User> users) const
 {
-    return this->membership_service->invite_multiple_to_channel(channel_id(), *this->data, users);
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->invite_multiple_to_channel(channel_id(), *this->data, users.into_std_vector())));
 }
 
 void Channel::start_typing() const {
@@ -142,8 +142,12 @@ void Channel::stop_typing() const {
     this->channel_service->stop_typing(this->channel_id_internal, *this->data);
 }
 
-void Channel::get_typing(std::function<void(const std::vector<String>&)> typing_callback) const {
-    this->channel_service->get_typing(this->channel_id_internal, *this->data, typing_callback);
+void Channel::get_typing(std::function<void(Pubnub::Vector<String>)> typing_callback) const {
+    auto new_callback = [=](std::vector<String> vec)
+    {
+        typing_callback(Pubnub::Vector<String>(std::move(vec)));
+    };
+    this->channel_service->get_typing(this->channel_id_internal, *this->data, new_callback);
 }
 
 Channel Channel::pin_message(const Message& message) const {
@@ -162,7 +166,7 @@ void Channel::stream_updates(std::function<void(const Channel&)> channel_callbac
     this->channel_service->stream_updates_on({this->channel_id()}, channel_callback);
 }
 
-void Channel::stream_updates_on(const std::vector<Channel>& channels, std::function<void(const Channel&)> channel_callback) const {
+void Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(const Channel&)> channel_callback) const {
     std::vector<String> channel_ids(channels.size());
     std::transform(
             channels.begin(),
@@ -173,8 +177,12 @@ void Channel::stream_updates_on(const std::vector<Channel>& channels, std::funct
     this->channel_service->stream_updates_on(channel_ids, channel_callback);
 }
 
-void Channel::stream_presence(std::function<void(const std::vector<String>&)> presence_callback) const {
-    this->presence_service->stream_presence(channel_id(), presence_callback);
+void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
+    auto new_callback = [=](std::vector<String> vec)
+    {
+        presence_callback(Pubnub::Vector<String>(std::move(vec)));
+    };
+    this->presence_service->stream_presence(channel_id(), new_callback);
 }
 void Channel::forward_message(const Message& message) const {
     this->message_service->forward_message(message, channel_id_internal);

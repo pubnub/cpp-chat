@@ -62,8 +62,8 @@ void User::delete_user() const {
     this->user_service->delete_user(user_id_internal);
 }
 
-std::vector<Pubnub::String> User::where_present() const {
-    return this->presence_service->where_present(user_id_internal);
+Pubnub::Vector<Pubnub::String> User::where_present() const {
+    return Pubnub::Vector<String>(std::move(this->presence_service->where_present(user_id_internal)));
 }
 
 bool User::is_present_on(const Pubnub::String& channel_id) const {
@@ -82,14 +82,14 @@ void User::report(const String& reason) const {
     this->restrictions_service->report_user(user_id(), reason);
 }
 
-std::vector<Pubnub::Membership> User::get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const {
-    return this->membership_service->get_user_memberships(user_id(), *this->data, limit, start_timetoken, end_timetoken);
+Pubnub::Vector<Pubnub::Membership> User::get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const {
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_user_memberships(user_id(), *this->data, limit, start_timetoken, end_timetoken)));
 }
 
 void User::stream_updates(std::function<void(const User&)> user_callback) const {
     this->user_service->stream_updates_on({*this}, user_callback);
 }
 
-void User::stream_updates_on(const std::vector<Pubnub::User>& users, std::function<void(const User&)> user_callback) const {
-    this->user_service->stream_updates_on(users, user_callback);
+void User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(const User&)> user_callback) const {
+    this->user_service->stream_updates_on(users.into_std_vector(), user_callback);
 }

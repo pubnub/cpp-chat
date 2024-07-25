@@ -54,18 +54,18 @@ namespace Pubnub
             PN_CHAT_EXPORT void leave() const;
             PN_CHAT_EXPORT void delete_channel() const;
             PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") const;
-            PN_CHAT_EXPORT std::vector<Pubnub::String> who_is_present() const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> who_is_present() const;
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, Pubnub::Restriction restrictions) const;
             PN_CHAT_EXPORT Pubnub::Restriction get_user_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Message> get_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
             PN_CHAT_EXPORT Pubnub::Message get_message(const Pubnub::String& timetoken) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_members(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
             PN_CHAT_EXPORT Pubnub::Membership invite(const Pubnub::User& user) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::Membership> invite_multiple(const std::vector<Pubnub::User>& users) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> invite_multiple(Pubnub::Vector<Pubnub::User> users) const;
             PN_CHAT_EXPORT void start_typing() const;
             PN_CHAT_EXPORT void stop_typing() const;
-            PN_CHAT_EXPORT void get_typing(std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
+            PN_CHAT_EXPORT void get_typing(std::function<void(Pubnub::Vector<Pubnub::String>)> typing_callback) const;
             PN_CHAT_EXPORT Pubnub::Channel pin_message(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT Pubnub::Channel unpin_message() const;
             PN_CHAT_EXPORT Pubnub::Message get_pinned_message() const;
@@ -73,8 +73,8 @@ namespace Pubnub
 
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(const std::vector<Pubnub::Channel>& channels, std::function<void(const Pubnub::Channel&)> channel_callback) const;
-            PN_CHAT_EXPORT void stream_presence(std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const;
+            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(const Pubnub::Channel&)> channel_callback) const;
+            PN_CHAT_EXPORT void stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig()) const;
 
