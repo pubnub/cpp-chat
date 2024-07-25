@@ -167,10 +167,12 @@ void Channel::stream_updates(std::function<void(const Channel&)> channel_callbac
 }
 
 void Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(const Channel&)> channel_callback) const {
-    std::vector<String> channel_ids(channels.size());
+    
+    auto channels_std = channels.into_std_vector();
+    std::vector<String> channel_ids(channels_std.size());
     std::transform(
-            channels.begin(),
-            channels.end(),
+            channels_std.begin(),
+            channels_std.end(),
             channel_ids.begin(),
             [](Channel channel) { return channel.channel_id(); }
         );
