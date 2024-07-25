@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "message_action.hpp"
+#include "vector.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -25,7 +26,7 @@ namespace Pubnub
         Pubnub::String user_id;
         //meta doesn't work for now, because we don't get this info from pubnub_fetch_history
         Pubnub::String meta;
-        std::vector<MessageAction> message_actions;
+        Pubnub::Vector<MessageAction> message_actions;
     };
 
     class Message

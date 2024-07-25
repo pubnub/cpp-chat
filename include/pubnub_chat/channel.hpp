@@ -5,6 +5,7 @@
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "enums.hpp"
+#include "vector.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -57,7 +58,7 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, Pubnub::Restriction restrictions) const;
             PN_CHAT_EXPORT Pubnub::Restriction get_user_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
-            PN_CHAT_EXPORT std::vector<Pubnub::Message> get_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Message> get_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
             PN_CHAT_EXPORT Pubnub::Message get_message(const Pubnub::String& timetoken) const;
             PN_CHAT_EXPORT std::vector<Pubnub::Membership> get_members(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
             PN_CHAT_EXPORT Pubnub::Membership invite(const Pubnub::User& user) const;

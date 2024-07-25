@@ -29,6 +29,7 @@ namespace Pubnub {
 
                 // Copy constructor
                 Vector(const Vector& other) : Vector() {
+                    cap = 0;
                     reserve(other.len);
                     len = other.len;
                     std::copy(other.data, other.data + other.len, data);
@@ -59,6 +60,15 @@ namespace Pubnub {
                     return *this;
                 }
 
+                Vector& operator=(const std::vector<T>&& other) {
+                    this->reserve(other.size());
+                    for (auto&& item : other) {
+                        this->push_back(std::move(item));
+                    }
+
+                    return *this;
+                }
+
                 //Vector& operator=(Vector&& other) = default;
 
                 // Move assignment operator
@@ -76,7 +86,11 @@ namespace Pubnub {
                 }
 
                 ~Vector() {
-                    free(data);
+                    if(data != nullptr)
+                    {
+                        free(data);
+                    }
+
                 }
 
                 void push_back(const T& value) {

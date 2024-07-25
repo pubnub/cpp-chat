@@ -15,7 +15,7 @@ class MessageDAO {
         const MessageEntity& get_entity() const;
 
     private:
-        static MessageEntity entity_from_message_data(const Pubnub::ChatMessageData& message_data);
+        static MessageEntity entity_from_message_data(Pubnub::ChatMessageData message_data);
 
         const MessageEntity message_entity;
 };

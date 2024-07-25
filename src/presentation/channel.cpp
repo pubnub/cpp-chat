@@ -112,12 +112,13 @@ Restriction Channel::get_user_restrictions(const String& user_id, const String& 
     return this->restrictions_service->get_user_restrictions(user_id, channel_id, limit, start, end);
 }
 
-std::vector<Message> Channel::get_history(const String& start_timetoken, const String& end_timetoken, int count) const {
-    return this->message_service->get_channel_history(channel_id(), start_timetoken, end_timetoken, count);
+Pubnub::Vector<Message> Channel::get_history(const String& start_timetoken, const String& end_timetoken, int count) const {
+    return Pubnub::Vector<Message>(std::move(this->message_service->get_channel_history(channel_id(), start_timetoken, end_timetoken, count)));
 }
 
 Message Channel::get_message(const String& timetoken) const {
-    return this->message_service->get_message(timetoken, channel_id());
+    Message message = this->message_service->get_message(timetoken, channel_id());
+    return message;
 }
 
 std::vector<Membership> Channel::get_members(int limit, const String& start_timetoken, const String& end_timetoken) const {

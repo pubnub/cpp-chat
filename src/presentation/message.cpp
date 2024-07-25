@@ -24,7 +24,12 @@ restrictions_service(other.restrictions_service),
 data(std::make_unique<MessageDAO>(other.data->to_message_data()))
 {}
 
-Message& Message::operator=(const Message& other) {
+Message& Message::operator =(const Message& other) {
+    if(this == &other)
+    {
+        return *this;
+    }
+
     this->timetoken_internal = other.timetoken_internal;
     this->chat_service = other.chat_service;
     this->message_service = other.message_service;
