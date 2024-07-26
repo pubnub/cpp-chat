@@ -58,7 +58,7 @@ Membership Membership::set_last_read_message(const Message& message) const {
     return this->membership_service->set_last_read_message_timetoken(*this, message.timetoken());
 }
 
-int Membership::get_unread_messages_count(const Membership& membership) const {
+int Membership::get_unread_messages_count() const {
     return this->membership_service->get_unread_messages_count_one_channel(*this);
 }
 

@@ -34,7 +34,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::String last_read_message_timetoken() const;
             PN_CHAT_EXPORT Pubnub::Membership set_last_read_message_timetoken(const Pubnub::String& timetoken) const;
             PN_CHAT_EXPORT Pubnub::Membership set_last_read_message(const Pubnub::Message& message) const;
-            PN_CHAT_EXPORT int get_unread_messages_count(const Pubnub::Membership& membership) const;
+            PN_CHAT_EXPORT int get_unread_messages_count() const;
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Membership&)> membership_callback) const;
             PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Membership> memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
