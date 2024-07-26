@@ -32,6 +32,7 @@ Pubnub::String ChannelEntity::get_channel_metadata_json_string(Pubnub::String ch
 }
 
 ChannelEntity ChannelEntity::from_json(Json channel_json) {
+    Pubnub::String Test = channel_json.dump();
     return ChannelEntity{
         channel_json.get_string("name").value_or(Pubnub::String("")),
         channel_json.get_string("description").value_or(Pubnub::String("")),

@@ -12,7 +12,9 @@
 #include "nlohmann/json.hpp"
 #include "callback_service.hpp"
 #include "application/dao/channel_dao.hpp"
+#include "domain/json.hpp"
 #include <memory>
+#include <chrono>
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -300,6 +302,84 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
     return return_tuples;
 }
 
+std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipService::mark_all_messages_as_read(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page& page) const
+{
+    auto chat_service_shared = chat_service.lock();
+    std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> return_tuple;
+
+    User current_user = chat_service_shared->user_service->get_current_user();
+    //TODO:: pass filter here when it will be supported in C-Core
+    auto user_memberships = current_user.get_memberships(limit, page.next, page.prev);
+
+    if(user_memberships.size() == 0)
+    {
+        return return_tuple;
+    }
+
+    std::vector<String> relevant_channel_ids;
+
+    String set_memberships_string = String("[");
+    for(auto membership : user_memberships)
+    {
+        relevant_channel_ids.push_back(membership.channel.channel_id());
+        
+        String custom_object_json_string = membership.custom_data().empty() ? String("{}") : membership.custom_data();
+        json custom_object_json = json::parse(custom_object_json_string);
+        custom_object_json["lastReadMessageTimetoken"] = get_now_timetoken().c_str();
+
+        set_memberships_string += String("{\"channel\": {\"id\": \"") + membership.channel.channel_id() + String("\"}, \"custom\": ") + custom_object_json.dump() + String("},");
+    }
+
+    set_memberships_string.erase(set_memberships_string.length() - 1, 1);
+    set_memberships_string += String("]");
+
+    /*  TODO:: this is disabled, because it looks like pubnub_fetch_history doesn't support getting messages for multiple channels
+    auto fetch_messages_response = [this, relevant_channel_ids] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->fetch_history("relevant_channel_ids", (char*)NULL, (char*)NULL, 1);
+    }();
+    */
+
+
+    auto memberships_response = [this, current_user, set_memberships_string] {
+        auto pubnub_handle = pubnub->lock();
+        //String include_string = "totalCount,customFields,channelFields,customChannelFields";
+        String include_string = "custom";
+        return pubnub_handle->set_memberships(current_user.user_id(), set_memberships_string, include_string);
+    }();
+
+
+    Json response_json = Json::parse(memberships_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get memberships, response is incorrect");
+    }
+
+    Json channels_array_json = response_json["data"];
+
+    std::vector<Membership> memberships;
+    for (auto& element : channels_array_json)
+    {
+        //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
+        String test = String(element["channel"].dump());
+        ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
+        String channel_id = String(element["channel"]["id"]);
+
+        Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_entity});
+
+        Membership membership = this->create_membership_object(current_user, channel);
+        memberships.push_back(membership);
+    }
+    int total = response_json.get_int("totalCount").value_or(0);
+    int status = response_json.get_int("status").value_or(0);
+    Page page_response;
+    page_response.next = response_json.get_string("next").value_or(String(""));
+    page_response.prev = response_json.get_string("prev").value_or(String(""));
+
+    return std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>>(page_response, total, status, memberships);
+}
+
 void MembershipService::stream_updates_on(const std::vector<Membership>& memberships, std::function<void(const Membership&)> membership_callback) const
 {
     if(memberships.empty())
@@ -326,7 +406,7 @@ void MembershipService::stream_updates_on(const std::vector<Membership>& members
 }
 
 Membership MembershipService::create_membership_object(const User& user, const Channel& channel) const {
-    return this->create_membership_object(user, channel, MembershipEntity{""});
+    return this->create_membership_object(user, channel, MembershipEntity{channel.channel_data().custom_data_json});
 }
 
 Membership MembershipService::create_membership_object(const User& user, const Channel& channel, const MembershipEntity& membership_entity) const {

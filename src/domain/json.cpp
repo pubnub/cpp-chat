@@ -64,6 +64,15 @@ std::optional<bool> Json::get_bool(Pubnub::String key) const {
     return std::nullopt;
 }
 
+std::optional<int> Json::get_int(Pubnub::String key) const {
+    if(this->json.contains(key) && this->json[key].is_number_integer() && !this->json[key].is_null())
+    {
+        return std::optional(this->json[key].get<int>());
+    }
+
+    return std::nullopt;
+}
+
 bool Json::is_array() const
 {
     return this->json.is_array();

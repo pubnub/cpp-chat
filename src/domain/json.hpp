@@ -34,6 +34,7 @@ class Json {
         Pubnub::String dump() const;
         std::optional<Pubnub::String> get_string(Pubnub::String key) const;
         std::optional<bool> get_bool(Pubnub::String key) const;
+        std::optional<int> get_int(Pubnub::String key) const;
         bool is_array() const;
         bool is_object() const;
         void erase(Pubnub::String key);

@@ -454,7 +454,23 @@ Pubnub::String PubNub::fetch_history(
 
     this->await_and_handle_error(result);
 
-    return pubnub_get(this->main_context.get());
+    auto fetch_history_response = pubnub_get_fetch_history(this->main_context.get());
+
+    if(!fetch_history_response.ptr)
+    {
+        throw std::runtime_error("Fetch history response is invalid");
+    }
+
+    return fetch_history_response.ptr;
+}
+Pubnub::String PubNub::fetch_history(
+        const std::vector<Pubnub::String> channels,
+        const Pubnub::String start_timetoken,
+        const Pubnub::String end_timetoken,
+        const int limit
+) 
+{
+    return fetch_history(get_comma_sep_string_from_vector(channels), start_timetoken, end_timetoken, limit);
 }
 
 Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value)

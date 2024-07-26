@@ -120,7 +120,7 @@ void Chat::forward_message(const Message& message, const Channel& channel) const
     this->message_service->forward_message(message, channel.channel_id());
 }
 
-Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_message_counts(const String& start_timetoken, const String& end_timetoken, const String& filter, int limit)
+Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_messages_counts(const String& start_timetoken, const String& end_timetoken, const String& filter, int limit) const
 {
     auto tuples = this->membership_service->get_all_unread_messages_counts(start_timetoken, end_timetoken, filter, limit);
 
@@ -132,6 +132,18 @@ Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_message_counts(const Strin
     }
 
     return Pubnub::Vector<UnreadMessageWrapper>(std::move(return_wrappers));
+}
+
+MarkMessagesAsReadWrapper Pubnub::Chat::mark_all_messages_as_read(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const
+{
+    auto return_tuple = this->membership_service->mark_all_messages_as_read(filter, sort, limit, page);
+    MarkMessagesAsReadWrapper Wrapper;
+    Wrapper.page = std::get<0>(return_tuple);
+    Wrapper.total = std::get<1>(return_tuple);
+    Wrapper.status = std::get<2>(return_tuple);
+    Wrapper.memberships = std::move(std::get<3>(return_tuple));
+
+    return Wrapper;
 }
 
 #ifdef PN_CHAT_C_ABI

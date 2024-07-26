@@ -60,6 +60,7 @@ public:
     Pubnub::String here_now(const Pubnub::String channel);
     Pubnub::String get_user_id();
     Pubnub::String fetch_history(const Pubnub::String channel, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
+    Pubnub::String fetch_history(const std::vector<Pubnub::String> channels, const Pubnub::String start_timetoken, const Pubnub::String end_timetoken, const int count);
     Pubnub::String add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value);
     void remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken);
     std::map<Pubnub::String, int, Pubnub::StringComparer> message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps);

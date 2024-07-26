@@ -8,6 +8,7 @@
 #include "membership.hpp"
 #include "restrictions.hpp"
 #include "vector.hpp"
+#include "page.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -51,6 +52,14 @@ namespace Pubnub {
         int count;
     };
 
+    struct MarkMessagesAsReadWrapper
+    {
+        Pubnub::Page page;
+        int total;
+        int status;
+        Pubnub::Vector<Pubnub::Membership> memberships;
+    };
+
 
     class Chat {
         public:
@@ -91,7 +100,8 @@ namespace Pubnub {
             /* MESSAGES */
 
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_message_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0);
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0) const;
+            PN_CHAT_EXPORT MarkMessagesAsReadWrapper mark_all_messages_as_read(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 
         private:
             std::shared_ptr<const ChatService> chat_service;
