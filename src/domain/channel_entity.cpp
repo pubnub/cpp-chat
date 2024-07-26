@@ -43,20 +43,14 @@ ChannelEntity ChannelEntity::from_json(Json channel_json) {
 }
 
 ChannelEntity ChannelEntity::from_channel_response(Json response) {
-    if(response.is_null())
-    {
-        throw std::runtime_error("can't create channel from response, response is incorrect");
-    }
-
-    //In most responses this data field is an array but in some cases (for example in get_channel) it's just an object.
-    Json channel_data_json = response["data"].is_array() ? response["data"][0] : response["data"];
-
-    if(channel_data_json.is_null())
-    {
-        throw std::runtime_error("can't create channel from response, response doesn't have data field");
-    }
-
-    return ChannelEntity::from_json(channel_data_json);
+    return ChannelEntity{
+        response.get_string("name").value_or(Pubnub::String("")),
+        response.get_string("description").value_or(Pubnub::String("")),
+        response.contains("custom") ? response["custom"].dump() : Pubnub::String(""),
+        response.get_string("updated").value_or(Pubnub::String("")),
+        response.get_string("status").value_or(Pubnub::String("")),
+        response.get_string("type").value_or(Pubnub::String(""))
+    };
 }
 
 ChannelEntity ChannelEntity::pin_message(std::pair<ChannelId, MessageTimetoken> channel_message) const {

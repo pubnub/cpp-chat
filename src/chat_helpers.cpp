@@ -71,7 +71,9 @@ String get_now_timetoken()
     auto epoch = now.time_since_epoch();
     long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
 
-    return String(std::to_string(nanoseconds));
+    String timetoken = String(std::to_string(nanoseconds));
+    timetoken.erase(timetoken.length() - 2, 2);
+    return timetoken;
 }
 
 }

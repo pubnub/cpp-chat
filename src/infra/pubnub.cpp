@@ -527,11 +527,14 @@ std::map<Pubnub::String, int, Pubnub::StringComparer> PubNub::message_counts(con
     auto result = pubnub_message_counts(this->main_context.get(), get_comma_sep_string_from_vector(channels).c_str(), get_comma_sep_string_from_vector(timestamps).c_str());
     this->await_and_handle_error(result);
 
-    for(auto &channel : channels)
+    int size = channels.size();
+    std::vector<int> MessageCountsReturn(size);
+
+    int get_response = pubnub_get_message_counts(this->main_context.get(), get_comma_sep_string_from_vector(channels).c_str(), MessageCountsReturn.data());
+
+    for(int i = 0; i < channels.size(); i++)
     {
-        int MessageCountsReturn;
-	    int get_response = pubnub_get_message_counts(this->main_context.get(), channel.c_str(), &MessageCountsReturn);
-        final_map[channel] = get_response >= 0 ? MessageCountsReturn : 0;
+        final_map[channels[i]] = get_response >= 0 ? MessageCountsReturn[i] : 0;
     }
     return final_map;
 }

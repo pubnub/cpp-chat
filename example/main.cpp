@@ -16,38 +16,79 @@ int main() {
 
     Pubnub::Chat chat(pub_key.c_str(), sub_key.c_str(), user.c_str());
 
-    auto vecint = chat.TestVector();
+    // auto vecint = chat.TestVector();
 
-    for(auto &elem : vecint)
+    // for(auto &elem : vecint)
+    // {
+    //     std::cout << "vector: " << elem << std::endl;
+    // }
+
+         //CREATE CHANNEL  
+    Pubnub::ChatChannelData channel_data;
+    channel_data.channel_name = "iksde2";
+    channel_data.description = "Wha";
+    //Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
+
+    Pubnub::Channel channel = chat.get_channel("my_test_channel3");
+
+    auto response = chat.mark_all_messages_as_read("", "", 3);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    auto memberships = response.memberships.into_std_vector();
+
+    for(auto membership : memberships)
     {
-        std::cout << "vector: " << elem << std::endl;
+        std::cout << "membrship. Channel ID: " << membership.channel.channel_id() << " Custom data: " << membership.custom_data() << std::endl;
+        std::cout << "Channel name: " << membership.channel.channel_data().channel_name << std::endl;
     }
 
-    auto channels = chat.get_channels("", 10, "1738181488", "1708181488");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    Pubnub::Vector<Pubnub::Channel> new_channels;
+    auto response2 = chat.get_unread_messages_counts("", "", "", 3);
+    auto cpp_response2 = response2.into_std_vector();
 
-    for(auto channel : channels)
+    for(auto res : cpp_response2)
     {
-        new_channels.push_back(channel);
+        std::cout << "membrship. Channel ID: " << res.channel.channel_id() << " Custom data: " << res.membership.custom_data() << std::endl;
+        std::cout << "Message count: " << res.count << std::endl;
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+//     auto messages = channel.get_history((char*)NULL, (char*)NULL, 10);
+
+//     for(auto message : messages)
+//     {
+//         std::cout << "message: " << message.message_data().text << std::endl;
+//     }
+
+//     std::cout << std::endl;
+
+//     auto get_message = channel.get_message("17218251435862406");
+
+//     std::cout << "get message: " << get_message.message_data().text << std::endl;
+
+
+//     auto channels = chat.get_channels("", 10, "1738181488", "1708181488");
+
+//     //Pubnub::Vector<Pubnub::Channel> new_channels;
+// //
+//     //for(auto &channel : channels)
+//     //{
+//     //    new_channels.push_back(channel);
+//     //}
     
-    for(auto new_channel : new_channels)
-    {
-        std::cout << "new channel: " << new_channel.channel_id() << std::endl;
-    }
+//     for(auto new_channel : channels)
+//     {
+//         std::cout << "new channel: " << new_channel.channel_id() << std::endl;
+//     }
 
     // for(int i = 0; i < vecint.size(); i++)
     // {
     //     std::cout << "vector: " << vecint.get_element(i) << std::endl;
     // }
 
-    auto vec = chat.TestVectorString().into_std_vector();
-
-    for(auto &elem : vec)
-    {
-        std::cout << "vec elem: " << elem << std::endl;
-    }
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 

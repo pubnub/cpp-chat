@@ -126,7 +126,7 @@ Channel ChannelService::get_channel(const String& channel_id) const {
         throw std::runtime_error("can't get channel, response doesn't have data field");
     }
 
-    return this->create_channel_object({channel_id, ChannelEntity::from_channel_response(parsed_response)});
+    return this->create_channel_object({channel_id, ChannelEntity::from_channel_response(parsed_response["data"])});
 }
 
 std::vector<Channel> ChannelService::get_channels(const String& include, int limit, const String& start, const String& end) const {
