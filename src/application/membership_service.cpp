@@ -25,7 +25,7 @@ MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr
 {}
 
 std::vector<Membership> MembershipService::get_channel_members(const String& channel_id, const ChannelDAO& channel_data, int limit, const String& start_timetoken, const String& end_timetoken) const {
-    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String include_string = "custom,channel,totalCount,customChannel";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, start_timetoken, end_timetoken] {
         auto pubnub_handle = this->pubnub->lock();
@@ -62,7 +62,7 @@ std::vector<Membership> MembershipService::get_channel_members(const String& cha
 }
 
 std::vector<Membership> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, int limit, const String& start_timetoken, const String& end_timetoken) const {
-    String include_string = "totalCount,customFields,channelFields,customChannelFields,channelTypeField,statusField,channelStatusField";
+    String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
 
     auto get_memberships_response = [this, user_id, include_string, limit, start_timetoken, end_timetoken] {
         auto pubnub_handle = this->pubnub->lock();
@@ -84,7 +84,7 @@ std::vector<Membership> MembershipService::get_user_memberships(const String& us
     for (auto& element : channels_array_json)
     {
         //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
-        ChannelEntity channel_entity = ChannelEntity::from_json(String(element["channel"].dump()));
+        ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
         String channel_id = String(element["channel"]["id"]);
 
         Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_entity});
@@ -112,7 +112,7 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
     //TODO:: check here if user already is on that channel. Requires C-Core filtering
 
 
-    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String include_string = "custom,channel,totalCount,customChannel";
     String set_memeberships_obj = create_set_memberships_object(channel_id, "");
 
     auto user_id = user.user_id();
@@ -158,7 +158,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
         filtered_users_ids.push_back(user.user_id());
     }
 
-    String include_string = "totalCount,customFields,channelFields,customChannelFields";
+    String include_string = "custom,channel,totalCount,customChannel";
     String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
 
     auto set_members_response = [this, channel_id, set_memebers_obj, include_string] {
@@ -343,8 +343,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 
     auto memberships_response = [this, current_user, set_memberships_string] {
         auto pubnub_handle = pubnub->lock();
-        //String include_string = "totalCount,customFields,channelFields,customChannelFields";
-        String include_string = "custom";
+        String include_string = "custom,channel,totalCount,customChannel";
         return pubnub_handle->set_memberships(current_user.user_id(), set_memberships_string, include_string);
     }();
 
@@ -361,8 +360,6 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
     std::vector<Membership> memberships;
     for (auto& element : channels_array_json)
     {
-        //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
-        String test = String(element["channel"].dump());
         ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
         String channel_id = String(element["channel"]["id"]);
 

@@ -44,7 +44,7 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
         auto pubnub_handle = this->pubnub->lock();
 
         //TODO: Add filter when it will be supported in C-Core
-        String include_string = "totalCount,customFields,channelFields,customChannelFields";
+        String include_string = "custom,channel,totalCount,customChannel";
         user_id = pubnub_handle->get_user_id();
         pubnub_handle->set_memberships(pubnub_handle->get_user_id(), create_set_memberships_object(final_channel_id), include_string);
     }
@@ -74,7 +74,7 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
         user_id = pubnub_handle->get_user_id();
 
         //TODO: Add filter when it will be supported in C-Core
-        String include_string = "totalCount,customFields,channelFields,customChannelFields";
+        String include_string = "custom,channel,totalCount,customChannel";
         String memberships_response = pubnub_handle->set_memberships(user_id, create_set_memberships_object(final_channel_id), include_string);
     }
 
