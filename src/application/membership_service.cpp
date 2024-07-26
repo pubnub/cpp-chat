@@ -317,7 +317,9 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
     }
 
     std::vector<String> relevant_channel_ids;
+    String now_timetoken = get_now_timetoken();
 
+    //For all memberships get custom data, add current timetoken as lastReadMessageTimetoken and combine everything to SetMembers payload
     String set_memberships_string = String("[");
     for(auto membership : user_memberships)
     {
@@ -325,7 +327,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
         
         String custom_object_json_string = membership.custom_data().empty() ? String("{}") : membership.custom_data();
         json custom_object_json = json::parse(custom_object_json_string);
-        custom_object_json["lastReadMessageTimetoken"] = get_now_timetoken().c_str();
+        custom_object_json["lastReadMessageTimetoken"] = now_timetoken.c_str();
 
         set_memberships_string += String("{\"channel\": {\"id\": \"") + membership.channel.channel_id() + String("\"}, \"custom\": ") + custom_object_json.dump() + String("},");
     }
@@ -352,21 +354,42 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get memberships, response is incorrect");
+        throw std::runtime_error("can't mark all messages as read, set memberships response is incorrect");
     }
 
     Json channels_array_json = response_json["data"];
 
+    //Create new memberships with updated values from response
     std::vector<Membership> memberships;
     for (auto& element : channels_array_json)
     {
-        ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
         String channel_id = String(element["channel"]["id"]);
+
+        //Skip channels that are not in original request. TODO:: make this easier with filter
+        bool is_in_channels = false;
+        for (auto relevant_channel : relevant_channel_ids)
+        {
+            if (channel_id == relevant_channel)
+            {
+                is_in_channels = true;
+                break;
+            }
+        }
+        if (!is_in_channels)
+        {
+            continue;
+        }
+
+        ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
 
         Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_entity});
 
         Membership membership = this->create_membership_object(current_user, channel);
         memberships.push_back(membership);
+
+        //Emit events for updated memberships
+        String event_payload = String("{\"messageTimetoken\": \"") + now_timetoken + String("\"}");
+        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, channel_id, event_payload);
     }
     int total = response_json.get_int("totalCount").value_or(0);
     int status = response_json.get_int("status").value_or(0);
