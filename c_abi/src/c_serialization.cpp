@@ -14,6 +14,9 @@
 #include <pubnub_helper.h>
 #include "application/chat_service.hpp"
 #include "application/message_service.hpp"
+#include "application/channel_service.hpp"
+#include "application/user_service.hpp"
+#include "application/membership_service.hpp"
 
 extern "C" {
     #include <pubnub_api_types.h>
@@ -40,14 +43,14 @@ Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* m
 }
 
 Pubnub::Channel* pn_deserialize_channel(Pubnub::Chat* chat, pubnub_v2_message* channel_json) {
-    if (!Deserialization::is_channel_update_message(Pubnub::String(channel_json->payload.ptr, channel_json->payload.size))) {
+    if (!Parsers::PubnubJson::is_channel_update(Pubnub::String(channel_json->payload.ptr, channel_json->payload.size))) {
         pn_c_set_error_message("Message is not a chat channel");
 
         return PN_C_ERROR_PTR;
     }
 
     try {
-        return new Pubnub::Channel(Deserialization::pubnub_message_to_chat_channel(*chat, *channel_json));
+        return new Pubnub::Channel(chat->get_chat_service()->channel_service->create_channel_object(Parsers::PubnubJson::to_channel(*channel_json)));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -56,14 +59,14 @@ Pubnub::Channel* pn_deserialize_channel(Pubnub::Chat* chat, pubnub_v2_message* c
 }
 
 Pubnub::User* pn_deserialize_user(Pubnub::Chat* chat, pubnub_v2_message* user_json) {
-    if (!Deserialization::is_user_update_message(Pubnub::String(user_json->payload.ptr, user_json->payload.size))) {
+    if (!Parsers::PubnubJson::is_user_update(Pubnub::String(user_json->payload.ptr, user_json->payload.size))) {
         pn_c_set_error_message("Message is not a chat user");
 
         return PN_C_ERROR_PTR;
     }
 
     try {
-        return new Pubnub::User(Deserialization::pubnub_message_to_chat_user(*chat, *user_json));
+        return new Pubnub::User(chat->get_chat_service()->user_service->create_user_object(Parsers::PubnubJson::to_user(*user_json)));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -72,7 +75,7 @@ Pubnub::User* pn_deserialize_user(Pubnub::Chat* chat, pubnub_v2_message* user_js
 }
 
 PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
-    if (!Deserialization::is_event_message(Pubnub::String(event_json->payload.ptr, event_json->payload.size))) {
+    if (!Parsers::PubnubJson::is_event(Pubnub::String(event_json->payload.ptr, event_json->payload.size))) {
         pn_c_set_error_message("Message is not a chat event");
 
         return PN_C_ERROR;
@@ -80,7 +83,7 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
 
     try {
         //TODO: temporary to have channel ID, will be removed once Event is a proper entity
-        auto string = Deserialization::pubnub_message_to_string(*event_json);
+        auto string = Parsers::PubnubJson::to_string(*event_json);
         string.erase(string.length() - 1);
         string += ", \"channelId\": ";
         Pubnub::String channel_string = "\"";
@@ -98,7 +101,7 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
 }
 
 PnCResult pn_deserialize_presence(pubnub_v2_message* presence_json, char* result) {
-    if (!Deserialization::is_presence_message(Pubnub::String(presence_json->payload.ptr, presence_json->payload.size))) {
+    if (!Parsers::PubnubJson::is_presence(Pubnub::String(presence_json->payload.ptr, presence_json->payload.size))) {
         pn_c_set_error_message("Message is not a chat presence");
 
         return PN_C_ERROR;
@@ -117,7 +120,7 @@ PnCResult pn_deserialize_presence(pubnub_v2_message* presence_json, char* result
 }
 
 Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update) {
-    if (!Deserialization::is_message_update_message(Pubnub::String(message_update->payload.ptr, message_update->payload.size))) {
+    if (!Parsers::PubnubJson::is_message_update(Pubnub::String(message_update->payload.ptr, message_update->payload.size))) {
         pn_c_set_error_message("Message is not a chat message update");
 
         return PN_C_ERROR_PTR;
@@ -146,7 +149,7 @@ Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_mes
 }
 
 Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_message* membership) {
-    if (!Deserialization::is_membership_update_message(Pubnub::String(membership->payload.ptr, membership->payload.size))) {
+    if (!Parsers::PubnubJson::is_membership_update(Pubnub::String(membership->payload.ptr, membership->payload.size))) {
         pn_c_set_error_message("Message is not a chat membership update");
 
         return PN_C_ERROR_PTR;
@@ -170,8 +173,11 @@ Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_mess
         // if the strings are not kept alive - the ccore cannot find the user/channel
         auto channel_obj = chat->get_channel(channel_string_cleaned);
         auto user_obj = chat->get_user(user_string_cleaned);
+        auto membership_service = chat->get_chat_service()->membership_service;
+        auto user_service = chat->get_chat_service()->user_service;
+        auto channel_service = chat->get_chat_service()->channel_service;
 
-        return new Pubnub::Membership(*chat, channel_obj, user_obj, membership_string);
+        return new Pubnub::Membership(chat->get_chat_service()->membership_service->create_membership_object(user_service->get_user(user_string_cleaned), channel_service->get_channel(channel_string_cleaned), Parsers::PubnubJson::membership_from_string(membership_string)));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

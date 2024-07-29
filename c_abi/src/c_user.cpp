@@ -119,7 +119,7 @@ PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
     std::vector<Pubnub::String> channels;
 
     try {
-        channels = user->where_present();
+        channels = user->where_present().into_std_vector();
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
