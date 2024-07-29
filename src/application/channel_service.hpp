@@ -35,7 +35,9 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void delete_channel(const Pubnub::String& channel_id) const;
         Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
+#ifndef PN_CHAT_C_ABI
         void connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
+#endif
         void disconnect(const Pubnub::String& channel_id) const;
         void join(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
         void leave(const Pubnub::String& channel_id) const;
@@ -70,6 +72,11 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
 
         friend class ::MembershipService;
+
+#ifdef PN_CHAT_C_ABI
+    public:
+        std::vector<Pubnub::String> connect(const Pubnub::String& channel_id) const;
+#endif
 };
 
 #endif // PN_CHAT_CHANNEL_SERVICE_HPP

@@ -8,6 +8,7 @@
 #include "restrictions.hpp"
 #include <iostream>
 #include <sstream>
+#include "application/channel_service.hpp"
 
 void pn_channel_delete(Pubnub::Channel* channel) {
     delete channel;
@@ -118,9 +119,7 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
     try {
-        // TODO:
-        //auto messages = channel->connect_and_get_messages();
-        auto messages = std::vector<Pubnub::String>();
+        auto messages = channel->connect();
         auto jsonised = jsonize_messages2(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
@@ -294,7 +293,7 @@ PnCTribool pn_channel_is_present(Pubnub::Channel* channel, const char* user_id) 
 
 PnCResult pn_channel_who_is_present(Pubnub::Channel* channel, char* result) {
     try {
-        auto present = channel->who_is_present();
+        auto present = channel->who_is_present().into_std_vector();
         auto jsonised = jsonize_messages3(present);
         strcpy(result, jsonised);
         delete[] jsonised;
@@ -452,7 +451,7 @@ PnCResult pn_channel_invite_multiple(Pubnub::Channel* channel, Pubnub::User** us
         {
             users_vector.push_back(*users[i]);
         }
-        auto memberships = channel->invite_multiple(users_vector);
+        auto memberships = channel->invite_multiple(std::move(users_vector));
         
         if (memberships.size() == 0) {
             memcpy(result_json, "[]\0", 3);

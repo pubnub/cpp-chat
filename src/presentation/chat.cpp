@@ -149,8 +149,7 @@ MarkMessagesAsReadWrapper Pubnub::Chat::mark_all_messages_as_read(const Pubnub::
 
 #ifdef PN_CHAT_C_ABI
 
-ChatService* Chat::get_chat_service()
-{
+const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
 }
 

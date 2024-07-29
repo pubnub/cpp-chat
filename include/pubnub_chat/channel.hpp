@@ -48,7 +48,9 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data() const;
 
             PN_CHAT_EXPORT Pubnub::Channel update(const ChatChannelData& in_additional_channel_data) const;
+#ifndef PN_CHAT_C_ABI
             PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback) const;
+#endif
             PN_CHAT_EXPORT void disconnect() const;
             PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, const Pubnub::String& additional_params = "") const;
             PN_CHAT_EXPORT void leave() const;
@@ -99,6 +101,11 @@ namespace Pubnub
             std::shared_ptr<const MembershipService> membership_service;
 
         friend class ::ChannelService;
+
+#ifdef PN_CHAT_C_ABI
+        public:
+        std::vector<Pubnub::String> connect() const;
+#endif
     };
 };
 

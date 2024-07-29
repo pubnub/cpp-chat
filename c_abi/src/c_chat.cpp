@@ -8,13 +8,19 @@
 #include <string>
 #include <sstream>
 
+// TODO: add config
 Pubnub::Chat* pn_chat_new(
         const char* publish,
         const char* subscribe,
         const char* user_id) {
 
     try {
-        auto* chat = new Pubnub::Chat(publish, subscribe, user_id);
+        Pubnub::ChatConfig config {
+            .publish_key = publish,
+            .subscribe_key = subscribe,
+            .user_id = user_id
+        };
+        auto* chat = new Pubnub::Chat(config);
         return chat;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -496,7 +502,7 @@ Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
             users_vector.push_back(*users[i]);
         }
 
-        return new Pubnub::CreatedChannelWrapper(chat->create_group_conversation(users_vector, channel_id, converted_data));
+        return new Pubnub::CreatedChannelWrapper(chat->create_group_conversation(Pubnub::Vector(std::move(users_vector)), channel_id, converted_data));
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());

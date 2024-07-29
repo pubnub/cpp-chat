@@ -72,9 +72,15 @@ Channel Channel::update(const ChatChannelData& in_additional_channel_data) const
     return this->channel_service->update_channel(channel_id_internal, ChannelDAO(in_additional_channel_data));
 }
 
+#ifndef PN_CHAT_C_ABI
 void Channel::connect(std::function<void(Message)> message_callback) const {
     this->channel_service->connect(channel_id_internal, message_callback);
 }
+#else 
+std::vector<Pubnub::String> Channel::connect() const {
+    return this->channel_service->connect(channel_id_internal);
+}
+#endif
 
 void Channel::disconnect() const {
     this->channel_service->disconnect(channel_id_internal);
@@ -190,3 +196,4 @@ void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presen
 void Channel::forward_message(const Message& message) const {
     this->message_service->forward_message(message, channel_id_internal);
 }
+

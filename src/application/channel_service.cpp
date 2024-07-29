@@ -197,13 +197,16 @@ Channel ChannelService::unpin_message_from_channel(const String& channel_id, con
     return this->update_channel(channel_id, channel_data.to_entity().unpin_message());
 }
 
+#ifndef PN_CHAT_C_ABI
 void ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
+#else
+std::vector<Pubnub::String> ChannelService::connect(const String& channel_id) const {
+#endif // PN_CHAT_C_ABI
     auto messages = [this, channel_id] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
     }();
 
-    // TODO: C ABI way
 #ifndef PN_CHAT_C_ABI
     if (auto chat = this->chat_service.lock()) {
         // First broadcast messages because they're not related to the new callback
@@ -212,6 +215,8 @@ void ChannelService::connect(const String& channel_id, std::function<void(Messag
     } else {
         throw std::runtime_error("Chat service is not available to connect to channel");
     }
+#else
+    return messages;
 #endif // PN_CHAT_C_ABI
 }
 

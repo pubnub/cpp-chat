@@ -28,11 +28,11 @@ class CallbackService;
 
 namespace Pubnub {
     struct ChatConfig {
-        Pubnub::String publish_key;
-        Pubnub::String subscribe_key;
-        Pubnub::String secret_key;
-        Pubnub::String user_id;
-        Pubnub::String auth_key;
+        Pubnub::String publish_key = "";
+        Pubnub::String subscribe_key = "";
+        Pubnub::String secret_key = "";
+        Pubnub::String user_id = "";
+        Pubnub::String auth_key = "";
     };
 
     struct CreatedChannelWrapper
@@ -123,7 +123,7 @@ namespace Pubnub {
             std::shared_ptr<CallbackService> callback_service;
 #else
         public:
-            ChatService* get_chat_service();
+            const ChatService* get_chat_service() const;
 #endif
 
     };
