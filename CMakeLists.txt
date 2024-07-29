@@ -36,10 +36,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
 
 include(FetchContent)
 
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(USE_GRANT_TOKEN_API ON)
+# TODO: switch back to master branch
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG master
+  GIT_TAG feat/new-objects-vol2
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
@@ -83,6 +86,7 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/parsers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp)
 
 set(APP_SOURCES
@@ -94,6 +98,7 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/restrictions_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/access_manager_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp

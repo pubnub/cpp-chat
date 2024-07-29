@@ -23,6 +23,7 @@ extern "C" {
 #include <pubnub_fetch_history.h>
 #include <pubnub_actions_api.h>
 #include <pubnub_advanced_history.h>
+#include <pubnub_grant_token_api.h>
 }
 
 using json = nlohmann::json;
@@ -662,3 +663,7 @@ Pubnub::String PubNub::get_comma_sep_string_from_vector(std::vector<Pubnub::Stri
     return final_string;
 }
 
+Pubnub::String PubNub::parse_token(const Pubnub::String auth_key) 
+{
+    return pubnub_parse_token(this->main_context.get(), auth_key.c_str());
+}

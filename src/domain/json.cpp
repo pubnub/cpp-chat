@@ -122,3 +122,8 @@ Json Json::Iterator::value() const {
 Pubnub::String Json::Iterator::key() const {
     return this->it.key();
 }
+
+int Json::as_int() const {
+    return this->json.get<int>();
+}
+

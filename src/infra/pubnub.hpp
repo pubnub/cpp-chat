@@ -65,6 +65,8 @@ public:
     void remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken);
     std::map<Pubnub::String, int, Pubnub::StringComparer> message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps);
 
+    Pubnub::String parse_token(const Pubnub::String auth_key) ;
+
 private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);

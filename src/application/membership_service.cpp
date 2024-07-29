@@ -361,7 +361,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 
     //Create new memberships with updated values from response
     std::vector<Membership> memberships;
-    for (auto& element : channels_array_json)
+    for (auto element : channels_array_json)
     {
         String channel_id = String(element["channel"]["id"]);
 
