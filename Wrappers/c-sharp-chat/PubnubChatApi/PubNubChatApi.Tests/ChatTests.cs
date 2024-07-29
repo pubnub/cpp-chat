@@ -27,8 +27,7 @@ public class ChatTests
         var directConversation =
             chat.CreateDirectConversation(convoUser, "direct_conversation_test");
         Assert.True(directConversation.createdChannel is { Id: "direct_conversation_test" });
-        //TODO: waiting for C++ side fix
-        //Assert.True(directConversation.hostMembership != null && directConversation.hostMembership.UserId == user.Id);
+        Assert.True(directConversation.hostMembership != null && directConversation.hostMembership.UserId == user.Id);
         Assert.True(directConversation.inviteeMembership != null &&
                     directConversation.inviteeMembership.UserId == convoUser.Id);
     }
