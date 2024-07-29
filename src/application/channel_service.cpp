@@ -16,6 +16,9 @@
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 #include "application/callback_service.hpp"
+#ifdef PN_CHAT_C_ABI
+#include "domain/parsers.hpp"
+#endif // PN_CHAT_C_ABI
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -216,7 +219,11 @@ std::vector<Pubnub::String> ChannelService::connect(const String& channel_id) co
         throw std::runtime_error("Chat service is not available to connect to channel");
     }
 #else
-    return messages;
+    auto messages_strings = std::vector<String>();
+    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_strings), [](pubnub_v2_message message) {
+        return Parsers::PubnubJson::to_string(message);
+    });
+    return messages_strings;
 #endif // PN_CHAT_C_ABI
 }
 
@@ -235,7 +242,11 @@ void ChannelService::disconnect(const String& channel_id) const {
 #endif // PN_CHAT_C_ABI
 }
 
+#ifndef PN_CHAT_C_ABI
 void ChannelService::join(const String& channel_id, std::function<void(Message)> message_callback, const String& additional_params) const {
+#else
+std::vector<Pubnub::String> ChannelService::join(const String& channel_id, const String& additional_params) const {
+#endif // PN_CHAT_C_ABI
     String set_object_string = create_set_memberships_object(channel_id, additional_params);
 
     {
@@ -244,7 +255,11 @@ void ChannelService::join(const String& channel_id, std::function<void(Message)>
         pubnub_handle->set_memberships(user_id, set_object_string);
     }
 
+#ifndef PN_CHAT_C_ABI
     this->connect(channel_id, message_callback);
+#else
+    return this->connect(channel_id);
+#endif // PN_CHAT_C_ABI
 }
 
 void ChannelService::leave(const String& channel_id) const {

@@ -37,9 +37,9 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
 #ifndef PN_CHAT_C_ABI
         void connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
+        void join(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
 #endif
         void disconnect(const Pubnub::String& channel_id) const;
-        void join(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
         void leave(const Pubnub::String& channel_id) const;
         void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String& meta_data) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
@@ -76,6 +76,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 #ifdef PN_CHAT_C_ABI
     public:
         std::vector<Pubnub::String> connect(const Pubnub::String& channel_id) const;
+        std::vector<Pubnub::String> join(const Pubnub::String& channel_id, const Pubnub::String& additional_params = "") const;
 #endif
 };
 

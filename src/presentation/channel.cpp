@@ -76,18 +76,22 @@ Channel Channel::update(const ChatChannelData& in_additional_channel_data) const
 void Channel::connect(std::function<void(Message)> message_callback) const {
     this->channel_service->connect(channel_id_internal, message_callback);
 }
+
+void Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
+    this->channel_service->join(channel_id_internal, message_callback, additional_params);
+}
 #else 
 std::vector<Pubnub::String> Channel::connect() const {
     return this->channel_service->connect(channel_id_internal);
+}
+
+std::vector<Pubnub::String> Channel::join(const Pubnub::String& additional_params) const {
+    return this->channel_service->join(channel_id_internal, additional_params);
 }
 #endif
 
 void Channel::disconnect() const {
     this->channel_service->disconnect(channel_id_internal);
-}
-
-void Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
-    this->channel_service->join(channel_id_internal, message_callback, additional_params);
 }
 
 void Channel::leave() const {
@@ -193,6 +197,7 @@ void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presen
     };
     this->presence_service->stream_presence(channel_id(), new_callback);
 }
+
 void Channel::forward_message(const Message& message) const {
     this->message_service->forward_message(message, channel_id_internal);
 }
