@@ -113,9 +113,15 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, const String&
     this->chat_service->emit_chat_event(chat_event_type, channel_id, payload);
 }
 
+#ifndef PN_CHAT_C_ABI
 void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const String&)> event_callback) const {
     this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
 }
+#else
+std::vector<Pubnub::String> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
+    return this->chat_service->listen_for_events(channel_id, chat_event_type);
+}
+#endif
 
 void Chat::forward_message(const Message& message, const Channel& channel) const {
     this->message_service->forward_message(message, channel.channel_id());

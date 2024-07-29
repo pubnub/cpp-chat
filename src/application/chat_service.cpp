@@ -74,5 +74,11 @@ void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pu
     // First broadcast messages because they're not related to the new callback
     this->callback_service->broadcast_messages(messages);
     this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
+#else
+    std::vector<Pubnub::String> messages_vector;
+    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_vector), [](pubnub_v2_message message) {
+        return Parsers::PubnubJson::to_string(message);
+    });
+    return messages_vector;
 #endif
 }
