@@ -4,7 +4,9 @@
 #include "application/dao/user_dao.hpp"
 #include "application/user_service.hpp"
 #include "application/channel_service.hpp"
+#include "application/access_manager_service.hpp"
 #include "chat_helpers.hpp"
+#include "domain/access_manager.hpp"
 #include "domain/membership_entity.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
@@ -13,6 +15,7 @@
 #include "callback_service.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "domain/json.hpp"
+#include <iostream>
 #include <memory>
 #include <chrono>
 
@@ -245,8 +248,16 @@ Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Memb
 
     auto chat_service_shared = this->chat_service.lock();
 
-    String event_payload = String("{\"messageTimetoken\": \"") + timetoken + String("\"}");
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
+    auto can_i_emit = chat_service_shared->access_manager_service->can_i(
+            AccessManager::Permission::WRITE, AccessManager::ResourceType::CHANNELS, membership.channel.channel_id());
+
+    if(can_i_emit) {
+        String event_payload = String("{\"messageTimetoken\": \"") + timetoken + String("\"}");
+        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
+    } else {
+        // TODO: right now we don't have a logger yet
+        std::cerr << "Can't emit chat event, user doesn't have permissions" << std::endl;
+    }
 
     return new_membership;
 }
