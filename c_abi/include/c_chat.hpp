@@ -37,6 +37,19 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CreatedChannelWrapper* pn_chat_create_dire
     char* channel_type
 );
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
+    Pubnub::Chat* chat,
+    Pubnub::User** users,
+    int users_length,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type
+);
+
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_chat_get_created_channel_wrapper_channel(
     Pubnub::CreatedChannelWrapper* wrapper);
 

@@ -41,9 +41,8 @@ public class ChatTests
         var groupConversation =
             chat.CreateGroupConversation([convoUser1, convoUser2, convoUser3], "group_conversation_test");
         Assert.True(groupConversation.createdChannel is { Id: "group_conversation_test" });
-        //TODO: waiting for C++ side fix
-        //Assert.True(directConversation.hostMembership != null && directConversation.hostMembership.UserId == user.Id);
-        Assert.True(groupConversation.inviteeMemberships is { Count: 4 });
+        Assert.True(groupConversation.hostMembership != null && groupConversation.hostMembership.UserId == user.Id);
+        Assert.True(groupConversation.inviteeMemberships is { Count: 3 });
         Assert.True(groupConversation.inviteeMemberships.Any(x =>
             x.UserId == convoUser1.Id && x.ChannelId == "group_conversation_test"));
     }

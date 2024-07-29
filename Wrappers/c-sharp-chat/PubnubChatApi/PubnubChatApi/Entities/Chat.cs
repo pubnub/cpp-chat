@@ -556,11 +556,10 @@ namespace PubNubChatAPI.Entities
             var createdChannelPointer = pn_chat_get_created_channel_wrapper_channel(wrapperPointer);
             CUtilities.CheckCFunctionResult(createdChannelPointer);
             TryGetChannel(createdChannelPointer, out var createdChannel);
-
-            //TODO: waiting for C++ side fix
-            /*var hostMembershipPointer = pn_chat_get_created_channel_wrapper_host_membership(wrapperPointer);
+            
+            var hostMembershipPointer = pn_chat_get_created_channel_wrapper_host_membership(wrapperPointer);
             CUtilities.CheckCFunctionResult(hostMembershipPointer);
-            TryGetMembership(hostMembershipPointer, out var hostMembership);*/
+            TryGetMembership(hostMembershipPointer, out var hostMembership);
 
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(
@@ -569,7 +568,7 @@ namespace PubNubChatAPI.Entities
             
             pn_chat_dispose_created_channel_wrapper(wrapperPointer);
 
-            return (createdChannel, null, inviteeMemberships);
+            return (createdChannel, hostMembership, inviteeMemberships);
         }
 
         /// <summary>
