@@ -252,7 +252,7 @@ Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Memb
             AccessManager::Permission::WRITE, AccessManager::ResourceType::CHANNELS, membership.channel.channel_id());
 
     if(can_i_emit) {
-        String event_payload = String("{\"messageTimetoken\": \"") + timetoken + String("\"}");
+        String event_payload = "{\"messageTimetoken\": " + timetoken +", \"userId\": \"" + membership.user.user_id() + "\"}";
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
     } else {
         // TODO: right now we don't have a logger yet
@@ -399,7 +399,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
         memberships.push_back(membership);
 
         //Emit events for updated memberships
-        String event_payload = String("{\"messageTimetoken\": \"") + now_timetoken + String("\"}");
+        String event_payload = "{\"messageTimetoken\": " + now_timetoken +", \"userId\": \"" + membership.user.user_id() + "\"}";
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, channel_id, event_payload);
     }
     int total = response_json.get_int("totalCount").value_or(0);

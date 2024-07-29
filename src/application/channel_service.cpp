@@ -449,7 +449,18 @@ void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, cons
         
     }
 
+    read_receipts_callback(generate_receipts(timetoken_per_user));
 
+    auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::String& event){
+
+        json payload_json = json::parse(event);
+
+        timetoken_per_user[String(payload_json["user_id"])] = String(payload_json["messageTimetoken"]);
+
+        read_receipts_callback(generate_receipts(timetoken_per_user));
+    };
+
+    chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
 }
 
 String ChannelService::get_thread_id(const Pubnub::Message& message)
