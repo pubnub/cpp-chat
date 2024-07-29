@@ -14,11 +14,10 @@ int main() {
     std::string sub_key = "sub-c-2b4db8f2-c025-4a76-9e23-326123298667";
     std::string user = "hehehe";
 
-    Pubnub::ChatConfig config = {
-        .publish_key = pub_key,
-        .subscribe_key = sub_key,
-        .user_id = user
-    };
+    Pubnub::ChatConfig config;
+    config.publish_key = pub_key;
+    config.subscribe_key = sub_key;
+    config.user_id = user;
 
     Pubnub::Chat chat(config);
 
