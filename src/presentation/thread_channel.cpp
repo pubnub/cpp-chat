@@ -1,4 +1,5 @@
 #include "thread_channel.hpp"
+#include "application/channel_service.hpp"
 #include "application/dao/channel_dao.hpp"
 
 
@@ -39,4 +40,21 @@ ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
     this->parent_message = other.parent_message;
 
     return *this;
+}
+
+void Pubnub::ThreadChannel::send_text(const Pubnub::String &message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String &meta_data) const
+{
+    //If this is new thread, set all server data before sending the first message (this is actually creating the thread, even if the object was created earlier)
+    if(!is_thread_created)
+    {
+        this->channel_service->confirm_creating_thread(*this);
+        is_thread_created = true;
+    }
+
+    Channel::send_text(message, message_type, meta_data);
+}
+
+void Pubnub::ThreadChannel::set_is_thread_created(bool is_created) 
+{
+    this->is_thread_created = is_created;
 };

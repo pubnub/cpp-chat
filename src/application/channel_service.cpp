@@ -1,4 +1,5 @@
 #include "channel_service.hpp"
+#include "thread_channel.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "chat_service.hpp"
 #include "domain/channel_entity.hpp"
@@ -507,14 +508,9 @@ ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& messa
     auto channel_entity = channel_dao.to_entity();
 
     auto new_thread_channel = create_thread_channel_object({thread_id, channel_entity}, message);
-
-    {
-        auto pubnub_handle = this->pubnub->lock();
-        pubnub_handle->set_channel_metadata(thread_id, channel_entity.get_channel_metadata_json_string(thread_id));
-        String message_action_value = String("{\"value\": \"}") + thread_id + String("\"}");
-        pubnub_handle->add_message_action(message.message_data().channel_id, message.timetoken(), "threadRootId", message_action_value);
-    }
-    //TODO:: this code is very complex here in JS CHAT. Check with Piotr if it does everything that it should do.
+    //This thread is not created yet, it will be after sending the first message to this thread.
+    //This is to avoid creating threads without any messages
+    new_thread_channel.set_is_thread_created(false);
 
     return new_thread_channel;
 
@@ -526,6 +522,15 @@ ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message)
 
     throw std::runtime_error("I will continue work here");
     
+}
+
+void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel thread_channel)
+{
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->set_channel_metadata(thread_channel.channel_id(), channel_entity.get_channel_metadata_json_string(thread_channel.channel_id()));
+    String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
+    pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
+
 }
 
 Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> channel_data) const
