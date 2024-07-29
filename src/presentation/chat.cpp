@@ -12,10 +12,10 @@
 
 using namespace Pubnub;
 
-Chat::Chat(String publish_key, String subscribe_key, String user_id) :
+Chat::Chat(const ChatConfig& config) :
     chat_service(
             std::make_shared<ChatService>(
-                ChatService::create_pubnub(publish_key, subscribe_key, user_id)
+                ChatService::create_pubnub(config.publish_key, config.subscribe_key, config.user_id)
             )
         )
 {

@@ -14,7 +14,13 @@ int main() {
     std::string sub_key = "sub-c-2b4db8f2-c025-4a76-9e23-326123298667";
     std::string user = "hehehe";
 
-    Pubnub::Chat chat(pub_key.c_str(), sub_key.c_str(), user.c_str());
+    Pubnub::ChatConfig config = {
+        .publish_key = pub_key,
+        .subscribe_key = sub_key,
+        .user_id = user
+    };
+
+    Pubnub::Chat chat(config);
 
     // auto vecint = chat.TestVector();
 

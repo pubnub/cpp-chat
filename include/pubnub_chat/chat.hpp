@@ -26,6 +26,13 @@ class CallbackService;
 #endif
 
 namespace Pubnub {
+    struct ChatConfig {
+        Pubnub::String publish_key;
+        Pubnub::String subscribe_key;
+        Pubnub::String secret_key;
+        Pubnub::String user_id;
+        Pubnub::String auth_key;
+    };
 
     struct CreatedChannelWrapper
     {
@@ -63,7 +70,7 @@ namespace Pubnub {
 
     class Chat {
         public:
-            PN_CHAT_EXPORT Chat(String publish_key, String subscribe_key, String user_id);
+            PN_CHAT_EXPORT Chat(const ChatConfig& config);
 
             /* CHANNELS */
 
