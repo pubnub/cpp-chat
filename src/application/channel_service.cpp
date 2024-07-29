@@ -407,6 +407,51 @@ void ChannelService::stream_updates_on(const std::vector<Pubnub::String>& channe
 #endif // PN_CHAT_C_ABI
 }
 
+void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+{
+    if(channel_data.get_entity().type == String("public"))
+    {
+        throw std::runtime_error("Read receipts are not supported in Public chats");
+    }
+
+    auto chat_service_shared = chat_service.lock();
+
+    auto generate_receipts = [=](std::map<String, String, StringComparer> in_timetoken_per_user) -> std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>
+    {
+        std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer> receipts;
+
+        for(auto it = in_timetoken_per_user.begin(); it != in_timetoken_per_user.end(); it++)
+        {
+            //If there is no key with such timetoken yet, just add empty array
+            if(receipts.find(it->second) == receipts.end())
+            {
+                receipts[it->second] = {};
+            }
+            receipts[it->second].push_back(it->first);
+        }
+
+        return receipts;
+
+    };
+    std::map<String, String, StringComparer> timetoken_per_user;
+
+    auto channel_members = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
+
+    for(auto membership : channel_members)
+    {
+        String last_read_timetoken = membership.last_read_message_timetoken();
+        if(last_read_timetoken.empty())
+        {
+            continue;
+        }
+
+        timetoken_per_user[membership.user.user_id()] =  last_read_timetoken;
+        
+    }
+
+
+}
+
 String ChannelService::get_thread_id(const Pubnub::Message& message)
 {
     return MESSAGE_THREAD_ID_PREFIX + "_" + message.message_data().channel_id + "_" + message.timetoken();

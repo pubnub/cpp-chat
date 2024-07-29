@@ -8,6 +8,7 @@
 #include "infra/sync.hpp"
 #include <memory>
 #include <vector>
+#include <map>
 
 class EntityRepository;
 class PubNub;
@@ -48,6 +49,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         
         void stream_updates_on(const std::vector<Pubnub::String>& channel_ids, std::function<void(Pubnub::Channel)> channel_callback) const;
+        void stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
         /* THREADS */
         Pubnub::String get_thread_id(const Pubnub::Message& message);

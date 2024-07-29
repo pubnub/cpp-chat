@@ -22,7 +22,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
     public:
         MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<const ChatService> chat_service);
 
-        std::vector<Pubnub::Membership> get_channel_members(const Pubnub::String& channel_id, const ChannelDAO& channel_data, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+        std::vector<Pubnub::Membership> get_channel_members(const Pubnub::String& channel_id, const ChannelDAO& channel_data, int limit = 0, const Pubnub::String& start_timetoken = "", const Pubnub::String& end_timetoken = "") const;
         std::vector<Pubnub::Membership> get_user_memberships(const Pubnub::String& user_id, const UserDAO& user_data, int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
         Pubnub::Membership invite_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::User& user) const;
         std::vector<Pubnub::Membership> invite_multiple_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const std::vector<Pubnub::User>& users) const;

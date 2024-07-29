@@ -198,6 +198,22 @@ void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presen
     this->presence_service->stream_presence(channel_id(), new_callback);
 }
 
+void Pubnub::Channel::stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+{
+    auto new_callback = [=](std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer> vec)
+    {
+        std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> final_map;
+
+        for(auto it = vec.begin(); it != vec.end(); it++)
+        {
+            final_map[it->first] = Pubnub::Vector<String>(std::move(it->second));
+        }
+
+        read_receipts_callback(final_map);
+    };
+
+}
+
 void Channel::forward_message(const Message& message) const {
     this->message_service->forward_message(message, channel_id_internal);
 }
