@@ -147,7 +147,6 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
 PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* messages_json) {
     try {
         auto messages = channel->join(additional_params);
-        auto messages = std::vector<Pubnub::String>();
         auto jsonised = jsonize_messages2(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;

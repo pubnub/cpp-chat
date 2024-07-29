@@ -120,7 +120,7 @@ set(SOURCES
 )
 
 if(${ENABLE_C_ABI})
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-D PN_CHAT_C_ABI")
+    add_compile_definitions(PN_CHAT_C_ABI)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/c_abi/include)
     set(SOURCES
         ${SOURCES}

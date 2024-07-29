@@ -15,11 +15,11 @@ Pubnub::Chat* pn_chat_new(
         const char* user_id) {
 
     try {
-        Pubnub::ChatConfig config {
-            .publish_key = publish,
-            .subscribe_key = subscribe,
-            .user_id = user_id
-        };
+        Pubnub::ChatConfig config; 
+            config.publish_key = publish;
+            config.subscribe_key = subscribe;
+            config.user_id = user_id;
+
         auto* chat = new Pubnub::Chat(config);
         return chat;
     } catch (std::exception& e) {

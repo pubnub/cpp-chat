@@ -9,8 +9,10 @@
 #include "application/callback_service.hpp"
 #include "application/access_manager_service.hpp"
 #include "chat.hpp"
+#include "domain/json.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
+#include "domain/parsers.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -58,6 +60,7 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const 
     pubnub_handle->publish(channel_id, event_message);
 }
 
+//Without C_ABI
 void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const {
     if(channel_id.empty())
     {
@@ -69,16 +72,27 @@ void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pu
         return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
     }();
 
-    // TODO: C ABI way
-#ifndef PN_CHAT_C_ABI
     // First broadcast messages because they're not related to the new callback
     this->callback_service->broadcast_messages(messages);
     this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
-#else
+}
+
+//With C_ABI
+std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
+    }
+
+    auto messages = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    }();
+
     std::vector<Pubnub::String> messages_vector;
     std::transform(messages.begin(), messages.end(), std::back_inserter(messages_vector), [](pubnub_v2_message message) {
         return Parsers::PubnubJson::to_string(message);
     });
     return messages_vector;
-#endif
+
 }
