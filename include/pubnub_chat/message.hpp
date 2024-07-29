@@ -46,6 +46,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type() const;
 
             PN_CHAT_EXPORT void pin() const;
+            PN_CHAT_EXPORT void unpin() const;
             PN_CHAT_EXPORT Pubnub::Message toggle_reaction(const Pubnub::String& reaction) const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::MessageAction> reactions() const;
             PN_CHAT_EXPORT bool has_user_reaction(const Pubnub::String& reaction) const;

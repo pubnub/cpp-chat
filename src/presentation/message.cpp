@@ -75,6 +75,25 @@ void Message::pin() const {
     channel.pin_message(*this);
 }
 
+void Message::unpin() const {
+    Channel channel = this->channel_service->get_channel(message_data().channel_id);
+
+    //Make sure that this message is pinned to the channel
+    bool is_this_message_pinned = false;
+    try {
+        auto pinned_message = channel.get_pinned_message();
+        is_this_message_pinned = timetoken() == pinned_message.timetoken();
+    } catch(const std::exception &e) {
+        is_this_message_pinned = false;
+    }
+
+    //Unpin the message if that's the pinned message
+    if(is_this_message_pinned)
+    {
+        channel.unpin_message();
+    }
+}
+
 Message Message::toggle_reaction(const String& reaction) const {
     return this->message_service->toggle_reaction(this->timetoken(), *this->data, reaction);
 }
