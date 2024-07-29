@@ -7,6 +7,7 @@
 #include "application/message_service.hpp"
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
+#include "application/access_manager_service.hpp"
 
 #include <iostream>
 
@@ -20,7 +21,7 @@ Chat::Chat(const ChatConfig& config) :
         )
 {
     // TODO: This is a hack to get around the fact that we can't call init_services() from the constructor
-    const_cast<ChatService*>(chat_service.get())->init_services();
+    const_cast<ChatService*>(chat_service.get())->init_services(config);
 
     channel_service = chat_service->channel_service;
     user_service = chat_service->user_service;

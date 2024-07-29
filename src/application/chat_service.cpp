@@ -7,6 +7,8 @@
 #include "application/restrictions_service.hpp"
 #include "application/membership_service.hpp"
 #include "application/callback_service.hpp"
+#include "application/access_manager_service.hpp"
+#include "chat.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 
@@ -17,13 +19,14 @@ ChatService::ChatService(ThreadSafePtr<PubNub> pubnub):
 pubnub(pubnub)
 {}
 
-void ChatService::init_services() {
+void ChatService::init_services(const ChatConfig& config) {
     channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this());
     user_service = std::make_shared<UserService>(pubnub, weak_from_this());
     message_service = std::make_shared<MessageService>(pubnub, weak_from_this());
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, weak_from_this());
+    access_manager_service = std::make_shared<AccessManagerService>(pubnub, config.auth_key);
 #ifndef PN_CHAT_C_ABI
     auto service_bundle = EntityServicesBundle{
         channel_service,

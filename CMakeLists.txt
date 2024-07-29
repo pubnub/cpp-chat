@@ -38,6 +38,8 @@ include(FetchContent)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(USE_GRANT_TOKEN_API ON)
+# TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
+set(PUBNUB_SDK_VERSION_SUFFIX "/CA-SDKC++/${PROJECT_VERSION}")
 # TODO: switch back to master branch
 FetchContent_Declare(
   pubnub

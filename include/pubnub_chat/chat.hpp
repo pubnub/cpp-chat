@@ -20,6 +20,7 @@ class PresenceService;
 class RestrictionsService;
 class MessageService;
 class MembershipService;
+class AccessManagerService;
 
 #ifndef PN_CHAT_C_ABI
 class CallbackService;

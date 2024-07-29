@@ -2,6 +2,11 @@
 #include "domain/access_manager.hpp"
 #include "domain/json.hpp"
 
+AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key):
+    pubnub(pubnub),
+    auth_key(auth_key)
+{}
+
 bool AccessManagerService::can_i(AccessManager::Permission permission, AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const {
     if (this->auth_key.empty()) {
         return true;
