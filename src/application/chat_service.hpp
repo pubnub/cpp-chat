@@ -18,6 +18,7 @@ class MembershipService;
 class EntityRepository;
 class PubNub;
 class AccessManagerService;
+struct pubnub_v2_message;
 
 class ChatService : public std::enable_shared_from_this<ChatService>
 {
@@ -44,7 +45,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<CallbackService> callback_service;
 
 #ifdef PN_CHAT_C_ABI
-        std::vector<Pubnub::String> get_chat_updates() const;
+        std::vector<pubnub_v2_message> get_chat_updates() const;
 #endif
 
 

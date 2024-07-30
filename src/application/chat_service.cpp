@@ -14,6 +14,10 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 
+extern "C" {
+    #include <pubnub_subscribe_v2.h>
+}
+
 using namespace Pubnub;
 using json = nlohmann::json;
 
@@ -99,18 +103,14 @@ std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String
 
 #ifdef PN_CHAT_C_ABI
 
-std::vector<Pubnub::String> ChatService::get_chat_updates() const
+std::vector<pubnub_v2_message> ChatService::get_chat_updates() const
 {
     auto messages = [this] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->fetch_messages();
     }();
 
-    auto messages_strings = std::vector<String>();
-    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_strings), [](pubnub_v2_message message) {
-        return Parsers::PubnubJson::to_string(message);
-    });
-    return messages_strings;
+    return messages;
 };
 
 #endif

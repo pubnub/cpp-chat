@@ -230,27 +230,28 @@ PnCResult pn_chat_delete_user(
     return PN_C_OK;
 }
 
-//TODO:: @Mateusz please check if this is correct. I had to change this function to work on Pubnub::String instead of messagev2
-const char* move_message_to_heap(std::vector<Pubnub::String> messages) {
+const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     if (messages.size() == 0) {
         char* empty_result = new char[3];
         memcpy(empty_result, "[]\0", 3);
         return empty_result;
     }
-
     Pubnub::String result = "[";
-        for (auto message : messages) {
-            result += message;
-            result += ",";
-        }  
-
+    for (auto message : messages) {
+        auto ptr = new pubnub_v2_message(message);
+        // TODO: utils void* to string
+#ifdef _WIN32
+        result += "0x";
+#endif
+        std::ostringstream oss;
+        oss << static_cast<void*>(ptr);
+        result += oss.str();
+        result += ",";
+    }
     result.erase(result.length() - 1);
     result += "]";
-    
     char* c_result = new char[result.length() + 1];
-
     memcpy(c_result, result.c_str(), result.length() + 1);
-
     return c_result;
 }
 

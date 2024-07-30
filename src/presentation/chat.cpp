@@ -9,6 +9,11 @@
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
 
+extern "C" {
+    #include <pubnub_subscribe_v2.h>
+}
+
+
 #include <iostream>
 
 using namespace Pubnub;
@@ -168,13 +173,18 @@ void Chat::remove_thread_channel(const Pubnub::Message& message) const
     this->channel_service->remove_thread_channel(message);
 }
 
+pubnub_v2_message Pubnub::Chat::test_message_v2()
+{
+    return pubnub_v2_message();
+}
+
 #ifdef PN_CHAT_C_ABI
 
 const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
 }
 
-std::vector<Pubnub::String> Chat::get_chat_updates() const
+std::vector<pubnub_v2_message> Chat::get_chat_updates() const
 {
     return this->chat_service->get_chat_updates();
 }
