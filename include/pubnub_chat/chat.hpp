@@ -22,7 +22,11 @@ class RestrictionsService;
 class MessageService;
 class MembershipService;
 class AccessManagerService;
+
+
+#ifdef PN_CHAT_C_ABI
 struct pubnub_v2_message;
+#endif
 
 #ifndef PN_CHAT_C_ABI
 class CallbackService;
@@ -136,7 +140,7 @@ namespace Pubnub {
 #else
         public:
             const ChatService* get_chat_service() const;
-            std::vector<Pubnub::String> listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
+            std::vector<pubnub_v2_message> listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
             std::vector<pubnub_v2_message> get_chat_updates() const;
 #endif
 

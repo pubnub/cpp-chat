@@ -18,7 +18,11 @@ class MembershipService;
 class EntityRepository;
 class PubNub;
 class AccessManagerService;
+
+
+#ifdef PN_CHAT_C_ABI
 struct pubnub_v2_message;
+#endif
 
 class ChatService : public std::enable_shared_from_this<ChatService>
 {
@@ -32,7 +36,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         //Without C_ABI
         void listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const;
         //With C_ABI
-        std::vector<Pubnub::String> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const;
+        std::vector<pubnub_v2_message> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const;
 
         std::shared_ptr<const ChannelService> channel_service;
         std::shared_ptr<const UserService> user_service;

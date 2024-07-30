@@ -123,7 +123,7 @@ void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type ch
     this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
 }
 #else
-std::vector<Pubnub::String> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
+std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
     return this->chat_service->listen_for_events(channel_id, chat_event_type);
 }
 #endif

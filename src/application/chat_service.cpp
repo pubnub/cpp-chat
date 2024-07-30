@@ -14,9 +14,11 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 
+#ifdef PN_CHAT_C_ABI
 extern "C" {
     #include <pubnub_subscribe_v2.h>
 }
+#endif
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -82,7 +84,7 @@ void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pu
 }
 
 //With C_ABI
-std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
+std::vector<pubnub_v2_message>  ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
@@ -92,12 +94,8 @@ std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
     }();
-
-    std::vector<Pubnub::String> messages_vector;
-    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_vector), [](pubnub_v2_message message) {
-        return Parsers::PubnubJson::to_string(message);
-    });
-    return messages_vector;
+    
+    return messages;
 
 }
 

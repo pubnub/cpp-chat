@@ -409,25 +409,12 @@ PnCResult pn_chat_listen_for_events(
         const char* channel_id,
         char* result) {
     try {
-        // TODO:
-        //auto events = chat->listen_for_events_and_get_last_messages(channel_id);
-        auto events = std::vector<Pubnub::String>();
+        //TODO:: Pass event type here?
+        auto messages = chat->listen_for_events(channel_id, Pubnub::pubnub_chat_event_type::PCET_CUSTOM);
+        auto jsonised = move_message_to_heap(messages);
+        strcpy(result, jsonised);
+        delete[] jsonised;
 
-        if (events.size() == 0) {
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
-
-        Pubnub::String string = "[";
-        for (auto event : events) {
-            string += event;
-            string += ",";
-        }
-
-        string.erase(string.length() - 1);
-        string += "]";
-
-        memcpy(result, string.c_str(), string.length() + 1);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
