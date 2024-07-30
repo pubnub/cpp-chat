@@ -22,23 +22,28 @@ public class ChatEventTests
     }
     
     [Test]
-    public async Task TestReportEvents()
+    public void TestReportEvents()
     {
+        var manualReportedEvent = new ManualResetEvent(false);
         chat.OnReportEvent += reportEvent =>
         {
             Assert.True(reportEvent.Json.Contains("some_reason"));
+            manualReportedEvent.Set();
         };
         chat.StartListeningForReportEvents();
         user.ReportUser("some_reason");
-        await Task.Delay(3000);
+        var reported = manualReportedEvent.WaitOne(4000);
+        Assert.IsTrue(reported);
     }
     
     [Test]
-    public async Task TestModerationEvents()
+    public void TestModerationEvents()
     {
+        var manualModerationEvent = new ManualResetEvent(false);
         chat.OnModerationEvent += moderationEvent =>
         {
             Assert.True(moderationEvent.Json.Contains("some_reason"));
+            manualModerationEvent.Set();
         };
         chat.StartListeningForUserModerationEvents(user.Id);
         user.SetRestriction(channel.Id, new Restriction()
@@ -47,6 +52,7 @@ public class ChatEventTests
             Mute = true,
             Reason = "some_reason"
         });
-        await Task.Delay(3000);
+        var moderationEventReceived = manualModerationEvent.WaitOne(5000);
+        Assert.IsTrue(moderationEventReceived);
     }
 }

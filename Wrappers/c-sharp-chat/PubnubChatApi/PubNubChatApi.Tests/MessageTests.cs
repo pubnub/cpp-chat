@@ -19,51 +19,62 @@ public class MessageTests
     }
 
     [Test]
-    public async Task TestSendAndReceive()
+    public void TestSendAndReceive()
     {
+        var manualReceiveEvent = new ManualResetEvent(false);
+        
         channel.OnMessageReceived += message =>
         {
             Assert.True(message.MessageText == "Test message text");
+            manualReceiveEvent.Set();
         };
         channel.SendText("Test message text");
-
-        await Task.Delay(3000);
+        
+        var received = manualReceiveEvent.WaitOne(4000);
+        Assert.IsTrue(received);
     }
 
     [Test]
-    public async Task TestTryGetMessage()
+    public void TestTryGetMessage()
     {
+        var manualReceiveEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += message =>
         {
             if (message.ChannelId == channel.Id)
             {
                 Assert.True(chat.TryGetMessage(channel.Id, message.TimeToken, out _));
+                manualReceiveEvent.Set();
             }
         };
         channel.SendText("something");
 
-        await Task.Delay(3000);
+        var received = manualReceiveEvent.WaitOne(4000);
+        Assert.IsTrue(received);
     }
     
     [Test]
-    public async Task TestEditMessage()
+    public void TestEditMessage()
     {
+        var manualUpdatedEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += message =>
         {
             message.EditMessageText("new-text");
             message.OnMessageUpdated += updatedMessage =>
             {
+                manualUpdatedEvent.Set();
                 Assert.True(updatedMessage.MessageText == "new-text");
             };
         };
         channel.SendText("something");
 
-        await Task.Delay(5000);
+        var receivedAndUpdated = manualUpdatedEvent.WaitOne(4000);
+        Assert.IsTrue(receivedAndUpdated);
     }
     
     [Test]
-    public async Task TestDeleteMessage()
+    public void TestDeleteMessage()
     {
+        var manualReceivedEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += async message =>
         {
             message.Delete();
@@ -71,15 +82,18 @@ public class MessageTests
             await Task.Delay(2000);
             
             Assert.True(message.IsDeleted);
+            manualReceivedEvent.Set();
         };
         channel.SendText("something");
 
-        await Task.Delay(7000);
+        var received = manualReceivedEvent.WaitOne(4000);
+        Assert.IsTrue(received);
     }
 
     [Test]
-    public async Task TestPinMessage()
+    public void TestPinMessage()
     {
+        var manualReceivedEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += async message =>
         {
             message.Pin();
@@ -88,9 +102,11 @@ public class MessageTests
             
             Console.WriteLine("lol");
             Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
+            manualReceivedEvent.Set();
         };
         channel.SendText("message to pin");
-        
-        await Task.Delay(6000);
+
+        var received = manualReceivedEvent.WaitOne(4000);
+        Assert.IsTrue(received);
     }
 }

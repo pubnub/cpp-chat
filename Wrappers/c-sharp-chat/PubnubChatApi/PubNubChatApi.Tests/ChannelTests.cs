@@ -8,6 +8,7 @@ public class ChannelTests
 {
     private Chat chat;
     private User user;
+    private User talkUser;
 
     [SetUp]
     public void Setup()
@@ -17,103 +18,112 @@ public class ChannelTests
             PubnubTestsParameters.SubscribeKey,
             "channel_tests_user");
         user = chat.CreateUser("channel_tests_user");
+        talkUser = chat.CreateUser("talk_user");
+    }
+    
+    [Test]
+    public void TestGetMemberships()
+    {
+        var channel = chat.CreatePublicConversation("get_members_test_channel");
+        channel.Join();
+        var memberships =  channel.GetMemberships(20, "99999999999999999", "00000000000000000");
+        Assert.That(memberships.Count, Is.GreaterThanOrEqualTo(1));
     }
 
     [Test]
-    public async Task TestStartTyping()
+    public void TestStartTyping()
     {
-        var channel = chat.CreatePublicConversation("start_typing_test_channel");
+        var channel = chat.CreateDirectConversation(talkUser, "start_typing_test_channel").createdChannel;
         channel.Join();
+        
+        var typingManualEvent = new ManualResetEvent(false);
+        
         channel.OnUsersTyping += typingUsers =>
         {
             Assert.That(typingUsers, Does.Contain(user.Id));
+            typingManualEvent.Set();
         };
         channel.StartTyping();
-
-        await Task.Delay(3000);
+        
+        var receivedTyping = typingManualEvent.WaitOne(5000);
+        Assert.IsTrue(receivedTyping);
     }
     
     [Test]
     public async Task TestStopTyping()
     {
-        var channel = chat.CreatePublicConversation("stop_typing_test_channel");
+        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_test_channel").createdChannel;
         channel.Join();
         
         channel.StartTyping();
         
-        await Task.Delay(1000);
+        await Task.Delay(1500);
         
+        var typingManualEvent = new ManualResetEvent(false);
         channel.OnUsersTyping += typingUsers =>
         {
             Assert.That(typingUsers, Is.Empty);
+            typingManualEvent.Set();
         };
         channel.StopTyping();
 
-        await Task.Delay(3000);
+        var typingEvent = typingManualEvent.WaitOne(3000);
+        Assert.IsTrue(typingEvent);
     }
     
     [Test]
     public async Task TestStopTypingFromTimer()
     {
-        var channel = chat.CreatePublicConversation("stop_typing_timer_test_channel");
+        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_timeout_test_channel").createdChannel;
         channel.Join();
         
         channel.StartTyping();
 
         await Task.Delay(3000);
         
+        var typingManualEvent = new ManualResetEvent(false);
         channel.OnUsersTyping += typingUsers =>
         {
             Assert.That(typingUsers, Is.Empty);
+            typingManualEvent.Set();
         };
-        
-        await Task.Delay(9000);
+
+        var stoppedTyping = typingManualEvent.WaitOne(10000);
+        Assert.IsTrue(stoppedTyping);
     }
 
     [Test]
-    public async Task TestPinMessage()
+    public void TestPinMessage()
     {
-        var channel = chat.CreatePublicConversation("pin_message_test_channel_32", new ChatChannelData()
+        var channel = chat.CreatePublicConversation("pin_message_test_channel_36", new ChatChannelData()
         {
-            ChannelName = "Some fucking name",
+            ChannelName = "some_name",
             ChannelCustomDataJson = "{}"
         });
-        
-        Debug.WriteLine($"Name on create: {channel.Name}");
-        Debug.WriteLine($"Json on create: {channel.CustomDataJson}");
-        
         channel.Join();
         
-        Debug.WriteLine($"Name after join: {channel.Name}");
-        Debug.WriteLine($"Json after join: {channel.CustomDataJson}");
-        
+        var receivedManualEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += async message =>
         {
-            Debug.WriteLine($"Name before pin: {channel.Name}");
-            Debug.WriteLine($"Json before pin: {channel.CustomDataJson}");
-            
             channel.PinMessage(message);
             
-            Debug.WriteLine($"Name IMMEDIETELY after pin: {channel.Name}");
-            Debug.WriteLine($"Json IMMEDIETELY after pin: {channel.CustomDataJson}");
-            
-            await Task.Delay(5000);
-            
-            Debug.WriteLine($"Name 5s after pin: {channel.Name}");
-            Debug.WriteLine($"Json 5s after pin: {channel.CustomDataJson}");
-            
+            await Task.Delay(2000);
+
             Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
+            receivedManualEvent.Set();
         };
         channel.SendText("message to pin");
-        
-        await Task.Delay(8000);
+
+        var received = receivedManualEvent.WaitOne(8000);
+        Assert.IsTrue(received);
     }
     
     [Test]
-    public async Task TestUnPinMessage()
+    public void TestUnPinMessage()
     {
         var channel = chat.CreatePublicConversation("unpin_message_test_channel");
         channel.Join();
+        var receivedManualEvent = new ManualResetEvent(false);
         channel.OnMessageReceived += async message =>
         {
             channel.PinMessage(message);
@@ -126,10 +136,12 @@ public class ChannelTests
             await Task.Delay(2000);
             
             Assert.False(channel.TryGetPinnedMessage(out _));
+            receivedManualEvent.Set();
         };
         channel.SendText("message to pin");
-        
-        await Task.Delay(6000);
+
+        var received = receivedManualEvent.WaitOne(6000);
+        Assert.IsTrue(received);
     }
     
     [Test]

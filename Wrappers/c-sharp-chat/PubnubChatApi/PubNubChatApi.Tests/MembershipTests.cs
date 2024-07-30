@@ -28,13 +28,19 @@ public class MembershipTests
     }
 
     [Test]
-    public async Task TestUpdateMemberships()
+    public void TestUpdateMemberships()
     {
         var memberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
         var testMembership = memberships[0];
-        testMembership.OnMembershipUpdated += membership => { Assert.True(membership.Id == testMembership.Id); };
+        var manualUpdatedEvent = new ManualResetEvent(false);
+        testMembership.OnMembershipUpdated += membership =>
+        {
+            Assert.True(membership.Id == testMembership.Id);
+            manualUpdatedEvent.Set();
+        };
         testMembership.Update("{\"key\": \"value\"}");
-        await Task.Delay(4000);
+        var updated = manualUpdatedEvent.WaitOne(5000);
+        Assert.IsTrue(updated);
     }
 
     [Test]
