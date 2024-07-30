@@ -169,7 +169,7 @@ const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
 }
 
-std::vector<Pubnub::String> get_chat_updates()
+std::vector<Pubnub::String> Chat::get_chat_updates() const
 {
     return this->chat_service->get_chat_updates();
 }

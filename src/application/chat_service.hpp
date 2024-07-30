@@ -44,7 +44,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<CallbackService> callback_service;
 
 #ifdef PN_CHAT_C_ABI
-        std::vector<Pubnub::String> get_chat_updates();
+        std::vector<Pubnub::String> get_chat_updates() const;
 #endif
 
 

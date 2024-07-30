@@ -99,9 +99,9 @@ std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String
 
 #ifdef PN_CHAT_C_ABI
 
-std::vector<Pubnub::String> ChatService::get_chat_updates()
+std::vector<Pubnub::String> ChatService::get_chat_updates() const
 {
-    auto messages = [this, channel_id] {
+    auto messages = [this] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->fetch_messages();
     }();
