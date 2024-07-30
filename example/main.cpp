@@ -36,30 +36,52 @@ int main() {
 
     Pubnub::Channel channel = chat.get_channel("my_test_channel3");
 
-    auto response = chat.mark_all_messages_as_read("", "", 3);
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    auto memberships = response.memberships.into_std_vector();
-
-    for(auto membership : memberships)
+    auto read_receipts_callback = [=](std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> result)
     {
-        std::cout << "membrship. Channel ID: " << membership.channel.channel_id() << " Custom data: " << membership.custom_data() << std::endl;
-        std::cout << "Channel name: " << membership.channel.channel_data().channel_name << std::endl;
-    }
+        std::cout << "Read receipt event:" << std::endl;
+        for(auto it = result.begin(); it != result.end(); it++)
+        {
+            auto std_vec = it->second.into_std_vector();
+            for(auto user : std_vec)
+            {
+                std::cout << "Read receipt timetoken: " <<  it->first << " User: " << user << std::endl; 
+            }
+        }
+
+    };
+    channel.stream_read_receipts(read_receipts_callback);
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    auto response2 = chat.get_unread_messages_counts("", "", "", 3);
-    auto cpp_response2 = response2.into_std_vector();
 
-    for(auto res : cpp_response2)
-    {
-        std::cout << "membrship. Channel ID: " << res.channel.channel_id() << " Custom data: " << res.membership.custom_data() << std::endl;
-        std::cout << "Message count: " << res.count << std::endl;
-    }
+    auto members = channel.get_members(1, "", "");
+    
+    members[0].set_last_read_message_timetoken("17180052750696469");
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // auto response = chat.mark_all_messages_as_read("", "", 3);
+
+    // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // auto memberships = response.memberships.into_std_vector();
+
+    // for(auto membership : memberships)
+    // {
+    //     std::cout << "membrship. Channel ID: " << membership.channel.channel_id() << " Custom data: " << membership.custom_data() << std::endl;
+    //     std::cout << "Channel name: " << membership.channel.channel_data().channel_name << std::endl;
+    // }
+
+    // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // auto response2 = chat.get_unread_messages_counts("", "", "", 3);
+    // auto cpp_response2 = response2.into_std_vector();
+
+    // for(auto res : cpp_response2)
+    // {
+    //     std::cout << "membrship. Channel ID: " << res.channel.channel_id() << " Custom data: " << res.membership.custom_data() << std::endl;
+    //     std::cout << "Message count: " << res.count << std::endl;
+    // }
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
 //     auto messages = channel.get_history((char*)NULL, (char*)NULL, 10);
 

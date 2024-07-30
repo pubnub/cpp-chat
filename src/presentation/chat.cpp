@@ -153,6 +153,16 @@ MarkMessagesAsReadWrapper Pubnub::Chat::mark_all_messages_as_read(const Pubnub::
     return Wrapper;
 }
 
+ThreadChannel Chat::create_thread_channel(const Pubnub::Message& message) const
+{
+    return this->channel_service->create_thread_channel(message);
+}
+
+ThreadChannel Chat::get_thread_channel(const Pubnub::Message& message) const
+{
+    return this->channel_service->get_thread_channel(message);
+}
+
 #ifdef PN_CHAT_C_ABI
 
 const ChatService* Chat::get_chat_service() const {

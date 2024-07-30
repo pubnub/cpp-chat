@@ -11,7 +11,8 @@ enum pubnub_message_action_type : uint8_t
     PMAT_Receipt,
     PMAT_Custom,
 	PMAT_Edited,
-	PMAT_Deleted
+	PMAT_Deleted,
+	PMAT_ThreadRootId
 };
 
 enum pubnub_chat_event_type : uint8_t
@@ -44,6 +45,8 @@ static inline Pubnub::String message_action_type_to_string(pubnub_message_action
 		return "\"edited\"";
 	case pubnub_message_action_type::PMAT_Deleted:
 		return "\"deleted\"";
+	case pubnub_message_action_type::PMAT_ThreadRootId:
+		return "\"threadRootId\"";
 	}
 	return "incorrect_chat_event_type";
 };
@@ -99,6 +102,8 @@ static inline pubnub_message_action_type message_action_type_from_string(Pubnub:
 		return pubnub_message_action_type::PMAT_Edited;
 	else if(message_action_type_string == Pubnub::String("deleted") || message_action_type_string == Pubnub::String("\"deleted\"")) 
 		return pubnub_message_action_type::PMAT_Deleted;
+	else if(message_action_type_string == Pubnub::String("threadRootId") || message_action_type_string == Pubnub::String("\"threadRootId\"")) 
+		return pubnub_message_action_type::PMAT_ThreadRootId;
 	
 	throw std::invalid_argument("can't convert message_action_type_string to pubnub_message_action_type");
 }

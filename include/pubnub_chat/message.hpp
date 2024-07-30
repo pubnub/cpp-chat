@@ -60,6 +60,8 @@ namespace Pubnub
             PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(const Message&)> message_callback) const;
 
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread() const;
+            PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread() const;
+            PN_CHAT_EXPORT bool has_thread() const;
 
         protected:
             PN_CHAT_EXPORT Message(

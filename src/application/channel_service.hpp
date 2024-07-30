@@ -56,6 +56,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message) const;
         Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
         void confirm_creating_thread(const Pubnub::ThreadChannel& thread_channel) const;
+        bool has_thread_channel(const Pubnub::Message& message) const;
+        void remove_thread_channel(const Pubnub::Message& message) const;
 
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data) const;
         Pubnub::ThreadChannel create_thread_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data, Pubnub::Message parent_message) const;

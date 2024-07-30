@@ -136,3 +136,13 @@ ThreadChannel Message::create_thread() const
 {
     return this->channel_service->create_thread_channel(*this);
 }
+
+ThreadChannel Message::get_thread() const
+{
+    return this->channel_service->get_thread_channel(*this);
+}
+
+bool Message::has_thread() const
+{
+    return this->channel_service->has_thread_channel(*this);
+}
