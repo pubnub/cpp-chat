@@ -464,12 +464,12 @@ void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, cons
     chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
 }
 
-String ChannelService::get_thread_id(const Pubnub::Message& message)
+String ChannelService::get_thread_id(const Pubnub::Message& message) const
 {
     return MESSAGE_THREAD_ID_PREFIX + "_" + message.message_data().channel_id + "_" + message.timetoken();
 }
 
-ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& message)
+ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& message) const
 {
     if(string_starts_with(message.message_data().channel_id, MESSAGE_THREAD_ID_PREFIX))
     {
@@ -516,20 +516,35 @@ ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& messa
 
 }
 
-ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message)
+ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message) const
 {
     String thread_id = this->get_thread_id(message);
 
-    throw std::runtime_error("I will continue work here");
+    auto channel_response = [this, thread_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_channel_metadata(thread_id);
+    }();
+
+    auto parsed_response = Json::parse(channel_response);
+
+    if(parsed_response.is_null()) {
+        throw std::runtime_error("can't get thread channel, response is incorrect");
+    }
+
+    if(parsed_response["data"].is_null()) {
+        throw std::runtime_error("can't get thread channel, response doesn't have data field");
+    }
+
+    return this->create_thread_channel_object({thread_id, ChannelEntity::from_channel_response(parsed_response["data"])}, message);
     
 }
 
-void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel thread_channel)
+void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel& thread_channel) const
 {
-    // auto pubnub_handle = this->pubnub->lock();
-    // pubnub_handle->set_channel_metadata(thread_channel.channel_id(), channel_entity.get_channel_metadata_json_string(thread_channel.channel_id()));
-    // String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
-    // pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->set_channel_metadata(thread_channel.channel_id(), thread_channel.data->get_entity().get_channel_metadata_json_string(thread_channel.channel_id()));
+    String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
+    pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
 
 }
 

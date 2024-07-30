@@ -52,10 +52,10 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
         /* THREADS */
-        Pubnub::String get_thread_id(const Pubnub::Message& message);
-        Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message);
-        Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message);
-        void confirm_creating_thread(const Pubnub::ThreadChannel thread_channel);
+        Pubnub::String get_thread_id(const Pubnub::Message& message) const;
+        Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message) const;
+        Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
+        void confirm_creating_thread(const Pubnub::ThreadChannel& thread_channel) const;
 
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data) const;
         Pubnub::ThreadChannel create_thread_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data, Pubnub::Message parent_message) const;

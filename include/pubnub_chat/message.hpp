@@ -15,8 +15,11 @@ class ChannelService;
 class RestrictionsService;
 class MessageDAO;
 
+
 namespace Pubnub
 {
+    class ThreadChannel;
+
     struct ChatMessageData
     {
         pubnub_chat_message_type type;
@@ -55,6 +58,8 @@ namespace Pubnub
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Message&)> message_callback) const;
             PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(const Message&)> message_callback) const;
+
+            PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread() const;
 
         protected:
             PN_CHAT_EXPORT Message(

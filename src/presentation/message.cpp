@@ -3,6 +3,7 @@
 #include "application/channel_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/dao/message_dao.hpp"
+#include "thread_channel.hpp"
 
 using namespace Pubnub;
 
@@ -129,4 +130,9 @@ void Message::stream_updates(std::function<void(const Message&)> message_callbac
 
 void Message::stream_updates_on(Pubnub::Vector<Message> messages, std::function<void(const Message&)> message_callback) const {
     this->message_service->stream_updates_on(messages.into_std_vector(), message_callback);
+}
+
+ThreadChannel Message::create_thread() const
+{
+    return this->channel_service->create_thread_channel(*this);
 }

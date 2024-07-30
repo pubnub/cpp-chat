@@ -56,7 +56,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void disconnect() const;
             PN_CHAT_EXPORT void leave() const;
             PN_CHAT_EXPORT void delete_channel() const;
-            PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") const;
+            PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "");
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> who_is_present() const;
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, Pubnub::Restriction restrictions) const;

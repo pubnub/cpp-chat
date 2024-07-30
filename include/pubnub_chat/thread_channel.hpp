@@ -27,7 +27,7 @@ namespace Pubnub
             PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
 
 
-            PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") const override;
+            PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
 
 
             Pubnub::String parent_channel_id;

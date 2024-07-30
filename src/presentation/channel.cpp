@@ -102,7 +102,7 @@ void Channel::delete_channel() const {
     this->channel_service->delete_channel(channel_id_internal);
 }
 
-void Channel::send_text(const String& message, pubnub_chat_message_type message_type, const String& meta_data) const {
+void Channel::send_text(const String& message, pubnub_chat_message_type message_type, const String& meta_data) {
     this->channel_service->send_text(channel_id_internal, message, message_type, meta_data);
 }
 
