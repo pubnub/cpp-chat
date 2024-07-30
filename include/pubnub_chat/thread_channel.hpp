@@ -12,6 +12,13 @@ namespace Pubnub
         public:
 
         PN_CHAT_EXPORT ~ThreadChannel();
+        PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return internal_parent_channel_id;};
+        PN_CHAT_EXPORT Pubnub::Message parent_message()const {return internal_parent_message;};
+
+        PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
+
+
+
 
         private:
             PN_CHAT_EXPORT ThreadChannel(
@@ -23,23 +30,16 @@ namespace Pubnub
                     std::shared_ptr<const MessageService> message_service, 
                     std::shared_ptr<const MembershipService> membership_service,
                     std::unique_ptr<ChannelDAO> data,
-                    Pubnub::String parent_channel_id, 
-                    Pubnub::Message parent_message);
+                    Pubnub::String in_parent_channel_id, 
+                    Pubnub::Message in_parent_message);
 
             PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
 
-
-            PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
-
-
-            Pubnub::String parent_channel_id;
-            Pubnub::Message parent_message;
+            Pubnub::String internal_parent_channel_id;
+            Pubnub::Message internal_parent_message;
 
         friend class ::ChannelService;
 
-
-
-        private:
         //Bool to track if there was at least one message sent, because the thread is created on server during sending the first message
         bool is_thread_created = true;
 
