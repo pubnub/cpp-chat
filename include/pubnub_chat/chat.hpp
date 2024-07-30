@@ -134,6 +134,7 @@ namespace Pubnub {
         public:
             const ChatService* get_chat_service() const;
             std::vector<Pubnub::String> listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
+            std::vector<Pubnub::String> get_chat_updates();
 #endif
 
     };

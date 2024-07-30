@@ -96,3 +96,21 @@ std::vector<Pubnub::String>  ChatService::listen_for_events(const Pubnub::String
     return messages_vector;
 
 }
+
+#ifdef PN_CHAT_C_ABI
+
+std::vector<Pubnub::String> ChatService::get_chat_updates()
+{
+    auto messages = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->fetch_messages();
+    }();
+
+    auto messages_strings = std::vector<String>();
+    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_strings), [](pubnub_v2_message message) {
+        return Parsers::PubnubJson::to_string(message);
+    });
+    return messages_strings;
+};
+
+#endif

@@ -262,10 +262,8 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
 
 PnCResult pn_chat_get_updates(Pubnub::Chat *chat, char* messages_json) {
     try {
-        // TODO:
-        //auto messages = chat->get_pubnub_context().fetch_messages();
-        auto messages = std::vector<pubnub_v2_message>();
-        auto jsonised = move_message_to_heap(messages);
+        auto messages = chat->get_chat_updates();
+        auto jsonised = jsonize_messages2(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
     } catch (std::exception& e) {

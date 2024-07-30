@@ -6,6 +6,7 @@
 #include "string.hpp"
 #include "enums.hpp"
 #include <functional>
+#include <vector>
 
 class CallbackService;
 class ChannelService;
@@ -41,6 +42,11 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<const AccessManagerService> access_manager_service;
 
         std::shared_ptr<CallbackService> callback_service;
+
+#ifdef PN_CHAT_C_ABI
+        std::vector<Pubnub::String> get_chat_updates();
+#endif
+
 
     
     private:
