@@ -163,6 +163,11 @@ ThreadChannel Chat::get_thread_channel(const Pubnub::Message& message) const
     return this->channel_service->get_thread_channel(message);
 }
 
+void Chat::remove_thread_channel(const Pubnub::Message& message) const
+{
+    this->channel_service->remove_thread_channel(message);
+}
+
 #ifdef PN_CHAT_C_ABI
 
 const ChatService* Chat::get_chat_service() const {

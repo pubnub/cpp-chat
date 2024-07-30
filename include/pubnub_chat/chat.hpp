@@ -119,6 +119,7 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
+            PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
 
         private:
             std::shared_ptr<const ChatService> chat_service;

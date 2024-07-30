@@ -62,6 +62,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread() const;
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread() const;
             PN_CHAT_EXPORT bool has_thread() const;
+            PN_CHAT_EXPORT void remove_thread() const;
 
         protected:
             PN_CHAT_EXPORT Message(

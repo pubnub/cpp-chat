@@ -146,3 +146,8 @@ bool Message::has_thread() const
 {
     return this->channel_service->has_thread_channel(*this);
 }
+
+void Message::remove_thread() const
+{
+    this->channel_service->remove_thread_channel(*this);
+}
