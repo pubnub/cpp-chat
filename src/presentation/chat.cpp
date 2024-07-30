@@ -123,8 +123,8 @@ void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type ch
     this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
 }
 #else
-std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
-    return this->chat_service->listen_for_events(channel_id, chat_event_type);
+void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
+    this->chat_service->listen_for_events(channel_id, chat_event_type);
 }
 #endif
 
@@ -171,11 +171,6 @@ ThreadChannel Chat::get_thread_channel(const Pubnub::Message& message) const
 void Chat::remove_thread_channel(const Pubnub::Message& message) const
 {
     this->channel_service->remove_thread_channel(message);
-}
-
-pubnub_v2_message Pubnub::Chat::test_message_v2()
-{
-    return pubnub_v2_message();
 }
 
 #ifdef PN_CHAT_C_ABI

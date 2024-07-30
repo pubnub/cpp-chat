@@ -126,7 +126,6 @@ namespace Pubnub {
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
 
-            pubnub_v2_message test_message_v2();
         private:
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const ChannelService> channel_service;
@@ -140,7 +139,7 @@ namespace Pubnub {
 #else
         public:
             const ChatService* get_chat_service() const;
-            std::vector<pubnub_v2_message> listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
+            void listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
             std::vector<pubnub_v2_message> get_chat_updates() const;
 #endif
 
