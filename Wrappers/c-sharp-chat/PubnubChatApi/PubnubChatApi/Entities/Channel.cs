@@ -26,14 +26,13 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_channel_delete(IntPtr channel);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_connect(IntPtr channel, StringBuilder messages_json);
+        private static extern int pn_channel_connect(IntPtr channel);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_disconnect(IntPtr channel);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_join(IntPtr channel, string additional_params,
-            StringBuilder messages_json);
+        private static extern int pn_channel_join(IntPtr channel, string additional_params);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_leave(IntPtr channel);
@@ -450,9 +449,8 @@ namespace PubNubChatAPI.Entities
         public void Connect()
         {
             connected = true;
-            var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, messagesBuffer));
-            chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
+            CUtilities.CheckCFunctionResult(pn_channel_connect(pointer));
+            chat.ParseJsonUpdatePointers(chat.GetUpdates());
         }
 
         // TODO: Shouldn't join have additional parameters?
@@ -481,9 +479,8 @@ namespace PubNubChatAPI.Entities
         public void Join()
         {
             connected = true;
-            var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty, messagesBuffer));
-            chat.ParseJsonUpdatePointers(messagesBuffer.ToString());
+            CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty));
+            chat.ParseJsonUpdatePointers(chat.GetUpdates());
         }
 
         /// <summary>

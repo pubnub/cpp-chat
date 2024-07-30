@@ -406,15 +406,10 @@ PnCResult pn_chat_get_channels(
 
 PnCResult pn_chat_listen_for_events(
         Pubnub::Chat* chat,
-        const char* channel_id,
-        char* result) {
+        const char* channel_id) {
     try {
         //TODO:: Pass event type here?
-        auto messages = chat->listen_for_events(channel_id, Pubnub::pubnub_chat_event_type::PCET_CUSTOM);
-        auto jsonised = move_message_to_heap(messages);
-        strcpy(result, jsonised);
-        delete[] jsonised;
-
+        chat->listen_for_events(channel_id, Pubnub::pubnub_chat_event_type::PCET_CUSTOM);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

@@ -173,8 +173,7 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_listen_for_events(
             IntPtr chat,
-            string channel_id,
-            StringBuilder result);
+            string channel_id);
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_create_direct_conversation_dirty(
@@ -417,7 +416,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        private string GetUpdates()
+        internal string GetUpdates()
         {
             var messagesBuffer = new StringBuilder(32768);
             CUtilities.CheckCFunctionResult(pn_chat_get_updates(chatPointer, messagesBuffer));
@@ -1361,10 +1360,8 @@ namespace PubNubChatAPI.Entities
             {
                 throw new ArgumentException("Channel ID cannot be null or empty.");
             }
-
-            var messagesBuffer = new StringBuilder(32768);
-            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(chatPointer, channelId, messagesBuffer));
-            ParseJsonUpdatePointers(messagesBuffer.ToString());
+            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(chatPointer, channelId));
+            ParseJsonUpdatePointers(GetUpdates());
         }
 
         #endregion

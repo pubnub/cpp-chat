@@ -117,12 +117,9 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 
 
-PnCResult pn_channel_connect(Pubnub::Channel* channel, char* messages_json) {
+PnCResult pn_channel_connect(Pubnub::Channel* channel) {
     try {
-        auto messages = channel->connect();
-        auto jsonised = jsonize_messages2(messages);
-        strcpy(messages_json, jsonised);
-        delete[] jsonised;
+        channel->connect();
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -144,12 +141,9 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
     return PN_C_OK;
 }
 
-PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* messages_json) {
+PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params) {
     try {
-        auto messages = channel->join(additional_params);
-        auto jsonised = jsonize_messages2(messages);
-        strcpy(messages_json, jsonised);
-        delete[] jsonised;
+        channel->join(additional_params);
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
