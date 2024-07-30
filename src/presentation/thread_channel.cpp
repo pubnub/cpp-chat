@@ -42,6 +42,8 @@ ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
     return *this;
 }
 
+ThreadChannel::~ThreadChannel() = default;
+
 void Pubnub::ThreadChannel::send_text(const Pubnub::String &message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String &meta_data)
 {
     //If this is new thread, set all server data before sending the first message (this is actually creating the thread, even if the object was created earlier)

@@ -536,7 +536,7 @@ ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message)
     }
 
     return this->create_thread_channel_object({thread_id, ChannelEntity::from_channel_response(parsed_response["data"])}, message);
-    
+
 }
 
 void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel& thread_channel) const
@@ -545,7 +545,6 @@ void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel& thread
     pubnub_handle->set_channel_metadata(thread_channel.channel_id(), thread_channel.data->get_entity().get_channel_metadata_json_string(thread_channel.channel_id()));
     String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
     pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
-
 }
 
 Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> channel_data) const

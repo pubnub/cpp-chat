@@ -11,6 +11,8 @@ namespace Pubnub
     {
         public:
 
+        PN_CHAT_EXPORT ~ThreadChannel();
+
         private:
             PN_CHAT_EXPORT ThreadChannel(
                     Pubnub::String channel_id, 
