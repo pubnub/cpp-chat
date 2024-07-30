@@ -3,6 +3,7 @@
 #include "channel.hpp"
 #include "c_errors.hpp"
 #include "chat.hpp"
+#include "string.hpp"
 #include "restrictions.hpp"
 #include <pubnub_helper.h>
 #include <string>
@@ -229,7 +230,8 @@ PnCResult pn_chat_delete_user(
     return PN_C_OK;
 }
 
-const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
+//TODO:: @Mateusz please check if this is correct. I had to change this function to work on Pubnub::String instead of messagev2
+const char* move_message_to_heap(std::vector<Pubnub::String> messages) {
     if (messages.size() == 0) {
         char* empty_result = new char[3];
         memcpy(empty_result, "[]\0", 3);
@@ -237,18 +239,10 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     }
 
     Pubnub::String result = "[";
-    for (auto message : messages) {
-        auto ptr = new pubnub_v2_message(message);
-
-        // TODO: utils void* to string
-#ifdef _WIN32
-        result += "0x";
-#endif
-        std::ostringstream oss;
-        oss << static_cast<void*>(ptr);
-        result += oss.str();
-        result += ",";
-    }   
+        for (auto message : messages) {
+            result += message;
+            result += ",";
+        }  
 
     result.erase(result.length() - 1);
     result += "]";
@@ -263,7 +257,7 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
 PnCResult pn_chat_get_updates(Pubnub::Chat *chat, char* messages_json) {
     try {
         auto messages = chat->get_chat_updates();
-        auto jsonised = jsonize_messages2(messages);
+        auto jsonised = move_message_to_heap(messages);
         strcpy(messages_json, jsonised);
         delete[] jsonised;
     } catch (std::exception& e) {
