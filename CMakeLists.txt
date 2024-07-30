@@ -44,7 +44,7 @@ set(PUBNUB_SDK_VERSION_SUFFIX "/CA-SDKC++/${PROJECT_VERSION}")
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG feat/new-objects-vol2
+  GIT_TAG master
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM

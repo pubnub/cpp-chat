@@ -526,10 +526,10 @@ ThreadChannel ChannelService::get_thread_channel(const Pubnub::Message& message)
 
 void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel thread_channel)
 {
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->set_channel_metadata(thread_channel.channel_id(), channel_entity.get_channel_metadata_json_string(thread_channel.channel_id()));
-    String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
-    pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
+    // auto pubnub_handle = this->pubnub->lock();
+    // pubnub_handle->set_channel_metadata(thread_channel.channel_id(), channel_entity.get_channel_metadata_json_string(thread_channel.channel_id()));
+    // String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
+    // pubnub_handle->add_message_action(thread_channel.parent_message.message_data().channel_id, thread_channel.parent_message.timetoken(), "threadRootId", message_action_value);
 
 }
 

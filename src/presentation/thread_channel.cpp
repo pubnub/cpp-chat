@@ -47,8 +47,8 @@ void Pubnub::ThreadChannel::send_text(const Pubnub::String &message, Pubnub::pub
     //If this is new thread, set all server data before sending the first message (this is actually creating the thread, even if the object was created earlier)
     if(!is_thread_created)
     {
-        this->channel_service->confirm_creating_thread(*this);
-        is_thread_created = true;
+        //this->channel_service->confirm_creating_thread(*this);
+        //is_thread_created = true;
     }
 
     Channel::send_text(message, message_type, meta_data);
