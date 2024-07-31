@@ -57,7 +57,7 @@ void ThreadChannel::send_text(const String &message, pubnub_chat_message_type me
     Channel::send_text(message, message_type, meta_data);
 }
 
-Pubnub::Vector<Pubnub::ThreadMessage> Pubnub::ThreadChannel::get_history(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
+Pubnub::Vector<Pubnub::ThreadMessage> Pubnub::ThreadChannel::get_thread_history(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
 {
     return Pubnub::Vector<ThreadMessage>(std::move(this->channel_service->get_thread_channel_history(channel_id(), start_timetoken, end_timetoken, count, parent_channel_id())));
 }

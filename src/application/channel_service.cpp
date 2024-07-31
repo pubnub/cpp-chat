@@ -640,7 +640,7 @@ std::vector<Pubnub::ThreadMessage> ChannelService::get_thread_channel_history(co
     std::vector<Pubnub::ThreadMessage> thread_messages;
 
     auto chat_service_shared = chat_service.lock();
-    for(auto base_message : thread_messages)
+    for(auto base_message : base_messages)
     {
         thread_messages.push_back(chat_service_shared->message_service->create_thread_message_object(base_message, parent_channel_id));
     }
