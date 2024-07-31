@@ -62,8 +62,59 @@ public class MembershipTests
             secondUser
         ]);
         Assert.True(
-            returnedMemberships.Count == 2 && 
+            returnedMemberships.Count == 2 &&
             returnedMemberships.Any(x => x.UserId == secondUser.Id && x.ChannelId == testChannel.Id) &&
             returnedMemberships.Any(x => x.UserId == user.Id && x.ChannelId == testChannel.Id));
+    }
+
+    [Test]
+    public void TestLastRead()
+    {
+        channel.Join();
+        
+        var membership = user.GetMemberships(20, "99999999999999999", "00000000000000000")
+            .FirstOrDefault(x => x.ChannelId == channel.Id);
+        if (membership == null)
+        {
+            Assert.Fail();
+            return;
+        }
+
+        var messageReceivedManual = new ManualResetEvent(false);
+        
+        channel.OnMessageReceived += message =>
+        {
+            membership.SetLastReadMessage(message);
+            Assert.True(membership.GetLastReadMessageTimeToken() == message.TimeToken);
+            membership.SetLastReadMessageTimeToken("99999999999999999");
+            Assert.True(membership.GetLastReadMessageTimeToken() == "99999999999999999");
+            messageReceivedManual.Set();
+        };
+        channel.SendText("some_message");
+
+        var received = messageReceivedManual.WaitOne(7000);
+        Assert.True(received);
+    }
+
+    [Test]
+    public async Task TestUnreadMessagesCount()
+    {
+        if (chat.TryGetChannel("unread_count_test_channel", out var existingChannel))
+        {
+            chat.DeleteChannel(existingChannel.Id);
+            await Task.Delay(6000);
+        }
+
+        var unreadChannel = chat.CreatePublicConversation("unread_count_test_channel");
+        unreadChannel.Join();
+        unreadChannel.SendText("one");
+        unreadChannel.SendText("two");
+        unreadChannel.SendText("three");
+
+        await Task.Delay(4000);
+
+        var membership = chat.GetUserMemberships(user.Id, 20, "99999999999999999", "00000000000000000")
+            .FirstOrDefault(x => x.ChannelId == unreadChannel.Id);
+        Assert.True(membership != null && membership.GetUnreadMessagesCount() == 3);
     }
 }

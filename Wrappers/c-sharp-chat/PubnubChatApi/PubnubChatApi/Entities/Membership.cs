@@ -34,11 +34,23 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_membership_get_channel_id(
             IntPtr membership,
             StringBuilder result);
-        
+
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_membership_update_dirty(
             IntPtr membership,
             string custom_object_json);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_membership_last_read_message_timetoken(IntPtr membership, StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_membership_set_last_read_message_timetoken(IntPtr membership, string timetoken);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_membership_set_last_read_message(IntPtr membership, IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_membership_get_unread_messages_count(IntPtr membership);
 
         #endregion
 
@@ -54,7 +66,7 @@ namespace PubNubChatAPI.Entities
                 return buffer.ToString();
             }
         }
-        
+
         /// <summary>
         /// The channel ID of the channel that this membership belongs to.
         /// </summary>
@@ -124,20 +136,29 @@ namespace PubNubChatAPI.Entities
         {
             CUtilities.CheckCFunctionResult(pn_membership_update_dirty(pointer, customJsonObject));
         }
-        
+
         public string GetLastReadMessageTimeToken()
         {
-            throw new NotImplementedException();
+            var buffer = new StringBuilder(128);
+            CUtilities.CheckCFunctionResult(pn_membership_last_read_message_timetoken(pointer, buffer));
+            return buffer.ToString();
+        }
+
+        public void SetLastReadMessage(Message message)
+        {
+            CUtilities.CheckCFunctionResult(pn_membership_set_last_read_message(pointer, message.Pointer));
         }
         
-        public void SetLastReadMessage()
+        public void SetLastReadMessageTimeToken(string timeToken)
         {
-            throw new NotImplementedException();
+            CUtilities.CheckCFunctionResult(pn_membership_set_last_read_message_timetoken(pointer, timeToken));
         }
 
         public int GetUnreadMessagesCount()
         {
-            throw new NotImplementedException();
+            var result = pn_membership_get_unread_messages_count(pointer);
+            CUtilities.CheckCFunctionResult(result);
+            return result;
         }
 
         protected override void DisposePointer()

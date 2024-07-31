@@ -1,6 +1,7 @@
 #include "c_membership.hpp"
 #include "c_errors.hpp"
 #include "membership.hpp"
+#include <iostream>
 
 void pn_membership_delete(Pubnub::Membership* membership) {
     delete membership;
@@ -61,7 +62,9 @@ void pn_membership_get_channel_id(
 PnCResult pn_membership_last_read_message_timetoken(Pubnub::Membership* membership, char* result) {
     try {
         auto time_token = membership->last_read_message_timetoken();
-        strcpy(result, time_token.c_str());
+        if (!time_token.empty()) {
+            strcpy(result, time_token.c_str());
+        }
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());
