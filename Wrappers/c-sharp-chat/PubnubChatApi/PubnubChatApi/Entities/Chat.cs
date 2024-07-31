@@ -211,8 +211,10 @@ namespace PubNubChatAPI.Entities
             IntPtr wrapper, StringBuilder result_json);
         
         [DllImport("pubnub-chat")]
-        private static extern void pn_chat_dispose_created_channel_wrapper(
-            IntPtr wrapper);
+        private static extern void pn_chat_dispose_created_channel_wrapper(IntPtr wrapper);
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_forward_message(IntPtr chat, IntPtr message, IntPtr channel);
 
         #endregion
 
@@ -1216,7 +1218,7 @@ namespace PubNubChatAPI.Entities
 
         public void ForwardMessage(Message message, Channel channel)
         {
-            throw new NotImplementedException();
+            CUtilities.CheckCFunctionResult(pn_chat_forward_message(chatPointer, message.Pointer, channel.Pointer));
         }
 
         public List<(Channel channel, Membership membership, int count)> GetUnreadMessageCounts(string startTimeToken,

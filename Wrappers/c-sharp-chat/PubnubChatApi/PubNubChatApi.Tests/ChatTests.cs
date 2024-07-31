@@ -46,4 +46,29 @@ public class ChatTests
         Assert.True(groupConversation.inviteeMemberships.Any(x =>
             x.UserId == convoUser1.Id && x.ChannelId == "group_conversation_test"));
     }
+
+    [Test]
+    public void TestForwardMessage()
+    {
+        var messageForwardReceivedManualEvent = new ManualResetEvent(false);
+        
+        var forwardingChannel = chat.CreatePublicConversation("forwarding_channel");
+        forwardingChannel.OnMessageReceived += message =>
+        {
+            Assert.True(message.MessageText == "message_to_forward");
+            messageForwardReceivedManualEvent.Set();
+        };
+        forwardingChannel.Join();
+        
+        channel.Join();
+        channel.OnMessageReceived += message =>
+        {
+            chat.ForwardMessage(message, forwardingChannel);
+        };
+        
+        channel.SendText("message_to_forward");
+
+        var forwarded = messageForwardReceivedManualEvent.WaitOne(6000);
+        Assert.True(forwarded);
+    }
 }

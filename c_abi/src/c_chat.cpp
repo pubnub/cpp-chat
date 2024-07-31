@@ -561,3 +561,16 @@ PnCResult unpin_message_from_channel(Pubnub::Chat* chat, Pubnub::Channel* channe
 
     return PN_C_OK;
 }
+
+PnCResult pn_chat_forward_message(Pubnub::Chat* chat, Pubnub::Message* message, Pubnub::Channel* channel) {
+    try {
+        chat->forward_message(*message, *channel);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
