@@ -58,4 +58,51 @@ void pn_membership_get_channel_id(
     strcpy(result, channel_id.c_str());
 }
 
+PnCResult pn_membership_last_read_message_timetoken(Pubnub::Membership* membership, char* result) {
+    try {
+        auto time_token = membership->last_read_message_timetoken();
+        strcpy(result, time_token.c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+Pubnub::Membership* pn_membership_set_last_read_message_timetoken(Pubnub::Membership* membership, const char* timetoken) {
+    try {
+        return new Pubnub::Membership(membership->set_last_read_message_timetoken(timetoken));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+Pubnub::Membership* pn_membership_set_last_read_message(Pubnub::Membership* membership, Pubnub::Message* message) {
+    try {
+        return new Pubnub::Membership(membership->set_last_read_message(*message));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+PnCResult pn_membership_get_unread_messages_count(Pubnub::Membership* membership) {
+    try {
+        return membership->get_unread_messages_count();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
 

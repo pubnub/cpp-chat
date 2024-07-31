@@ -35,5 +35,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_membership_get_channel_id(
         Pubnub::Membership* membership,
         char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_membership_last_read_message_timetoken(Pubnub::Membership* membership, char* result);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_set_last_read_message_timetoken(Pubnub::Membership* membership, const char* timetoken);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_set_last_read_message(Pubnub::Membership* membership, Pubnub::Message* message);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_membership_get_unread_messages_count(Pubnub::Membership* membership);
 
 #endif // PN_CHAT_C_MEMBERSHIP_H
