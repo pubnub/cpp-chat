@@ -208,6 +208,7 @@ std::vector<Pubnub::String> ChannelService::connect(const String& channel_id) co
 #endif // PN_CHAT_C_ABI
     auto messages = [this, channel_id] {
         auto pubnub_handle = this->pubnub->lock();
+
         return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
     }();
 
@@ -543,8 +544,8 @@ void ChannelService::confirm_creating_thread(const Pubnub::ThreadChannel& thread
 {
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->set_channel_metadata(thread_channel.channel_id(), thread_channel.data->get_entity().get_channel_metadata_json_string(thread_channel.channel_id()));
-    String message_action_value = String("{\"value\": \"}") + thread_channel.channel_id() + String("\"}");
-    pubnub_handle->add_message_action(thread_channel.parent_message().message_data().channel_id, thread_channel.parent_message().timetoken(), "threadRootId", message_action_value);
+    String message_action_value = String("\"") + thread_channel.channel_id() + String("\"");
+    pubnub_handle->add_message_action(thread_channel.parent_message().message_data().channel_id, thread_channel.parent_message().timetoken(), message_action_type_to_string(pubnub_message_action_type::PMAT_ThreadRootId), message_action_value);
 }
 
 bool ChannelService::has_thread_channel(const Pubnub::Message &message) const
@@ -552,14 +553,10 @@ bool ChannelService::has_thread_channel(const Pubnub::Message &message) const
     bool found_thread_root = false;
     for(auto &message_action : message.message_data().message_actions)
     {
-        if(message_action.type == pubnub_message_action_type::PMAT_ThreadRootId)
+        if(message_action.type == pubnub_message_action_type::PMAT_ThreadRootId && !message_action.value.empty())
         {
-            Json value_json = Json::parse(message_action.value);
-            if(value_json.contains("threadRootId") && !String(value_json["threadRootId"]).empty())
-            {
-                found_thread_root = true;
-                break;
-            }
+            found_thread_root = true;
+            break;
         }
     }
 
