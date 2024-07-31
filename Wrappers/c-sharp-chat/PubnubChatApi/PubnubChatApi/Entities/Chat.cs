@@ -8,6 +8,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Entities.Events;
+using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -215,6 +216,9 @@ namespace PubNubChatAPI.Entities
         
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_forward_message(IntPtr chat, IntPtr message, IntPtr channel);
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_emit_event(IntPtr chat, byte chat_event_type, string channel_id, string payload);
 
         #endregion
 
@@ -1316,6 +1320,11 @@ namespace PubNubChatAPI.Entities
         //TODO: use enum instead of all these methods?
         #region Events
 
+        public void EmitEvent(PubnubChatEventType type, string channelId, string jsonPayload)
+        {
+            CUtilities.CheckCFunctionResult(pn_chat_emit_event(chatPointer, (byte)type, channelId, jsonPayload));
+        } 
+        
         //TODO: full summary
         /// <summary>
         /// Start listening for Moderation Events for this UserId.

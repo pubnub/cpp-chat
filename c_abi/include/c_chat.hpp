@@ -162,4 +162,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult unpin_message_from_channel(Pubnub::Chat*
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_forward_message(Pubnub::Chat* chat, Pubnub::Message* message, Pubnub::Channel* channel);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_emit_event(Pubnub::Chat* chat, Pubnub::pubnub_chat_event_type chat_event_type, const char* channel_id, const char* payload);
+
 #endif // PN_CHAT_C_CHAT_HPP

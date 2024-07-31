@@ -574,3 +574,16 @@ PnCResult pn_chat_forward_message(Pubnub::Chat* chat, Pubnub::Message* message, 
 
     return PN_C_OK;
 }
+
+PnCResult pn_chat_emit_event(Pubnub::Chat* chat, Pubnub::pubnub_chat_event_type chat_event_type, const char* channel_id, const char* payload) {
+    try {
+        chat->emit_chat_event(chat_event_type, channel_id, payload);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

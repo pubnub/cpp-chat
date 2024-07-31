@@ -1,4 +1,5 @@
 using PubNubChatAPI.Entities;
+using PubnubChatApi.Enums;
 
 namespace PubNubChatApi.Tests;
 
@@ -70,5 +71,21 @@ public class ChatTests
 
         var forwarded = messageForwardReceivedManualEvent.WaitOne(6000);
         Assert.True(forwarded);
+    }
+    
+    [Test]
+    public void TestEmitEvent()
+    {
+        var reportManualEvent = new ManualResetEvent(false);
+        chat.OnReportEvent += reportEvent =>
+        {
+            Assert.True(reportEvent.Json == "{\"test\":\"some_nonsense\", \"type\": \"report\", \"channelId\": \"chat_tests_channel\"}");
+            reportManualEvent.Set();
+        };
+        channel.Join();
+        chat.EmitEvent(PubnubChatEventType.Report, channel.Id, "{\"test\":\"some_nonsense\"}");
+
+        var eventReceived = reportManualEvent.WaitOne(5000);
+        Assert.True(eventReceived);
     }
 }
