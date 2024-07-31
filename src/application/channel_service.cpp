@@ -1,5 +1,6 @@
 #include "channel_service.hpp"
 #include "thread_channel.hpp"
+#include "thread_message.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "chat_service.hpp"
 #include "domain/channel_entity.hpp"
@@ -9,7 +10,6 @@
 #include "membership_service.hpp"
 #include "message_service.hpp"
 #include "message.hpp"
-#include "pubnub_chat/thread_channel.hpp"
 #include "const_values.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
@@ -183,6 +183,37 @@ void ChannelService::delete_channel(const String& channel_id) const {
 
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->remove_channel_metadata(channel_id);
+}
+
+std::vector<Message> ChannelService::get_channel_history(const String& channel_id, const String& start_timetoken, const String& end_timetoken, int count) const {
+    auto fetch_history_response = [this, channel_id, start_timetoken, end_timetoken, count] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->fetch_history(channel_id, start_timetoken, end_timetoken, count);
+    }();
+
+    Json response_json = Json::parse(fetch_history_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get history, response is incorrect");
+    }
+
+    if(!response_json.contains("channels") && !response_json["channels"].contains(channel_id))
+    {
+        throw std::runtime_error("can't get history, response doesn't have channel info");
+    }
+
+    std::vector<Message> messages;
+
+    auto entities = MessageEntity::from_history_json(response_json, channel_id);
+
+    auto chat_service_shared = chat_service.lock();
+
+    std::transform(entities.begin(), entities.end(), std::back_inserter(messages), [this, chat_service_shared](auto message) {
+        return chat_service_shared->message_service->create_message_object(message);
+    });
+
+    return messages;
 }
 
 Channel ChannelService::pin_message_to_channel(const Message& message, const String& channel_id, const ChannelDAO& channel_data) const {
@@ -589,6 +620,31 @@ void ChannelService::remove_thread_channel(const Pubnub::Message &message) const
     }
 
     thread_channel.delete_channel();
+}
+
+Pubnub::ThreadChannel ChannelService::pin_message_to_thread_channel(const Pubnub::ThreadMessage &message, const Pubnub::ThreadChannel& thread_channel) const
+{
+    auto new_channel = this->pin_message_to_channel(message, thread_channel.channel_id(), *thread_channel.data);
+    return create_thread_channel_object({thread_channel.channel_id(), new_channel.data->get_entity()}, thread_channel.parent_message());
+}
+
+Pubnub::ThreadChannel ChannelService::unpin_message_from_thread_channel(const Pubnub::ThreadChannel& thread_channel) const
+{
+    auto new_channel = this->unpin_message_from_channel(thread_channel.channel_id(), *thread_channel.data);
+    return create_thread_channel_object({thread_channel.channel_id(), new_channel.data->get_entity()}, thread_channel.parent_message());
+}
+
+std::vector<Pubnub::ThreadMessage> ChannelService::get_thread_channel_history(const Pubnub::String &channel_id, const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count, const Pubnub::String &parent_channel_id) const
+{
+    auto base_messages = this->get_channel_history(channel_id, start_timetoken, end_timetoken, count);
+    std::vector<Pubnub::ThreadMessage> thread_messages;
+
+    auto chat_service_shared = chat_service.lock();
+    for(auto base_message : thread_messages)
+    {
+        thread_messages.push_back(chat_service_shared->message_service->create_thread_message_object(base_message, parent_channel_id));
+    }
+    return thread_messages;
 }
 
 Channel ChannelService::create_channel_object(std::pair<String, ChannelEntity> channel_data) const

@@ -69,9 +69,9 @@ namespace Pubnub
             PN_CHAT_EXPORT void start_typing() const;
             PN_CHAT_EXPORT void stop_typing() const;
             PN_CHAT_EXPORT void get_typing(std::function<void(Pubnub::Vector<Pubnub::String>)> typing_callback) const;
-            PN_CHAT_EXPORT Pubnub::Channel pin_message(const Pubnub::Message& message) const;
-            PN_CHAT_EXPORT Pubnub::Channel unpin_message() const;
-            PN_CHAT_EXPORT Pubnub::Message get_pinned_message() const;
+            PN_CHAT_EXPORT virtual Pubnub::Channel pin_message(const Pubnub::Message& message) const;
+            PN_CHAT_EXPORT virtual Pubnub::Channel unpin_message() const;
+            PN_CHAT_EXPORT virtual Pubnub::Message get_pinned_message() const;
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message) const;
 
 

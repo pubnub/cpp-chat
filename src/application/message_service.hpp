@@ -18,6 +18,7 @@ namespace Pubnub
     class MessageDraft;
     struct MessageDraftConfig;
     class Channel;
+    class ThreadMessage;
 }
 
 class MessageService : public std::enable_shared_from_this<MessageService>
@@ -30,7 +31,6 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::Message delete_message(const MessageDAO& message, const Pubnub::String& timetoken) const;
         bool deleted(const MessageDAO& message) const;
 
-        std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         Pubnub::Message get_message(const Pubnub::String& timetoken, const Pubnub::String& channel_id) const;
 
         std::vector<Pubnub::MessageAction> get_message_reactions(const MessageDAO& message) const;
@@ -41,6 +41,8 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         void stream_updates_on(const std::vector<Pubnub::Message>& messages, std::function<void(const Pubnub::Message&)> message_callback) const;
 
         Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data) const;
+        Pubnub::ThreadMessage create_thread_message_object(std::pair<Pubnub::String, MessageEntity> message_data, Pubnub::String parent_channel_id) const;
+        Pubnub::ThreadMessage create_thread_message_object(const Pubnub::Message& base_message, const Pubnub::String& parent_channel_id) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;

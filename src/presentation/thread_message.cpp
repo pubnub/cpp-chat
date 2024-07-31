@@ -14,9 +14,15 @@ ThreadMessage::ThreadMessage(
         std::unique_ptr<MessageDAO> data, 
         String parent_channel_id) :
 Message(timetoken, chat_service, message_service, channel_service, restrictions_service, std::move(data)),
-parent_channel_id(parent_channel_id)
+internal_parent_channel_id(parent_channel_id)
 {}
 
+ThreadMessage::ThreadMessage(
+    Pubnub::Message base_message, 
+    Pubnub::String parent_channel_id) :
+Message(base_message),
+internal_parent_channel_id(parent_channel_id)
+{}
 
 ThreadMessage& ThreadMessage::operator=(const ThreadMessage& other) {
     this->timetoken_internal = other.timetoken_internal;
@@ -25,7 +31,9 @@ ThreadMessage& ThreadMessage::operator=(const ThreadMessage& other) {
     this->channel_service = other.channel_service;
     this->restrictions_service = other.restrictions_service;
     this->data = std::make_unique<MessageDAO>(other.data->to_message_data());
-    this->parent_channel_id = other.parent_channel_id;
+    this->internal_parent_channel_id = other.internal_parent_channel_id;
 
     return *this;
 }
+
+ThreadMessage::~ThreadMessage() = default;

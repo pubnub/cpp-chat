@@ -123,7 +123,7 @@ Restriction Channel::get_user_restrictions(const String& user_id, const String& 
 }
 
 Pubnub::Vector<Message> Channel::get_history(const String& start_timetoken, const String& end_timetoken, int count) const {
-    return Pubnub::Vector<Message>(std::move(this->message_service->get_channel_history(channel_id(), start_timetoken, end_timetoken, count)));
+    return Pubnub::Vector<Message>(std::move(this->channel_service->get_channel_history(channel_id(), start_timetoken, end_timetoken, count)));
 }
 
 Message Channel::get_message(const String& timetoken) const {

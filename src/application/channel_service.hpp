@@ -19,6 +19,7 @@ namespace Pubnub
     class Message;
     class Membership;
     class ThreadChannel;
+    class ThreadMessage;
 }
 
 class ChannelService : public std::enable_shared_from_this<ChannelService>
@@ -34,6 +35,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::vector<Pubnub::Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
         Pubnub::Channel update_channel(const Pubnub::String& channel_id, ChannelDAO channel_data) const;
         void delete_channel(const Pubnub::String& channel_id) const;
+        std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
 #ifndef PN_CHAT_C_ABI
@@ -58,6 +60,9 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void confirm_creating_thread(const Pubnub::ThreadChannel& thread_channel) const;
         bool has_thread_channel(const Pubnub::Message& message) const;
         void remove_thread_channel(const Pubnub::Message& message) const;
+        Pubnub::ThreadChannel pin_message_to_thread_channel(const Pubnub::ThreadMessage& message, const Pubnub::ThreadChannel& thread_channel) const;
+        Pubnub::ThreadChannel unpin_message_from_thread_channel(const Pubnub::ThreadChannel& thread_channel) const;
+        std::vector<Pubnub::ThreadMessage> get_thread_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count, const Pubnub::String& parent_channel_id) const;
 
         Pubnub::Channel create_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data) const;
         Pubnub::ThreadChannel create_thread_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data, Pubnub::Message parent_message) const;

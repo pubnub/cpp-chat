@@ -7,18 +7,23 @@
 
 namespace Pubnub 
 {
+    class ThreadMessage;
+
     class ThreadChannel : public Channel
     {
         public:
 
         PN_CHAT_EXPORT ~ThreadChannel();
+        PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
+        
         PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return internal_parent_channel_id;};
         PN_CHAT_EXPORT Pubnub::Message parent_message() const {return internal_parent_message;};
 
         PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
 
-
-
+        PN_CHAT_EXPORT Pubnub::Vector<Pubnub::ThreadMessage> get_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
+        PN_CHAT_EXPORT Pubnub::ThreadChannel pin_message_to_thread(const Pubnub::ThreadMessage& message) const;
+        PN_CHAT_EXPORT Pubnub::ThreadChannel unpin_message_from_thread() const;
 
         private:
             PN_CHAT_EXPORT ThreadChannel(
@@ -30,10 +35,9 @@ namespace Pubnub
                     std::shared_ptr<const MessageService> message_service, 
                     std::shared_ptr<const MembershipService> membership_service,
                     std::unique_ptr<ChannelDAO> data,
-                    Pubnub::String in_parent_channel_id, 
-                    Pubnub::Message in_parent_message);
+                    Pubnub::String parent_channel_id, 
+                    Pubnub::Message parent_message);
 
-            PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
 
             Pubnub::String internal_parent_channel_id;
             Pubnub::Message internal_parent_message;

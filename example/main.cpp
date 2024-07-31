@@ -28,35 +28,37 @@ int main() {
     //     std::cout << "vector: " << elem << std::endl;
     // }
 
-         //CREATE CHANNEL  
-    Pubnub::ChatChannelData channel_data;
-    channel_data.channel_name = "iksde2";
-    channel_data.description = "Wha";
-    //Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
+    //      //CREATE CHANNEL  
+    // Pubnub::ChatChannelData channel_data;
+    // channel_data.channel_name = "iksde2";
+    // channel_data.description = "Wha";
+    // Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
 
     Pubnub::Channel channel = chat.get_channel("my_test_channel3");
-
-    auto read_receipts_callback = [=](std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> result)
-    {
-        std::cout << "Read receipt event:" << std::endl;
-        for(auto it = result.begin(); it != result.end(); it++)
-        {
-            auto std_vec = it->second.into_std_vector();
-            for(auto user : std_vec)
-            {
-                std::cout << "Read receipt timetoken: " <<  it->first << " User: " << user << std::endl; 
-            }
-        }
-
-    };
-    channel.stream_read_receipts(read_receipts_callback);
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    auto message = channel.get_message("17224104171400850");
 
 
-    auto members = channel.get_members(1, "", "");
+    // auto read_receipts_callback = [=](std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> result)
+    // {
+    //     std::cout << "Read receipt event:" << std::endl;
+    //     for(auto it = result.begin(); it != result.end(); it++)
+    //     {
+    //         auto std_vec = it->second.into_std_vector();
+    //         for(auto user : std_vec)
+    //         {
+    //             std::cout << "Read receipt timetoken: " <<  it->first << " User: " << user << std::endl; 
+    //         }
+    //     }
+
+    // };
+    // channel.stream_read_receipts(read_receipts_callback);
+
+    // std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+    // auto members = channel.get_members(1, "", "");
     
-    members[0].set_last_read_message_timetoken("17180052750696469");
+    // members[0].set_last_read_message_timetoken("17180052750696469");
 
     // auto response = chat.mark_all_messages_as_read("", "", 3);
 

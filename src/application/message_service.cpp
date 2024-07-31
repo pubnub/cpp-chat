@@ -5,6 +5,7 @@
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
 #include "message.hpp"
+#include "thread_message.hpp"
 #include "message_action.hpp"
 #include "message_draft.hpp"
 #include "message_draft_config.hpp"
@@ -69,39 +70,11 @@ bool MessageService::deleted(const MessageDAO& message) const {
     return message.get_entity().is_deleted();
 }
 
-std::vector<Message> MessageService::get_channel_history(const String& channel_id, const String& start_timetoken, const String& end_timetoken, int count) const {
-    auto fetch_history_response = [this, channel_id, start_timetoken, end_timetoken, count] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->fetch_history(channel_id, start_timetoken, end_timetoken, count);
-    }();
-
-    Json response_json = Json::parse(fetch_history_response);
-
-    if(response_json.is_null())
-    {
-        throw std::runtime_error("can't get history, response is incorrect");
-    }
-
-    if(!response_json.contains("channels") && !response_json["channels"].contains(channel_id))
-    {
-        throw std::runtime_error("can't get history, response doesn't have channel info");
-    }
-
-    std::vector<Message> messages;
-
-    auto entities = MessageEntity::from_history_json(response_json, channel_id);
-
-    std::transform(entities.begin(), entities.end(), std::back_inserter(messages), [this](auto message) {
-        return this->create_message_object(message);
-    });
-
-    return messages;
-}
-
 Message MessageService::get_message(const String& timetoken, const String& channel_id) const {
     auto start_timetoken_int = std::stoull(timetoken.to_std_string()) + 1;
     String start_timetoken = std::to_string(start_timetoken_int);
-    std::vector<Message> messages = this->get_channel_history(channel_id, start_timetoken, timetoken, 1);
+    auto chat_service_shared = chat_service.lock();
+    std::vector<Message> messages = chat_service_shared->channel_service->get_channel_history(channel_id, start_timetoken, timetoken, 1);
     if(messages.size() == 0)
     {
         throw std::runtime_error("can't get message, there is no message with this timestamp");
@@ -199,4 +172,15 @@ Message MessageService::create_message_object(std::pair<String, MessageEntity> m
     }
 
     throw std::runtime_error("Can't create message, chat service pointer is invalid");
+}
+
+
+Pubnub::ThreadMessage MessageService::create_thread_message_object(std::pair<Pubnub::String, MessageEntity> message_data, Pubnub::String parent_channel_id) const
+{
+    return ThreadMessage(create_message_object(message_data), parent_channel_id);
+}
+
+Pubnub::ThreadMessage MessageService::create_thread_message_object(const Pubnub::Message& base_message, const Pubnub::String& parent_channel_id) const
+{
+    return Pubnub::ThreadMessage(base_message, parent_channel_id);
 }
