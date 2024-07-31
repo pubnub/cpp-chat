@@ -6,13 +6,18 @@
 
 namespace Pubnub 
 {
+    class Channel;
+
     class ThreadMessage : public Message
     {
         public:
         PN_CHAT_EXPORT ~ThreadMessage();
         PN_CHAT_EXPORT ThreadMessage& operator=(const ThreadMessage& other);
 
-        PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return internal_parent_channel_id;};
+        PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return parent_channel_id_internal;};
+
+        PN_CHAT_EXPORT Pubnub::Channel pin_to_parent_channel() const;
+        PN_CHAT_EXPORT Pubnub::Channel unpin_from_parent_channel() const;
 
         private:
             PN_CHAT_EXPORT ThreadMessage(
@@ -26,7 +31,7 @@ namespace Pubnub
 
             PN_CHAT_EXPORT ThreadMessage(Pubnub::Message base_message, Pubnub::String parent_channel_id);
 
-            Pubnub::String internal_parent_channel_id;
+            Pubnub::String parent_channel_id_internal;
         friend class ::MessageService;
       
     };

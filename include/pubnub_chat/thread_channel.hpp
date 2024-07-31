@@ -16,14 +16,16 @@ namespace Pubnub
         PN_CHAT_EXPORT ~ThreadChannel();
         PN_CHAT_EXPORT ThreadChannel& operator=(const ThreadChannel& other);
 
-        PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return internal_parent_channel_id;};
-        PN_CHAT_EXPORT Pubnub::Message parent_message() const {return internal_parent_message;};
+        PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return parent_channel_id_internal;};
+        PN_CHAT_EXPORT Pubnub::Message parent_message() const {return parent_message_internal;};
 
         PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
 
         PN_CHAT_EXPORT Pubnub::Vector<Pubnub::ThreadMessage> get_thread_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         PN_CHAT_EXPORT Pubnub::ThreadChannel pin_message_to_thread(const Pubnub::ThreadMessage& message) const;
         PN_CHAT_EXPORT Pubnub::ThreadChannel unpin_message_from_thread() const;
+        PN_CHAT_EXPORT Pubnub::Channel pin_message_to_parent_channel(const Pubnub::ThreadMessage& message) const;
+        PN_CHAT_EXPORT Pubnub::Channel unpin_message_from_parent_channel() const;
 
         private:
             PN_CHAT_EXPORT ThreadChannel(
@@ -39,8 +41,8 @@ namespace Pubnub
                     Pubnub::Message parent_message);
 
 
-            Pubnub::String internal_parent_channel_id;
-            Pubnub::Message internal_parent_message;
+            Pubnub::String parent_channel_id_internal;
+            Pubnub::Message parent_message_internal;
 
         friend class ::ChannelService;
 

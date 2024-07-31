@@ -18,8 +18,8 @@ ThreadChannel::ThreadChannel(
                     String parent_channel_id, 
                     Message parent_message) :
 Channel(channel_id, chat_service, channel_service, presence_service, restrictions_service, message_service, membership_service, std::move(data)),
-internal_parent_channel_id(parent_channel_id),
-internal_parent_message(parent_message)
+parent_channel_id_internal(parent_channel_id),
+parent_message_internal(parent_message)
 {}
 
 
@@ -37,8 +37,8 @@ ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
     this->restrictions_service = other.restrictions_service;
     this->message_service = other.message_service;
     this->membership_service = other.membership_service;
-    this->internal_parent_channel_id = other.internal_parent_channel_id;
-    this->internal_parent_message = other.internal_parent_message;
+    this->parent_channel_id_internal = other.parent_channel_id_internal;
+    this->parent_message_internal = other.parent_message_internal;
 
     return *this;
 }
@@ -70,6 +70,18 @@ Pubnub::ThreadChannel Pubnub::ThreadChannel::pin_message_to_thread(const Pubnub:
 Pubnub::ThreadChannel Pubnub::ThreadChannel::unpin_message_from_thread() const
 {
     return this->channel_service->unpin_message_from_thread_channel(*this);
+}
+
+Pubnub::Channel Pubnub::ThreadChannel::pin_message_to_parent_channel(const Pubnub::ThreadMessage &message) const
+{
+    auto parent_channel = this->channel_service->get_channel(parent_channel_id_internal);
+    return parent_channel.pin_message(message);
+}
+
+Pubnub::Channel Pubnub::ThreadChannel::unpin_message_from_parent_channel() const
+{
+    auto parent_channel = this->channel_service->get_channel(parent_channel_id_internal);
+    return parent_channel.unpin_message();
 }
 
 void ThreadChannel::set_is_thread_created(bool is_created) 
