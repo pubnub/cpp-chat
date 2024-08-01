@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
@@ -23,31 +24,54 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern void pn_message_delete(IntPtr message);
+
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_message_edit_text(IntPtr message, string text);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_text(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_delete_message(IntPtr message);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_deleted(IntPtr message);
-        
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_get_timetoken(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_get_data_type(IntPtr message);
+
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_text(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_channel_id(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_user_id(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_meta(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern void pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_message_pin(IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_get_reactions(IntPtr message, StringBuilder reactions_json);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_toggle_reaction(IntPtr message, string reaction);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_has_user_reaction(IntPtr message, string reaction);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_report(IntPtr message, string reason);
 
         #endregion
 
@@ -173,7 +197,7 @@ namespace PubNubChatAPI.Entities
         /// </summary>
         /// <seealso cref="pubnub_chat_message_type"/>
         public PubnubChatMessageType Type => (PubnubChatMessageType)pn_message_get_data_type(pointer);
-        
+
         private Chat chat;
 
         /// <summary>
@@ -194,20 +218,20 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <seealso cref="EditMessageText"/>
         /// <seealso cref="Delete"/>
-        public event Action<Message> OnMessageUpdated; 
-        
+        public event Action<Message> OnMessageUpdated;
+
         internal Message(Chat chat, IntPtr messagePointer, string timeToken) : base(messagePointer, timeToken)
         {
             this.chat = chat;
         }
-        
+
         internal static string GetMessageIdFromPtr(IntPtr messagePointer)
         {
             var buffer = new StringBuilder(512);
             pn_message_get_timetoken(messagePointer, buffer);
             return buffer.ToString();
         }
-        
+
         internal static string GetChannelIdFromMessagePtr(IntPtr messagePointer)
         {
             var buffer = new StringBuilder(512);
@@ -248,7 +272,7 @@ namespace PubNubChatAPI.Entities
 
         public void Report(string reason)
         {
-            throw new NotImplementedException();
+            CUtilities.CheckCFunctionResult(pn_message_report(pointer, reason));
         }
 
         public void Forward(string channelId)
@@ -261,17 +285,28 @@ namespace PubNubChatAPI.Entities
 
         public List<MessageAction> Reactions()
         {
-            throw new NotImplementedException();
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_message_get_reactions(pointer, buffer));
+            var reactionsJson = buffer.ToString();
+            var reactions = new List<MessageAction>();
+            if (CUtilities.IsValidJson(reactionsJson))
+            {
+                reactions = JsonConvert.DeserializeObject<List<MessageAction>>(reactionsJson);
+                reactions ??= new List<MessageAction>();
+            }
+            return reactions;
         }
 
         public bool HasUserReaction(string reactionValue)
         {
-            throw new NotImplementedException();
+            var result = pn_message_has_user_reaction(pointer, reactionValue);
+            CUtilities.CheckCFunctionResult(result);
+            return result == 1;
         }
-        
+
         public void ToggleReaction(string reactionValue)
         {
-            throw new NotImplementedException();
+            CUtilities.CheckCFunctionResult(pn_message_toggle_reaction(pointer, reactionValue));
         }
 
         /// <summary>

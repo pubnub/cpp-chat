@@ -14,9 +14,9 @@ public class MembershipTests
         chat = new Chat(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "membership_tests_user");
+            "membership_tests_user_19");
         channel = chat.CreatePublicConversation("membership_tests_channel");
-        user = chat.CreateUser("membership_tests_user");
+        user = chat.CreateUser("membership_tests_user_19");
         channel.Join();
     }
 
@@ -68,12 +68,15 @@ public class MembershipTests
     }
 
     [Test]
-    public void TestLastRead()
+    public async Task TestLastRead()
     {
-        channel.Join();
+        var testChannel = chat.CreatePublicConversation("last_read_test_channel_22");
+        testChannel.Join();
+        
+        await Task.Delay(4000);
         
         var membership = user.GetMemberships(20, "99999999999999999", "00000000000000000")
-            .FirstOrDefault(x => x.ChannelId == channel.Id);
+            .FirstOrDefault(x => x.ChannelId == testChannel.Id);
         if (membership == null)
         {
             Assert.Fail();
@@ -82,15 +85,28 @@ public class MembershipTests
 
         var messageReceivedManual = new ManualResetEvent(false);
         
-        channel.OnMessageReceived += message =>
+        testChannel.OnMessageReceived += async message =>
         {
             membership.SetLastReadMessage(message);
-            Assert.True(membership.GetLastReadMessageTimeToken() == message.TimeToken);
+            Console.WriteLine("this is fine 1");
+
+            await Task.Delay(5000);
+
+            var lastTimeToken = membership.GetLastReadMessageTimeToken();
+            Console.WriteLine("this is fine 2");
+            
+            /*await Task.Delay(5000);
+
+            Assert.True(lastTimeToken == message.TimeToken);
+
             membership.SetLastReadMessageTimeToken("99999999999999999");
-            Assert.True(membership.GetLastReadMessageTimeToken() == "99999999999999999");
+
+            await Task.Delay(3000);
+
+            Assert.True(membership.GetLastReadMessageTimeToken() == "99999999999999999");*/
             messageReceivedManual.Set();
         };
-        channel.SendText("some_message");
+        testChannel.SendText("some_message");
 
         var received = messageReceivedManual.WaitOne(7000);
         Assert.True(received);

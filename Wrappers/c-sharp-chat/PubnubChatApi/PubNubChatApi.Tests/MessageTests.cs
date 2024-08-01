@@ -109,4 +109,31 @@ public class MessageTests
         var received = manualReceivedEvent.WaitOne(4000);
         Assert.IsTrue(received);
     }
+
+    [Test]
+    public void TestMessageReactions()
+    {
+        channel.Join();
+        var manualReset = new ManualResetEvent(false);
+        channel.OnMessageReceived += async message =>
+        {
+            message.ToggleReaction("\"happy\"");
+
+            await Task.Delay(3000);
+
+            var has = message.HasUserReaction("\"happy\"");
+            Assert.True(has);
+            var reactions = message.Reactions(); 
+            Assert.True(reactions.Count == 1 && reactions.Any(x => x.Value == "\"happy\""));
+            manualReset.Set();
+        };
+        channel.SendText("a_message");
+        var reacted = manualReset.WaitOne(7000);
+        Assert.True(reacted);
+    }
+    
+    [Test]
+    public void TestMessageReport()
+    {
+    }
 }

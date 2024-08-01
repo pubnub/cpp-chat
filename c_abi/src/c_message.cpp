@@ -1,5 +1,6 @@
 #include "c_message.hpp"
 #include "c_errors.hpp"
+#include "nlohmann/json.hpp"
 
 void pn_message_delete(Pubnub::Message* message) {
     delete message;
@@ -90,6 +91,97 @@ void pn_message_get_data_message_actions(Pubnub::Message* message, char* result)
 PnCResult pn_message_pin(Pubnub::Message* message) {
     try {
         message->pin();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+// TODO: utils
+static void message_action_to_json(nlohmann::json& j, const Pubnub::MessageAction data) {
+    j = nlohmann::json{
+        {"timeToken", data.timetoken},
+        {"type", data.type},
+        {"userId", data.user_id},
+        {"value", data.value}
+    };
+}
+
+// TODO: dont copy code (again)
+const char* jsonize_reactions(std::vector<Pubnub::MessageAction> reactions) {
+    if (reactions.size() == 0) {
+        char* empty_result = new char[3];
+        memcpy(empty_result, "[]\0", 3);
+        return empty_result;
+    }
+
+    Pubnub::String result = "[";
+    for (auto reaction : reactions) {
+        //result += "\"";
+        nlohmann::json json;
+        message_action_to_json(json, reaction);
+        result += json.dump().c_str();
+        result += ",";
+        //result += "\,";
+    }
+
+    result.erase(result.length() - 1);
+    result += "]";
+
+    char* c_result = new char[result.length() + 1];
+
+    memcpy(c_result, result.c_str(), result.length() + 1);
+
+    return c_result;
+}
+
+PnCResult pn_message_get_reactions(Pubnub::Message* message, char* reactions_json) {
+    try {
+        auto reactions = message->reactions().into_std_vector();
+        auto jsonised = jsonize_reactions(reactions);
+        strcpy(reactions_json, jsonised);
+        delete[] jsonised;
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_message_toggle_reaction(Pubnub::Message* message, const char* reaction) {
+    try {
+        message->toggle_reaction(reaction);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCTribool pn_message_has_user_reaction(Pubnub::Message* message, const char* reaction) {
+    try {
+        return message->has_user_reaction(reaction);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
+PnCResult pn_message_report(Pubnub::Message* message, const char* reason) {
+    try {
+        message->report(reason);
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());

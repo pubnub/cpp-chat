@@ -238,6 +238,12 @@ PnCResult pn_user_get_memberships(
     try {
         auto memberships = user->get_memberships(limit, start, end);
 
+        if (memberships.size() == 0) {
+            char* empty_result = new char[3];
+            memcpy(result, "[]\0", 3);
+            return PN_C_OK;
+        }
+
         Pubnub::String string = "[";
         for (auto membership : memberships) {
             auto ptr = new Pubnub::Membership(membership);
