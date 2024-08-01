@@ -263,6 +263,7 @@ namespace PubNubChatAPI.Entities
         {
             var newPointer = pn_message_edit_text(pointer, newText);
             CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public void Pin()

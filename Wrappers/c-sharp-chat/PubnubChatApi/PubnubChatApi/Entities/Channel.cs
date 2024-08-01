@@ -394,12 +394,14 @@ namespace PubNubChatAPI.Entities
         {
             var newPointer = pn_channel_pin_message(pointer, message.Pointer);
             CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public void UnpinMessage()
         {
             var newPointer = pn_channel_unpin_message(pointer);
             CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         //TODO: currently same result whether error or no pinned message present
