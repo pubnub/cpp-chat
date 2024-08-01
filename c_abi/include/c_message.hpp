@@ -46,4 +46,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_message_has_user_reaction(Pubnub::Me
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_report(Pubnub::Message* message, const char* reason);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadChannel* pn_message_create_thread(Pubnub::Message* message);
+
 #endif // PN_CHAT_C_MESSAGE_H

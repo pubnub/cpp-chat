@@ -72,7 +72,10 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern int pn_message_report(IntPtr message, string reason);
-
+        
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_message_create_thread(IntPtr message);
+        
         #endregion
 
         /// <summary>
@@ -264,6 +267,13 @@ namespace PubNubChatAPI.Entities
             var newPointer = pn_message_edit_text(pointer, newText);
             CUtilities.CheckCFunctionResult(newPointer);
             UpdatePointer(newPointer);
+        }
+
+        public ThreadChannel CreateThread()
+        {
+            var threadChannelPointer = pn_message_create_thread(pointer);
+            CUtilities.CheckCFunctionResult(threadChannelPointer);
+            return new ThreadChannel(threadChannelPointer);
         }
 
         public void Pin()

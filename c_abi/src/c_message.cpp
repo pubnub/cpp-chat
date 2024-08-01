@@ -1,4 +1,5 @@
 #include "c_message.hpp"
+#include "c_thread_channel.hpp"
 #include "c_errors.hpp"
 #include "nlohmann/json.hpp"
 
@@ -189,3 +190,15 @@ PnCResult pn_message_report(Pubnub::Message* message, const char* reason) {
 
     return PN_C_OK;
 }
+
+Pubnub::ThreadChannel* pn_message_create_thread(Pubnub::Message* message) {
+    try {
+        return new Pubnub::ThreadChannel(message->create_thread());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+

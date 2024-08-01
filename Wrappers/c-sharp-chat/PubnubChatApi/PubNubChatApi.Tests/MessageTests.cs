@@ -135,5 +135,43 @@ public class MessageTests
     [Test]
     public void TestMessageReport()
     {
+        var reportManualEvent = new ManualResetEvent(false);
+        channel.Join();
+        chat.StartListeningForReportEvents();
+        chat.OnReportEvent += reportEvent =>
+        {
+            Assert.True(reportEvent.Json.Contains("bad_message"));
+            reportManualEvent.Set();
+        };
+        channel.OnMessageReceived += message =>
+        {
+            message.Report("bad_message");
+        };
+        channel.SendText("message_to_be_reported");
+        var reported = reportManualEvent.WaitOne(12000);
+        Assert.True(reported);
+    }
+
+    [Test]
+    public void TestCreateThread()
+    {
+        var manualReceiveEvent = new ManualResetEvent(false);
+        channel.OnMessageReceived += message =>
+        {
+            try
+            {
+                var thread = message.CreateThread();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Assert.Fail();
+            }
+            manualReceiveEvent.Set();
+        };
+        channel.SendText("thread_start_message");
+        
+        var received = manualReceiveEvent.WaitOne(5000);
+        Assert.IsTrue(received);
     }
 }
