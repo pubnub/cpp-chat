@@ -48,6 +48,9 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
 
         friend class ::ChannelService;
 
+        //Message counts requires a valid timetoken, so this one will be like "0", from beginning of the channel
+        Pubnub::String EMPTY_TIMETOKEN = "17000000000000000";
+
 };
 
 #endif // PN_CHAT_MEMBERSHIP_SERVICE_HPP

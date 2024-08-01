@@ -264,7 +264,8 @@ Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Memb
 
 int MembershipService::get_unread_messages_count_one_channel(const Membership& membership) const {
     auto pubnub_handle = pubnub->lock();
-    auto message_counts_map =  pubnub_handle->message_counts({membership.channel.channel_id()}, {this->last_read_message_timetoken(membership)});
+    String last_read_timetoken = this->last_read_message_timetoken(membership).empty() ? EMPTY_TIMETOKEN : this->last_read_message_timetoken(membership);
+    auto message_counts_map =  pubnub_handle->message_counts({membership.channel.channel_id()}, {last_read_timetoken});
 
     return message_counts_map[membership.channel.channel_id()];
 }
@@ -291,7 +292,8 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
         String last_timetoken = this->last_read_message_timetoken(membership);
         if(last_timetoken.empty())
         {
-            last_timetoken = "0";
+            //Message counts requires a valid timetoken, so this one will be like "0", from beginning of the channel
+            last_timetoken = EMPTY_TIMETOKEN;
         }
         timetokens.push_back(last_timetoken);
     }
