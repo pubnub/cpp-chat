@@ -227,23 +227,18 @@ String MembershipService::last_read_message_timetoken(const Membership& membersh
         return String();
     }
     
-    json custom_data_json = json::parse(custom_data);
+    Json custom_data_json = Json::parse(custom_data);
 
-    if(custom_data_json.contains("lastReadMessageTimetoken") && !custom_data_json["lastReadMessageTimetoken"].is_null())
-    {
-        return String(custom_data_json["lastReadMessageTimetoken"]);
-    }
-    
-    return String();
+    return custom_data_json.get_string("lastReadMessageTimetoken").value_or(String(""));
 }
 
 Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Membership& membership, const String& timetoken) const {
     String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
 
-    json custom_data_json = json::parse(custom_data);
-    custom_data_json["lastReadMessageTimetoken"] = timetoken.c_str();
+    Json custom_data_json = Json::parse(custom_data);
+    custom_data_json.insert_or_update("lastReadMessageTimetoken", timetoken);
     Pubnub::Membership new_membership = membership.update(custom_data_json.dump());
-
+    
     //TODO:: in js chat here is check in access manager if event can be sent
 
     auto chat_service_shared = this->chat_service.lock();

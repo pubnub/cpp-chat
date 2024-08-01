@@ -56,10 +56,10 @@ ChannelEntity ChannelEntity::from_channel_response(Json response) {
 ChannelEntity ChannelEntity::pin_message(std::pair<ChannelId, MessageTimetoken> channel_message) const {
     auto custom_data = this->custom_data_json.empty() ? "{}" :  this->custom_data_json;
 
-    json custom_data_json = json::parse(custom_data);
+    Json custom_data_json = Json::parse(custom_data);
 
-    custom_data_json["pinnedMessageChannelID"] = channel_message.first.c_str();
-    custom_data_json["pinnedMessageTimetoken"] = channel_message.second.c_str();
+    custom_data_json.insert_or_update("pinnedMessageChannelID", channel_message.first);
+    custom_data_json.insert_or_update("pinnedMessageTimetoken", channel_message.second);
 
     return ChannelEntity{
         this->channel_name,
