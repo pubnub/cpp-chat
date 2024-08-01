@@ -155,17 +155,15 @@ PnCResult pn_message_get_reactions(Pubnub::Message* message, char* reactions_jso
     return PN_C_OK;
 }
 
-PnCResult pn_message_toggle_reaction(Pubnub::Message* message, const char* reaction) {
+Pubnub::Message* pn_message_toggle_reaction(Pubnub::Message* message, const char* reaction) {
     try {
-        message->toggle_reaction(reaction);
+        return new Pubnub::Message(message->toggle_reaction(reaction));
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 PnCTribool pn_message_has_user_reaction(Pubnub::Message* message, const char* reaction) {

@@ -40,7 +40,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_pin(Pubnub::Message* message)
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_get_reactions(Pubnub::Message* message, char* reactions_json);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_toggle_reaction(Pubnub::Message* message, const char* reaction);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_toggle_reaction(Pubnub::Message* message, const char* reaction);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_message_has_user_reaction(Pubnub::Message* message, const char* reaction);
 

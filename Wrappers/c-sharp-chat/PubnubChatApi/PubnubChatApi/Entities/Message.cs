@@ -65,7 +65,7 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_message_get_reactions(IntPtr message, StringBuilder reactions_json);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_message_toggle_reaction(IntPtr message, string reaction);
+        private static extern IntPtr pn_message_toggle_reaction(IntPtr message, string reaction);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_message_has_user_reaction(IntPtr message, string reaction);
@@ -307,7 +307,9 @@ namespace PubNubChatAPI.Entities
 
         public void ToggleReaction(string reactionValue)
         {
-            CUtilities.CheckCFunctionResult(pn_message_toggle_reaction(pointer, reactionValue));
+            var newPointer = pn_message_toggle_reaction(pointer, reactionValue);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         /// <summary>

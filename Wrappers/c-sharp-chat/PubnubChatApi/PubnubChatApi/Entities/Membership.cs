@@ -134,7 +134,9 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="OnMembershipUpdated"/>
         public void Update(string customJsonObject)
         {
-            CUtilities.CheckCFunctionResult(pn_membership_update_dirty(pointer, customJsonObject));
+            var newPointer = pn_membership_update_dirty(pointer, customJsonObject);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public string GetLastReadMessageTimeToken()
@@ -146,12 +148,16 @@ namespace PubNubChatAPI.Entities
 
         public void SetLastReadMessage(Message message)
         {
-            CUtilities.CheckCFunctionResult(pn_membership_set_last_read_message(pointer, message.Pointer));
+            var newPointer = pn_membership_set_last_read_message(pointer, message.Pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
         
         public void SetLastReadMessageTimeToken(string timeToken)
         {
-            CUtilities.CheckCFunctionResult(pn_membership_set_last_read_message_timetoken(pointer, timeToken));
+            var newPointer = pn_membership_set_last_read_message_timetoken(pointer, timeToken);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public int GetUnreadMessagesCount()
