@@ -16,6 +16,10 @@ Json Json::array() {
     return Json(nlohmann::json::array());
 }
 
+Json Json::object() {
+    return Json(nlohmann::json::object());
+}
+
 void Json::push_back(Json&& val){
     this->json.push_back(val.json);
 }

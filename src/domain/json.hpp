@@ -24,6 +24,7 @@ class Json {
         Json(nlohmann::json json);
         static Json parse(Pubnub::String json);
         static Json array();
+        static Json object();
         void push_back(Json&& val);
 
         Json operator[](Pubnub::String key) const;

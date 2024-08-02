@@ -223,3 +223,7 @@ void Channel::forward_message(const Message& message) const {
     this->message_service->forward_message(message, channel_id_internal);
 }
 
+void Pubnub::Channel::emit_user_mention(const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text) const
+{
+    this->channel_service->emit_user_mention(channel_id(), user_id, timetoken, text);
+}

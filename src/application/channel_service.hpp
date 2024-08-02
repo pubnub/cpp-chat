@@ -82,7 +82,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
         Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
-        
+        void emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text) const;
+
         void stream_updates_on(const std::vector<Pubnub::String>& channel_ids, std::function<void(Pubnub::Channel)> channel_callback) const;
         void stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 

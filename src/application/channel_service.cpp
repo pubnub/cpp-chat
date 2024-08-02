@@ -320,8 +320,21 @@ void ChannelService::send_text(const Pubnub::String& channel_id, const Pubnub::S
         throw std::invalid_argument("You cannot quote messages from other channels");
     }
     
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
+    {
+        auto pubnub_handle = this->pubnub->lock();
+        pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
+    }
+
+    //TODO::This actually should be published message timetoken, but at the moment we don't have any way to get this from C-Core
+    String mention_timetoken = get_now_timetoken();
+
+    if(text_params.mentioned_users.size() > 0)
+    {
+        for(auto it = text_params.mentioned_users.begin(); it != text_params.mentioned_users.end(); it++)
+        {
+            this->emit_user_mention(channel_id, it->second.id, mention_timetoken, message);
+        }
+    }
 }
 
 
@@ -420,6 +433,16 @@ Message ChannelService::get_pinned_message(const String& channel_id, const Chann
 
     //TODO: also check here for pinned message in thread channela after implementing threads
     return pinned_message;
+}
+
+void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text) const
+{
+    auto chat_service_shared = chat_service.lock();
+    json payload_json = json::object();
+    payload_json["text"] = text.c_str();
+    payload_json["messageTimetoken"] = timetoken.c_str();
+    payload_json["channel"] = channel_id.c_str();
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MENTION, user_id, payload_json.dump());
 }
 
 void ChannelService::stream_updates_on(const std::vector<Pubnub::String>& channel_ids, std::function<void(Channel)> channel_callback) const

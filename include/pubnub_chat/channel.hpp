@@ -87,6 +87,7 @@ namespace Pubnub
             PN_CHAT_EXPORT virtual Pubnub::Channel unpin_message() const;
             PN_CHAT_EXPORT virtual Pubnub::Message get_pinned_message() const;
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message) const;
+            PN_CHAT_EXPORT void emit_user_mention(const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text) const;
 
 
             PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
