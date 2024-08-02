@@ -211,3 +211,31 @@ std::map<int, Pubnub::MentionedUser> MessageEntity::get_mentioned_users() const
 
     return mentioned_users;
 }
+
+std::map<int, Pubnub::ReferencedChannel> MessageEntity::get_referenced_channels() const
+{
+    std::map<int, Pubnub::ReferencedChannel> referenced_channels;
+    if(meta.empty())
+    {
+        return referenced_channels;
+    }
+
+    Json metadata_json = Json::parse(meta);
+    
+    if(metadata_json.contains("referencedChannels") && !metadata_json["referencedChannels"].is_null())
+    {
+        auto referenced_channels_json = metadata_json["referencedChannels"];
+        for (Json::Iterator referenced_channel = referenced_channels_json.begin(); referenced_channel != referenced_channels_json.end(); ++referenced_channel) 
+        {
+            Json mentioned_object_json = referenced_channel.value();
+            Pubnub::ReferencedChannel referenced_channel_data;
+            int key = std::stoi(referenced_channel.key());
+            referenced_channel_data.id = mentioned_object_json.get_string("id").value_or(Pubnub::String(""));
+            referenced_channel_data.name = mentioned_object_json.get_string("name").value_or(Pubnub::String(""));
+
+            referenced_channels[key] = referenced_channel_data;
+        }
+    }
+
+    return referenced_channels;
+}

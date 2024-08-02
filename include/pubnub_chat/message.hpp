@@ -68,6 +68,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void remove_thread() const;
 
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::MentionedUser> mentioned_users() const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::ReferencedChannel> referenced_channels() const;
 
         protected:
             PN_CHAT_EXPORT Message(

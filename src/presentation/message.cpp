@@ -162,3 +162,14 @@ Pubnub::Vector<MentionedUser> Message::mentioned_users() const
     }
     return Pubnub::Vector<MentionedUser>(std::move(users_vector));
 }
+
+Pubnub::Vector<ReferencedChannel> Message::referenced_channels() const
+{
+    auto channels_map = this->data->to_entity().get_referenced_channels();
+    std::vector<ReferencedChannel> channels_vector;
+    for(auto it = channels_map.begin(); it != channels_map.end(); it++)
+    {
+        channels_vector.push_back(it->second);
+    }
+    return Pubnub::Vector<ReferencedChannel>(std::move(channels_vector));
+}
