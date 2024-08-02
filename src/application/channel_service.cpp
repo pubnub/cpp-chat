@@ -435,13 +435,17 @@ Message ChannelService::get_pinned_message(const String& channel_id, const Chann
     return pinned_message;
 }
 
-void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text) const
+void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text, const Pubnub::String &parent_channel_id) const
 {
     auto chat_service_shared = chat_service.lock();
     json payload_json = json::object();
     payload_json["text"] = text.c_str();
     payload_json["messageTimetoken"] = timetoken.c_str();
     payload_json["channel"] = channel_id.c_str();
+    if(!parent_channel_id.empty())
+    {
+        payload_json["parentChannel"] = parent_channel_id.c_str();
+    }
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MENTION, user_id, payload_json.dump());
 }
 

@@ -27,6 +27,8 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::Channel pin_message_to_parent_channel(const Pubnub::ThreadMessage& message) const;
         PN_CHAT_EXPORT Pubnub::Channel unpin_message_from_parent_channel() const;
 
+        PN_CHAT_EXPORT virtual void emit_user_mention(const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text) const override;
+
         private:
             PN_CHAT_EXPORT ThreadChannel(
                     Pubnub::String channel_id, 

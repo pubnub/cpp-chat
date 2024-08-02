@@ -84,6 +84,11 @@ Pubnub::Channel Pubnub::ThreadChannel::unpin_message_from_parent_channel() const
     return parent_channel.unpin_message();
 }
 
+void Pubnub::ThreadChannel::emit_user_mention(const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text) const
+{
+    this->channel_service->emit_user_mention(channel_id(), user_id, timetoken, text, parent_channel_id_internal);
+}
+
 void ThreadChannel::set_is_thread_created(bool is_created) 
 {
     this->is_thread_created = is_created;
