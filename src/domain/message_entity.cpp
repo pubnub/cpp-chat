@@ -239,3 +239,26 @@ std::map<int, Pubnub::ReferencedChannel> MessageEntity::get_referenced_channels(
 
     return referenced_channels;
 }
+
+Pubnub::QuotedMessage MessageEntity::get_quoted_message() const
+{
+    if(meta.empty())
+    {
+        return Pubnub::QuotedMessage();
+    }
+
+    Json metadata_json = Json::parse(meta);
+
+    if(metadata_json.contains("quotedMessage") && !metadata_json["quotedMessage"].is_null())
+    {
+        Pubnub::QuotedMessage quoted_message;
+        Json quoted_message_json = metadata_json["quotedMessage"];
+        quoted_message.text = quoted_message_json.get_string("text").value_or(Pubnub::String(""));
+        quoted_message.channel_id = quoted_message_json.get_string("channelId").value_or(Pubnub::String(""));
+        quoted_message.user_id = quoted_message_json.get_string("userId").value_or(Pubnub::String(""));
+        quoted_message.timetoken = quoted_message_json.get_string("timetoken").value_or(Pubnub::String(""));
+
+        return quoted_message;
+    }
+    return Pubnub::QuotedMessage();
+}

@@ -5,6 +5,7 @@
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "message_elements.hpp"
+#include "message.hpp"
 #include "enums.hpp"
 #include "vector.hpp"
 #include <memory>
@@ -47,7 +48,7 @@ namespace Pubnub
         Pubnub::Map<int, Pubnub::MentionedUser> mentioned_users;
         Pubnub::Map<int, Pubnub::ReferencedChannel> referenced_channels;
         Pubnub::Vector<Pubnub::TextLink> text_links;
-        Pubnub::QuotedMessage quoted_message;
+        Pubnub::Option<Pubnub::Message> quoted_message;
     };
 
     class Channel {

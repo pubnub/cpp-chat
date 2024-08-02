@@ -173,3 +173,25 @@ Pubnub::Vector<ReferencedChannel> Message::referenced_channels() const
     }
     return Pubnub::Vector<ReferencedChannel>(std::move(channels_vector));
 }
+
+Pubnub::Option<Pubnub::Message> Pubnub::Message::quoted_message() const
+{
+    QuotedMessage quoted_message = this->data->to_entity().get_quoted_message();
+    if(quoted_message.timetoken.empty())
+    {
+        return Pubnub::Option<Pubnub::Message>();
+    }
+
+    try {
+        auto channel = this->channel_service->get_channel(message_data().channel_id);
+        Pubnub::Message final_quoted_message = channel.get_message(quoted_message.timetoken);
+        return final_quoted_message;
+        
+    }
+    catch (...)
+    {
+        return Pubnub::Option<Pubnub::Message>();
+    }
+
+    return Pubnub::Option<Pubnub::Message>();
+}

@@ -37,12 +37,20 @@ struct SendTextParamsInternal
     SendTextParamsInternal(Pubnub::SendTextParams params) :
     store_in_history(params.store_in_history),
     send_by_post(params.send_by_post),
-    meta(params.meta),
-    quoted_message(params.quoted_message)
+    meta(params.meta)
     {
         mentioned_users = params.mentioned_users.into_std_map();
         referenced_channels = params.referenced_channels.into_std_map();
         text_links = params.text_links.into_std_vector();
+        if(params.quoted_message.has_value())
+        {
+            Pubnub::Message message = params.quoted_message.value();
+            quoted_message.channel_id = message.message_data().channel_id;
+            quoted_message.text = message.text();
+            quoted_message.user_id = message.message_data().user_id;
+            quoted_message.timetoken = message.timetoken();
+        }
+        
     };
 };
 

@@ -38,6 +38,7 @@ struct MessageEntity {
     MessageEntity add_user_reaction(const Pubnub::String& user_id, const Pubnub::String& reaction, const ActionTimetoken& timetoken) const;
     std::map<int, Pubnub::MentionedUser> get_mentioned_users() const;
     std::map<int, Pubnub::ReferencedChannel> get_referenced_channels() const;
+    Pubnub::QuotedMessage get_quoted_message() const;
 };
 
 #endif // PN_CHAT_MESSAGE_ENTITY_HPP
