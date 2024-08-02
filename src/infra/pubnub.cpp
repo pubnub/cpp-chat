@@ -45,9 +45,11 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     pubnub_set_non_blocking_io(this->long_poll_context.get());
 }
 
-void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata)
+void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)
 {
     auto publish_options = pubnub_publish_defopts();
+    publish_options.store = store_in_history;
+    publish_options.method = send_by_post ? pubnubSendViaPOST : pubnubSendViaGET;
     metadata.empty() ?  publish_options.meta = NULL : publish_options.meta = metadata;
 
     auto result = pubnub_publish_ex(main_context.get(), channel.c_str(), message.c_str(), publish_options);

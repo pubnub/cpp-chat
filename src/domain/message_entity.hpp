@@ -5,6 +5,8 @@
 #include "enums.hpp"
 #include "string.hpp"
 #include "message_action.hpp"
+#include "message_elements.hpp"
+#include "option.hpp"
 #include <optional>
 #include <variant>
 #include <vector>
@@ -34,6 +36,7 @@ struct MessageEntity {
     std::optional<ActionTimetoken> get_user_reaction_timetoken(const Pubnub::String& user_id, const Pubnub::String& reaction) const;
     MessageEntity remove_user_reaction(const ActionTimetoken& timetoken) const;
     MessageEntity add_user_reaction(const Pubnub::String& user_id, const Pubnub::String& reaction, const ActionTimetoken& timetoken) const;
+    std::map<int, Pubnub::MentionedUser> get_mentioned_users() const;
 };
 
 #endif // PN_CHAT_MESSAGE_ENTITY_HPP

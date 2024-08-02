@@ -5,6 +5,8 @@
 #include "helpers/export.hpp"
 #include "message_action.hpp"
 #include "vector.hpp"
+#include "message_elements.hpp"
+#include "option.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -19,6 +21,7 @@ class MessageDAO;
 namespace Pubnub
 {
     class ThreadChannel;
+    struct MentionedUser;
 
     struct ChatMessageData
     {
@@ -63,6 +66,8 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread() const;
             PN_CHAT_EXPORT bool has_thread() const;
             PN_CHAT_EXPORT void remove_thread() const;
+
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::MentionedUser> mentioned_users() const;
 
         protected:
             PN_CHAT_EXPORT Message(

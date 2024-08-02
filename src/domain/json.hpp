@@ -23,6 +23,8 @@ class Json {
         Json(Pubnub::String json);
         Json(nlohmann::json json);
         static Json parse(Pubnub::String json);
+        static Json array();
+        void push_back(Json&& val);
 
         Json operator[](Pubnub::String key) const;
         Json operator[](int index) const;

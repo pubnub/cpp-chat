@@ -49,6 +49,17 @@ namespace Pubnub
         return values;
     };
 
+    template<typename K, typename V>
+    std::vector<K> getValues(const std::map<K, V>& m) 
+    {
+        std::vector<K> values;
+        values.reserve(m.size());
+        for (const auto& pair : m) {
+            values.push_back(pair.second);
+        }
+        return values;
+    };
+
     //Checks if string starts with provided prefix
     bool string_starts_with(const Pubnub::String& string, const Pubnub::String prefix);
 

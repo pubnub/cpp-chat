@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "option.hpp"
-#include "text_link.hpp"
+#include "message_elements.hpp"
 #include "message_draft_config.hpp"
 #include "channel.hpp"
 #include "user.hpp"

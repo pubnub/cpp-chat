@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <optional>
 #include <variant>
+#include <iostream>
 
 MessageEntity MessageEntity::from_json(Pubnub::String message_json, Pubnub::String channel_id) {
     auto message_data_json = Json::parse(message_json);;
@@ -30,6 +31,17 @@ MessageEntity MessageEntity::from_json(Pubnub::String message_json, Pubnub::Stri
         new_message_entity.text = message_json.get_string("text").value_or(Pubnub::String(""));
         new_message_entity.type = chat_message_type_from_string(message_data_json["message"]["type"].dump());
     }
+    new_message_entity.user_id = message_data_json.get_string("uuid").value_or(Pubnub::String(""));
+    if(message_data_json.contains("meta") && !message_data_json["meta"].is_null())
+    {
+        Json meta_json = message_data_json["meta"];
+        new_message_entity.meta = meta_json.dump();
+    }
+    else 
+    {
+        new_message_entity.meta = "";
+    }
+
     if(message_data_json.contains("actions") && !message_data_json["actions"].is_null())
     {
         auto message_action_types_json = message_data_json["actions"];
@@ -59,6 +71,7 @@ std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> MessageEn
     std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> messages;
 
     Json messages_array_json = history_json["channels"][channel_id];
+    
 
     for (auto element : messages_array_json)
     {
@@ -169,4 +182,32 @@ MessageEntity MessageEntity::add_user_reaction(const Pubnub::String& user_id, co
     new_message_entity.message_actions.push_back(message_action);
 
     return new_message_entity;
+}
+
+std::map<int, Pubnub::MentionedUser> MessageEntity::get_mentioned_users() const
+{
+    std::map<int, Pubnub::MentionedUser> mentioned_users;
+    if(meta.empty())
+    {
+        return mentioned_users;
+    }
+
+    Json metadata_json = Json::parse(meta);
+    
+    if(metadata_json.contains("mentionedUsers") && !metadata_json["mentionedUsers"].is_null())
+    {
+        auto mentioned_users_json = metadata_json["mentionedUsers"];
+        for (Json::Iterator mentioned_user = mentioned_users_json.begin(); mentioned_user != mentioned_users_json.end(); ++mentioned_user) 
+        {
+            Json mentioned_object_json = mentioned_user.value();
+            Pubnub::MentionedUser mentioned_user_data;
+            int key = std::stoi(mentioned_user.key());
+            mentioned_user_data.id = mentioned_object_json.get_string("id").value_or(Pubnub::String(""));
+            mentioned_user_data.name = mentioned_object_json.get_string("name").value_or(Pubnub::String(""));
+
+            mentioned_users[key] = mentioned_user_data;
+        }
+    }
+
+    return mentioned_users;
 }

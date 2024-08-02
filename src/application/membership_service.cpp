@@ -233,6 +233,7 @@ String MembershipService::last_read_message_timetoken(const Membership& membersh
 }
 
 Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Membership& membership, const String& timetoken) const {
+    
     String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
 
     Json custom_data_json = Json::parse(custom_data);

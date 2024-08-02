@@ -1,5 +1,6 @@
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
+#include "domain/json.hpp"
 
 #include <chrono>
 

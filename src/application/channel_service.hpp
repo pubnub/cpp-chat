@@ -22,6 +22,30 @@ namespace Pubnub
     class ThreadMessage;
 }
 
+struct SendTextParamsInternal
+{
+    bool store_in_history = true;
+    bool send_by_post = false;
+    Pubnub::String meta = "";
+    std::map<int, Pubnub::MentionedUser> mentioned_users;
+    std::map<int, Pubnub::ReferencedChannel> referenced_channels;
+    std::vector<Pubnub::TextLink> text_links;
+    Pubnub::QuotedMessage quoted_message;
+
+    SendTextParamsInternal() = default;
+
+    SendTextParamsInternal(Pubnub::SendTextParams params) :
+    store_in_history(params.store_in_history),
+    send_by_post(params.send_by_post),
+    meta(params.meta),
+    quoted_message(params.quoted_message)
+    {
+        mentioned_users = params.mentioned_users.into_std_map();
+        referenced_channels = params.referenced_channels.into_std_map();
+        text_links = params.text_links.into_std_vector();
+    };
+};
+
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
@@ -45,6 +69,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;
         void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String& meta_data) const;
+        void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
@@ -79,6 +104,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
 
         Pubnub::ChatChannelData presentation_data_from_domain(ChannelEntity& channel_entity);
+
+        Pubnub::String send_text_meta_from_params(const SendTextParamsInternal& text_params) const;
 
 
         friend class ::MembershipService;

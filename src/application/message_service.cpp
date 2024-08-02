@@ -184,3 +184,29 @@ Pubnub::ThreadMessage MessageService::create_thread_message_object(const Pubnub:
 {
     return Pubnub::ThreadMessage(base_message, parent_channel_id);
 }
+
+std::map<int, Pubnub::MentionedUser> MessageService::mentioned_users(const MessageDAO &message_data) const
+{
+    String metadata;
+    message_data.to_message_data().meta.empty() ? metadata = "{}" : metadata = message_data.to_message_data().meta;
+
+    std::map<int, Pubnub::MentionedUser> mentioned_users;
+    Json metadata_json = Json::parse(metadata);
+    
+    if(metadata_json.contains("mentionedUsers") && !metadata_json["mentionedUsers"].is_null())
+    {
+        auto mentioned_users_json = metadata_json["mentionedUsers"];
+        for (Json::Iterator mentioned_user = mentioned_users_json.begin(); mentioned_user != mentioned_users_json.end(); ++mentioned_user) 
+        {
+            int key = std::stoi(mentioned_user.key());
+            //mentioned_users.[]
+            
+        }
+    }
+
+
+
+    return mentioned_users;
+
+
+}

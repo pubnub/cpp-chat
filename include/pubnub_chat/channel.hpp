@@ -4,6 +4,7 @@
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
+#include "message_elements.hpp"
 #include "enums.hpp"
 #include "vector.hpp"
 #include <memory>
@@ -38,6 +39,17 @@ namespace Pubnub
         Pubnub::String type = "";
     };
 
+    struct SendTextParams
+    {
+        bool store_in_history = true;
+        bool send_by_post = false;
+        Pubnub::String meta = "";
+        Pubnub::Map<int, Pubnub::MentionedUser> mentioned_users;
+        Pubnub::Map<int, Pubnub::ReferencedChannel> referenced_channels;
+        Pubnub::Vector<Pubnub::TextLink> text_links;
+        Pubnub::QuotedMessage quoted_message;
+    };
+
     class Channel {
         public:
             PN_CHAT_EXPORT Channel(const Channel& other);
@@ -57,6 +69,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void leave() const;
             PN_CHAT_EXPORT void delete_channel() const;
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "");
+            PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, SendTextParams& text_params = SendTextParams());
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> who_is_present() const;
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, Pubnub::Restriction restrictions) const;

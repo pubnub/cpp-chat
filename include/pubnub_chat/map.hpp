@@ -19,8 +19,27 @@ namespace Pubnub {
             }
         }
 
+        Map& operator=(const Map& other) {
+            keys = other.keys;
+            values = other.values;
+            return *this;
+        }
+
+        Map& operator=(const std::map<T, K>&& other) {
+            for(auto it = other.begin(); it != other.end(); it++)
+            {
+                keys.push_back(it->first);
+                values.push_back(it->second);
+            }
+            return *this;
+        }
+
         Pubnub::Vector<T> keys;
         Pubnub::Vector<K> values;
+
+        int size(){
+            return keys.size();
+        }
 
         std::map<T, K> into_std_map(){
             if(keys.size() != values.size())

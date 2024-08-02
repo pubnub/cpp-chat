@@ -17,6 +17,7 @@
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 #include "application/callback_service.hpp"
+#include "option.hpp"
 #ifdef PN_CHAT_C_ABI
 #include "domain/parsers.hpp"
 #endif // PN_CHAT_C_ABI
@@ -311,6 +312,18 @@ void ChannelService::send_text(const String& channel_id, const String& message, 
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type), meta_data);
 }
+
+void ChannelService::send_text(const Pubnub::String& channel_id, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
+{
+    if(!text_params.quoted_message.timetoken.empty() && text_params.quoted_message.channel_id != channel_id)
+    {
+        throw std::invalid_argument("You cannot quote messages from other channels");
+    }
+    
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
+}
+
 
 void ChannelService::start_typing(const String& channel_id, ChannelDAO& channel_data) const {
     if(channel_data.get_entity().type == String("public"))
@@ -683,4 +696,78 @@ ThreadChannel ChannelService::create_thread_channel_object(std::pair<String, Cha
     } else {
         throw std::runtime_error("Chat service is not available to create thread channel object");
     }
+}
+
+String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& text_params) const
+{
+    String meta = text_params.meta.empty() ? "{}" : text_params.meta;
+    json message_json = json::parse(meta);
+
+    //mentioned users
+    if(text_params.mentioned_users.size() > 0)
+    {
+        json mentioned_users_json;
+        auto mentioned_users = text_params.mentioned_users;
+
+        for(auto it = mentioned_users.begin(); it != mentioned_users.end(); it++)
+        {
+            json mentioned_user_json;
+            mentioned_user_json["id"] = String(it->second.id).c_str();
+            mentioned_user_json["name"] = String(it->second.name).c_str();
+            String key = std::to_string(it->first);
+            mentioned_users_json[key] = mentioned_user_json;
+        }
+
+        message_json["mentionedUsers"] = mentioned_users_json;
+    }
+
+    //referenced channels
+    if(text_params.referenced_channels.size() > 0)
+    {
+        json referenced_channels_json;
+        auto referenced_channels = text_params.referenced_channels;
+
+        for(auto it = referenced_channels.begin(); it != referenced_channels.end(); it++)
+        {
+            json referenced_channel_json;
+            referenced_channel_json["id"] = String(it->second.id).c_str();
+            referenced_channel_json["name"] = String(it->second.name).c_str();
+            String key = std::to_string(it->first);
+            referenced_channels_json[key] = referenced_channel_json;
+        }
+
+        message_json["referencedChannels"] = referenced_channels_json;
+    }
+
+    //text links
+    if(text_params.text_links.size() > 0)
+    {
+        json text_links_json = json::array();
+        auto text_links = text_params.text_links;
+
+        for(auto text_link : text_links)
+        {
+            json text_link_json;
+            text_link_json["start_index"] = text_link.start_index;
+            text_link_json["end_index"] = text_link.end_index;
+            text_link_json["link"] = text_link.link.c_str();
+
+            text_links_json.push_back(text_link_json);
+        }
+
+        message_json["textLinks"] = text_links_json;
+    }
+
+    //quoted message
+    if(!text_params.quoted_message.timetoken.empty())
+    {
+        json quoted_message_json;
+        quoted_message_json["timetoken"] = text_params.quoted_message.timetoken.c_str();
+        quoted_message_json["text"] = text_params.quoted_message.text.c_str();
+        quoted_message_json["userId"] = text_params.quoted_message.user_id.c_str();
+        quoted_message_json["channelId"] = text_params.quoted_message.channel_id.c_str();
+        message_json["quotedMessage"] = quoted_message_json;
+    }
+
+	return message_json.dump();
 }

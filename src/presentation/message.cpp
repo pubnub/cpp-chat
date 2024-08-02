@@ -151,3 +151,14 @@ void Message::remove_thread() const
 {
     this->channel_service->remove_thread_channel(*this);
 }
+
+Pubnub::Vector<MentionedUser> Message::mentioned_users() const
+{
+    auto users_map = this->data->to_entity().get_mentioned_users();
+    std::vector<MentionedUser> users_vector;
+    for(auto it = users_map.begin(); it != users_map.end(); it++)
+    {
+        users_vector.push_back(it->second);
+    }
+    return Pubnub::Vector<MentionedUser>(std::move(users_vector));
+}
