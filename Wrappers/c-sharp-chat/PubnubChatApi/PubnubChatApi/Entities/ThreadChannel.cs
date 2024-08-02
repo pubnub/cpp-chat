@@ -7,7 +7,7 @@ using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
-    public class ThreadChannel : PointerWrapper
+    public class ThreadChannel : Channel
     {
         #region DLL Imports
 
@@ -25,7 +25,7 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
-        internal ThreadChannel(IntPtr pointer) : base(pointer)
+        internal ThreadChannel(Chat chat, string channelId, IntPtr channelPointer) : base(chat, channelId, channelPointer)
         {
         }
 
@@ -46,7 +46,8 @@ namespace PubNubChatAPI.Entities
             }
             foreach (var messagePointer in messagePointers)
             {
-                history.Add(new ThreadMessage(messagePointer));
+                var id = ThreadMessage.GetThreadMessageIdFromPtr(messagePointer);
+                history.Add(new ThreadMessage(chat, messagePointer, id));
             }
             return history;
         }

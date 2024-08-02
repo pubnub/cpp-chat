@@ -273,7 +273,7 @@ namespace PubNubChatAPI.Entities
         {
             var threadChannelPointer = pn_message_create_thread(pointer);
             CUtilities.CheckCFunctionResult(threadChannelPointer);
-            return new ThreadChannel(threadChannelPointer);
+            return new ThreadChannel(chat, Id, threadChannelPointer);
         }
 
         public void Pin()

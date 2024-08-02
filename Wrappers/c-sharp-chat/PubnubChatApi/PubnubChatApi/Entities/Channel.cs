@@ -228,7 +228,7 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        private Chat chat;
+        protected Chat chat;
         private bool connected;
         private Dictionary<string, Timer> typingIndicators = new();
 
