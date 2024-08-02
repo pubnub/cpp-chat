@@ -106,7 +106,7 @@ void Channel::send_text(const String& message, pubnub_chat_message_type message_
     this->channel_service->send_text(channel_id_internal, message, message_type, meta_data);
 }
 
-void Pubnub::Channel::send_text(const Pubnub::String &message, SendTextParams &text_params)
+void Pubnub::Channel::send_text(const Pubnub::String &message, SendTextParams text_params)
 {
     this->channel_service->send_text(channel_id_internal, message, SendTextParamsInternal(text_params));
 }
