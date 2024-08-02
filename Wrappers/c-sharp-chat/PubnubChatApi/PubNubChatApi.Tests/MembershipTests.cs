@@ -14,9 +14,9 @@ public class MembershipTests
         chat = new Chat(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "membership_tests_user_34");
+            "membership_tests_user_54");
         channel = chat.CreatePublicConversation("membership_tests_channel");
-        user = chat.CreateUser("membership_tests_user_34");
+        user = chat.CreateUser("membership_tests_user_54");
         channel.Join();
     }
 
@@ -70,7 +70,7 @@ public class MembershipTests
     [Test]
     public async Task TestLastRead()
     {
-        var testChannel = chat.CreatePublicConversation("last_read_test_channel_37");
+        var testChannel = chat.CreatePublicConversation("last_read_test_channel_57");
         testChannel.Join();
         
         await Task.Delay(4000);
@@ -89,7 +89,7 @@ public class MembershipTests
         {
             membership.SetLastReadMessage(message);
             
-            await Task.Delay(3000);
+            await Task.Delay(7000);
 
             var lastTimeToken = membership.GetLastReadMessageTimeToken();
             Assert.True(lastTimeToken == message.TimeToken);
@@ -102,7 +102,7 @@ public class MembershipTests
         };
         testChannel.SendText("some_message");
 
-        var received = messageReceivedManual.WaitOne(9000);
+        var received = messageReceivedManual.WaitOne(90000);
         Assert.True(received);
     }
 

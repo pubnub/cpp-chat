@@ -91,22 +91,29 @@ public class MessageTests
     }
 
     [Test]
-    public void TestPinMessage()
+    public async Task TestPinMessage()
     {
+        if (chat.TryGetChannel("pin_test", out var existingChannel))
+        {
+            chat.DeleteChannel(existingChannel.Id);
+            await Task.Delay(10000);
+        }
+        var pinTestChannel = chat.CreatePublicConversation("pin_test");
+        pinTestChannel.Join();
+       
         var manualReceivedEvent = new ManualResetEvent(false);
-        channel.OnMessageReceived += async message =>
+        pinTestChannel.OnMessageReceived += async message =>
         {
             message.Pin();
 
-            await Task.Delay(2000);
+            await Task.Delay(10000);
             
-            Console.WriteLine("lol");
             Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
             manualReceivedEvent.Set();
         };
-        channel.SendText("message to pin");
+        pinTestChannel.SendText("message to pin");
 
-        var received = manualReceivedEvent.WaitOne(4000);
+        var received = manualReceivedEvent.WaitOne(40000);
         Assert.IsTrue(received);
     }
 

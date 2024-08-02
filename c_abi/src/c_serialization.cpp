@@ -177,7 +177,7 @@ Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_mess
         auto user_service = chat->get_chat_service()->user_service;
         auto channel_service = chat->get_chat_service()->channel_service;
 
-        return new Pubnub::Membership(chat->get_chat_service()->membership_service->create_membership_object(user_service->get_user(user_string_cleaned), channel_service->get_channel(channel_string_cleaned), Parsers::PubnubJson::membership_from_string(membership_string)));
+        return new Pubnub::Membership(chat->get_chat_service()->membership_service->create_membership_object(user_service->get_user(user_string_cleaned), channel_service->get_channel(channel_string_cleaned), Parsers::PubnubJson::membership_from_string(message_json.dump())));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
