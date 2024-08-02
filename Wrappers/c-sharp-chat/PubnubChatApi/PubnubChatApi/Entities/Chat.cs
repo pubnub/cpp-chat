@@ -1243,6 +1243,16 @@ namespace PubNubChatAPI.Entities
             return message.CreateThread();
         }
 
+        public void RemoveThreadChannel(Message message)
+        {
+            message.RemoveThread();
+        }
+
+        public bool TryGetThreadChannel(Message message, out ThreadChannel threadChannel)
+        {
+            return message.TryGetThread(out threadChannel);
+        }
+
         public void ForwardMessage(Message message, Channel channel)
         {
             CUtilities.CheckCFunctionResult(pn_chat_forward_message(chatPointer, message.Pointer, channel.Pointer));

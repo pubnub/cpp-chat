@@ -29,7 +29,7 @@ namespace PubNubChatAPI.Entities
         {
         }
 
-        public List<ThreadMessage> GetHistory(string startTimeToken, string endTimeToken, int count)
+        public List<ThreadMessage> GetThreadHistory(string startTimeToken, string endTimeToken, int count)
         {
             var buffer = new StringBuilder(4096);
             CUtilities.CheckCFunctionResult(pn_thread_channel_get_history(pointer, startTimeToken, endTimeToken, count, buffer));

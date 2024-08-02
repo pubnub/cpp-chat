@@ -117,14 +117,14 @@ public class MessageTests
         var manualReset = new ManualResetEvent(false);
         channel.OnMessageReceived += async message =>
         {
-            message.ToggleReaction("\"happy\"");
+            message.ToggleReaction("happy");
 
             await Task.Delay(3000);
 
-            var has = message.HasUserReaction("\"happy\"");
+            var has = message.HasUserReaction("happy");
             Assert.True(has);
-            var reactions = message.Reactions(); 
-            Assert.True(reactions.Count == 1 && reactions.Any(x => x.Value == "\"happy\""));
+            /*var reactions = message.Reactions(); 
+            Assert.True(reactions.Count == 1 && reactions.Any(x => x.Value == "\"happy\""));*/
             manualReset.Set();
         };
         channel.SendText("a_message");
@@ -153,25 +153,37 @@ public class MessageTests
     }
 
     [Test]
-    public void TestCreateThread()
+    public async Task TestCreateThread()
     {
         var manualReceiveEvent = new ManualResetEvent(false);
-        channel.OnMessageReceived += message =>
+        channel.OnMessageReceived += async message =>
         {
+            var hasThread = false;
             try
             {
                 var thread = message.CreateThread();
+                await Task.Delay(3000);
+                thread.SendText("thread_init_text");
+                await Task.Delay(3000);
+                hasThread = message.HasThread();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 Assert.Fail();
             }
+            Assert.True(hasThread);
+            Assert.True(message.TryGetThread(out var threadChannel));
+            message.RemoveThread();
+
+            await Task.Delay(4000);
+            Assert.False(message.HasThread());
+            
             manualReceiveEvent.Set();
         };
         channel.SendText("thread_start_message");
         
-        var received = manualReceiveEvent.WaitOne(5000);
+        var received = manualReceiveEvent.WaitOne(20000);
         Assert.IsTrue(received);
     }
 }

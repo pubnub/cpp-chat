@@ -76,6 +76,15 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_message_create_thread(IntPtr message);
         
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_has_thread(IntPtr message);
+        
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_message_get_thread(IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_remove_thread(IntPtr message);
+        
         #endregion
 
         /// <summary>
@@ -202,6 +211,7 @@ namespace PubNubChatAPI.Entities
         public PubnubChatMessageType Type => (PubnubChatMessageType)pn_message_get_data_type(pointer);
 
         private Chat chat;
+        private ThreadChannel thread;
 
         /// <summary>
         /// Event that is triggered when the message is updated.
@@ -269,11 +279,47 @@ namespace PubNubChatAPI.Entities
             UpdatePointer(newPointer);
         }
 
+        public bool HasThread()
+        {
+            var result = pn_message_has_thread(pointer);
+            CUtilities.CheckCFunctionResult(result);
+            return result == 1;
+        }
+
         public ThreadChannel CreateThread()
         {
+            if (HasThread())
+            {
+                return thread;
+            }
             var threadChannelPointer = pn_message_create_thread(pointer);
             CUtilities.CheckCFunctionResult(threadChannelPointer);
             return new ThreadChannel(chat, Id, threadChannelPointer);
+        }
+
+        public bool TryGetThread(out ThreadChannel threadChannel)
+        {
+            if (!HasThread())
+            {
+                thread = null;
+                threadChannel = null;
+                return false;
+            }
+            var threadPointer = pn_message_get_thread(pointer);
+            CUtilities.CheckCFunctionResult(threadPointer);
+            thread = new ThreadChannel(chat, Id, threadPointer);
+            threadChannel = thread;
+            return true;
+        }
+
+        public void RemoveThread()
+        {
+            if (!HasThread())
+            {
+                return;
+            }
+            thread = null;
+            CUtilities.CheckCFunctionResult(pn_message_remove_thread(pointer));
         }
 
         public void Pin()

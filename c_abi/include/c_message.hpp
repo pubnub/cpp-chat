@@ -48,4 +48,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_report(Pubnub::Message* messa
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadChannel* pn_message_create_thread(Pubnub::Message* message);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_message_has_thread(Pubnub::Message* message);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadChannel* pn_message_get_thread(Pubnub::Message* message);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_remove_thread(Pubnub::Message* message);
+
+
 #endif // PN_CHAT_C_MESSAGE_H

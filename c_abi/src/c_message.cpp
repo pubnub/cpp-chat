@@ -202,3 +202,38 @@ Pubnub::ThreadChannel* pn_message_create_thread(Pubnub::Message* message) {
     }
 }
 
+PnCTribool pn_message_has_thread(Pubnub::Message* message) {
+    try {
+        return message->has_thread();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
+Pubnub::ThreadChannel* pn_message_get_thread(Pubnub::Message* message) {
+    try {
+        return new Pubnub::ThreadChannel(message->get_thread());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+PnCResult pn_message_remove_thread(Pubnub::Message* message) {
+    try {
+        message->remove_thread();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
