@@ -39,6 +39,7 @@ struct MessageEntity {
     std::map<int, Pubnub::MentionedUser> get_mentioned_users() const;
     std::map<int, Pubnub::ReferencedChannel> get_referenced_channels() const;
     Pubnub::QuotedMessage get_quoted_message() const;
+    std::vector<Pubnub::TextLink> get_text_links() const;
 };
 
 #endif // PN_CHAT_MESSAGE_ENTITY_HPP

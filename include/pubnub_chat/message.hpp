@@ -70,6 +70,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::MentionedUser> mentioned_users() const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::ReferencedChannel> referenced_channels() const;
             PN_CHAT_EXPORT Pubnub::Option<Pubnub::Message> quoted_message() const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::TextLink> text_links() const;
 
         protected:
             PN_CHAT_EXPORT Message(

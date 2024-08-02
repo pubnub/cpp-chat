@@ -195,3 +195,9 @@ Pubnub::Option<Pubnub::Message> Pubnub::Message::quoted_message() const
 
     return Pubnub::Option<Pubnub::Message>();
 }
+
+Pubnub::Vector<TextLink> Message::text_links() const
+{
+    auto text_links = this->data->to_entity().get_text_links();
+    return Pubnub::Vector<TextLink>(std::move(text_links));
+}

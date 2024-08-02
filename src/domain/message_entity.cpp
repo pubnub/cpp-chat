@@ -262,3 +262,29 @@ Pubnub::QuotedMessage MessageEntity::get_quoted_message() const
     }
     return Pubnub::QuotedMessage();
 }
+
+std::vector<Pubnub::TextLink> MessageEntity::get_text_links() const
+{
+    std::vector<Pubnub::TextLink> text_links;
+    if(meta.empty())
+    {
+        return text_links;
+    }
+
+    Json metadata_json = Json::parse(meta);
+
+    if(metadata_json.contains("textLinks") && !metadata_json["textLinks"].is_null())
+    {
+        auto text_links_json_array = metadata_json["textLinks"];
+        for (Json::Iterator text_link = text_links_json_array.begin(); text_link != text_links_json_array.end(); ++text_link) 
+        {
+            Json text_link_json = text_link.value();
+            Pubnub::TextLink text_link_data;
+            text_link_data.start_index = text_link_json.get_int("start_index").value_or(0);
+            text_link_data.end_index = text_link_json.get_int("end_index").value_or(0);
+            text_link_data.link = text_link_json.get_string("link").value_or(Pubnub::String(""));
+            text_links.push_back(text_link_data);
+        }
+    }
+    return text_links;
+}
