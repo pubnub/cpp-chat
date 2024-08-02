@@ -105,10 +105,10 @@ PnCResult pn_message_pin(Pubnub::Message* message) {
 // TODO: utils
 static void message_action_to_json(nlohmann::json& j, const Pubnub::MessageAction data) {
     j = nlohmann::json{
-        {"timeToken", data.timetoken},
-        {"type", data.type},
-        {"userId", data.user_id},
-        {"value", data.value}
+        {"timeToken", data.timetoken.c_str()},
+        {"type", message_action_type_to_string(data.type).c_str()},
+        {"userId", data.user_id.c_str()},
+        {"value", data.value.c_str()}
     };
 }
 
