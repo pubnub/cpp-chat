@@ -258,11 +258,14 @@ std::vector<pubnub_v2_message> ChannelService::connect(const String& channel_id)
 #endif // PN_CHAT_C_ABI
 }
 
+#ifndef PN_CHAT_C_ABI
 void ChannelService::disconnect(const String& channel_id) const {
+#else
+std::vector<pubnub_v2_message> ChannelService::disconnect(const String& channel_id) const {
+#endif // PN_CHAT_C_ABI
       auto pubnub_handle = this->pubnub->lock();
       auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
 
-     // TODO: C ABI way
 #ifndef PN_CHAT_C_ABI
     if (auto chat = this->chat_service.lock()) {
         chat->callback_service->broadcast_messages(messages);
@@ -271,6 +274,7 @@ void ChannelService::disconnect(const String& channel_id) const {
         throw std::runtime_error("Chat service is not available to connect to channel");
     }
 #endif // PN_CHAT_C_ABI
+    return messages;
 }
 
 #ifndef PN_CHAT_C_ABI
@@ -292,8 +296,12 @@ std::vector<pubnub_v2_message> ChannelService::join(const String& channel_id, co
     return this->connect(channel_id);
 #endif // PN_CHAT_C_ABI
 }
-
+    
+#ifndef PN_CHAT_C_ABI
 void ChannelService::leave(const String& channel_id) const {
+#else
+std::vector<pubnub_v2_message> ChannelService::leave(const String& channel_id) const {
+#endif // PN_CHAT_C_ABI
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
     {
@@ -302,7 +310,11 @@ void ChannelService::leave(const String& channel_id) const {
         pubnub_handle->remove_memberships(user_id, remove_object_string);
     }
 
+#ifndef PN_CHAT_C_ABI
 	this->disconnect(channel_id);
+#else
+    return this->disconnect(channel_id);
+#endif // PN_CHAT_C_ABI
 }
 
 void ChannelService::send_text(const String& channel_id, const String& message, pubnub_chat_message_type message_type, const String& meta_data) const {

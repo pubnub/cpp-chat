@@ -160,9 +160,12 @@ PnCResult pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
     return PN_C_OK;
 }
 
-PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
+PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages) {
     try {
-        channel->disconnect();
+        auto messages = channel->disconnect();
+        auto heaped = move_message_to_heap2(messages);
+        strcpy(result_messages, heaped);
+        delete[] heaped;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -187,9 +190,11 @@ PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_param
     return PN_C_OK;
 }
 
-PnCResult pn_channel_leave(Pubnub::Channel* channel) {
+PnCResult pn_channel_leave(Pubnub::Channel* channel, char* result_messages) {
     try {
-        channel->leave();
+        auto messages = channel->leave();
+        auto heaped = move_message_to_heap2(messages);
+        delete[] heaped;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

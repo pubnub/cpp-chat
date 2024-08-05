@@ -69,9 +69,9 @@ namespace Pubnub
 #ifndef PN_CHAT_C_ABI
             PN_CHAT_EXPORT void connect(std::function<void(Message)> message_callback) const;
             PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, const Pubnub::String& additional_params = "") const;
-#endif
             PN_CHAT_EXPORT void disconnect() const;
             PN_CHAT_EXPORT void leave() const;
+#endif
             PN_CHAT_EXPORT void delete_channel() const;
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "");
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, SendTextParams text_params = SendTextParams());
@@ -127,6 +127,8 @@ namespace Pubnub
         public:
         std::vector<pubnub_v2_message> connect() const;
         std::vector<pubnub_v2_message> join(const Pubnub::String& additional_params = "") const;
+        std::vector<pubnub_v2_message> disconnect() const;
+        std::vector<pubnub_v2_message> leave() const;
 #endif
     };
 };
