@@ -19,7 +19,7 @@ namespace Pubnub
         PN_CHAT_EXPORT Pubnub::String parent_channel_id() const {return parent_channel_id_internal;};
         PN_CHAT_EXPORT Pubnub::Message parent_message() const {return parent_message_internal;};
 
-        PN_CHAT_EXPORT void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "") override;
+        PN_CHAT_EXPORT void send_text(const Pubnub::String& message, SendTextParams text_params = SendTextParams()) override;
 
         PN_CHAT_EXPORT Pubnub::Vector<Pubnub::ThreadMessage> get_thread_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         PN_CHAT_EXPORT Pubnub::ThreadChannel pin_message_to_thread(const Pubnub::ThreadMessage& message) const;

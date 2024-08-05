@@ -45,7 +45,7 @@ ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
 
 ThreadChannel::~ThreadChannel() = default;
 
-void ThreadChannel::send_text(const String &message, pubnub_chat_message_type message_type, const String &meta_data)
+void ThreadChannel::send_text(const String &message, SendTextParams text_params)
 {
     //If this is new thread, set all server data before sending the first message (this is actually creating the thread, even if the object was created earlier)
     if(!is_thread_created)
@@ -54,7 +54,7 @@ void ThreadChannel::send_text(const String &message, pubnub_chat_message_type me
         is_thread_created = true;
     }
 
-    Channel::send_text(message, message_type, meta_data);
+    Channel::send_text(message, text_params);
 }
 
 Pubnub::Vector<Pubnub::ThreadMessage> Pubnub::ThreadChannel::get_thread_history(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
