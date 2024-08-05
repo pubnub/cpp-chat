@@ -8,9 +8,13 @@
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
+#include <vector>
 
 extern "C" {
     #include <pubnub_subscribe_v2.h>
+#ifdef PN_CHAT_C_ABI
+    #include <pubnub_helper.h>
+#endif
 }
 
 
@@ -123,8 +127,8 @@ void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type ch
     this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
 }
 #else
-void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
-    this->chat_service->listen_for_events(channel_id, chat_event_type);
+std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
+    return this->chat_service->listen_for_events(channel_id, chat_event_type);
 }
 #endif
 

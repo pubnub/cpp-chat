@@ -13,6 +13,7 @@
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
+#include <pubnub_helper.h>
 
 #ifdef PN_CHAT_C_ABI
 extern "C" {
@@ -66,7 +67,7 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const 
     pubnub_handle->publish(channel_id, event_message);
 }
 
-//Without C_ABI
+#ifndef PN_CHAT_C_ABI
 void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const {
     if(channel_id.empty())
     {
@@ -83,23 +84,21 @@ void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pu
     this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
 }
 
-//With C_ABI
-void  ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
-    // if(channel_id.empty())
-    // {
-    //     throw std::invalid_argument("Cannot listen for events - channel_id is empty");
-    // }
+#else
 
-    // auto messages = [this, channel_id] {
-    //     auto pubnub_handle = this->pubnub->lock();
-    //     return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    // }();
+std::vector<pubnub_v2_message> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
+    if(channel_id.empty())
+    {
+        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
+    }
+
+    auto messages = [this, channel_id] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+    }();
     
-    // return messages;
-
+    return messages;
 }
-
-#ifdef PN_CHAT_C_ABI
 
 std::vector<pubnub_v2_message> ChatService::get_chat_updates() const
 {

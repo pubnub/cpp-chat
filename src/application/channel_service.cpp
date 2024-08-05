@@ -421,7 +421,12 @@ void ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_da
     };
     auto chat_service_shared = chat_service.lock();
 
+#ifndef PN_CHAT_C_ABI
     chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
+#else
+    auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING);
+    // TODO: messages are not used in C ABI
+#endif
 }
 
 Message ChannelService::get_pinned_message(const String& channel_id, const ChannelDAO& channel_data) const {
@@ -542,7 +547,12 @@ void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, cons
         read_receipts_callback(generate_receipts(timetoken_per_user));
     };
 
+#ifndef PN_CHAT_C_ABI
     chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
+#else
+    auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT);
+    // TODO: messages are not used in C ABI 
+#endif
 }
 
 String ChannelService::get_thread_id(const Pubnub::Message& message) const

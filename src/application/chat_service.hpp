@@ -7,6 +7,9 @@
 #include "enums.hpp"
 #include <functional>
 #include <vector>
+#ifdef PN_CHAT_C_ABI
+#include <pubnub_helper.h>
+#endif
 
 class CallbackService;
 class ChannelService;
@@ -33,10 +36,9 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         static ThreadSafePtr<PubNub> create_pubnub(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id);
 
         void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
-        //Without C_ABI
+#ifndef PN_CHAT_C_ABI
         void listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const;
-        //With C_ABI
-        void listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const;
+#endif
 
         std::shared_ptr<const ChannelService> channel_service;
         std::shared_ptr<const UserService> user_service;
@@ -49,19 +51,12 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<CallbackService> callback_service;
 
 #ifdef PN_CHAT_C_ABI
+        std::vector<pubnub_v2_message> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const;
         std::vector<pubnub_v2_message> get_chat_updates() const;
 #endif
-
-
     
     private:
         ThreadSafePtr<PubNub> pubnub;
-
-    public:
-
-
-        
-
 };
 
 #endif // PN_CHAT_CHAT_SERVICE_HPP

@@ -155,7 +155,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_channels(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_listen_for_events(
         Pubnub::Chat* chat,
-        const char* channel_id);
+        const char* channel_id,
+        char* messages_json);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pin_message_to_channel(Pubnub::Chat* chat, Pubnub::Message* message, Pubnub::Channel* channel);
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult unpin_message_from_channel(Pubnub::Chat* chat, Pubnub::Channel* channel);
