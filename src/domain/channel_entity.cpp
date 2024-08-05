@@ -32,14 +32,18 @@ Pubnub::String ChannelEntity::get_channel_metadata_json_string(Pubnub::String ch
 }
 
 ChannelEntity ChannelEntity::from_json(Json channel_json) {
-    return ChannelEntity{
-        channel_json["channel"].get_string("name").value_or(Pubnub::String("")),
-        channel_json["channel"].get_string("description").value_or(Pubnub::String("")),
-        channel_json.contains("custom") ? channel_json["custom"].dump() : Pubnub::String(""),
-        channel_json.get_string("updated").value_or(Pubnub::String("")),
-        channel_json.get_string("status").value_or(Pubnub::String("")),
-        channel_json.get_string("type").value_or(Pubnub::String(""))
-    };
+    ChannelEntity new_entity;
+    if (channel_json.contains("channel") && !channel_json["channel"].is_null())
+    {
+        new_entity.channel_name = channel_json["channel"].get_string("name").value_or(Pubnub::String(""));
+        new_entity.description = channel_json["channel"].get_string("description").value_or(Pubnub::String(""));
+    }
+    new_entity.custom_data_json = channel_json.contains("custom") ? channel_json["custom"].dump() : Pubnub::String("");
+    new_entity.updated = channel_json.get_string("updated").value_or(Pubnub::String(""));
+    new_entity.status = channel_json.get_string("status").value_or(Pubnub::String(""));
+    new_entity.type =  channel_json.get_string("type").value_or(Pubnub::String(""));
+
+    return new_entity;
 }
 
 ChannelEntity ChannelEntity::from_channel_response(Json response) {
