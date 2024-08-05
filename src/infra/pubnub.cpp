@@ -478,7 +478,15 @@ Pubnub::String PubNub::fetch_history(
 
 Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value)
 {
-    auto result = pubnub_add_message_action_str(this->main_context.get(), channel, message_time_token, message_action_type, value);
+    Pubnub::String json_safe_value;;
+    if ((value.front() != '\"' && value.back() != '\"') || (value.front() != '{' && value.back() != '}')) {
+        // we asume it is a string and we need to add quotes 
+        json_safe_value = Pubnub::String("\"") + value + Pubnub::String("\"");
+    } else {
+        json_safe_value = value;
+    }    
+
+    auto result = pubnub_add_message_action_str(this->main_context.get(), channel, message_time_token, message_action_type, json_safe_value);
 
     this->await_and_handle_error(result);
 

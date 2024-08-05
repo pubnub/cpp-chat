@@ -71,7 +71,11 @@ std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> MessageEn
     std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> messages;
 
     Json messages_array_json = history_json["channels"][channel_id];
-    
+
+    if (messages_array_json.is_null())
+    {
+        return messages;
+    }
 
     for (auto element : messages_array_json)
     {
