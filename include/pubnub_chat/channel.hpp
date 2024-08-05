@@ -15,6 +15,10 @@
 
 #include "message_draft_config.hpp"
 
+#ifdef PN_CHAT_C_ABI
+#include "pubnub_helper.h"
+#endif
+
 class ChannelService; 
 class ChatService;
 class PresenceService;
@@ -121,8 +125,8 @@ namespace Pubnub
 
 #ifdef PN_CHAT_C_ABI
         public:
-        std::vector<Pubnub::String> connect() const;
-        std::vector<Pubnub::String> join(const Pubnub::String& additional_params = "") const;
+        std::vector<pubnub_v2_message> connect() const;
+        std::vector<pubnub_v2_message> join(const Pubnub::String& additional_params = "") const;
 #endif
     };
 };

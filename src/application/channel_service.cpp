@@ -19,6 +19,7 @@
 #include "application/callback_service.hpp"
 #include "option.hpp"
 #ifdef PN_CHAT_C_ABI
+#include <pubnub_helper.h>
 #include "domain/parsers.hpp"
 #endif // PN_CHAT_C_ABI
 
@@ -236,7 +237,7 @@ Channel ChannelService::unpin_message_from_channel(const String& channel_id, con
 #ifndef PN_CHAT_C_ABI
 void ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
 #else
-std::vector<Pubnub::String> ChannelService::connect(const String& channel_id) const {
+std::vector<pubnub_v2_message> ChannelService::connect(const String& channel_id) const {
 #endif // PN_CHAT_C_ABI
     auto messages = [this, channel_id] {
         auto pubnub_handle = this->pubnub->lock();
@@ -253,11 +254,7 @@ std::vector<Pubnub::String> ChannelService::connect(const String& channel_id) co
         throw std::runtime_error("Chat service is not available to connect to channel");
     }
 #else
-    auto messages_strings = std::vector<String>();
-    std::transform(messages.begin(), messages.end(), std::back_inserter(messages_strings), [](pubnub_v2_message message) {
-        return Parsers::PubnubJson::to_string(message);
-    });
-    return messages_strings;
+    return messages;
 #endif // PN_CHAT_C_ABI
 }
 
@@ -279,7 +276,7 @@ void ChannelService::disconnect(const String& channel_id) const {
 #ifndef PN_CHAT_C_ABI
 void ChannelService::join(const String& channel_id, std::function<void(Message)> message_callback, const String& additional_params) const {
 #else
-std::vector<Pubnub::String> ChannelService::join(const String& channel_id, const String& additional_params) const {
+std::vector<pubnub_v2_message> ChannelService::join(const String& channel_id, const String& additional_params) const {
 #endif // PN_CHAT_C_ABI
     String set_object_string = create_set_memberships_object(channel_id, additional_params);
 

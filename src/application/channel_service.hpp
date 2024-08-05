@@ -9,6 +9,9 @@
 #include <memory>
 #include <vector>
 #include <map>
+#ifdef PN_CHAT_C_ABI
+#include <pubnub_helper.h>
+#endif
 
 class EntityRepository;
 class PubNub;
@@ -121,8 +124,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
 #ifdef PN_CHAT_C_ABI
     public:
-        std::vector<Pubnub::String> connect(const Pubnub::String& channel_id) const;
-        std::vector<Pubnub::String> join(const Pubnub::String& channel_id, const Pubnub::String& additional_params = "") const;
+        std::vector<pubnub_v2_message> connect(const Pubnub::String& channel_id) const;
+        std::vector<pubnub_v2_message> join(const Pubnub::String& channel_id, const Pubnub::String& additional_params = "") const;
 #endif
 };
 

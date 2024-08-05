@@ -8,6 +8,10 @@
 #include "application/membership_service.hpp"
 #include <algorithm>
 
+#ifdef PN_CHAT_C_ABI
+#include <pubnub_helper.h>
+#endif
+
 using namespace Pubnub;
 
 Channel::Channel(
@@ -81,11 +85,11 @@ void Channel::join(std::function<void(Message)> message_callback, const String& 
     this->channel_service->join(channel_id_internal, message_callback, additional_params);
 }
 #else 
-std::vector<Pubnub::String> Channel::connect() const {
+std::vector<pubnub_v2_message> Channel::connect() const {
     return this->channel_service->connect(channel_id_internal);
 }
 
-std::vector<Pubnub::String> Channel::join(const Pubnub::String& additional_params) const {
+std::vector<pubnub_v2_message> Channel::join(const Pubnub::String& additional_params) const {
     return this->channel_service->join(channel_id_internal, additional_params);
 }
 #endif

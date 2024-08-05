@@ -10,6 +10,34 @@
 #include <sstream>
 #include "application/channel_service.hpp"
 
+// TODO: utils module for c ABI
+const char* move_message_to_heap2(std::vector<pubnub_v2_message> messages) {
+    if (messages.size() == 0) {
+        char* empty_result = new char[3];
+        memcpy(empty_result, "[]\0", 3);
+        return empty_result;
+    }
+    Pubnub::String result = "[";
+    for (auto message : messages) {
+        auto ptr = new pubnub_v2_message(message);
+        // TODO: utils void* to string
+#ifdef _WIN32
+        result += "0x";
+#endif
+        std::ostringstream oss;
+        oss << static_cast<void*>(ptr);
+        result += oss.str();
+        result += ",";
+    }
+    result.erase(result.length() - 1);
+    result += "]";
+    char* c_result = new char[result.length() + 1];
+    memcpy(c_result, result.c_str(), result.length() + 1);
+    return c_result;
+}
+
+
+
 void pn_channel_delete(Pubnub::Channel* channel) {
     delete channel;
 }
@@ -117,9 +145,12 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 
 
-PnCResult pn_channel_connect(Pubnub::Channel* channel) {
+PnCResult pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
     try {
-        channel->connect();
+        auto messages = channel->connect();
+        auto heaped = move_message_to_heap2(messages);
+        strcpy(result_messages, heaped);
+        delete[] heaped;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -141,9 +172,12 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
     return PN_C_OK;
 }
 
-PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params) {
+PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages) {
     try {
-        channel->join(additional_params);
+        auto messages = channel->join(additional_params);
+        auto heaped = move_message_to_heap2(messages);
+        strcpy(result_messages, heaped);
+        delete[] heaped;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
