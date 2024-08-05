@@ -273,8 +273,9 @@ std::vector<pubnub_v2_message> ChannelService::disconnect(const String& channel_
     } else {
         throw std::runtime_error("Chat service is not available to connect to channel");
     }
-#endif // PN_CHAT_C_ABI
+#else
     return messages;
+#endif // PN_CHAT_C_ABI
 }
 
 #ifndef PN_CHAT_C_ABI

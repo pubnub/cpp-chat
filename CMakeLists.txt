@@ -23,7 +23,7 @@ if(${DEBUG})
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-option(ENABLE_C_ABI "Enable C ABI" ON)
+option(ENABLE_C_ABI "Enable C ABI" OFF)
 if(${ENABLE_C_ABI})
     message(STATUS "Enabling C ABI functions")
 endif()
