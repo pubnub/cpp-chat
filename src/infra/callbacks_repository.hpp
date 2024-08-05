@@ -5,6 +5,7 @@
 #include "channel.hpp"
 #include "user.hpp"
 #include "membership.hpp"
+#include "event.hpp"
 #include "infra/repository.hpp"
 #include "string.hpp"
 
@@ -20,7 +21,7 @@ class CallbacksRepository {
         FunctionRepository<Pubnub::Message>& get_message_callbacks();
         TupleFunctionRepository<Pubnub::String, Pubnub::Message>& get_message_update_callbacks();
         FunctionRepository<Pubnub::Channel>& get_channel_callbacks();
-        TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::String>& get_event_callbacks();
+        TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::Event>& get_event_callbacks();
         FunctionRepository<Pubnub::User>& get_user_callbacks();
         FunctionRepository<std::vector<Pubnub::String>>& get_channel_presence_callbacks();
         TupleFunctionRepository<Pubnub::String, Pubnub::Membership>& get_membership_callbacks();
@@ -29,7 +30,7 @@ class CallbacksRepository {
         FunctionRepository<Pubnub::Message> message_callbacks;
         TupleFunctionRepository<Pubnub::String, Pubnub::Message> message_update_callbacks;
         FunctionRepository<Pubnub::Channel> channel_callbacks;
-        TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::String> event_callbacks;
+        TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::Event> event_callbacks;
         FunctionRepository<Pubnub::User> user_callbacks;
         FunctionRepository<std::vector<Pubnub::String>> channel_presence_callbacks;
         TupleFunctionRepository<Pubnub::String, Pubnub::Membership> membership_callbacks;

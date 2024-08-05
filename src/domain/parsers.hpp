@@ -6,6 +6,7 @@
 #include "domain/message_entity.hpp"
 #include "domain/user_entity.hpp"
 #include "string.hpp"
+#include "event.hpp"
 extern "C" {
 #include <pubnub_helper.h>
 }
@@ -29,6 +30,7 @@ namespace Parsers {
         std::pair<UserId, UserEntity> to_user(pubnub_v2_message pn_message);
         MembershipEntity membership_from_string(Pubnub::String message_json);
         Pubnub::String to_string(pubnub_v2_message pn_message);
+        Pubnub::Event to_event(pubnub_v2_message pn_message);
 
         Pubnub::String event_type(Pubnub::String message_json);
         Pubnub::String message_update_timetoken(Pubnub::String message_json);

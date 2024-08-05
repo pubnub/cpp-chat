@@ -8,7 +8,7 @@
 bool Parsers::PubnubJson::is_message(Pubnub::String message_json_string)
 {
     auto message_json = Json::parse(message_json_string);
-    return message_json.contains("text") && message_json.contains("type");
+    return message_json.contains("text") && message_json.contains("type") && message_json["type"] == "text";
 }
 
 bool Parsers::PubnubJson::is_message_update(Pubnub::String message_json_string)
@@ -121,6 +121,17 @@ MembershipEntity Parsers::PubnubJson::membership_from_string(Pubnub::String mess
 
 Pubnub::String Parsers::PubnubJson::to_string(pubnub_v2_message pn_message) {
     return string_from_pn_block(pn_message.payload);
+}
+
+Pubnub::Event Parsers::PubnubJson::to_event(pubnub_v2_message pn_message)
+{
+    return Pubnub::Event({
+        string_from_pn_block(pn_message.tt),
+        Pubnub::chat_event_type_from_string(event_type(string_from_pn_block(pn_message.payload))),
+        string_from_pn_block(pn_message.channel),
+        string_from_pn_block(pn_message.publisher),
+        string_from_pn_block(pn_message.payload)
+    });
 }
 
 Pubnub::String Parsers::PubnubJson::event_type(Pubnub::String message_json) {

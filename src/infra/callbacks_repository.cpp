@@ -15,7 +15,7 @@ CallbacksRepository::FunctionRepository<Pubnub::Channel>& CallbacksRepository::g
     return this->channel_callbacks;
 }
 
-CallbacksRepository::TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::String>& CallbacksRepository::get_event_callbacks()
+CallbacksRepository::TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::Event>& CallbacksRepository::get_event_callbacks()
 {
     return this->event_callbacks;
 }

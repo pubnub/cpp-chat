@@ -49,7 +49,7 @@ class CallbackService {
         void register_event_callback(
                 Pubnub::String channel_id,
                 Pubnub::pubnub_chat_event_type chat_event_type,
-                std::function<void(Pubnub::String)> event_callback
+                std::function<void(Pubnub::Event)> event_callback
         );
         void remove_event_callback(Pubnub::String channel_id, Pubnub::pubnub_chat_event_type chat_event_type);
 

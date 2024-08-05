@@ -5,6 +5,7 @@
 #include "domain/json.hpp"
 #include "infra/timer.hpp"
 #include "string.hpp"
+#include "event.hpp"
 #include <map>
 #include <optional>
 
@@ -28,6 +29,7 @@ class Typing {
 
         static Pubnub::String payload(const Pubnub::String& user_id, bool is_typing);
         static std::optional<std::pair<UserId, bool>> typing_user_from_payload(const Json& payload);
+        static std::optional<std::pair<UserId, bool>> typing_user_from_event(const Pubnub::Event& event);
     private:
         bool sent = false;
         std::vector<Pubnub::String> typing_indicators;

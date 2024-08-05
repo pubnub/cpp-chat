@@ -71,7 +71,7 @@ void CallbackService::remove_channel_callback(Pubnub::String channel_id)
 void CallbackService::register_event_callback(
         Pubnub::String channel_id,
         Pubnub::pubnub_chat_event_type chat_event_type,
-        std::function<void(Pubnub::String)> event_callback
+        std::function<void(Pubnub::Event)> event_callback
 )
 {
     //TODO: Storing this in map is not good idea, as someone could listen for 2 types on the same channel. Then only 1 type would work.
@@ -194,14 +194,13 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
     if (Parsers::PubnubJson::is_event(message_string)) {
         auto maybe_callback = this->callbacks.get_event_callbacks().get(message_channel_string);
         if (maybe_callback.has_value()) {
-            auto parsed_event = Parsers::PubnubJson::to_string(message);
+            auto parsed_event = Parsers::PubnubJson::to_event(message);
 
             Pubnub::pubnub_chat_event_type event_type;
-            std::function<void(Pubnub::String)> callback;
+            std::function<void(Pubnub::Event)> callback;
             std::tie(event_type, callback) = maybe_callback.value();
 
-            auto message_event_type = Parsers::PubnubJson::event_type(parsed_event);
-            if (Pubnub::chat_event_type_from_string(message_event_type) == event_type) {
+            if (parsed_event.type == event_type) {
                 callback(parsed_event);
             }
         }

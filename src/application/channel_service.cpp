@@ -393,9 +393,9 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
 
 void ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
     auto typing_timeout = TYPING_TIMEOUT;
-    std::function<void(String)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (String event_string)
+    std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
     {
-        auto maybe_typing = Typing::typing_user_from_payload(event_string);
+        auto maybe_typing = Typing::typing_user_from_event(event);
         if(!maybe_typing.has_value()) {
             throw std::runtime_error("Can't get typing from payload");
         }
@@ -539,9 +539,9 @@ void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, cons
 
     read_receipts_callback(generate_receipts(timetoken_per_user));
 
-    auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::String& event){
+    auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::Event& event){
 
-        json payload_json = json::parse(event);
+        json payload_json = json::parse(event.payload);
 
         timetoken_per_user[String(payload_json["user_id"])] = String(payload_json["messageTimetoken"]);
 

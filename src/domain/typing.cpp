@@ -50,3 +50,21 @@ std::optional<std::pair<Typing::UserId, bool>> Typing::typing_user_from_payload(
 
     return std::make_pair(payload.get_string("userId").value(), payload.get_bool("value").value());
 }
+
+std::optional<std::pair<Typing::UserId, bool>> Typing::typing_user_from_event(const Pubnub::Event& event)
+{
+    if(event.payload.empty())
+    {
+        return std::nullopt;
+    }
+    Json payload = Json::parse(event.payload);
+    if(!payload.contains("userId")) {
+        return std::nullopt;
+    }
+
+    if(!payload.contains("value")) {
+        return std::nullopt;
+    }
+
+    return std::make_pair(payload.get_string("userId").value(), payload.get_bool("value").value());
+}
