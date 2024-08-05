@@ -70,14 +70,14 @@ MessageEntity MessageEntity::from_json(Pubnub::String message_json, Pubnub::Stri
 std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> MessageEntity::from_history_json(Json history_json, Pubnub::String channel_id) {
     std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> messages;
 
-    Json messages_array_json = history_json["channels"][channel_id];
+    Json messages_array_json = history_json["channels"];
 
-    if (messages_array_json.is_null())
+    if (!messages_array_json.contains(channel_id))
     {
         return messages;
     }
 
-    for (auto element : messages_array_json)
+    for (auto element : messages_array_json[channel_id])
     {
         auto new_message_entity = MessageEntity::from_json(element.dump(), channel_id);
 
