@@ -51,6 +51,26 @@ static inline Pubnub::String message_action_type_to_string(pubnub_message_action
 	return "incorrect_chat_event_type";
 };
 
+static inline Pubnub::String message_action_type_to_non_quoted_string(pubnub_message_action_type message_action_type)
+{
+	switch (message_action_type)
+	{
+	case pubnub_message_action_type::PMAT_Reaction:
+		return "reaction";
+	case pubnub_message_action_type::PMAT_Receipt:
+		return "receipt";
+	case pubnub_message_action_type::PMAT_Custom:
+		return "custom";
+	case pubnub_message_action_type::PMAT_Edited:
+		return "edited";
+	case pubnub_message_action_type::PMAT_Deleted:
+		return "deleted";
+	case pubnub_message_action_type::PMAT_ThreadRootId:
+		return "threadRootId";
+	}
+	return "incorrect_chat_event_type";
+};
+
 static inline Pubnub::String chat_event_type_to_string(pubnub_chat_event_type chat_event_type)
 {
     switch(chat_event_type)
