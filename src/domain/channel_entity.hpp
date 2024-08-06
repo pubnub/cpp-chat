@@ -4,8 +4,10 @@
 #include "domain/json.hpp"
 #include "string.hpp"
 #include "infra/timer.hpp"
+#include "channel.hpp"
 #include <map>
 #include <utility>
+
 
 struct ChannelEntity {
     using ChannelId = Pubnub::String;
@@ -26,6 +28,10 @@ struct ChannelEntity {
 
     static ChannelEntity from_json(Json channel_json);
     static ChannelEntity from_channel_response(Json response);
+
+    void update_channel_in_stream_channels(Pubnub::Channel channel);
+
+    std::vector<Pubnub::Channel> stream_updates_channels;
 };
 
 #endif // PN_CHAT_CHANNEL_ENTITY_HPP
