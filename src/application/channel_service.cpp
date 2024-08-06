@@ -504,6 +504,12 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
     ChannelEntity calling_channel_entity = ChannelDAO(calling_channel.channel_data()).to_entity();
     calling_channel_entity.stream_updates_channels = channels;
 
+    for(auto aa : calling_channel_entity.stream_updates_channels)
+    {
+        std::cout << "Stream updates on. ID: " << aa.channel_id() << "  name: " << aa.channel_data().channel_name <<
+            "\n desc: " << aa.channel_data().description << "  custom: " << aa.channel_data().custom_data_json << std::endl;
+    }
+
     std::function<void(Channel)> single_channel_callback = [=](Channel channel){
         
         std::vector<Pubnub::Channel> updated_channels; 
@@ -512,6 +518,12 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
         {
             //Find channel that was updated and replace it in Entity stream channels
             auto stream_channel = calling_channel_entity.stream_updates_channels[i];
+
+
+                std::cout << "Stream updates in callback. ID: " << stream_channel.channel_id() << "  name: " << stream_channel.channel_data().channel_name <<
+            "\n desc: " << stream_channel.channel_data().description << "  custom: " << stream_channel.channel_data().custom_data_json << std::endl;
+
+
             if(stream_channel.channel_id() == channel.channel_id())
             {
                 ChannelEntity stream_channel_entity = ChannelDAO(stream_channel.channel_data()).to_entity();
@@ -525,8 +537,9 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
                 updated_channels.push_back(calling_channel_entity.stream_updates_channels[i]);
             }
         }
-
-        channel_callback(calling_channel_entity.stream_updates_channels);
+        //TODO:: guarantee lifetime for calling_channel_entity, so it can hold all necessary data
+        //calling_channel_entity.stream_updates_channels = updated_channels;
+        channel_callback(updated_channels);
 
     };
     
