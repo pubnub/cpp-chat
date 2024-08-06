@@ -752,6 +752,7 @@ ThreadChannel ChannelService::create_thread_channel_object(std::pair<String, Cha
 
 String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& text_params) const
 {
+    bool any_data_added = !text_params.meta.empty();
     String meta = text_params.meta.empty() ? "{}" : text_params.meta;
     json message_json = json::parse(meta);
 
@@ -771,6 +772,7 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         }
 
         message_json["mentionedUsers"] = mentioned_users_json;
+        any_data_added = true;
     }
 
     //referenced channels
@@ -789,6 +791,7 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         }
 
         message_json["referencedChannels"] = referenced_channels_json;
+        any_data_added = true;
     }
 
     //text links
@@ -808,6 +811,7 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         }
 
         message_json["textLinks"] = text_links_json;
+        any_data_added = true;
     }
 
     //quoted message
@@ -819,9 +823,11 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         quoted_message_json["userId"] = text_params.quoted_message.user_id.c_str();
         quoted_message_json["channelId"] = text_params.quoted_message.channel_id.c_str();
         message_json["quotedMessage"] = quoted_message_json;
+
+        any_data_added = true;
     }
 
-	return message_json.dump();
+	return any_data_added? message_json.dump() : String("");
 }
 
 #ifdef PN_CHAT_C_ABI
