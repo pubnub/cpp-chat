@@ -123,8 +123,8 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, const String&
 }
 
 #ifndef PN_CHAT_C_ABI
-void Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
-    this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback);
+CallbackStop Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
+    return CallbackStop(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
 }
 #else
 std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {

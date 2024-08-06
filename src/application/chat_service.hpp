@@ -37,7 +37,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
 
         void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
 #ifndef PN_CHAT_C_ABI
-        void listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
+        std::function<void()> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
 #endif
 
         std::shared_ptr<const ChannelService> channel_service;

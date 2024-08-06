@@ -68,7 +68,7 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const 
 }
 
 #ifndef PN_CHAT_C_ABI
-void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
+std::function<void()> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
@@ -82,6 +82,11 @@ void ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pu
     // First broadcast messages because they're not related to the new callback
     this->callback_service->broadcast_messages(messages);
     this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
+
+    std::function<void()> stop_callback = [=](){
+        this->callback_service->remove_event_callback(channel_id, chat_event_type);
+    };
+    return stop_callback;
 }
 
 #else
