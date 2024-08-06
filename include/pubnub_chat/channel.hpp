@@ -8,6 +8,7 @@
 #include "message.hpp"
 #include "enums.hpp"
 #include "vector.hpp"
+#include "callback_stop.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -94,8 +95,8 @@ namespace Pubnub
             PN_CHAT_EXPORT virtual void emit_user_mention(const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text) const;
 
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(const Pubnub::Channel&)> channel_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(const Pubnub::Channel&)> channel_callback) const;
             PN_CHAT_EXPORT void stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
             PN_CHAT_EXPORT void stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
