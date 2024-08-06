@@ -57,6 +57,18 @@ ChannelEntity ChannelEntity::from_channel_response(Json response) {
     };
 }
 
+ChannelEntity ChannelEntity::from_base_and_updated_channel(ChannelEntity base_channel, ChannelEntity updated_channel)
+{
+    ChannelEntity new_entity;
+    new_entity.channel_name = updated_channel.channel_name.empty() ? base_channel.channel_name : updated_channel.channel_name;
+    new_entity.description = updated_channel.description.empty() ? base_channel.description : updated_channel.description;
+    new_entity.custom_data_json = updated_channel.custom_data_json.empty() ? base_channel.custom_data_json : updated_channel.custom_data_json;
+    new_entity.updated = updated_channel.updated.empty() ? base_channel.updated : updated_channel.updated;
+    new_entity.status = updated_channel.status.empty() ? base_channel.status : updated_channel.status;
+    new_entity.type = updated_channel.type.empty() ? base_channel.type : updated_channel.type;
+    return new_entity;
+}
+
 void ChannelEntity::update_channel_in_stream_channels(Pubnub::Channel channel)
 {
     

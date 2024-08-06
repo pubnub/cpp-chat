@@ -464,7 +464,34 @@ void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const P
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MENTION, user_id, payload_json.dump());
 }
 
-std::function<void()> ChannelService::stream_updates_on(const std::vector<Pubnub::Channel>& channels, std::function<void(Channel)> channel_callback) const
+std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat = this->chat_service.lock();
+    std::vector<String> channels_ids;
+    std::function<void(Channel)> final_channel_callback = [=](Channel channel){
+        ChannelEntity calling_channel_entity = ChannelDAO(calling_channel.channel_data()).to_entity();
+        ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
+        std::pair<String, ChannelEntity> pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(calling_channel_entity, channel_entity));
+        auto updated_channel = create_channel_object(pair);
+        
+        channel_callback(updated_channel);
+    };
+    
+
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_channel.channel_id()});
+    chat->callback_service->broadcast_messages(messages);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=](){
+        chat->callback_service->remove_channel_callback(calling_channel.channel_id());
+    };
+
+    return stop_streaming;
+}
+
+std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Channel>)> channel_callback) const
 {
     if(channels.empty())
     {
@@ -476,11 +503,11 @@ std::function<void()> ChannelService::stream_updates_on(const std::vector<Pubnub
     auto chat = this->chat_service.lock();
     std::vector<String> channels_ids;
     //std::function<void(Channel)> = [=](Channel channel)
-    for(auto channel : channels)
-    {
-        channels_ids.push_back(channel.channel_id());
-        chat->callback_service->register_channel_callback(channel.channel_id(), channel_callback);
-    }
+    // for(auto channel : channels)
+    // {
+    //     channels_ids.push_back(channel.channel_id());
+    //     chat->callback_service->register_channel_callback(channel.channel_id(), channel_callback);
+    // }
     
 
 
@@ -499,6 +526,7 @@ std::function<void()> ChannelService::stream_updates_on(const std::vector<Pubnub
 
     return stop_streaming;
 }
+
 
 void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
 {

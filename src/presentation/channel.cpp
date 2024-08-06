@@ -196,21 +196,17 @@ Message Channel::get_pinned_message() const {
 }
 
 CallbackStop Channel::stream_updates(std::function<void(const Channel&)> channel_callback) const {
-    std::vector<Channel> channels = {*this};
-    return CallbackStop(this->channel_service->stream_updates_on(channels, channel_callback));
+    return CallbackStop(this->channel_service->stream_updates(*this, channel_callback));
 }
 
-CallbackStop Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(const Channel&)> channel_callback) const {
-    
+CallbackStop Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback) {
     auto channels_std = channels.into_std_vector();
-    std::vector<String> channel_ids(channels_std.size());
-    std::transform(
-            channels_std.begin(),
-            channels_std.end(),
-            channel_ids.begin(),
-            [](Channel channel) { return channel.channel_id(); }
-        );
-    return CallbackStop(this->channel_service->stream_updates_on(channels_std, channel_callback));
+
+    auto new_callback = [=](std::vector<Pubnub::Channel> vec)
+    {
+        channel_callback(std::move(vec));
+    };
+    return CallbackStop(this->channel_service->stream_updates_on(*this, channels_std, new_callback));
 }
 
 void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
