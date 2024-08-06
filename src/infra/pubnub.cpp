@@ -479,7 +479,7 @@ Pubnub::String PubNub::fetch_history(
 Pubnub::String PubNub::add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value)
 {
     Pubnub::String json_safe_value;;
-    if ((value.front() != '\"' && value.back() != '\"') || (value.front() != '{' && value.back() != '}')) {
+    if ((value.front() != '\"' && value.back() != '\"') && (value.front() != '{' && value.back() != '}')) {
         // we asume it is a string and we need to add quotes 
         json_safe_value = Pubnub::String("\"") + value + Pubnub::String("\"");
     } else {
