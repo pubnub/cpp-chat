@@ -500,12 +500,41 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
 
     auto chat = this->chat_service.lock();
     std::vector<String> channels_ids;
-    //std::function<void(Channel)> = [=](Channel channel)
-    // for(auto channel : channels)
-    // {
-    //     channels_ids.push_back(channel.channel_id());
-    //     chat->callback_service->register_channel_callback(channel.channel_id(), channel_callback);
-    // }
+
+    ChannelEntity calling_channel_entity = ChannelDAO(calling_channel.channel_data()).to_entity();
+    calling_channel_entity.stream_updates_channels = channels;
+
+    std::function<void(Channel)> single_channel_callback = [=](Channel channel){
+        
+        std::vector<Pubnub::Channel> updated_channels; 
+
+        for(int i = 0; i < calling_channel_entity.stream_updates_channels.size(); i++)
+        {
+            //Find channel that was updated and replace it in Entity stream channels
+            auto stream_channel = calling_channel_entity.stream_updates_channels[i];
+            if(stream_channel.channel_id() == channel.channel_id())
+            {
+                ChannelEntity stream_channel_entity = ChannelDAO(stream_channel.channel_data()).to_entity();
+                ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
+                std::pair<String, ChannelEntity> pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(calling_channel_entity, channel_entity));
+                auto updated_channel = create_channel_object(pair);
+                updated_channels.push_back(updated_channel);
+            }
+            else
+            {
+                updated_channels.push_back(calling_channel_entity.stream_updates_channels[i]);
+            }
+        }
+
+        channel_callback(calling_channel_entity.stream_updates_channels);
+
+    };
+    
+    for(auto channel : channels)
+    {
+        channels_ids.push_back(channel.channel_id());
+        chat->callback_service->register_channel_callback(channel.channel_id(), single_channel_callback);
+    }
     
 
 
