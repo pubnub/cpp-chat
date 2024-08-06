@@ -224,7 +224,7 @@ Channel ChannelService::pin_message_to_channel(const Message& message, const Str
             channel_data
                 .to_entity()
                 .pin_message({
-                    channel_id,
+                    message.message_data().channel_id,
                     message.timetoken()
                 })
             );
@@ -431,20 +431,19 @@ void ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_da
 }
 
 Message ChannelService::get_pinned_message(const String& channel_id, const ChannelDAO& channel_data) const {
-    json custom_data_json = json::parse(channel_data.get_entity().custom_data_json);
+    Json custom_data_json = Json::parse(channel_data.get_entity().custom_data_json);
     if(!custom_data_json.contains("pinnedMessageTimetoken") || custom_data_json["pinnedMessageTimetoken"].is_null())
     {
         //TODO: I don't think we need to throw any error here, but we don't have empty message object.
         throw std::invalid_argument("there is no any pinned message");
     }
 
-    String message_timetoken = custom_data_json["pinnedMessageTimetoken"].dump();
-    message_timetoken.erase(0, 1);
-    message_timetoken.erase(message_timetoken.length() - 1, 1);
+    String message_timetoken = custom_data_json.get_string("pinnedMessageTimetoken").value_or(String(""));
+    String message_channel_id = custom_data_json.get_string("pinnedMessageChannelID").value_or(String(""));
 
     auto chat_service_shared = chat_service.lock();
 
-    Message pinned_message = chat_service_shared->message_service->get_message(message_timetoken, channel_id);
+    Message pinned_message = chat_service_shared->message_service->get_message(message_timetoken, message_channel_id);
 
     //TODO: also check here for pinned message in thread channela after implementing threads
     return pinned_message;
@@ -479,7 +478,6 @@ std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_cha
         channel_callback(updated_channel);
     };
     
-
     auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_channel.channel_id()});
     chat->callback_service->broadcast_messages(messages);
 
