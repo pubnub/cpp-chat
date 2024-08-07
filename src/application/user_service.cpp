@@ -224,19 +224,3 @@ User UserService::create_user_object(std::pair<String, UserDAO> user_data) const
 
     throw std::runtime_error("Failed to create user object, chat service is not available");
 }
-
-#ifdef PN_CHAT_C_ABI
-
-void UserService::stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::String>& user_ids, std::function<void(std::vector<Pubnub::User>)> user_callback) const
-{
-    // TODO: C ABI way
-    if(users.empty())
-    {
-        throw std::invalid_argument("Cannot stream user updates on an empty list");
-    }
-
-    auto pubnub_handle = this->pubnub->lock();
-    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(user_ids);     
-}
-
-#endif

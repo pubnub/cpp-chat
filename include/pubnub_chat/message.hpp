@@ -6,6 +6,7 @@
 #include "message_action.hpp"
 #include "vector.hpp"
 #include "message_elements.hpp"
+#include "callback_stop.hpp"
 #include "option.hpp"
 #include <memory>
 #include <vector>
@@ -59,8 +60,8 @@ namespace Pubnub
             PN_CHAT_EXPORT void forward(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(const Message&)> message_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(const Message&)> message_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const Message&)> message_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(Pubnub::Vector<Pubnub::Message>)> message_callback) const;
 
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread() const;
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread() const;

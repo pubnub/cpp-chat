@@ -391,7 +391,7 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, false));
 }
 
-void ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
+std::function<void()> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
     auto typing_timeout = TYPING_TIMEOUT;
     std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
     {
@@ -423,10 +423,13 @@ void ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_da
     auto chat_service_shared = chat_service.lock();
 
 #ifndef PN_CHAT_C_ABI
-    chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
+    return chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
 #else
     auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING);
     // TODO: messages are not used in C ABI
+
+    std::function<void()> dummy_return = [](){};
+    return dummy_return;
 #endif
 }
 

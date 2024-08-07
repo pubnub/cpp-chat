@@ -37,11 +37,6 @@ class UserService : public std::enable_shared_from_this<UserService>
 
         friend class ::MembershipService;
 
-#ifdef PN_CHAT_C_ABI
-    public:
-        std::function<void()> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
-#endif
-
 };
 
 #endif // PN_CHAT_USER_SERVICE_HPP

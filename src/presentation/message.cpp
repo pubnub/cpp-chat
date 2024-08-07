@@ -124,12 +124,18 @@ void Message::report(const Pubnub::String& reason) const {
     this->restrictions_service->report_message(*this, reason);
 }
 
-void Message::stream_updates(std::function<void(const Message&)> message_callback) const {
-    this->message_service->stream_updates_on({*this}, message_callback);
+CallbackStop Message::stream_updates(std::function<void(const Message&)> message_callback) const {
+    return CallbackStop(this->message_service->stream_updates(*this, message_callback));
 }
 
-void Message::stream_updates_on(Pubnub::Vector<Message> messages, std::function<void(const Message&)> message_callback) const {
-    this->message_service->stream_updates_on(messages.into_std_vector(), message_callback);
+CallbackStop Message::stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(Pubnub::Vector<Pubnub::Message>)> message_callback) const {
+    auto messages_std = messages.into_std_vector();
+
+    auto new_callback = [=](std::vector<Pubnub::Message> vec)
+    {
+        message_callback(std::move(vec));
+    };
+    return CallbackStop(this->message_service->stream_updates_on(*this, messages_std, new_callback));
 }
 
 ThreadChannel Message::create_thread() const

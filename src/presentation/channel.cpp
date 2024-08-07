@@ -175,12 +175,12 @@ void Channel::stop_typing() const {
     this->channel_service->stop_typing(this->channel_id_internal, *this->data);
 }
 
-void Channel::get_typing(std::function<void(Pubnub::Vector<String>)> typing_callback) const {
+CallbackStop Channel::get_typing(std::function<void(Pubnub::Vector<String>)> typing_callback) const {
     auto new_callback = [=](std::vector<String> vec)
     {
         typing_callback(Pubnub::Vector<String>(std::move(vec)));
     };
-    this->channel_service->get_typing(this->channel_id_internal, *this->data, new_callback);
+    return CallbackStop(this->channel_service->get_typing(this->channel_id_internal, *this->data, new_callback));
 }
 
 Channel Channel::pin_message(const Message& message) const {

@@ -292,3 +292,15 @@ std::vector<Pubnub::TextLink> MessageEntity::get_text_links() const
     }
     return text_links;
 }
+
+MessageEntity MessageEntity::from_base_and_updated_message(MessageEntity base_message, MessageEntity updated_message)
+{
+    MessageEntity new_entity;
+    new_entity.type = base_message.type;
+    new_entity.text = updated_message.text.empty() ? base_message.text : updated_message.text;
+    new_entity.channel_id = updated_message.channel_id.empty() ? base_message.channel_id : updated_message.channel_id;
+    new_entity.user_id = updated_message.user_id.empty() ? base_message.user_id : updated_message.user_id;
+    new_entity.meta = updated_message.meta.empty() ? base_message.meta : updated_message.meta;
+    new_entity.message_actions = updated_message.message_actions.size() != 0 ? updated_message.message_actions : base_message.message_actions;
+    return new_entity;
+}
