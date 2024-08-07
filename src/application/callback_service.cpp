@@ -146,8 +146,6 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
         throw std::runtime_error("received message is invalid");
     }
 
-    std::cout << "Callback message: " << message.payload.ptr << std::endl;
-
     Pubnub::String message_string = Pubnub::String(message.payload.ptr, message.payload.size);
     Pubnub::String message_channel_string = Pubnub::String(message.channel.ptr, message.channel.size);
 
