@@ -504,12 +504,6 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
     ChannelEntity calling_channel_entity = ChannelDAO(calling_channel.channel_data()).to_entity();
     calling_channel_entity.stream_updates_channels = channels;
 
-    for(auto aa : calling_channel_entity.stream_updates_channels)
-    {
-        std::cout << "Stream updates on. ID: " << aa.channel_id() << "  name: " << aa.channel_data().channel_name <<
-            "\n desc: " << aa.channel_data().description << "  custom: " << aa.channel_data().custom_data_json << std::endl;
-    }
-
     std::function<void(Channel)> single_channel_callback = [=](Channel channel){
         
         std::vector<Pubnub::Channel> updated_channels; 
@@ -518,11 +512,6 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
         {
             //Find channel that was updated and replace it in Entity stream channels
             auto stream_channel = calling_channel_entity.stream_updates_channels[i];
-
-
-                std::cout << "Stream updates in callback. ID: " << stream_channel.channel_id() << "  name: " << stream_channel.channel_data().channel_name <<
-            "\n desc: " << stream_channel.channel_data().description << "  custom: " << stream_channel.channel_data().custom_data_json << std::endl;
-
 
             if(stream_channel.channel_id() == channel.channel_id())
             {
@@ -550,9 +539,6 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
     }
     
 
-
-
-
     auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channels_ids);
     chat->callback_service->broadcast_messages(messages);
 
@@ -568,7 +554,7 @@ std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_
 }
 
 
-void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
 {
     if(channel_data.get_entity().type == String("public"))
     {
@@ -621,12 +607,7 @@ void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, cons
         read_receipts_callback(generate_receipts(timetoken_per_user));
     };
 
-#ifndef PN_CHAT_C_ABI
-    chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
-#else
-    auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT);
-    // TODO: messages are not used in C ABI 
-#endif
+    return chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
 }
 
 String ChannelService::get_thread_id(const Pubnub::Message& message) const
@@ -895,7 +876,9 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         any_data_added = true;
     }
 
-	return any_data_added? message_json.dump() : String("");
+    String final_metadata = any_data_added? message_json.dump() : String("");
+
+	return final_metadata;
 }
 
 #ifdef PN_CHAT_C_ABI

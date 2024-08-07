@@ -86,10 +86,16 @@ Pubnub::Vector<Pubnub::Membership> User::get_memberships(int limit, const Pubnub
     return Pubnub::Vector<Membership>(std::move(this->membership_service->get_user_memberships(user_id(), *this->data, limit, start_timetoken, end_timetoken)));
 }
 
-void User::stream_updates(std::function<void(const User&)> user_callback) const {
-    this->user_service->stream_updates_on({*this}, user_callback);
+CallbackStop User::stream_updates(std::function<void(const User&)> user_callback) const {
+    return CallbackStop(this->user_service->stream_updates(*this, user_callback));
 }
 
-void User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(const User&)> user_callback) const {
-    this->user_service->stream_updates_on(users.into_std_vector(), user_callback);
+CallbackStop User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const {
+    auto users_std = users.into_std_vector();
+
+    auto new_callback = [=](std::vector<Pubnub::User> vec)
+    {
+        user_callback(std::move(vec));
+    };
+    return CallbackStop(this->user_service->stream_updates_on(*this, users_std, new_callback));
 }

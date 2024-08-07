@@ -5,6 +5,7 @@
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "vector.hpp"
+#include "callback_stop.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -53,8 +54,8 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(const User&)> user_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(const Pubnub::User&)> user_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const User&)> user_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const;
 
         private:
             PN_CHAT_EXPORT User(

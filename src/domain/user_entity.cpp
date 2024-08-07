@@ -63,3 +63,16 @@ std::vector<std::pair<UserEntity::UserId, UserEntity>> UserEntity::from_user_lis
     return users;
 
 }
+
+UserEntity UserEntity::from_base_and_updated_user(UserEntity base_user, UserEntity updated_user)
+{
+    UserEntity new_entity;
+    new_entity.user_name = updated_user.user_name.empty() ? base_user.user_name : updated_user.user_name;
+    new_entity.external_id = updated_user.external_id.empty() ? base_user.external_id : updated_user.external_id;
+    new_entity.profile_url = updated_user.profile_url.empty() ? base_user.profile_url : updated_user.profile_url;
+    new_entity.email = updated_user.email.empty() ? base_user.email : updated_user.email;
+    new_entity.custom_data_json = updated_user.custom_data_json.empty() ? base_user.custom_data_json : updated_user.custom_data_json;
+    new_entity.status = updated_user.status.empty() ? base_user.status : updated_user.status;
+    new_entity.type = updated_user.type.empty() ? base_user.type : updated_user.type;
+    return new_entity;
+}

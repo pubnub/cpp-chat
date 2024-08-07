@@ -97,8 +97,8 @@ namespace Pubnub
 
             PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
             PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback);
-            PN_CHAT_EXPORT void stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
-            PN_CHAT_EXPORT void stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig()) const;
 

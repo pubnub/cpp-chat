@@ -209,15 +209,15 @@ CallbackStop Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::f
     return CallbackStop(this->channel_service->stream_updates_on(*this, channels_std, new_callback));
 }
 
-void Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
+CallbackStop Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
     auto new_callback = [=](std::vector<String> vec)
     {
         presence_callback(Pubnub::Vector<String>(std::move(vec)));
     };
-    this->presence_service->stream_presence(channel_id(), new_callback);
+    return CallbackStop(this->presence_service->stream_presence(channel_id(), new_callback));
 }
 
-void Pubnub::Channel::stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+CallbackStop Pubnub::Channel::stream_read_receipts(std::function<void(std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
 {
     auto new_callback = [=](std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer> vec)
     {
@@ -230,6 +230,8 @@ void Pubnub::Channel::stream_read_receipts(std::function<void(std::map<Pubnub::S
 
         read_receipts_callback(final_map);
     };
+
+    return CallbackStop(this->channel_service->stream_read_receipts(channel_id(), *this->data, new_callback));
 
 }
 

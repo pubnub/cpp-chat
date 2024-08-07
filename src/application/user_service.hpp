@@ -26,7 +26,8 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::vector<Pubnub::User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
         Pubnub::User update_user(const Pubnub::String& user_id, const UserDAO& user_data) const;
         void delete_user(const Pubnub::String& user_id) const;
-        void stream_updates_on(const std::vector<Pubnub::User>& users, std::function<void(const Pubnub::User&)> user_callback) const;
+        std::function<void()> stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const;
+        std::function<void()> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
 
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserDAO> user_data) const;
 
@@ -35,6 +36,12 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::weak_ptr<const ChatService> chat_service;
 
         friend class ::MembershipService;
+
+#ifdef PN_CHAT_C_ABI
+    public:
+        std::function<void()> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
+#endif
+
 };
 
 #endif // PN_CHAT_USER_SERVICE_HPP

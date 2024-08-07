@@ -3,6 +3,7 @@
 
 #include "domain/json.hpp"
 #include "string.hpp"
+#include "user.hpp"
 #include <vector>
 
 struct UserEntity {
@@ -21,6 +22,10 @@ struct UserEntity {
     static UserEntity from_json(Json user_json);
     static UserEntity from_user_response(Json response);
     static std::vector<std::pair<UserId, UserEntity>> from_user_list_response(Json response);
+
+    static UserEntity from_base_and_updated_user(UserEntity base_user, UserEntity updated_user);
+
+    std::vector<Pubnub::User> stream_updates_users;
 };
 
 #endif // PN_CHAT_USER_ENTITY_HPP

@@ -31,8 +31,6 @@ struct ChannelEntity {
 
     static ChannelEntity from_base_and_updated_channel(ChannelEntity base_channel, ChannelEntity updated_channel);
 
-    void update_channel_in_stream_channels(Pubnub::Channel channel);
-
     std::vector<Pubnub::Channel> stream_updates_channels;
 };
 

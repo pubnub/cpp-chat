@@ -89,7 +89,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
         std::function<void()> stream_updates(Pubnub::Channel calling_channel, std::function<void(Pubnub::Channel)> channel_callback) const;
         std::function<void()> stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Pubnub::Channel>)> channel_callback) const;
-        void stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
+        std::function<void()> stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
        
         /* THREADS */
         Pubnub::String get_thread_id(const Pubnub::Message& message) const;

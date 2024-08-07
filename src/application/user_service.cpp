@@ -120,7 +120,36 @@ void UserService::delete_user(const String& user_id) const {
     pubnub_handle->remove_user_metadata(user_id);
 }
 
-void UserService::stream_updates_on(const std::vector<User>& users, std::function<void(const User&)> user_callback) const
+std::function<void()> UserService::stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const
+{
+
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat = this->chat_service.lock();
+
+    std::vector<String> users_ids;
+    std::function<void(User)> final_user_callback = [=](User user){
+        UserEntity calling_user_entity = UserDAO(calling_user.user_data()).to_entity();
+        UserEntity user_entity = UserDAO(user.user_data()).to_entity();
+        std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(calling_user_entity, user_entity));
+        auto updated_user = create_user_object(pair);
+        
+        user_callback(updated_user);
+    };
+    
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_user.user_id()});
+    chat->callback_service->broadcast_messages(messages);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=](){
+        chat->callback_service->remove_user_callback(calling_user.user_id());
+    };
+
+    return stop_streaming;
+
+}
+
+std::function<void()> UserService::stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const
 {
     if(users.empty())
     {
@@ -129,20 +158,59 @@ void UserService::stream_updates_on(const std::vector<User>& users, std::functio
 
     auto pubnub_handle = this->pubnub->lock();
 
-#ifndef PN_CHAT_C_ABI
-    if (auto chat = this->chat_service.lock()) {
-#endif
-        for(auto user : users)
-        {
-            auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(user.user_id());
+    auto chat = this->chat_service.lock();
+    std::vector<String> users_ids;
 
-            // TODO: C ABI way
-#ifndef PN_CHAT_C_ABI
-            chat->callback_service->broadcast_messages(messages);
-            chat->callback_service->register_user_callback(user.user_id(), user_callback);
+    UserEntity calling_user_entity = UserDAO(calling_user.user_data()).to_entity();
+    calling_user_entity.stream_updates_users = users;
+
+    std::function<void(User)> single_user_callback = [=](User user){
+        
+        std::vector<Pubnub::User> updated_users; 
+
+        for(int i = 0; i < calling_user_entity.stream_updates_users.size(); i++)
+        {
+            //Find user that was updated and replace it in Entity stream users
+            auto stream_user = calling_user_entity.stream_updates_users[i];
+
+            if(stream_user.user_id() == user.user_id())
+            {
+                UserEntity stream_user_entity = UserDAO(stream_user.user_data()).to_entity();
+                UserEntity user_entity = UserDAO(user.user_data()).to_entity();
+                std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(calling_user_entity, user_entity));
+                auto updated_user = create_user_object(pair);
+                updated_users.push_back(updated_user);
+            }
+            else
+            {
+                updated_users.push_back(calling_user_entity.stream_updates_users[i]);
+            }
         }
-#endif
+        //TODO:: guarantee lifetime for calling_user_entity, so it can hold all necessary data
+        //calling_user_entity.stream_updates_users = updated_users;
+        user_callback(updated_users);
+
+    };
+    
+    for(auto user : users)
+    {
+        users_ids.push_back(user.user_id());
+        chat->callback_service->register_user_callback(user.user_id(), single_user_callback);
     }
+    
+
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(users_ids);
+    chat->callback_service->broadcast_messages(messages);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=, &users_ids](){
+        for(auto id : users_ids)
+        {
+            chat->callback_service->remove_user_callback(id);
+        }
+    };
+
+    return stop_streaming;
 }
 
 User UserService::create_user_object(std::pair<String, UserDAO> user_data) const {
@@ -160,3 +228,19 @@ User UserService::create_user_object(std::pair<String, UserDAO> user_data) const
 
     throw std::runtime_error("Failed to create user object, chat service is not available");
 }
+
+#ifdef PN_CHAT_C_ABI
+
+void UserService::stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::String>& user_ids, std::function<void(std::vector<Pubnub::User>)> user_callback) const
+{
+    // TODO: C ABI way
+    if(users.empty())
+    {
+        throw std::invalid_argument("Cannot stream user updates on an empty list");
+    }
+
+    auto pubnub_handle = this->pubnub->lock();
+    auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(user_ids);     
+}
+
+#endif

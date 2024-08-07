@@ -69,11 +69,6 @@ ChannelEntity ChannelEntity::from_base_and_updated_channel(ChannelEntity base_ch
     return new_entity;
 }
 
-void ChannelEntity::update_channel_in_stream_channels(Pubnub::Channel channel)
-{
-    
-}
-
 ChannelEntity ChannelEntity::pin_message(std::pair<ChannelId, MessageTimetoken> channel_message) const {
     auto custom_data = this->custom_data_json.empty() ? "{}" :  this->custom_data_json;
 
