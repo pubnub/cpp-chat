@@ -75,7 +75,7 @@ bool PresenceService::is_present(const Pubnub::String& user_id, const Pubnub::St
     //int count = std::count(channels.begin(), channels.end(), channel_id);
     return count > 0;
 }
-
+#ifndef PN_CHAT_C_ABI
 std::function<void()> PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const
 {
     //Send callback with currently present users
@@ -106,8 +106,8 @@ std::function<void()> PresenceService::stream_presence(const Pubnub::String& cha
 
 }
 
-#ifdef PN_CHAT_C_ABI
-void PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const
+#else
+std::function<void()> PresenceService::stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const
 {
     //Send callback with currently present users
     std::vector<Pubnub::String> current_users = who_is_present(channel_id);
@@ -117,14 +117,10 @@ void PresenceService::stream_presence(const Pubnub::String& channel_id, std::fun
 
     String presence_channel = channel_id + "-pnpres";
     auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(presence_channel);
+ 
+    std::function<void()> dumy_return = [](){};
+    return dumy_return;
 
     // TODO: C ABI way
-#ifndef PN_CHAT_C_ABI
-    if (auto chat = this->chat_service.lock())
-    {
-        chat->callback_service->broadcast_messages(messages);
-        chat->callback_service->register_channel_presence_callback(channel_id, presence_callback);
-    }
-#endif
 }
 #endif

@@ -610,7 +610,13 @@ std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String&
         read_receipts_callback(generate_receipts(timetoken_per_user));
     };
 
+#ifndef PN_CHAT_C_ABI
     return chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
+#else
+chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT);
+    std::function<void()> dumy_return = [](){};
+    return dumy_return;
+#endif
 }
 
 String ChannelService::get_thread_id(const Pubnub::Message& message) const
