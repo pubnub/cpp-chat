@@ -620,7 +620,8 @@ String ChannelService::get_thread_id(const Pubnub::Message& message) const
 
 ThreadChannel ChannelService::create_thread_channel(const Pubnub::Message& message) const
 {
-    if(string_starts_with(message.message_data().channel_id, MESSAGE_THREAD_ID_PREFIX))
+    String message_channel_id = message.message_data().channel_id;
+    if(string_starts_with(message_channel_id, MESSAGE_THREAD_ID_PREFIX))
     {
         throw std::invalid_argument("Only one level of thread nesting is allowed");
     }
