@@ -876,7 +876,7 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         any_data_added = true;
     }
 
-    String final_metadata = any_data_added? message_json.dump() : String("");
+    String final_metadata = any_data_added ? String(message_json.dump()) : String("");
 
 	return final_metadata;
 }
