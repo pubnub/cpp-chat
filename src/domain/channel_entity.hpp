@@ -30,8 +30,6 @@ struct ChannelEntity {
     static ChannelEntity from_channel_response(Json response);
 
     static ChannelEntity from_base_and_updated_channel(ChannelEntity base_channel, ChannelEntity updated_channel);
-
-    std::vector<Pubnub::Channel> stream_updates_channels;
 };
 
 #endif // PN_CHAT_CHANNEL_ENTITY_HPP

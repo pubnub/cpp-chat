@@ -139,6 +139,7 @@ std::function<void()> UserService::stream_updates(Pubnub::User calling_user, std
     
     auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_user.user_id()});
     chat->callback_service->broadcast_messages(messages);
+    chat->callback_service->register_user_callback(calling_user.user_id(), final_user_callback);
 
     //stop streaming callback
     std::function<void()> stop_streaming = [=](){
@@ -161,33 +162,28 @@ std::function<void()> UserService::stream_updates_on(Pubnub::User calling_user, 
     auto chat = this->chat_service.lock();
     std::vector<String> users_ids;
 
-    UserEntity calling_user_entity = UserDAO(calling_user.user_data()).to_entity();
-    calling_user_entity.stream_updates_users = users;
-
     std::function<void(User)> single_user_callback = [=](User user){
         
         std::vector<Pubnub::User> updated_users; 
 
-        for(int i = 0; i < calling_user_entity.stream_updates_users.size(); i++)
+        for(int i = 0; i < users.size(); i++)
         {
             //Find user that was updated and replace it in Entity stream users
-            auto stream_user = calling_user_entity.stream_updates_users[i];
+            auto stream_user = users[i];
 
             if(stream_user.user_id() == user.user_id())
             {
                 UserEntity stream_user_entity = UserDAO(stream_user.user_data()).to_entity();
                 UserEntity user_entity = UserDAO(user.user_data()).to_entity();
-                std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(calling_user_entity, user_entity));
+                std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(stream_user_entity, user_entity));
                 auto updated_user = create_user_object(pair);
                 updated_users.push_back(updated_user);
             }
             else
             {
-                updated_users.push_back(calling_user_entity.stream_updates_users[i]);
+                updated_users.push_back(users[i]);
             }
         }
-        //TODO:: guarantee lifetime for calling_user_entity, so it can hold all necessary data
-        //calling_user_entity.stream_updates_users = updated_users;
         user_callback(updated_users);
 
     };

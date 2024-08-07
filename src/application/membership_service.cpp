@@ -409,29 +409,91 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
     return std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>>(page_response, total, status, memberships);
 }
 
-void MembershipService::stream_updates_on(const std::vector<Membership>& memberships, std::function<void(const Membership&)> membership_callback) const
+
+std::function<void()> MembershipService::stream_updates(Pubnub::Membership calling_membership, std::function<void(Membership)> membership_callback) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat = this->chat_service.lock();
+    std::vector<String> memberships_ids;
+    std::function<void(Membership)> final_membership_callback = [=](Membership membership){
+        MembershipEntity calling_membership_entity = MembershipDAO(calling_membership.custom_data()).to_entity();
+        MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
+        auto updated_membership = create_membership_object(calling_membership.user, calling_membership.channel, MembershipEntity::from_base_and_updated_membership(calling_membership_entity, membership_entity));
+        
+        membership_callback(updated_membership);
+    };
+    
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_membership.channel.channel_id()});
+    chat->callback_service->broadcast_messages(messages);
+
+    chat->callback_service->register_membership_callback(calling_membership.channel.channel_id(), calling_membership.user.user_id(), final_membership_callback);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=](){
+        chat->callback_service->remove_membership_callback(calling_membership.channel.channel_id());
+    };
+
+    return stop_streaming;
+}
+
+std::function<void()> MembershipService::stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Membership>)> membership_callback) const
 {
     if(memberships.empty())
     {
-        throw std::invalid_argument("Cannot stream memberships updates on an empty list");
+        throw std::invalid_argument("Cannot stream membership updates on an empty list");
     }
+    
+    auto pubnub_handle = this->pubnub->lock();
 
-    auto pubnub_handle = pubnub->lock();
+    auto chat = this->chat_service.lock();
+    std::vector<String> channels_ids;
 
-#ifndef PN_CHAT_C_ABI
-    if (auto chat = this->chat_service.lock()) {
-#endif
-        for(auto& membership : memberships)
+
+    std::function<void(Membership)> single_membership_callback = [=](Membership membership){
+        
+        std::vector<Pubnub::Membership> updated_memberships; 
+
+        for(int i = 0; i < memberships.size(); i++)
         {
-            auto messages = pubnub_handle->subscribe_to_channel_and_get_messages(membership.channel.channel_id());
+            //Find membership that was updated and replace it in Entity stream memberships
+            auto stream_membership = memberships[i];
 
-#ifndef PN_CHAT_C_ABI
-            chat->callback_service->broadcast_messages(messages);
-            chat->callback_service->register_membership_callback(
-                    membership.channel.channel_id(), membership.user.user_id(), membership_callback);
+            if(stream_membership.channel.channel_id() == membership.channel.channel_id() && stream_membership.user.user_id() == membership.user.user_id())
+            {
+                MembershipEntity stream_membership_entity = MembershipDAO(stream_membership.custom_data()).to_entity();
+                MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
+                auto updated_membership = create_membership_object(stream_membership.user, stream_membership.channel, MembershipEntity::from_base_and_updated_membership(stream_membership_entity, membership_entity));
+                updated_memberships.push_back(updated_membership);
+            }
+            else
+            {
+                updated_memberships.push_back(memberships[i]);
+            }
         }
-#endif
+        membership_callback(updated_memberships);
+
+    };
+    
+    for(auto membership : memberships)
+    {
+        channels_ids.push_back(membership.channel.channel_id());
+        chat->callback_service->register_membership_callback(membership.channel.channel_id(), membership.user.user_id(), single_membership_callback);
     }
+    
+
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channels_ids);
+    chat->callback_service->broadcast_messages(messages);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=, &channels_ids](){
+        for(auto id : channels_ids)
+        {
+            chat->callback_service->remove_membership_callback(id);
+        }
+    };
+
+    return stop_streaming;
 }
 
 Membership MembershipService::create_membership_object(const User& user, const Channel& channel) const {

@@ -62,10 +62,16 @@ int Membership::get_unread_messages_count() const {
     return this->membership_service->get_unread_messages_count_one_channel(*this);
 }
 
-void Membership::stream_updates(std::function<void(const Membership&)> membership_callback) const {
-    this->membership_service->stream_updates_on({*this}, membership_callback);
+CallbackStop Membership::stream_updates(std::function<void(const Membership&)> membership_callback) const {
+    return CallbackStop(this->membership_service->stream_updates(*this, membership_callback));
 }
 
-void Membership::stream_updates_on(Pubnub::Vector<Membership> memberships, std::function<void(const Membership&)> membership_callback) const {
-    this->membership_service->stream_updates_on(memberships.into_std_vector(), membership_callback);
+CallbackStop Membership::stream_updates_on(Pubnub::Vector<Membership> memberships, std::function<void(Pubnub::Vector<Pubnub::Membership>)> membership_callback) const {
+    auto memberships_std = memberships.into_std_vector();
+
+    auto new_callback = [=](std::vector<Pubnub::Membership> vec)
+    {
+        membership_callback(std::move(vec));
+    };
+    return CallbackStop(this->membership_service->stream_updates_on(*this, memberships_std, new_callback));
 }

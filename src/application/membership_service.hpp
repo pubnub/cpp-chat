@@ -34,7 +34,8 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> get_all_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0) const;
         std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> mark_all_messages_as_read(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page &page = Pubnub::Page()) const;
 
-        void stream_updates_on(const std::vector<Pubnub::Membership>& memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
+        std::function<void()> stream_updates(Pubnub::Membership calling_membership, std::function<void(Pubnub::Membership)> membership_callback) const;
+        std::function<void()> stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) const;
 
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel) const;
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel, const MembershipEntity& membership_entity) const;
@@ -51,6 +52,11 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         //Message counts requires a valid timetoken, so this one will be like "0", from beginning of the channel
         Pubnub::String EMPTY_TIMETOKEN = "17000000000000000";
 
+#ifdef PN_CHAT_C_ABI
+    public:
+        void stream_updates_on(const std::vector<Pubnub::String>& membership_ids) const;
+        void stream_read_receipts(const Pubnub::String& membership_id, const MembershipDAO& membership_data) const;
+#endif
 };
 
 #endif // PN_CHAT_MEMBERSHIP_SERVICE_HPP
