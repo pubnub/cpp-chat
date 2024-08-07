@@ -19,6 +19,7 @@ namespace Pubnub
                 if(!stopped)
                 {
                     stop_func();
+                    stopped = true;
                 }
             }
 
