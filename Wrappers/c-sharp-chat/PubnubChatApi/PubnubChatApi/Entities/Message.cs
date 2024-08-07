@@ -74,16 +74,7 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_message_report(IntPtr message, string reason);
         
         [DllImport("pubnub-chat")]
-        private static extern IntPtr pn_message_create_thread(IntPtr message);
-        
-        [DllImport("pubnub-chat")]
         private static extern int pn_message_has_thread(IntPtr message);
-        
-        [DllImport("pubnub-chat")]
-        private static extern IntPtr pn_message_get_thread(IntPtr message);
-
-        [DllImport("pubnub-chat")]
-        private static extern int pn_message_remove_thread(IntPtr message);
         
         #endregion
 
@@ -210,8 +201,7 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="pubnub_chat_message_type"/>
         public PubnubChatMessageType Type => (PubnubChatMessageType)pn_message_get_data_type(pointer);
 
-        private Chat chat;
-        private ThreadChannel thread;
+        protected Chat chat;
 
         /// <summary>
         /// Event that is triggered when the message is updated.
@@ -288,38 +278,17 @@ namespace PubNubChatAPI.Entities
 
         public ThreadChannel CreateThread()
         {
-            if (HasThread())
-            {
-                return thread;
-            }
-            var threadChannelPointer = pn_message_create_thread(pointer);
-            CUtilities.CheckCFunctionResult(threadChannelPointer);
-            return new ThreadChannel(chat, Id, threadChannelPointer);
+            return chat.CreateThreadChannel(this);
         }
 
         public bool TryGetThread(out ThreadChannel threadChannel)
         {
-            if (!HasThread())
-            {
-                thread = null;
-                threadChannel = null;
-                return false;
-            }
-            var threadPointer = pn_message_get_thread(pointer);
-            CUtilities.CheckCFunctionResult(threadPointer);
-            thread = new ThreadChannel(chat, Id, threadPointer);
-            threadChannel = thread;
-            return true;
+            return chat.TryGetThreadChannel(this, out threadChannel);
         }
 
         public void RemoveThread()
         {
-            if (!HasThread())
-            {
-                return;
-            }
-            thread = null;
-            CUtilities.CheckCFunctionResult(pn_message_remove_thread(pointer));
+            chat.RemoveThreadChannel(this);
         }
 
         public void Pin()

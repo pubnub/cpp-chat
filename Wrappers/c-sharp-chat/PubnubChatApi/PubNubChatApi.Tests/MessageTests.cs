@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PubNubChatAPI.Entities;
 
 namespace PubNubChatApi.Tests;
@@ -14,7 +15,7 @@ public class MessageTests
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
             "message_tests_user");
-        channel = chat.CreatePublicConversation("message_tests_channel");
+        channel = chat.CreatePublicConversation("message_tests_channel_2");
         channel.Join();
     }
 
@@ -93,12 +94,12 @@ public class MessageTests
     [Test]
     public async Task TestPinMessage()
     {
-        if (chat.TryGetChannel("pin_test", out var existingChannel))
+        if (chat.TryGetChannel("pin_test_2", out var existingChannel))
         {
             chat.DeleteChannel(existingChannel.Id);
-            await Task.Delay(10000);
+            await Task.Delay(4000);
         }
-        var pinTestChannel = chat.CreatePublicConversation("pin_test");
+        var pinTestChannel = chat.CreatePublicConversation("pin_test_2");
         pinTestChannel.Join();
        
         var manualReceivedEvent = new ManualResetEvent(false);
@@ -106,14 +107,16 @@ public class MessageTests
         {
             message.Pin();
 
-            await Task.Delay(10000);
-            
-            Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "message to pin");
+            await Task.Delay(3000);
+
+            var got = pinTestChannel.TryGetPinnedMessage(out var pinnedMessage);
+            Debug.WriteLine(pinnedMessage.MessageText);
+            Assert.True(got && pinnedMessage.MessageText == "message to pin");
             manualReceivedEvent.Set();
         };
         pinTestChannel.SendText("message to pin");
 
-        var received = manualReceivedEvent.WaitOne(40000);
+        var received = manualReceivedEvent.WaitOne(12000);
         Assert.IsTrue(received);
     }
 

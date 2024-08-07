@@ -3,6 +3,7 @@
 #include "domain/json.hpp"
 
 #include <chrono>
+#include <iostream>
 
 
 using namespace Pubnub;
@@ -48,12 +49,12 @@ String create_set_members_object(std::vector<String> users_ids, String custom_pa
     return final_object;
 }
 
-bool string_starts_with(const String& string, const String prefix)
+bool string_starts_with(const String& string, const String& prefix)
 {
     //If string is smaller it can't start with given prefix
     if (string.length() < prefix.length()) return false;
 
-    return std::equal(prefix.to_std_string().begin(), prefix.to_std_string().end(), string.to_std_string().begin());
+    return string.to_std_string().rfind(prefix.to_std_string(), 0) == 0;
 }
 
 String chat_message_to_publish_string(String message, pubnub_chat_message_type message_type)

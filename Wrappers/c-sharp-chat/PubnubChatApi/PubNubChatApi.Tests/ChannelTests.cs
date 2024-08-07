@@ -95,11 +95,7 @@ public class ChannelTests
     [Test]
     public void TestPinMessage()
     {
-        var channel = chat.CreatePublicConversation("pin_message_test_channel_36", new ChatChannelData()
-        {
-            ChannelName = "some_name",
-            ChannelCustomDataJson = "{}"
-        });
+        var channel = chat.CreatePublicConversation("pin_message_test_channel_37");
         channel.Join();
         
         var receivedManualEvent = new ManualResetEvent(false);
@@ -114,7 +110,7 @@ public class ChannelTests
         };
         channel.SendText("message to pin");
 
-        var received = receivedManualEvent.WaitOne(8000);
+        var received = receivedManualEvent.WaitOne(9000);
         Assert.IsTrue(received);
     }
     

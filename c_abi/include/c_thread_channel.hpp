@@ -17,4 +17,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_get_history(
 	int count, 
 	char* thread_messages_pointers_json);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_thread_channel_pin_message_to_parent_channel(Pubnub::ThreadChannel* thread_channel, Pubnub::ThreadMessage* message);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_thread_channel_unpin_message_from_parent_channel(Pubnub::ThreadChannel* thread_channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_send_text(Pubnub::ThreadChannel* thread_channel, const char* text);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_get_parent_channel_id(Pubnub::ThreadChannel* thread_channel, char* result);
+
+
 #endif // PN_CHAT_C_THREAD_CHANNEL_H

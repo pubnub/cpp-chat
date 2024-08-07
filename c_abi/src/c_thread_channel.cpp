@@ -46,3 +46,52 @@ PnCResult pn_thread_channel_get_history(
 
         return PN_C_OK;
 }
+
+Pubnub::Channel* pn_thread_channel_pin_message_to_parent_channel(Pubnub::ThreadChannel* thread_channel, Pubnub::ThreadMessage* message) {
+    try {
+        return new Pubnub::Channel(thread_channel->pin_message_to_parent_channel(*message));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+Pubnub::Channel* pn_thread_channel_unpin_message_from_parent_channel(Pubnub::ThreadChannel* thread_channel) {
+    try {
+        std::cout << "1" << std::endl;
+        return new Pubnub::Channel(thread_channel->unpin_message_from_parent_channel());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+PnCResult pn_thread_channel_send_text(Pubnub::ThreadChannel* thread_channel, const char* text) {
+    try {
+        thread_channel->send_text(text);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_thread_channel_get_parent_channel_id(Pubnub::ThreadChannel* thread_channel, char* result) {
+    try {
+        auto parent_id = thread_channel->parent_channel_id();
+        strcpy(result, parent_id.c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

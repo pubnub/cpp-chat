@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -26,16 +27,16 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_channel_delete(IntPtr channel);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_connect(IntPtr channel);
+        private static extern int pn_channel_connect(IntPtr channel, StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_disconnect(IntPtr channel);
+        private static extern int pn_channel_disconnect(IntPtr channel, StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_join(IntPtr channel, string additional_params);
+        private static extern int pn_channel_join(IntPtr channel, string additional_params, StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_leave(IntPtr channel);
+        private static extern int pn_channel_leave(IntPtr channel, StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_set_restrictions(IntPtr channel, string user_id, bool ban_user,
@@ -415,6 +416,7 @@ namespace PubNubChatAPI.Entities
             else
             {
                 pinnedMessage = null;
+                Debug.WriteLine(CUtilities.GetErrorMessage());
                 return false;
             }
         }
@@ -451,8 +453,9 @@ namespace PubNubChatAPI.Entities
         public void Connect()
         {
             connected = true;
-            CUtilities.CheckCFunctionResult(pn_channel_connect(pointer));
-            chat.ParseJsonUpdatePointers(chat.GetUpdates());
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_channel_connect(pointer, buffer));
+            chat.ParseJsonUpdatePointers(buffer.ToString());
         }
 
         // TODO: Shouldn't join have additional parameters?
@@ -481,8 +484,9 @@ namespace PubNubChatAPI.Entities
         public void Join()
         {
             connected = true;
-            CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty));
-            chat.ParseJsonUpdatePointers(chat.GetUpdates());
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_channel_join(pointer, string.Empty, buffer));
+            chat.ParseJsonUpdatePointers(buffer.ToString());
         }
 
         /// <summary>
@@ -506,7 +510,9 @@ namespace PubNubChatAPI.Entities
         public void Disconnect()
         {
             connected = false;
-            CUtilities.CheckCFunctionResult(pn_channel_disconnect(pointer));
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_channel_disconnect(pointer, buffer));
+            chat.ParseJsonUpdatePointers(buffer.ToString());
         }
 
         /// <summary>
@@ -532,7 +538,9 @@ namespace PubNubChatAPI.Entities
         public void Leave()
         {
             connected = false;
-            CUtilities.CheckCFunctionResult(pn_channel_leave(pointer));
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_channel_leave(pointer, buffer));
+            chat.ParseJsonUpdatePointers(buffer.ToString());
         }
 
         /// <summary>
@@ -581,7 +589,7 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while sending the message.</exception>
         /// <seealso cref="OnMessageReceived"/>
-        public void SendText(string message)
+        public virtual void SendText(string message)
         {
             CUtilities.CheckCFunctionResult(pn_channel_send_text(pointer, message,
                 (byte)PubnubChatMessageType.Text, string.Empty));

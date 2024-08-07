@@ -19,8 +19,9 @@ namespace PubnubChatApi.Utilities
 
         private static void ThrowCError()
         {
-            Debug.WriteLine("Throwing C-side Error!");
-            throw new PubNubCCoreException(GetErrorMessage());
+            var errorMessage = GetErrorMessage();
+            Debug.WriteLine($"Throwing C-side Error: {errorMessage}");
+            throw new PubNubCCoreException(errorMessage);
         }
 
         internal static string GetErrorMessage()

@@ -61,7 +61,7 @@ namespace Pubnub
     };
 
     //Checks if string starts with provided prefix
-    bool string_starts_with(const Pubnub::String& string, const Pubnub::String prefix);
+    bool string_starts_with(const Pubnub::String& string, const Pubnub::String& prefix);
 
     inline Pubnub::String const bool_to_string(bool b)
     {

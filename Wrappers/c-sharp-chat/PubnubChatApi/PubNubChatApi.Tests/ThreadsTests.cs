@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PubNubChatAPI.Entities;
 
 namespace PubNubChatApi.Tests;
@@ -14,7 +15,7 @@ public class ThreadsTests
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
             "threads_tests_user");
-        channel = chat.CreatePublicConversation("threads_tests_channel");
+        channel = chat.CreatePublicConversation("threads_tests_channel_36");
         channel.Join();
     }
 
@@ -38,5 +39,39 @@ public class ThreadsTests
         channel.SendText("thread_start_message");
         var read = historyReadReset.WaitOne(12000);
         Assert.True(read);
+    }
+
+    [Test]
+    public void TestThreadChannelParentChannelPinning()
+    {
+        var historyReadReset = new ManualResetEvent(false);
+        channel.OnMessageReceived += async message =>
+        {
+            var thread = message.CreateThread();
+            thread.Join();
+            thread.OnMessageReceived += threadMessage =>
+            {
+                thread.PinMessageToParentChannel(threadMessage);
+            };
+            thread.SendText("some_thread_message");
+            
+            await Task.Delay(5000);
+
+            Assert.True(channel.TryGetPinnedMessage(out var pinnedMessage) && pinnedMessage.MessageText == "some_thread_message");
+            thread.UnPinMessageFromParentChannel();
+            
+            await Task.Delay(5000);
+
+            Assert.False(channel.TryGetPinnedMessage(out _));
+            historyReadReset.Set();
+        };
+        channel.SendText("thread_start_message");
+        var read = historyReadReset.WaitOne(15000);
+        Assert.True(read);
+    }
+    
+    [Test]
+    public void TestThreadMessageParentChannelPinning()
+    {
     }
 }
