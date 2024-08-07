@@ -45,13 +45,13 @@ public:
     void set_channel_metadata(const Pubnub::String channel, const Pubnub::String metadata);
     void remove_channel_metadata(const Pubnub::String channel);
     Pubnub::String get_channel_metadata(const Pubnub::String channel);
-    Pubnub::String get_all_channels_metadata(const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
+    Pubnub::String get_all_channels_metadata(const Pubnub::String include, const int limit, const Pubnub::String filter, const Pubnub::String sort, const Pubnub::String page_next, const Pubnub::String page_prev);
     Pubnub::String get_channel_members(const Pubnub::String channel, const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
     void remove_members(const Pubnub::String channel, const Pubnub::String members_object);
     Pubnub::String set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include = "");
     void set_user_metadata(const Pubnub::String user_id, const Pubnub::String metadata);
     Pubnub::String get_user_metadata(const Pubnub::String user_id);
-    Pubnub::String get_all_user_metadata(const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
+    Pubnub::String get_all_user_metadata(const Pubnub::String include, const int limit, const Pubnub::String filter, const Pubnub::String sort, const Pubnub::String page_next, const Pubnub::String page_prev);
     void remove_user_metadata(const Pubnub::String user_id);
     Pubnub::String get_memberships(const Pubnub::String user_id, const Pubnub::String include, const int limit, const Pubnub::String start, const Pubnub::String end);
     Pubnub::String set_memberships(const Pubnub::String user_id, const Pubnub::String memberships_object, const Pubnub::String include = "");

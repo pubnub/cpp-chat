@@ -69,10 +69,12 @@ User UserService::get_user(const String& user_id) const
     return this->create_user_object({user_id, UserDAO(new_user_entity)});
 }
 
-std::vector<User> UserService::get_users(const String& include, int limit, const String& start, const String& end) const {
-    auto users_response = [this, include, limit, start, end] {
+std::vector<User> UserService::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    
+    Pubnub::String include = "custom,totalCount";
+    auto users_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->get_all_user_metadata(include, limit, start, end);
+        return pubnub_handle->get_all_user_metadata(include, limit, filter, sort, page.next, page.prev);
     }();
 
     Json response_json = Json::parse(users_response);
@@ -207,6 +209,29 @@ std::function<void()> UserService::stream_updates_on(Pubnub::User calling_user, 
     };
 
     return stop_streaming;
+}
+
+std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text, int limit) const
+{
+    auto chat_shared = this->chat_service.lock();
+
+    if(!chat_shared)
+    {
+        throw std::runtime_error("can't get users suggestions, chat service is invalid");
+    }
+
+    String cache_key = chat_shared->message_service->get_phrase_to_look_for(text);
+
+    if(cache_key.empty())
+    {
+        return {};
+    }
+
+    //TODO:: cashe rezults here like in js
+
+    String filter = "name LIKE \"" + cache_key + "*\"";
+    
+    return this->get_users(filter, "", limit);
 }
 
 User UserService::create_user_object(std::pair<String, UserDAO> user_data) const {

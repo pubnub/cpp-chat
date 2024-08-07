@@ -62,8 +62,8 @@ Channel Chat::get_channel(const String& channel_id) const
     return this->channel_service->get_channel(channel_id);
 }
 
-Pubnub::Vector<Channel> Chat::get_channels(const String& include, int limit, const String& start, const String& end) const {
-    return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channels(include, limit, start, end)));
+Pubnub::Vector<Channel> Chat::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channels(filter, sort, limit, page)));
 }
 
 Channel Chat::update_channel(const String& channel_id, const ChatChannelData& channel_data) const {
@@ -82,6 +82,11 @@ void Chat::unpin_message_from_channel(const Channel& channel) const {
     channel.unpin_message();
 }
 
+Pubnub::Vector<Channel> Pubnub::Chat::get_channel_suggestions(String text, int limit) const
+{
+    return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channel_suggestions(text, limit)));
+}
+
 User Chat::create_user(const String& user_id, const ChatUserData& user_data) const {
     return this->user_service->create_user(user_id, user_data);
 }
@@ -90,8 +95,8 @@ User Chat::get_user(const String& user_id) const {
     return this->user_service->get_user(user_id);
 }
 
-Pubnub::Vector<User> Chat::get_users(const String& include, int limit, const String& start, const String& end) const {
-    return Pubnub::Vector<User>(std::move(this->user_service->get_users(include, limit, start, end)));
+Pubnub::Vector<User> Chat::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    return Pubnub::Vector<User>(std::move(this->user_service->get_users(filter, sort, limit, page)));
 }
 
 User Chat::update_user(const String& user_id, const ChatUserData& user_data) const {
@@ -100,6 +105,11 @@ User Chat::update_user(const String& user_id, const ChatUserData& user_data) con
 
 void Chat::delete_user(const String& user_id) const {
     return this->user_service->delete_user(user_id);
+}
+
+Pubnub::Vector<User> Chat::get_user_suggestions(String text, int limit) const
+{
+    return Pubnub::Vector<User>(std::move(this->user_service->get_users_suggestions(text, limit)));
 }
 
 Pubnub::Vector<String> Chat::where_present(const String& user_id) const {

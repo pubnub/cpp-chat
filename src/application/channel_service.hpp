@@ -6,6 +6,7 @@
 #include "enums.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
+#include "page.hpp"
 #include <memory>
 #include <vector>
 #include <map>
@@ -67,7 +68,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
         Pubnub::Channel create_channel(const Pubnub::String& channel_id, const ChannelEntity&& channel_entity) const;
         Pubnub::Channel get_channel(const Pubnub::String& channel_id) const;
-        std::vector<Pubnub::Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+        std::vector<Pubnub::Channel> get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::Channel update_channel(const Pubnub::String& channel_id, ChannelDAO channel_data) const;
         void delete_channel(const Pubnub::String& channel_id) const;
         std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
@@ -86,6 +87,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::function<void()> get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
         Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         void emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text, const Pubnub::String &parent_channel_id = "") const;
+        std::vector<Pubnub::Channel> get_channel_suggestions(Pubnub::String text, int limit = 10) const;
+
 
         std::function<void()> stream_updates(Pubnub::Channel calling_channel, std::function<void(Pubnub::Channel)> channel_callback) const;
         std::function<void()> stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Pubnub::Channel>)> channel_callback) const;

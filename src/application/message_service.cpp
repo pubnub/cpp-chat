@@ -13,6 +13,9 @@
 #include "dao/message_dao.hpp"
 #include "callback_service.hpp"
 
+#include <string>
+#include <sstream>
+
 using namespace Pubnub;
 using json = nlohmann::json;
 
@@ -250,3 +253,37 @@ Pubnub::ThreadMessage MessageService::create_thread_message_object(const Pubnub:
     return Pubnub::ThreadMessage(base_message, parent_channel_id);
 }
 
+Pubnub::String MessageService::get_phrase_to_look_for(const Pubnub::String& look_text) const
+{
+    std::string text = look_text.to_std_string();
+    size_t lastAtIndex = text.find_last_of('@');
+    
+    // If there is no '@' or if there are fewer than 3 characters after the last '@'
+    if (lastAtIndex == std::string::npos || text.size() - lastAtIndex - 1 < 3) {
+        return "";
+    }
+
+    // Get the substring after the last '@'
+    std::string charactersAfterAt = text.substr(lastAtIndex + 1);
+
+    // Split the substring by spaces
+    std::istringstream iss(charactersAfterAt);
+    std::vector<std::string> splitWords;
+    std::string word;
+    while (iss >> word) {
+        splitWords.push_back(word);
+    }
+
+    // If there are more than 2 words after the '@', return null
+    if (splitWords.size() > 2) {
+        return "";
+    }
+
+    // Combine the first two words (if they exist) with a space in between
+    std::string result = splitWords[0];
+    if (splitWords.size() > 1) {
+        result += " " + splitWords[1];
+    }
+
+    return String(result);
+}

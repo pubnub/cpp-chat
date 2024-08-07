@@ -135,10 +135,11 @@ Channel ChannelService::get_channel(const String& channel_id) const {
     return this->create_channel_object({channel_id, ChannelEntity::from_channel_response(parsed_response["data"])});
 }
 
-std::vector<Channel> ChannelService::get_channels(const String& include, int limit, const String& start, const String& end) const {
-    auto channels_response = [this, include, limit, start, end] {
+std::vector<Channel> ChannelService::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    Pubnub::String include = "custom,totalCount";
+    auto channels_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->get_all_channels_metadata(include, limit, start, end);
+        return pubnub_handle->get_all_channels_metadata(include, limit, filter, sort, page.next, page.prev);
     }();
 
     Json response_json = Json::parse(channels_response);
@@ -464,6 +465,29 @@ void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const P
         payload_json["parentChannel"] = parent_channel_id.c_str();
     }
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MENTION, user_id, payload_json.dump());
+}
+
+std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::String text, int limit) const
+{
+    auto chat_shared = this->chat_service.lock();
+
+    if(!chat_shared)
+    {
+        throw std::runtime_error("can't get users suggestions, chat service is invalid");
+    }
+
+    String cache_key = chat_shared->message_service->get_phrase_to_look_for(text);
+
+    if(cache_key.empty())
+    {
+        return {};
+    }
+
+    //TODO:: cashe rezults here like in js
+
+    String filter = "name LIKE \"" + cache_key + "*\"";
+    
+    return this->get_channels(filter, "", limit);
 }
 
 std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const

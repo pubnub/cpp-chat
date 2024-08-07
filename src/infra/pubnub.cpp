@@ -247,17 +247,20 @@ Pubnub::String PubNub::get_channel_metadata(const Pubnub::String channel)
 Pubnub::String PubNub::get_all_channels_metadata(
         const Pubnub::String include,
         const int limit,
-        const Pubnub::String start,
-        const Pubnub::String end
+        const Pubnub::String filter,
+        const Pubnub::String sort,
+        const Pubnub::String page_next,
+        const Pubnub::String page_prev
 ) {
-    auto result = pubnub_getall_channelmetadata(
-            this->main_context.get(),
-            include,
-            limit,
-            start,
-            end,
-            pubnub_tribool::pbccFalse
-    );
+    pubnub_getall_metadata_opts opt = pubnub_getall_metadata_defopts();
+    opt.count = pubnub_tribool::pbccTrue;
+    opt.filter = filter.c_str();
+    opt.include = include.c_str();
+    opt.limit = limit;
+    opt.sort = sort.c_str();
+    opt.page.next = page_next.c_str();
+    opt.page.prev = page_prev.c_str();
+    auto result = pubnub_getall_channelmetadata_ex(this->main_context.get(), opt);
 
     this->await_and_handle_error(result);
 
@@ -340,17 +343,21 @@ Pubnub::String PubNub::get_user_metadata(const Pubnub::String user_id)
 Pubnub::String PubNub::get_all_user_metadata(
         const Pubnub::String include,
         const int limit,
-        const Pubnub::String start,
-        const Pubnub::String end
+        const Pubnub::String filter,
+        const Pubnub::String sort,
+        const Pubnub::String page_next,
+        const Pubnub::String page_prev
 ) {
-    auto result = pubnub_getall_uuidmetadata(
-            this->main_context.get(),
-            include,
-            limit,
-            start,
-            end,
-            pubnub_tribool::pbccFalse
-    );
+    pubnub_getall_metadata_opts opt = pubnub_getall_metadata_defopts();
+    opt.count = pubnub_tribool::pbccTrue;
+    opt.filter = filter.c_str();
+    opt.include = include.c_str();
+    opt.limit = limit;
+    opt.sort = sort.c_str();
+    opt.page.next = page_next.c_str();
+    opt.page.prev = page_prev.c_str();
+
+    auto result = pubnub_getall_uuidmetadata_ex(this->main_context.get(), opt);
 
     this->await_and_handle_error(result);
 

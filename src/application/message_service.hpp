@@ -45,6 +45,8 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::ThreadMessage create_thread_message_object(std::pair<Pubnub::String, MessageEntity> message_data, Pubnub::String parent_channel_id) const;
         Pubnub::ThreadMessage create_thread_message_object(const Pubnub::Message& base_message, const Pubnub::String& parent_channel_id) const;
 
+        Pubnub::String get_phrase_to_look_for(const Pubnub::String& look_text) const;
+
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;

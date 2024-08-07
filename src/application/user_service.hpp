@@ -4,6 +4,7 @@
 #include "user.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
+#include "page.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -23,11 +24,12 @@ class UserService : public std::enable_shared_from_this<UserService>
 
         Pubnub::User create_user(const Pubnub::String& user_id, const UserDAO& user_data) const;
         Pubnub::User get_user(const Pubnub::String& user_id) const;
-        std::vector<Pubnub::User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+        std::vector<Pubnub::User> get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::User update_user(const Pubnub::String& user_id, const UserDAO& user_data) const;
         void delete_user(const Pubnub::String& user_id) const;
         std::function<void()> stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const;
         std::function<void()> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
+        std::vector<Pubnub::User> get_users_suggestions(Pubnub::String text, int limit = 10) const;
 
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserDAO> user_data) const;
 
