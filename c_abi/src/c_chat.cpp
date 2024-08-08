@@ -635,17 +635,17 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
         Pubnub::String wrappers_json = "[";
         for (auto wrapper : wrappers) {
             auto channel_ptr = new Pubnub::Channel(wrapper.channel);
-            std::ostringstream oss;
-            oss << static_cast<void*>(channel_ptr);
-            auto channel_ptr_string = oss.str();
+            std::ostringstream channel_oss;
+            channel_oss << static_cast<void*>(channel_ptr);
+            auto channel_ptr_string = channel_oss.str();
 #ifdef _WIN32
             channel_ptr_string = "0x" + channel_ptr_string;
 #endif
             
             auto membership_ptr = new Pubnub::Membership(wrapper.membership);
-            std::ostringstream oss;
-            oss << static_cast<void*>(membership_ptr);
-            auto membership_ptr_string = oss.str();
+            std::ostringstream membership_oss;
+            membership_oss << static_cast<void*>(membership_ptr);
+            auto membership_ptr_string = membership_oss.str();
 #ifdef _WIN32
             membership_ptr_string = "0x" + membership_ptr_string;
 #endif
