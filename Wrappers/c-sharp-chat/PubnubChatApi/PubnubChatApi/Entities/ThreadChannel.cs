@@ -35,7 +35,10 @@ namespace PubNubChatAPI.Entities
         
         [DllImport("pubnub-chat")]
         private static extern int pn_thread_channel_get_parent_channel_id(IntPtr thread_channel, StringBuilder result);
-
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_thread_channel_emit_user_mention(IntPtr thread_channel, string user_id, string timetoken, string text);
+            
         #endregion
 
         public string ParentChannelId
@@ -84,6 +87,11 @@ namespace PubNubChatAPI.Entities
             }
 
             return history;
+        }
+
+        public override void EmitUserMention(string userId, string timeToken, string text)
+        {
+            CUtilities.CheckCFunctionResult(pn_thread_channel_emit_user_mention(pointer, userId, timeToken, text));
         }
 
         public override void SendText(string message)

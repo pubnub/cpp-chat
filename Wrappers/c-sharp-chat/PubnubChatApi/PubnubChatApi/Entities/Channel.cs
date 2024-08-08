@@ -7,6 +7,7 @@ using System.Text;
 using System.Timers;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
+using PubnubChatApi.Entities.Events;
 using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
@@ -124,7 +125,10 @@ namespace PubNubChatAPI.Entities
             bool is_typing_indicator_triggered,
             int user_limit,
             int channel_limit);
-
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_emit_user_mention(IntPtr channel, string user_id, string timetoken, string text);
+        
         #endregion
 
         /// <summary>
@@ -332,31 +336,37 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        internal void ParseAndBroadcastTypingEvent(Dictionary<string, string> eventJson)
+        internal bool TryParseAndBroadcastTypingEvent(ChatEvent chatEvent)
         {
-            if (!eventJson.TryGetValue("userId", out var userId))
+            if (string.IsNullOrEmpty(chatEvent.UserId) || string.IsNullOrEmpty(chatEvent.Payload))
             {
-                return;
+                return false;
+            }
+            
+            var payloadDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(chatEvent.Payload);
+            if (payloadDictionary == null)
+            {
+                return false;
             }
 
-            if (!eventJson.TryGetValue("value", out var valueString)
+            if (!payloadDictionary.TryGetValue("value", out var valueString)
                 || !bool.TryParse(valueString, out var typingValue))
             {
-                return;
+                return false;
             }
 
             //stop typing
-            if (!typingValue && typingIndicators.ContainsKey(userId))
+            if (!typingValue && typingIndicators.ContainsKey(chatEvent.UserId))
             {
-                typingIndicators[userId].Stop();
-                typingIndicators.Remove(userId);
+                typingIndicators[chatEvent.UserId].Stop();
+                typingIndicators.Remove(chatEvent.UserId);
             }
 
             //start typing
             if (typingValue)
             {
                 //Stop the old timer
-                if (typingIndicators.TryGetValue(userId, out var typingTimer))
+                if (typingIndicators.TryGetValue(chatEvent.UserId, out var typingTimer))
                 {
                     typingTimer.Stop();
                 }
@@ -366,19 +376,25 @@ namespace PubNubChatAPI.Entities
                 var newTimer = new Timer(5000);
                 newTimer.Elapsed += (_, _) =>
                 {
-                    typingIndicators.Remove(userId);
+                    typingIndicators.Remove(chatEvent.UserId);
                     OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
                 };
-                typingIndicators[userId] = newTimer;
+                typingIndicators[chatEvent.UserId] = newTimer;
                 newTimer.Start();
             }
 
             OnUsersTyping?.Invoke(typingIndicators.Keys.ToList());
+            return true;
         }
 
         public void ForwardMessage(Message message)
         {
             chat.ForwardMessage(message, this);
+        }
+
+        public virtual void EmitUserMention(string userId, string timeToken, string text)
+        {
+            CUtilities.CheckCFunctionResult(pn_channel_emit_user_mention(pointer, userId, timeToken, text));
         }
 
         public void StartTyping()

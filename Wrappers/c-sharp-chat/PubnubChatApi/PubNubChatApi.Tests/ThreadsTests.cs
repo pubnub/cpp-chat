@@ -7,6 +7,7 @@ public class ThreadsTests
 {
     private Chat chat;
     private Channel channel;
+    private User user;
 
     [SetUp]
     public void Setup()
@@ -16,6 +17,7 @@ public class ThreadsTests
             PubnubTestsParameters.SubscribeKey,
             "threads_tests_user");
         channel = chat.CreatePublicConversation("threads_tests_channel_37");
+        user = chat.CreateUser("threads_tests_user");
         channel.Join();
     }
 
@@ -67,6 +69,27 @@ public class ThreadsTests
         };
         channel.SendText("thread_start_message");
         var read = historyReadReset.WaitOne(15000);
+        Assert.True(read);
+    }
+    
+    [Test]
+    public void TestThreadChannelEmitUserMention()
+    {
+        var mentionedReset = new ManualResetEvent(false);
+        channel.OnMessageReceived += async message =>
+        {
+            var thread = message.CreateThread();
+            thread.Join();
+            chat.StartListeningForMentionEvents(user.Id);
+            chat.OnMentionEvent += mentionEvent =>
+            {
+                Assert.True(mentionEvent.Payload.Contains("heyyy"));
+                mentionedReset.Set();
+            };
+            thread.EmitUserMention(user.Id, "99999999999999999", "heyyy");
+        };
+        channel.SendText("thread_start_message");
+        var read = mentionedReset.WaitOne(10000);
         Assert.True(read);
     }
     

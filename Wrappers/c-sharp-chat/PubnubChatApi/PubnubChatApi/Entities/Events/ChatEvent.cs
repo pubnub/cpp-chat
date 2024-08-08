@@ -1,16 +1,13 @@
-using System;
-using PubNubChatAPI.Entities;
+using PubnubChatApi.Enums;
 
 namespace PubnubChatApi.Entities.Events
 {
-    public abstract class ChatEvent : PointerWrapper
+    public struct ChatEvent
     {
-        //TODO: temporary, waiting for C++ 
-        public string Json { get; }
-        
-        internal ChatEvent(IntPtr pointer, string json) : base(pointer)
-        {
-            Json = json;
-        }
+        public string TimeToken;
+        public PubnubChatEventType Type;
+        public string ChannelId;
+        public string UserId;
+        public string Payload;
     }
 }

@@ -147,10 +147,10 @@ public class MessageTests
     {
         var reportManualEvent = new ManualResetEvent(false);
         channel.Join();
-        chat.StartListeningForReportEvents();
+        chat.StartListeningForReportEvents(channel.Id);
         chat.OnReportEvent += reportEvent =>
         {
-            Assert.True(reportEvent.Json.Contains("bad_message"));
+            Assert.True(reportEvent.Payload.Contains("bad_message"));
             reportManualEvent.Set();
         };
         channel.OnMessageReceived += message =>

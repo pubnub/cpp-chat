@@ -575,6 +575,21 @@ Pubnub::Message* pn_channel_get_pinned_message(Pubnub::Channel* channel) {
     }
 }
 
+PnCResult pn_channel_emit_user_mention(Pubnub::Channel* channel, const char* user_id, const char* timetoken, const char* text) {
+    try {
+        std::cout << "ONE" << std::endl;
+        channel->emit_user_mention(user_id, timetoken, text);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+
 //Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
 //    char* user_suggestion_source, 
 //    bool is_typing_indicator_triggered, 

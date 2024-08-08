@@ -95,3 +95,16 @@ PnCResult pn_thread_channel_get_parent_channel_id(Pubnub::ThreadChannel* thread_
 
     return PN_C_OK;
 }
+
+PnCResult pn_thread_channel_emit_user_mention(Pubnub::ThreadChannel* thread_channel, const char* user_id, const char* timetoken, const char* text) {
+    try {
+        thread_channel->emit_user_mention(user_id, timetoken, text);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}

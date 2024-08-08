@@ -24,5 +24,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_send_text(Pubnub::Thre
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_get_parent_channel_id(Pubnub::ThreadChannel* thread_channel, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_channel_emit_user_mention(Pubnub::ThreadChannel* thread_channel, const char* user_id, const char* timetoken, const char* text);
 
 #endif // PN_CHAT_C_THREAD_CHANNEL_H

@@ -154,4 +154,21 @@ public class ChannelTests
             Assert.Fail();
         }
     }
+
+    [Test]
+    public void TestEmitUserMention()
+    {
+        var channel = chat.CreatePublicConversation("user_mention_test_channel");
+        channel.Join();
+        var receivedManualEvent = new ManualResetEvent(false);
+        chat.StartListeningForMentionEvents(user.Id);
+        chat.OnMentionEvent += mentionEvent =>
+        {
+            Assert.True(mentionEvent.Payload.Contains("heyyy"));
+            receivedManualEvent.Set();
+        };
+        channel.EmitUserMention(user.Id, "99999999999999999", "heyyy");
+        var received = receivedManualEvent.WaitOne(7000);
+        Assert.True(received);
+    }
 }

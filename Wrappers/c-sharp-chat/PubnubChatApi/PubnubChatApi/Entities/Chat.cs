@@ -175,6 +175,7 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_chat_listen_for_events(
             IntPtr chat,
             string channel_id,
+            byte event_type,
             StringBuilder result_json);
 
         [DllImport("pubnub-chat")]
@@ -241,8 +242,13 @@ namespace PubNubChatAPI.Entities
         private bool fetchUpdates = true;
         private Thread fetchUpdatesThread;
 
-        public event Action<ReportEvent> OnReportEvent;
-        public event Action<ModerationEvent> OnModerationEvent;
+        public event Action<ChatEvent> OnReportEvent;
+        public event Action<ChatEvent> OnModerationEvent;
+        public event Action<ChatEvent> OnTypingEvent;
+        public event Action<ChatEvent> OnReceiptEvent;
+        public event Action<ChatEvent> OnMentionEvent;
+        public event Action<ChatEvent> OnInviteEvent;
+        public event Action<ChatEvent> OnCustomEvent;
         public event Action<ChatEvent> OnAnyEvent;
 
         /// <summary>
@@ -306,34 +312,47 @@ namespace PubNubChatAPI.Entities
                             continue;
                         }
 
-                        var eventData = JsonConvert.DeserializeObject<Dictionary<string, string>>(eventJson);
-                        if (eventData != null && eventData.TryGetValue("type", out var eventType))
+                        var chatEvent = JsonConvert.DeserializeObject<ChatEvent>(eventJson);
+                        var failedToInvoke = false;
+                        //TODO: not a big fan of this big-ass switch
+                        switch (chatEvent.Type)
                         {
-                            //TODO: dumb, will be replaced by getting serialized event pointer + type
-                            switch (eventType)
-                            {
-                                case "moderation":
-                                    //TODO: real pointer!
-                                    var moderationEvent = new ModerationEvent(IntPtr.Zero, eventJson);
-                                    OnAnyEvent?.Invoke(moderationEvent);
-                                    OnModerationEvent?.Invoke(moderationEvent);
-                                    break;
-                                case "report":
-                                    //TODO: real pointer!
-                                    var reportEvent = new ReportEvent(IntPtr.Zero, eventJson);
-                                    OnAnyEvent?.Invoke(reportEvent);
-                                    OnReportEvent?.Invoke(reportEvent);
-                                    break;
-                                //TODO: should this one also be an Event Entity?
-                                case "typing":
-                                    if (eventData.TryGetValue("channelId", out var channelId) &&
-                                        TryGetChannel(channelId, out var channel))
-                                    {
-                                        channel.ParseAndBroadcastTypingEvent(eventData);
-                                    }
+                            case PubnubChatEventType.Typing:
+                                if (TryGetChannel(chatEvent.ChannelId, out var channel) 
+                                    && channel.TryParseAndBroadcastTypingEvent(chatEvent))
+                                {
+                                    OnTypingEvent?.Invoke(chatEvent);
+                                }
+                                else
+                                {
+                                    failedToInvoke = true;
+                                }
+                                break;
+                            case PubnubChatEventType.Report:
+                                OnReportEvent?.Invoke(chatEvent);
+                                break;
+                            case PubnubChatEventType.Receipt:
+                                OnReceiptEvent?.Invoke(chatEvent);
+                                break;
+                            case PubnubChatEventType.Mention:
+                                OnMentionEvent?.Invoke(chatEvent);
+                                break;
+                            case PubnubChatEventType.Invite:
+                                OnInviteEvent?.Invoke(chatEvent);
+                                break;
+                            case PubnubChatEventType.Custom:
+                                OnCustomEvent?.Invoke(chatEvent);
+                                break;
+                            case PubnubChatEventType.Moderation:
+                                OnModerationEvent?.Invoke(chatEvent);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
 
-                                    break;
-                            }
+                        if (!failedToInvoke)
+                        {
+                            OnAnyEvent?.Invoke(chatEvent);
                         }
 
                         pn_dispose_message(pointer);
@@ -1460,24 +1479,29 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_chat_emit_event(chatPointer, (byte)type, channelId, jsonPayload));
         }
 
-        //TODO: full summary
-        /// <summary>
-        /// Start listening for Moderation Events for this UserId.
-        /// </summary>
-        /// <param name="userId">User whose Moderation Events are to be broadcast.</param>
-        public void StartListeningForUserModerationEvents(string userId)
+        public void StartListeningForReportEvents(string channelId)
         {
-            ListenForEvents(userId);
+            ListenForEvents($"PUBNUB_INTERNAL_MODERATION_{channelId}", PubnubChatEventType.Report);
         }
 
-        //TODO: full summary
-        //TODO: might turn this into a StartListeningForEvents<T> later
-        /// <summary>
-        /// Start listening for Report Events.
-        /// </summary>
-        public void StartListeningForReportEvents()
+        public void StartListeningForCustomEvents(string channelId)
         {
-            ListenForEvents("PUBNUB_INTERNAL_ADMIN_CHANNEL");
+            ListenForEvents(channelId, PubnubChatEventType.Custom);
+        }
+        
+        public void StartListeningForMentionEvents(string userId)
+        {
+            ListenForEvents(userId, PubnubChatEventType.Mention);
+        }
+        
+        public void StartListeningForInviteEvents(string userId)
+        {
+            ListenForEvents(userId, PubnubChatEventType.Invite);
+        }
+        
+        public void StartListeningForModerationEvents(string userId)
+        {
+            ListenForEvents(userId, PubnubChatEventType.Moderation);
         }
 
         //TODO: I added that here but probably it is not the best place:
@@ -1500,7 +1524,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="OnEvent"/>
-        internal void ListenForEvents(string channelId)
+        internal void ListenForEvents(string channelId, PubnubChatEventType type)
         {
             if (string.IsNullOrEmpty(channelId))
             {
@@ -1508,7 +1532,7 @@ namespace PubNubChatAPI.Entities
             }
 
             var buffer = new StringBuilder(4096);
-            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(chatPointer, channelId, buffer));
+            CUtilities.CheckCFunctionResult(pn_chat_listen_for_events(chatPointer, channelId, (byte)type, buffer));
             ParseJsonUpdatePointers(buffer.ToString());
         }
 

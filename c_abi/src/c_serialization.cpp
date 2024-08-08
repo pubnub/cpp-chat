@@ -82,15 +82,16 @@ PnCResult pn_deserialize_event(pubnub_v2_message* event_json, char* result) {
     }
 
     try {
-        //TODO: temporary to have channel ID, will be removed once Event is a proper entity
-        auto string = Parsers::PubnubJson::to_string(*event_json);
-        string.erase(string.length() - 1);
-        string += ", \"channelId\": ";
-        Pubnub::String channel_string = "\"";
-        channel_string += Pubnub::String(event_json->channel.ptr, event_json->channel.size);
-        channel_string += "\"}";
-        string += channel_string;
-        strcpy(result, string.c_str());
+        //TODO: possibly redundant to go pubnub_v2_message -> event -> json
+        auto event = Parsers::PubnubJson::to_event(*event_json);
+        auto j = nlohmann::json{
+            {"timeToken", event.timetoken.c_str()},
+            {"type", chat_event_type_to_string(event.type).c_str()},
+            {"userId", event.user_id.c_str()},
+            {"channelId", event.channel_id.c_str()},
+            {"payload", event.payload.c_str()},
+        };
+        strcpy(result, j.dump().c_str());
 
         return PN_C_OK;
     } catch (std::exception& e) {

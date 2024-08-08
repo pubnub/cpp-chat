@@ -79,7 +79,7 @@ public class ChatTests
         var reportManualEvent = new ManualResetEvent(false);
         chat.OnReportEvent += reportEvent =>
         {
-            Assert.True(reportEvent.Json == "{\"test\":\"some_nonsense\", \"type\": \"report\", \"channelId\": \"chat_tests_channel\"}");
+            Assert.True(reportEvent.Payload == "{\"test\":\"some_nonsense\", \"type\": \"report\"}");
             reportManualEvent.Set();
         };
         channel.Join();

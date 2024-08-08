@@ -27,10 +27,10 @@ public class ChatEventTests
         var manualReportedEvent = new ManualResetEvent(false);
         chat.OnReportEvent += reportEvent =>
         {
-            Assert.True(reportEvent.Json.Contains("some_reason"));
+            Assert.True(reportEvent.Payload.Contains("some_reason"));
             manualReportedEvent.Set();
         };
-        chat.StartListeningForReportEvents();
+        chat.StartListeningForReportEvents(channel.Id);
         user.ReportUser("some_reason");
         var reported = manualReportedEvent.WaitOne(4000);
         Assert.IsTrue(reported);
@@ -42,10 +42,10 @@ public class ChatEventTests
         var manualModerationEvent = new ManualResetEvent(false);
         chat.OnModerationEvent += moderationEvent =>
         {
-            Assert.True(moderationEvent.Json.Contains("some_reason"));
+            Assert.True(moderationEvent.Payload.Contains("some_reason"));
             manualModerationEvent.Set();
         };
-        chat.StartListeningForUserModerationEvents(user.Id);
+        chat.StartListeningForModerationEvents(user.Id);
         user.SetRestriction(channel.Id, new Restriction()
         {
             Ban = true,
