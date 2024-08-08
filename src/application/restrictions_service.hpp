@@ -25,6 +25,7 @@ class RestrictionsService : public std::enable_shared_from_this<RestrictionsServ
 
         void set_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
         Pubnub::Restriction get_user_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+        std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::String> get_users_restrictions(const Pubnub::String& channel_id, const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         void report_user(const Pubnub::String& user_id, const Pubnub::String& reason) const;
         void report_message(const Pubnub::Message& message, const Pubnub::String& reason) const;

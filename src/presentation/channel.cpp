@@ -144,6 +144,12 @@ Restriction Channel::get_user_restrictions(const Pubnub::User& user) const {
     return this->restrictions_service->get_user_restrictions(user.user_id(), channel_id());
 }
 
+UsersRestrictionsWrapper Pubnub::Channel::get_users_restrictions(const Pubnub::String &sort, int limit, const Pubnub::Page &page) const
+{
+    std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::String> return_tuple = this->restrictions_service->get_users_restrictions(channel_id(), sort, limit, page);
+    return UsersRestrictionsWrapper({Pubnub::Vector<UserRestriction>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple), std::get<3>(return_tuple)});
+}
+
 Pubnub::Vector<Message> Channel::get_history(const String& start_timetoken, const String& end_timetoken, int count) const {
     return Pubnub::Vector<Message>(std::move(this->channel_service->get_channel_history(channel_id(), start_timetoken, end_timetoken, count)));
 }

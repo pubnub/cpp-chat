@@ -111,6 +111,7 @@ namespace Pubnub {
 
             /* USERS */
 
+            PN_CHAT_EXPORT Pubnub::User current_user();
             PN_CHAT_EXPORT Pubnub::User create_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT Pubnub::User get_user(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT UsersResponseWrapper get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;

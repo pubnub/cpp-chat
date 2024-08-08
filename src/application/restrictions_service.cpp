@@ -94,6 +94,53 @@ Restriction RestrictionsService::get_user_restrictions(const String& user_id, co
    return FinalRestrictionsData;
 }
 
+std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::String> RestrictionsService::get_users_restrictions(const Pubnub::String &channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const
+{
+    String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
+
+    auto get_restrictions_response = [this, full_channel_id, limit, sort, page] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, "", sort, page.next, page.prev);
+    }();
+
+    Json response_json = Json::parse(get_restrictions_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get channel restrictions, response is incorrect");
+    }
+
+    Json response_data_json = response_json["data"];
+    std::vector<UserRestriction> final_restrictions;
+
+    for (Json::Iterator single_data_json = response_data_json.begin(); single_data_json != response_data_json.end(); ++single_data_json)
+    {
+
+        if(!single_data_json.value().contains("custom") || single_data_json.value()["custom"].is_null())
+        {
+            continue;
+        }
+
+        Json custom_json = single_data_json.value()["custom"];
+
+        if (custom_json.contains("ban") || custom_json.contains("mute"))
+        {
+            UserRestriction restriction;
+            restriction.ban = custom_json.get_bool("ban").value_or(false);
+            restriction.ban = custom_json.get_bool("mute").value_or(false);
+            restriction.reason = custom_json.get_string("reason").value_or(String(""));
+            restriction.user_id = single_data_json.value()["uuid"]["id"];
+
+            final_restrictions.push_back(restriction);
+        }
+    }
+
+    int total_count = response_json.get_int("totalCount").value_or(0);
+    Page page_response({response_json.get_string("next").value_or(String("")), response_json.get_string("prev").value_or(String(""))});
+    String status = response_json.get_string("status").value_or(String(""));
+    std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::String> return_tuple = std::make_tuple(final_restrictions, page_response, total_count, status);
+}
+
 Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 

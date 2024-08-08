@@ -65,6 +65,14 @@ namespace Pubnub
         Pubnub::String status;
     };
 
+    struct UsersRestrictionsWrapper
+    {
+        Pubnub::Vector<Pubnub::UserRestriction> restrictions;
+        Pubnub::Page page;
+        int total;
+        Pubnub::String status;
+    };
+
     class Channel {
         public:
             PN_CHAT_EXPORT Channel(const Channel& other);
@@ -89,6 +97,7 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, Pubnub::Restriction restrictions) const;
             PN_CHAT_EXPORT Pubnub::Restriction get_user_restrictions(const Pubnub::User& user) const;
+            PN_CHAT_EXPORT UsersRestrictionsWrapper get_users_restrictions(const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Message> get_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
             PN_CHAT_EXPORT Pubnub::Message get_message(const Pubnub::String& timetoken) const;
             PN_CHAT_EXPORT MembersResponseWrapper get_members(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;

@@ -88,7 +88,13 @@ Pubnub::Vector<Channel> Pubnub::Chat::get_channel_suggestions(String text, int l
     return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channel_suggestions(text, limit)));
 }
 
-User Chat::create_user(const String& user_id, const ChatUserData& user_data) const {
+Pubnub::User Pubnub::Chat::current_user()
+{
+    return this->user_service->get_current_user();
+}
+
+User Chat::create_user(const String &user_id, const ChatUserData &user_data) const
+{
     return this->user_service->create_user(user_id, user_data);
 }
 
