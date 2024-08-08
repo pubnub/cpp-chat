@@ -69,7 +69,7 @@ User UserService::get_user(const String& user_id) const
     return this->create_user_object({user_id, UserDAO(new_user_entity)});
 }
 
-std::vector<User> UserService::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> UserService::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     
     Pubnub::String include = "custom,totalCount";
     auto users_response = [this, include, limit, filter, sort, page] {
@@ -94,7 +94,11 @@ std::vector<User> UserService::get_users(const Pubnub::String &filter, const Pub
         return this->create_user_object(user_entity);
     });
 
-    return users;
+    int total_count = response_json.get_int("totalCount").value_or(0);
+    Page page_response({response_json.get_string("next").value_or(String("")), response_json.get_string("prev").value_or(String(""))});
+    std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> return_tuple = std::make_tuple(users, page_response, total_count);
+
+    return return_tuple;
 }
 
 User UserService::update_user(const String& user_id, const UserDAO& user_data) const {
@@ -231,7 +235,8 @@ std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text
 
     String filter = "name LIKE \"" + cache_key + "*\"";
 
-    return this->get_users(filter, "", limit);
+    auto get_users_tuple =  this->get_users(filter, "", limit);
+    return std::get<0>(get_users_tuple);
 }
 
 User UserService::create_user_object(std::pair<String, UserDAO> user_data) const {

@@ -76,6 +76,21 @@ namespace Pubnub {
         Pubnub::Vector<Pubnub::Membership> memberships;
     };
 
+    struct ChannelsResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::Channel> channels;
+        Pubnub::Page page;
+        int total;
+    };
+
+    struct UsersResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::User> channels;
+        Pubnub::Page page;
+        int total;
+    };
+
+
 
     class Chat {
         public:
@@ -87,7 +102,7 @@ namespace Pubnub {
             PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(Pubnub::Vector<Pubnub::User> users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
-            PN_CHAT_EXPORT Pubnub::Vector<Channel> get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+            PN_CHAT_EXPORT ChannelsResponseWrapper get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
             PN_CHAT_EXPORT void delete_channel(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT void pin_message_to_channel(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
@@ -98,7 +113,7 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT Pubnub::User create_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT Pubnub::User get_user(const Pubnub::String& user_id) const;
-            PN_CHAT_EXPORT Pubnub::Vector<User> get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+            PN_CHAT_EXPORT UsersResponseWrapper get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::User update_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT void delete_user(const Pubnub::String& user_id) const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::User> get_user_suggestions(Pubnub::String text, int limit = 10) const;

@@ -62,8 +62,9 @@ Channel Chat::get_channel(const String& channel_id) const
     return this->channel_service->get_channel(channel_id);
 }
 
-Pubnub::Vector<Channel> Chat::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
-    return Pubnub::Vector<Channel>(std::move(this->channel_service->get_channels(filter, sort, limit, page)));
+ChannelsResponseWrapper Chat::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    auto return_tuple = this->channel_service->get_channels(filter, sort, limit, page);
+    return ChannelsResponseWrapper({Pubnub::Vector<Channel>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple)});
 }
 
 Channel Chat::update_channel(const String& channel_id, const ChatChannelData& channel_data) const {
@@ -95,8 +96,10 @@ User Chat::get_user(const String& user_id) const {
     return this->user_service->get_user(user_id);
 }
 
-Pubnub::Vector<User> Chat::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
-    return Pubnub::Vector<User>(std::move(this->user_service->get_users(filter, sort, limit, page)));
+UsersResponseWrapper Chat::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    auto return_tuple = this->user_service->get_users(filter, sort, limit, page);
+    return UsersResponseWrapper({Pubnub::Vector<User>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple)});
+;
 }
 
 User Chat::update_user(const String& user_id, const ChatUserData& user_data) const {

@@ -68,7 +68,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
         Pubnub::Channel create_channel(const Pubnub::String& channel_id, const ChannelEntity&& channel_entity) const;
         Pubnub::Channel get_channel(const Pubnub::String& channel_id) const;
-        std::vector<Pubnub::Channel> get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+        std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::Channel update_channel(const Pubnub::String& channel_id, ChannelDAO channel_data) const;
         void delete_channel(const Pubnub::String& channel_id) const;
         std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;

@@ -135,7 +135,7 @@ Channel ChannelService::get_channel(const String& channel_id) const {
     return this->create_channel_object({channel_id, ChannelEntity::from_channel_response(parsed_response["data"])});
 }
 
-std::vector<Channel> ChannelService::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> ChannelService::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     Pubnub::String include = "custom,totalCount";
     auto channels_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -152,15 +152,18 @@ std::vector<Channel> ChannelService::get_channels(const Pubnub::String &filter, 
     Json channel_data_array_json = response_json["data"];
     std::vector<Channel> Channels;
    
-   for (auto element : channel_data_array_json)
-   {
-        ChannelEntity new_channel_entity = ChannelEntity::from_json(element.dump());
-        Channel channel = this->create_channel_object({String(element["id"]), std::move(new_channel_entity)});
+    for (auto element : channel_data_array_json)
+    {
+         ChannelEntity new_channel_entity = ChannelEntity::from_json(element.dump());
+         Channel channel = this->create_channel_object({String(element["id"]), std::move(new_channel_entity)});
+ 
+         Channels.push_back(channel);
+    }
+    int total_count = response_json.get_int("totalCount").value_or(0);
+    Page page_response({response_json.get_string("next").value_or(String("")), response_json.get_string("prev").value_or(String(""))});
+    std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> return_tuple = std::make_tuple(Channels, page_response, total_count);
 
-        Channels.push_back(channel);
-   }
-
-    return Channels;
+    return return_tuple;
 }
 
 Channel ChannelService::update_channel(const String& channel_id, ChannelDAO channel_data) const {
@@ -486,8 +489,9 @@ std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::Str
     //TODO:: cashe rezults here like in js
 
     String filter = "name LIKE \"" + cache_key + "*\"";
-    
-    return this->get_channels(filter, "", limit);
+
+    auto get_channels_tuple = this->get_channels(filter, "", limit);
+    return std::get<0>(get_channels_tuple);
 }
 
 std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel(const String& channel_id, ChannelDAO& channel_data, Pubnub::String text, int limit) const
