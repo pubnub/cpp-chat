@@ -21,6 +21,7 @@ class UserDAO;
 namespace Pubnub
 {
     class Membership;
+    class Channel;
 
     struct ChatUserData
     {
@@ -58,7 +59,7 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present_on(const Pubnub::String& channel_id) const;
 
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
-            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::Channel& channel) const;
             PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
             PN_CHAT_EXPORT MembershipsResponseWrapper get_memberships(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;

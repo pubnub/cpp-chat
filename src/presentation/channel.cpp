@@ -140,8 +140,8 @@ void Channel::set_restrictions(const String& user_id, Restriction restrictions) 
     this->restrictions_service->set_restrictions(user_id, channel_id_internal, restrictions);
 }
 
-Restriction Channel::get_user_restrictions(const String& user_id, const String& channel_id, int limit, const String& start, const String& end) const {
-    return this->restrictions_service->get_user_restrictions(user_id, channel_id, limit, start, end);
+Restriction Channel::get_user_restrictions(const Pubnub::User& user) const {
+    return this->restrictions_service->get_user_restrictions(user.user_id(), channel_id());
 }
 
 Pubnub::Vector<Message> Channel::get_history(const String& start_timetoken, const String& end_timetoken, int count) const {

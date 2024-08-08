@@ -56,10 +56,11 @@ void RestrictionsService::set_restrictions(const String& user_id, const String& 
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
 }
 
-Restriction RestrictionsService::get_user_restrictions(const String& user_id, const String& channel_id, int limit, const String& start, const String& end) const {
-    auto get_restrictions_response = [this, user_id, limit, start, end] {
+Restriction RestrictionsService::get_user_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    //TODO:: add filter here
+    auto get_restrictions_response = [this, user_id, limit, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, "", "", "", "");
+        return pubnub_handle->get_memberships(user_id, "totalCount,custom", limit, "", sort, page.next, page.prev);
     }();
     json response_json = json::parse(get_restrictions_response);
 
@@ -93,12 +94,12 @@ Restriction RestrictionsService::get_user_restrictions(const String& user_id, co
    return FinalRestrictionsData;
 }
 
-Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, int limit, const String& start, const String& end) const {
+Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 
-    auto get_restrictions_response = [this, full_channel_id, limit, start, end] {
+    auto get_restrictions_response = [this, full_channel_id, limit, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, "", "", "", "");
+        return pubnub_handle->get_channel_members(full_channel_id, "totalCount,custom", limit, "", sort, page.next, page.prev);
     }();
 
     json response_json = json::parse(get_restrictions_response);

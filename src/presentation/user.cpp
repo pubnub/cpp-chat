@@ -74,8 +74,8 @@ void User::set_restrictions(const String& channel_id, const Restriction& restric
     this->restrictions_service->set_restrictions(user_id_internal, channel_id, restrictions);
 }
 
-Restriction User::get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const String& start, const String& end) const {
-    return this->restrictions_service->get_channel_restrictions(user_id, channel_id, limit, start, end);
+Restriction User::get_channel_restrictions(const Pubnub::Channel& channel) const {
+    return this->restrictions_service->get_channel_restrictions(user_id(), channel.channel_id());
 }
 
 void User::report(const String& reason) const {
