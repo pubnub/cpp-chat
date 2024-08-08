@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_USER_HPP
 #define PN_CHAT_C_USER_HPP
 
+#include "channel.hpp"
 #include "chat.hpp"
 #include "user.hpp"
 #include "helpers/export.hpp"
@@ -67,18 +68,16 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_user_get_data_type(Pubnub::User* user, cha
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channel_restrictions(
         Pubnub::User* user,
-        const char* user_id,
-        const char* channel_id,
-        int limit,
-        const char* start,
-        const char* end,
+        Pubnub::Channel* channel,
         char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_memberships(
         Pubnub::User* user,
-        int limit,
-        const char* start,
-        const char* end,
+        const char* filter,
+        const char* sort,
+        const int limit,
+        const char* next,
+        const char* prev,
         char* result);
 
 #endif // PN_CHAT_C_USER_HPP

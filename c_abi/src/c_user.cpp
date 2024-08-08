@@ -1,5 +1,7 @@
 #include "c_user.hpp"
 #include "c_errors.hpp"
+#include "channel.hpp"
+#include "page.hpp"
 #include "restrictions.hpp"
 #include "user.hpp"
 #include "nlohmann/json.hpp"
@@ -208,14 +210,10 @@ static void restrictions_to_json(nlohmann::json& j, const Pubnub::Restriction& d
 
 PnCResult pn_user_get_channel_restrictions(
         Pubnub::User* user,
-        const char* user_id,
-        const char* channel_id,
-        int limit,
-        const char* start,
-        const char* end,
+        Pubnub::Channel channel,
         char* result) {
     try {
-        auto restrictions = user->get_channel_restrictions(user_id, channel_id, limit, start, end);
+        auto restrictions = user->get_channel_restrictions(channel);
         nlohmann::json json;
         restrictions_to_json(json, restrictions);
 
@@ -231,21 +229,17 @@ PnCResult pn_user_get_channel_restrictions(
 
 PnCResult pn_user_get_memberships(
         Pubnub::User* user,
-        int limit,
-        const char* start,
-        const char* end,
-        char* result) {
+        const char* filter,
+        const char* sort,
+        const int limit,
+        const char* next,
+        const char* prev,
+       char* result) {
     try {
-        auto memberships = user->get_memberships(limit, start, end);
-
-        if (memberships.size() == 0) {
-            char* empty_result = new char[3];
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
+        auto tuple = user->get_memberships(filter, sort, limit, {next, prev});
 
         Pubnub::String string = "[";
-        for (auto membership : memberships) {
+        for (auto membership : tuple.memberships) {
             auto ptr = new Pubnub::Membership(membership);
             // TODO: utils void* to string
 #ifdef _WIN32
@@ -257,10 +251,22 @@ PnCResult pn_user_get_memberships(
             string += ",";
         }   
 
-        string.erase(string.length() - 1);
+        if (string.length() > 1) {
+            string.erase(string.length() - 1);
+        }
         string += "]";
 
-        strcpy(result, string.c_str());
+        auto j = nlohmann::json{
+            {"memberships", string.c_str()},
+            {"total", tuple.total},
+            {"status", tuple.status.c_str()},
+            {"page", nlohmann::json {
+                {"next", tuple.page.next.c_str()},
+                {"prev", tuple.page.prev.c_str()}
+            }}
+        };
+
+        strcpy(result, j.dump().c_str());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
