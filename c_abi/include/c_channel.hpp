@@ -85,11 +85,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_who_is_present(Pubnub::Channe
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_user_restrictions(
         Pubnub::Channel* channel,
-        const char* user_id,
-        const char* channel_id,
-        int limit,
-        const char* start,
-        const char* end,
+        Pubnub::User* user,
         char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_members(

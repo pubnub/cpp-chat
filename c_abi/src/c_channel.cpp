@@ -348,21 +348,13 @@ static void restrictions_to_json(nlohmann::json& j, const Pubnub::Restriction& d
 
 PnCResult pn_channel_get_user_restrictions(
         Pubnub::Channel* channel,
-        const char* user_id,
-        const char* channel_id,
-        const char* filter,
-        const char* sort,
-        const int limit,
-        const char* next,
-        const char* prev,
+        Pubnub::User* user,
         char* result
         ) {
     try {
-        auto restrictions = channel->get_user_restrictions(user_id, channel_id, limit, start, end);
+        auto restrictions = channel->get_user_restrictions(*user);
         nlohmann::json json;
         restrictions_to_json(json, restrictions);
-
-
         strcpy(result, json.dump().c_str());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());

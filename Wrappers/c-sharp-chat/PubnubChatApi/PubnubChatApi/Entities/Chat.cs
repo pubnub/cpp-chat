@@ -589,7 +589,7 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(
                 pn_chat_get_created_channel_wrapper_invited_memberships(wrapperPointer, buffer));
-            var inviteeMembership = ParseJsonMembershipPointers(buffer.ToString())[0];
+            var inviteeMembership = PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString())[0];
 
             pn_chat_dispose_created_channel_wrapper(wrapperPointer);
 
@@ -622,7 +622,7 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(
                 pn_chat_get_created_channel_wrapper_invited_memberships(wrapperPointer, buffer));
-            var inviteeMemberships = ParseJsonMembershipPointers(buffer.ToString());
+            var inviteeMemberships = PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString());
 
             pn_chat_dispose_created_channel_wrapper(wrapperPointer);
 
@@ -1008,7 +1008,7 @@ namespace PubNubChatAPI.Entities
             return TryGetUser(userId, userPointer, out user);
         }
 
-        private bool TryGetUser(string userId, IntPtr userPointer, out User user)
+        internal bool TryGetUser(string userId, IntPtr userPointer, out User user)
         {
             return TryGetWrapper(userWrappers, userId, userPointer, () => new User(this, userId, userPointer),
                 out user);
@@ -1171,7 +1171,7 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_user_get_memberships(user.Pointer, limit, startTimeToken, endTimeToken,
                 buffer));
-            return ParseJsonMembershipPointers(buffer.ToString());
+            return PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString());
         }
 
         public void AddListenerToMembershipsUpdate(List<string> membershipIds, Action<Membership> listener)
@@ -1224,31 +1224,7 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_channel_get_members(channel.Pointer, limit, startTimeToken, endTimeToken,
                 buffer));
-            return ParseJsonMembershipPointers(buffer.ToString());
-        }
-
-        internal List<Membership> ParseJsonMembershipPointers(string membershipPointersJson)
-        {
-            var memberships = new List<Membership>();
-            if (CUtilities.IsValidJson(membershipPointersJson))
-            {
-                var membershipPointers = JsonConvert.DeserializeObject<IntPtr[]>(membershipPointersJson);
-                if (membershipPointers == null)
-                {
-                    return memberships;
-                }
-
-                foreach (var membershipPointer in membershipPointers)
-                {
-                    var id = Membership.GetMembershipIdFromPtr(membershipPointer);
-                    if (TryGetMembership(id, membershipPointer, out var membership))
-                    {
-                        memberships.Add(membership);
-                    }
-                }
-            }
-
-            return memberships;
+            return PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString());
         }
 
         private bool TryGetMembership(IntPtr membershipPointer, out Membership membership)

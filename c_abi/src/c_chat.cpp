@@ -615,3 +615,62 @@ PnCResult pn_chat_emit_event(Pubnub::Chat* chat, Pubnub::pubnub_chat_event_type 
 
     return PN_C_OK;
 }
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
+        Pubnub::Chat* chat, 
+        const char* filter, 
+        const char* sort, 
+        int limit, 
+        const char* next, 
+        const char* prev,
+        char* result) {
+    try {
+        auto wrappers = chat->get_unread_messages_counts(filter, sort, limit, Pubnub::Page({next, prev}));
+        
+        if (wrappers.size() == 0) {
+            memcpy(result, "[]\0", 3);
+            return PN_C_OK;
+        }
+        
+        Pubnub::String wrappers_json = "[";
+        for (auto wrapper : wrappers) {
+            auto channel_ptr = new Pubnub::Channel(wrapper.channel);
+            std::ostringstream oss;
+            oss << static_cast<void*>(channel_ptr);
+            auto channel_ptr_string = oss.str();
+#ifdef _WIN32
+            channel_ptr_string = "0x" + channel_ptr_string;
+#endif
+            
+            auto membership_ptr = new Pubnub::Membership(wrapper.membership);
+            std::ostringstream oss;
+            oss << static_cast<void*>(membership_ptr);
+            auto membership_ptr_string = oss.str();
+#ifdef _WIN32
+            membership_ptr_string = "0x" + membership_ptr_string;
+#endif
+
+            auto j = nlohmann::json{
+                {"membership", membership_ptr_string.c_str()},
+                {"channel", channel_ptr_string.c_str()},
+                {"count", wrapper.count}
+            };
+
+            wrappers_json += j.dump().c_str();
+            wrappers_json += ",";
+        }
+
+        wrappers_json.erase(wrappers_json.length() - 1);
+        wrappers_json += "]";
+
+        strcpy(result, wrappers_json.c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+

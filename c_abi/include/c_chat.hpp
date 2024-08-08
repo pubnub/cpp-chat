@@ -168,4 +168,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_forward_message(Pubnub::Chat* ch
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_emit_event(Pubnub::Chat* chat, Pubnub::pubnub_chat_event_type chat_event_type, const char* channel_id, const char* payload);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(Pubnub::Chat* chat, const char* filter, const char* sort, int limit, const char* next, const char* prev, char* result);
+
 #endif // PN_CHAT_C_CHAT_HPP

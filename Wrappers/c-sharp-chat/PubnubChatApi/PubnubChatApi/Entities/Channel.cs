@@ -823,7 +823,7 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_channel_invite_multiple(pointer, users.Select(x => x.Pointer).ToArray(),
                 users.Count, buffer));
-            return chat.ParseJsonMembershipPointers(buffer.ToString());
+            return PointerParsers.ParseJsonMembershipPointers(chat, buffer.ToString());
         }
 
         protected override void DisposePointer()
