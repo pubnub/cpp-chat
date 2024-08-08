@@ -143,6 +143,7 @@ void RestrictionsService::report_user(const String& user_id, const String& reaso
 void RestrictionsService::report_message(const Message& message, const String& reason) const
 {
     Json payload_json = json::object();
+    String channel = INTERNAL_MODERATION_PREFIX + message.message_data().channel_id;
     payload_json.insert_or_update("text", message.text().c_str());
     payload_json.insert_or_update("reason", reason.c_str());
     payload_json.insert_or_update("reportedMessageChannelId", message.message_data().channel_id.c_str());
@@ -155,5 +156,5 @@ void RestrictionsService::report_message(const Message& message, const String& r
     
     
     auto chat_service_shared = chat_service.lock();
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, INTERNAL_ADMIN_CHANNEL, payload_json.dump());
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_REPORT, channel, payload_json.dump());
 }
