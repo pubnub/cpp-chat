@@ -119,10 +119,11 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_users(
             IntPtr chat,
-            string include,
+            string filter,
+            string sort,
             int limit,
-            string start,
-            string end,
+            string next,
+            string prev,
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
@@ -138,17 +139,21 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_user_get_memberships(
             IntPtr user,
+            string filter,
+            string sort,
             int limit,
-            string start,
-            string end,
+            string next,
+            string prev,
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_members(
             IntPtr channel,
+            string filter,
+            string sort,
             int limit,
-            string start,
-            string end,
+            string next,
+            string prev,
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
@@ -165,10 +170,11 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_channels(
             IntPtr chat,
-            string include,
+            string filter,
+            string sort,
             int limit,
-            string start,
-            string end,
+            string next,
+            string prev,
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
@@ -231,6 +237,16 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern int pn_message_remove_thread(IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_get_unread_messages_counts(
+            IntPtr chat,
+            string filter,
+            string sort,
+            int limit,
+            string next,
+            string prev,
+            StringBuilder result);
 
         #endregion
 
@@ -318,7 +334,7 @@ namespace PubNubChatAPI.Entities
                         switch (chatEvent.Type)
                         {
                             case PubnubChatEventType.Typing:
-                                if (TryGetChannel(chatEvent.ChannelId, out var channel) 
+                                if (TryGetChannel(chatEvent.ChannelId, out var channel)
                                     && channel.TryParseAndBroadcastTypingEvent(chatEvent))
                                 {
                                     OnTypingEvent?.Invoke(chatEvent);
@@ -327,6 +343,7 @@ namespace PubNubChatAPI.Entities
                                 {
                                     failedToInvoke = true;
                                 }
+
                                 break;
                             case PubnubChatEventType.Report:
                                 OnReportEvent?.Invoke(chatEvent);
@@ -655,7 +672,7 @@ namespace PubNubChatAPI.Entities
                 var channelAndTimeToken = channelId.Replace("PUBNUB_INTERNAL_THREAD_", "");
                 var split = channelAndTimeToken.LastIndexOf("_", StringComparison.Ordinal);
                 var parentChannelId = channelAndTimeToken.Remove(split);
-                var messageTimeToken = channelAndTimeToken.Remove(0, split+1);
+                var messageTimeToken = channelAndTimeToken.Remove(0, split + 1);
                 if (TryGetMessage(parentChannelId, messageTimeToken, out var message) &&
                     TryGetThreadChannel(message, out var threadChannel))
                 {
@@ -689,34 +706,17 @@ namespace PubNubChatAPI.Entities
                 () => new Channel(this, channelId, channelPointer), out channel);
         }
 
-        public List<Channel> GetChannels(string include, int limit, string startTimeToken, string endTimeToken)
+        public ChannelsResponseWrapper GetChannels(string filter = "", string sort = "", int limit = 0,
+            Page page = null)
         {
-            Debug.WriteLine("1");
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_chat_get_channels(chatPointer, include, limit, startTimeToken,
-                endTimeToken,
-                buffer));
-            Debug.WriteLine("2");
-            var jsonPointers = buffer.ToString();
-            Debug.WriteLine("3");
-            var channelPointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
-            Debug.WriteLine("4");
-            var returnChannels = new List<Channel>();
-            if (channelPointers == null)
-            {
-                return returnChannels;
-            }
-
-            foreach (var channelPointer in channelPointers)
-            {
-                var id = Channel.GetChannelIdFromPtr(channelPointer);
-                if (TryGetChannel(id, channelPointer, out var channel))
-                {
-                    returnChannels.Add(channel);
-                }
-            }
-
-            return returnChannels;
+            page ??= new Page();
+            CUtilities.CheckCFunctionResult(pn_chat_get_channels(chatPointer, filter, sort, limit, page.Next,
+                page.Previous, buffer));
+            var jsonChannelsWrapper = buffer.ToString();
+            var internalChannelsWrapper =
+                JsonConvert.DeserializeObject<InternalChannelsResponseWrapper>(jsonChannelsWrapper);
+            return new ChannelsResponseWrapper(this, internalChannelsWrapper);
         }
 
         /// <summary>
@@ -1041,29 +1041,15 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="User"/>
-        public List<User> GetUsers(string include, int limit, string startTimeToken, string endTimeToken)
+        public UsersResponseWrapper GetUsers(string filter = "", string sort = "", int limit = 0, Page page = null)
         {
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_chat_get_users(chatPointer, include, limit, startTimeToken, endTimeToken,
-                buffer));
-            var jsonPointers = buffer.ToString();
-            var userPointers = JsonConvert.DeserializeObject<IntPtr[]>(jsonPointers);
-            var returnUsers = new List<User>();
-            if (userPointers == null)
-            {
-                return returnUsers;
-            }
-
-            foreach (var userPointer in userPointers)
-            {
-                var id = User.GetUserIdFromPtr(userPointer);
-                if (TryGetUser(id, userPointer, out var user))
-                {
-                    returnUsers.Add(user);
-                }
-            }
-
-            return returnUsers;
+            page ??= new Page();
+            CUtilities.CheckCFunctionResult(pn_chat_get_users(chatPointer, filter, sort, limit, page.Next,
+                page.Previous, buffer));
+            var internalWrapperJson = buffer.ToString();
+            var internalWrapper = JsonConvert.DeserializeObject<InternalUsersResponseWrapper>(internalWrapperJson);
+            return new UsersResponseWrapper(this, internalWrapper);
         }
 
         /// <summary>
@@ -1161,17 +1147,21 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="Membership"/>
-        public List<Membership> GetUserMemberships(string userId, int limit, string startTimeToken, string endTimeToken)
+        public MembersResponseWrapper GetUserMemberships(string userId, string filter = "", string sort = "",
+            int limit = 0, Page page = null)
         {
             if (!TryGetUser(userId, out var user))
             {
-                return new List<Membership>();
+                return new MembersResponseWrapper();
             }
 
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_user_get_memberships(user.Pointer, limit, startTimeToken, endTimeToken,
-                buffer));
-            return PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString());
+            page ??= new Page();
+            CUtilities.CheckCFunctionResult(pn_user_get_memberships(user.Pointer, filter, sort, limit, page.Next,
+                page.Previous, buffer));
+            var internalWrapperJson = buffer.ToString();
+            var internalWrapper = JsonConvert.DeserializeObject<InternalMembersResponseWrapper>(internalWrapperJson);
+            return new MembersResponseWrapper(this, internalWrapper);
         }
 
         public void AddListenerToMembershipsUpdate(List<string> membershipIds, Action<Membership> listener)
@@ -1213,18 +1203,21 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="Membership"/>
-        public List<Membership> GetChannelMemberships(string channelId, int limit, string startTimeToken,
-            string endTimeToken)
+        public MembersResponseWrapper GetChannelMemberships(string channelId, string filter = "", string sort = "",
+            int limit = 0, Page page = null)
         {
             if (!TryGetChannel(channelId, out var channel))
             {
-                return new List<Membership>();
+                return new MembersResponseWrapper();
             }
 
+            page ??= new Page();
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_channel_get_members(channel.Pointer, limit, startTimeToken, endTimeToken,
-                buffer));
-            return PointerParsers.ParseJsonMembershipPointers(this, buffer.ToString());
+            CUtilities.CheckCFunctionResult(pn_channel_get_members(channel.Pointer, filter, sort, limit, page.Next,
+                page.Previous, buffer));
+            var internalWrapperJson = buffer.ToString();
+            var internalWrapper = JsonConvert.DeserializeObject<InternalMembersResponseWrapper>(internalWrapperJson);
+            return new MembersResponseWrapper(this, internalWrapper);
         }
 
         private bool TryGetMembership(IntPtr membershipPointer, out Membership membership)
@@ -1287,13 +1280,35 @@ namespace PubNubChatAPI.Entities
             return TryGetMessage(messageId, messagePointer, out message);
         }
 
+        public List<UnreadMessageWrapper> GetUnreadMessagesCounts(string filter = "", string sort = "", int limit = 0,
+            Page page = null)
+        {
+            var buffer = new StringBuilder(4096);
+            page ??= new Page();
+            CUtilities.CheckCFunctionResult(pn_chat_get_unread_messages_counts(chatPointer, filter, sort, limit,
+                page.Next, page.Previous, buffer));
+            var wrappersListJson = buffer.ToString();
+            var internalWrappersList =
+                JsonConvert.DeserializeObject<List<InternalUnreadMessageWrapper>>(wrappersListJson);
+            var returnWrappers = new List<UnreadMessageWrapper>();
+            if (internalWrappersList == null)
+            {
+                return returnWrappers;
+            }
+            foreach (var internalWrapper in internalWrappersList)
+            {
+                returnWrappers.Add(new UnreadMessageWrapper(this, internalWrapper));
+            }
+            return returnWrappers;
+        }
+
         public ThreadChannel CreateThreadChannel(Message message)
         {
             if (TryGetThreadChannel(message, out var existingThread))
             {
                 return existingThread;
             }
-            
+
             var threadChannelPointer = pn_message_create_thread(message.Pointer);
             CUtilities.CheckCFunctionResult(threadChannelPointer);
             var newThread = new ThreadChannel(this, message, threadChannelPointer);
@@ -1352,12 +1367,6 @@ namespace PubNubChatAPI.Entities
         public void ForwardMessage(Message message, Channel channel)
         {
             CUtilities.CheckCFunctionResult(pn_chat_forward_message(chatPointer, message.Pointer, channel.Pointer));
-        }
-
-        public List<(Channel channel, Membership membership, int count)> GetUnreadMessageCounts(string startTimeToken,
-            string endTimeToken, string filter, int limit)
-        {
-            throw new NotImplementedException();
         }
 
         public void AddListenerToMessagesUpdate(string channelId, List<string> messageTimeTokens,
@@ -1464,17 +1473,17 @@ namespace PubNubChatAPI.Entities
         {
             ListenForEvents(channelId, PubnubChatEventType.Custom);
         }
-        
+
         public void StartListeningForMentionEvents(string userId)
         {
             ListenForEvents(userId, PubnubChatEventType.Mention);
         }
-        
+
         public void StartListeningForInviteEvents(string userId)
         {
             ListenForEvents(userId, PubnubChatEventType.Invite);
         }
-        
+
         public void StartListeningForModerationEvents(string userId)
         {
             ListenForEvents(userId, PubnubChatEventType.Moderation);

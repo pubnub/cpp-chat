@@ -23,15 +23,15 @@ public class MembershipTests
     [Test]
     public async Task TestGetMemberships()
     {
-        var memberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
-        Assert.True(memberships.Any(x => x.ChannelId == channel.Id && x.UserId == user.Id));
+        var memberships = user.GetMemberships();
+        Assert.True(memberships.Memberships.Any(x => x.ChannelId == channel.Id && x.UserId == user.Id));
     }
 
     [Test]
     public void TestUpdateMemberships()
     {
-        var memberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
-        var testMembership = memberships[0];
+        var memberships = user.GetMemberships(limit:50);
+        var testMembership = memberships.Memberships[0];
         var manualUpdatedEvent = new ManualResetEvent(false);
         testMembership.OnMembershipUpdated += membership =>
         {
@@ -75,7 +75,7 @@ public class MembershipTests
         
         await Task.Delay(4000);
         
-        var membership = user.GetMemberships(20, "99999999999999999", "00000000000000000")
+        var membership = user.GetMemberships(limit:20).Memberships
             .FirstOrDefault(x => x.ChannelId == testChannel.Id);
         if (membership == null)
         {
@@ -123,7 +123,7 @@ public class MembershipTests
 
         await Task.Delay(4000);
 
-        var membership = chat.GetUserMemberships(user.Id, 20, "99999999999999999", "00000000000000000")
+        var membership = chat.GetUserMemberships(user.Id, limit:20).Memberships
             .FirstOrDefault(x => x.ChannelId == unreadChannel.Id);
         Assert.True(membership != null && membership.GetUnreadMessagesCount() == 3);
     }

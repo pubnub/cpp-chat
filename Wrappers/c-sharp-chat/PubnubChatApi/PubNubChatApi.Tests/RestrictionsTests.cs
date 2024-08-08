@@ -35,9 +35,14 @@ public class RestrictionsTests
         await Task.Delay(3000);
 
         var fetchedRestriction =
-            channel.GetUserRestriction(user.Id, 50, "99999999999999999", "00000000000000000");
+            channel.GetUserRestriction(user);
 
         Assert.True(restriction.Ban == fetchedRestriction.Ban && restriction.Mute == fetchedRestriction.Mute &&
                     restriction.Reason == fetchedRestriction.Reason);
+
+        var restrictionFromUser = user.GetChannelRestriction(channel);
+        
+        Assert.True(restriction.Ban == restrictionFromUser.Ban && restriction.Mute == restrictionFromUser.Mute &&
+                    restriction.Reason == restrictionFromUser.Reason);
     }
 }

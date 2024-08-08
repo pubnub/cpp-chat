@@ -57,11 +57,7 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_user_get_channel_restrictions(
             IntPtr user,
-            string user_id,
-            string channel_id,
-            int limit,
-            string start,
-            string end,
+            IntPtr channel,
             StringBuilder result);
 
         #endregion
@@ -310,14 +306,13 @@ namespace PubNubChatAPI.Entities
         /// <exception cref="PubNubCCoreException">
         /// This exception might be thrown when any error occurs while getting the restrictions on the user for the channel.
         /// 
-        public Restriction GetChannelRestriction(string channelId, int limit, string startTimeToken, string endTimeToken)
+        public Restriction GetChannelRestriction(Channel channel)
         {
             var buffer = new StringBuilder(8192);
-            CUtilities.CheckCFunctionResult(pn_user_get_channel_restrictions(pointer, Id, channelId, limit,
-                startTimeToken, endTimeToken, buffer));
+            CUtilities.CheckCFunctionResult(pn_user_get_channel_restrictions(pointer, channel.Pointer, buffer));
             var restrictionJson = buffer.ToString();
             var restriction = new Restriction();
-            if (!string.IsNullOrEmpty(restrictionJson) && restrictionJson != "{}" && restrictionJson != "[]")
+            if (CUtilities.IsValidJson(restrictionJson))
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
@@ -438,9 +433,9 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="Membership"/>
-        public List<Membership> GetMemberships(int limit, string startTimeToken, string endTimeToken)
+        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0, Page page = null)
         {
-            return chat.GetUserMemberships(Id, limit, startTimeToken, endTimeToken);
+            return chat.GetUserMemberships(Id, filter, sort, limit, page);
         }
 
         protected override void DisposePointer()

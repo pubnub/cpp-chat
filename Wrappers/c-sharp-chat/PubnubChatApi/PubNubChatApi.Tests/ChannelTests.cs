@@ -26,8 +26,8 @@ public class ChannelTests
     {
         var channel = chat.CreatePublicConversation("get_members_test_channel");
         channel.Join();
-        var memberships =  channel.GetMemberships(20, "99999999999999999", "00000000000000000");
-        Assert.That(memberships.Count, Is.GreaterThanOrEqualTo(1));
+        var memberships =  channel.GetMemberships();
+        Assert.That(memberships.Memberships.Count, Is.GreaterThanOrEqualTo(1));
     }
 
     [Test]

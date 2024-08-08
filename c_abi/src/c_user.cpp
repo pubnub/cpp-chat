@@ -210,10 +210,10 @@ static void restrictions_to_json(nlohmann::json& j, const Pubnub::Restriction& d
 
 PnCResult pn_user_get_channel_restrictions(
         Pubnub::User* user,
-        Pubnub::Channel channel,
+        Pubnub::Channel* channel,
         char* result) {
     try {
-        auto restrictions = user->get_channel_restrictions(channel);
+        auto restrictions = user->get_channel_restrictions(*channel);
         nlohmann::json json;
         restrictions_to_json(json, restrictions);
 
@@ -238,26 +238,14 @@ PnCResult pn_user_get_memberships(
     try {
         auto tuple = user->get_memberships(filter, sort, limit, {next, prev});
 
-        Pubnub::String string = "[";
+        std::vector<intptr_t> membership_pointers;
         for (auto membership : tuple.memberships) {
             auto ptr = new Pubnub::Membership(membership);
-            // TODO: utils void* to string
-#ifdef _WIN32
-            string += "0x";
-#endif
-            std::ostringstream oss;
-            oss << static_cast<void*>(ptr);
-            string += oss.str();
-            string += ",";
+            membership_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
         }   
 
-        if (string.length() > 1) {
-            string.erase(string.length() - 1);
-        }
-        string += "]";
-
         auto j = nlohmann::json{
-            {"memberships", string.c_str()},
+            {"memberships", membership_pointers},
             {"total", tuple.total},
             {"status", tuple.status.c_str()},
             {"page", nlohmann::json {

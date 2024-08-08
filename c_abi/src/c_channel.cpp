@@ -374,35 +374,23 @@ PnCResult pn_channel_get_members(
         const char* prev,
         char* result) {
     try {
-        auto membersWrapper = channel->get_members(filter, sort, limit, Pubnub::Page({next, prev}));
+        auto members_wrapper = channel->get_members(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        Pubnub::String membershipsPointers = "[";
-        for (auto member : membersWrapper.memberships) {
+        std::vector<intptr_t> membership_pointers;
+        for (auto member : members_wrapper.memberships) {
             auto ptr = new Pubnub::Membership(member);
-            // TODO: utils void* to string
-#ifdef _WIN32
-            membershipsPointers += "0x";
-#endif
-            std::ostringstream oss;
-            oss << static_cast<void*>(ptr);
-            membershipsPointers += oss.str();
-            membershipsPointers += ",";
+            membership_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
         }   
 
-        if (membershipsPointers.length() > 1) {
-            membershipsPointers.erase(membershipsPointers.length() - 1);
-        }
-        membershipsPointers += "]";
-
         auto j = nlohmann::json{
-            {"memberships", membershipsPointers.c_str()},
-            {"total", membersWrapper.total},
+            {"memberships", membership_pointers},
+            {"total", members_wrapper.total},
             {"page", nlohmann::json{
-                        {"prev", membersWrapper.page.prev},
-                        {"next", membersWrapper.page.next},
+                        {"prev", members_wrapper.page.prev.c_str()},
+                        {"next", members_wrapper.page.next.c_str()},
                     }
             },
-            {"status", membersWrapper.status}
+            {"status", members_wrapper.status.c_str()}
         };
 
         strcpy(result, j.dump().c_str());

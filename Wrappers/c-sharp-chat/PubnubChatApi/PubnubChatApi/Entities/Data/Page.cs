@@ -1,8 +1,8 @@
 namespace PubnubChatApi.Entities.Data
 {
-    public struct Page
+    public class Page
     {
-        public string Next;
-        public string Previous;
+        public string Next = string.Empty;
+        public string Previous = string.Empty;
     }
 }

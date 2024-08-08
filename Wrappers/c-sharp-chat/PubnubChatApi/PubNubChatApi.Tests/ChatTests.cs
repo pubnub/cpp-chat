@@ -22,6 +22,20 @@ public class ChatTests
     }
 
     [Test]
+    public void TestGetUsers()
+    {
+        var users = chat.GetUsers();
+        Assert.True(users.Users.Any(x => x.Id == user.Id));
+    }
+    
+    [Test]
+    public void TestGetChannels()
+    {
+        var channels = chat.GetChannels();
+        Assert.True(channels.Channels.Any(x => x.Id == channel.Id));
+    }
+
+    [Test]
     public void TestCreateDirectConversation()
     {
         var convoUser = chat.CreateUser("direct_conversation_user");
@@ -87,5 +101,15 @@ public class ChatTests
 
         var eventReceived = reportManualEvent.WaitOne(5000);
         Assert.True(eventReceived);
+    }
+
+    [Test]
+    public async Task TestGetUnreadMessagesCounts()
+    {
+        channel.SendText("wololo");
+
+        await Task.Delay(3000);
+        
+        Assert.True(chat.GetUnreadMessagesCounts(limit:50).Any(x => x.Channel.Id == channel.Id && x.Count > 0));
     }
 }

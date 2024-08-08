@@ -335,30 +335,18 @@ PnCResult pn_chat_get_users(
     try {
         auto usersWrapper = chat->get_users(filter, sort, limit, Pubnub::Page({ next, prev }));
 
-        Pubnub::String usersPointers = "[";
+        std::vector<intptr_t> users_pointers;
         for (auto user : usersWrapper.users) {
             auto ptr = new Pubnub::User(user);
-#ifdef _WIN32
-            usersPointers += "0x";
-#endif
-            std::ostringstream oss;
-            oss << static_cast<void*>(ptr);
-            usersPointers += oss.str();
-            usersPointers += ",";
-
+            users_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
         }
-
-        if (usersPointers.length() > 1) {
-            usersPointers.erase(usersPointers.length() - 1);
-        }
-        usersPointers += "]";
 
         auto j = nlohmann::json{
-            {"users", usersPointers.c_str()},
+            {"users", users_pointers},
             {"total", usersWrapper.total},
             {"page", nlohmann::json{
-                        {"prev", usersWrapper.page.prev},
-                        {"next", usersWrapper.page.next},
+                        {"prev", usersWrapper.page.prev.c_str()},
+                        {"next", usersWrapper.page.next.c_str()},
                     }
             } 
         };
@@ -382,31 +370,20 @@ PnCResult pn_chat_get_channels(
         const char* prev,
         char* result) {
     try {
-        auto channelsWrapper = chat->get_channels(filter, sort, limit, Pubnub::Page({next, prev}));
+        auto channels_wrapper = chat->get_channels(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        Pubnub::String channelPointers = "[";
-        for (auto channel : channelsWrapper.channels) {
+        std::vector<intptr_t> channel_pointers;
+        for (auto channel : channels_wrapper.channels) {
             auto ptr = new Pubnub::Channel(channel);
-#ifdef _WIN32
-            channelPointers += "0x";
-#endif
-            std::ostringstream oss;
-            oss << static_cast<void*>(ptr);
-            channelPointers += oss.str();
-            channelPointers += ",";
+            channel_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
         }
-
-        if (channelPointers.length() > 1) {
-            channelPointers.erase(channelPointers.length() - 1);
-        }
-        channelPointers += "]";
 
         auto j = nlohmann::json{
-            {"channels", channelPointers.c_str()},
-            {"total", channelsWrapper.total},
+            {"channels", channel_pointers},
+            {"total", channels_wrapper.total},
             {"page", nlohmann::json{
-                        {"prev", channelsWrapper.page.prev},
-                        {"next", channelsWrapper.page.next},
+                        {"prev", channels_wrapper.page.prev.c_str()},
+                        {"next", channels_wrapper.page.next.c_str()},
                     }
             }
         };
@@ -624,24 +601,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
         Pubnub::String wrappers_json = "[";
         for (auto wrapper : wrappers) {
             auto channel_ptr = new Pubnub::Channel(wrapper.channel);
-            std::ostringstream channel_oss;
-            channel_oss << static_cast<void*>(channel_ptr);
-            auto channel_ptr_string = channel_oss.str();
-#ifdef _WIN32
-            channel_ptr_string = "0x" + channel_ptr_string;
-#endif
-            
             auto membership_ptr = new Pubnub::Membership(wrapper.membership);
-            std::ostringstream membership_oss;
-            membership_oss << static_cast<void*>(membership_ptr);
-            auto membership_ptr_string = membership_oss.str();
-#ifdef _WIN32
-            membership_ptr_string = "0x" + membership_ptr_string;
-#endif
 
             auto j = nlohmann::json{
-                {"membership", membership_ptr_string.c_str()},
-                {"channel", channel_ptr_string.c_str()},
+                {"membership", reinterpret_cast<intptr_t>(membership_ptr)},
+                {"channel", reinterpret_cast<intptr_t>(channel_ptr)},
                 {"count", wrapper.count}
             };
 

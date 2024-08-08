@@ -54,11 +54,7 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_user_restrictions(
             IntPtr channel,
-            string user_id,
-            string channel_id,
-            int limit,
-            string start,
-            string end,
+            IntPtr user,
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
@@ -680,18 +676,16 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the user restrictions.</exception>
         /// <seealso cref="SetRestrictions"/>
-        public Restriction GetUserRestriction(string userId, int limit, string startTimetoken, string endTimetoken)
+        public Restriction GetUserRestriction(User user)
         {
             var buffer = new StringBuilder(4096);
-            CUtilities.CheckCFunctionResult(pn_channel_get_user_restrictions(pointer, userId, Id, limit, startTimetoken,
-                endTimetoken, buffer));
+            CUtilities.CheckCFunctionResult(pn_channel_get_user_restrictions(pointer, user.Pointer, buffer));
             var restrictionJson = buffer.ToString();
             var restriction = new Restriction();
             if (CUtilities.IsValidJson(restrictionJson))
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
-
             return restriction;
         }
 
@@ -774,9 +768,9 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the list of memberships.</exception>
         /// <seealso cref="Membership"/>
-        public List<Membership> GetMemberships(int limit, string startTimeToken, string endTimeToken)
+        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0, Page page = null)
         {
-            return chat.GetChannelMemberships(Id, limit, startTimeToken, endTimeToken);
+            return chat.GetChannelMemberships(Id, filter, sort, limit, page);
         }
 
         /// <summary>
