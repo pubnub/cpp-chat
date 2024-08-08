@@ -82,8 +82,8 @@ void User::report(const String& reason) const {
     this->restrictions_service->report_user(user_id(), reason);
 }
 
-Pubnub::Vector<Pubnub::Membership> User::get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const {
-    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_user_memberships(user_id(), *this->data, limit, start_timetoken, end_timetoken)));
+Pubnub::Vector<Pubnub::Membership> User::get_memberships(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_user_memberships(user_id(), *this->data, filter, sort, limit, page)));
 }
 
 CallbackStop User::stream_updates(std::function<void(const User&)> user_callback) const {

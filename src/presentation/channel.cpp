@@ -153,8 +153,8 @@ Message Channel::get_message(const String& timetoken) const {
     return message;
 }
 
-Pubnub::Vector<Membership> Channel::get_members(int limit, const String& start_timetoken, const String& end_timetoken) const {
-    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_channel_members(channel_id(), *this->data, limit, start_timetoken, end_timetoken)));
+Pubnub::Vector<Membership> Channel::get_members(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_channel_members(channel_id(), *this->data, filter, sort, limit, page)));
 }
 
 Membership Channel::invite(const User& user) const {
@@ -242,4 +242,9 @@ void Channel::forward_message(const Message& message) const {
 void Pubnub::Channel::emit_user_mention(const Pubnub::String &user_id, const Pubnub::String &timetoken, const Pubnub::String &text) const
 {
     this->channel_service->emit_user_mention(channel_id(), user_id, timetoken, text);
+}
+
+Pubnub::Vector<Pubnub::Membership> Pubnub::Channel::get_user_suggestions(Pubnub::String text, int limit) const
+{
+    return Pubnub::Vector<Membership>(std::move(this->channel_service->get_user_suggestions_for_channel(channel_id(), *this->data, text, limit)));
 }

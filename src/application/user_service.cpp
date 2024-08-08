@@ -230,7 +230,7 @@ std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text
     //TODO:: cashe rezults here like in js
 
     String filter = "name LIKE \"" + cache_key + "*\"";
-    
+
     return this->get_users(filter, "", limit);
 }
 

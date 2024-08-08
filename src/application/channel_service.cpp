@@ -490,6 +490,29 @@ std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::Str
     return this->get_channels(filter, "", limit);
 }
 
+std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel(const String& channel_id, ChannelDAO& channel_data, Pubnub::String text, int limit) const
+{
+    auto chat_shared = this->chat_service.lock();
+
+    if(!chat_shared)
+    {
+        throw std::runtime_error("can't get users suggestions, chat service is invalid");
+    }
+
+    String cache_key = chat_shared->message_service->get_phrase_to_look_for(text);
+
+    if(cache_key.empty())
+    {
+        return {};
+    }
+
+    //TODO:: cashe rezults here like in js
+
+    String filter = "name LIKE \"" + cache_key + "*\"";
+
+    return chat_shared->membership_service->get_channel_members(channel_id, channel_data, filter, "", limit);
+}
+
 std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const
 {
     auto pubnub_handle = this->pubnub->lock();

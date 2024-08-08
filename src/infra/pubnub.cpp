@@ -271,18 +271,23 @@ Pubnub::String PubNub::get_channel_members(
         const Pubnub::String channel,
         const Pubnub::String include,
         const int limit,
-        const Pubnub::String start,
-        const Pubnub::String end
+        const Pubnub::String filter,
+        const Pubnub::String sort,
+        const Pubnub::String page_next,
+        const Pubnub::String page_prev
 ) {
-    auto result = pubnub_get_members(
-            this->main_context.get(),
-            channel,
-            include,
-            limit,
-            start,
-            end,
-            pubnub_tribool::pbccFalse
-    );
+    pubnub_members_opts opt = pubnub_members_opts();
+    opt.count = pubnub_tribool::pbccTrue;
+    //opt.filter = filter.empty() ? NULL : filter.c_str();
+    opt.include = include.empty() ? NULL : include.c_str();
+    opt.limit = limit;
+    opt.sort = sort.empty() ? NULL : sort.c_str();
+    opt.page.next = page_next.empty() ? NULL : page_next.c_str();
+    opt.page.prev = page_prev.empty() ? NULL : page_prev.c_str();
+
+
+    auto result = pubnub_get_members_ex(
+            this->main_context.get(), channel, opt);
 
     this->await_and_handle_error(result);
 
@@ -378,18 +383,22 @@ Pubnub::String PubNub::get_memberships(
         const Pubnub::String user_id,
         const Pubnub::String include,
         const int limit,
-        const Pubnub::String start,
-        const Pubnub::String end
+        const Pubnub::String filter,
+        const Pubnub::String sort,
+        const Pubnub::String page_next,
+        const Pubnub::String page_prev
 ) {
-    auto result = pubnub_get_memberships(
-            this->main_context.get(),
-            user_id,
-            include,
-            limit,
-            start,
-            end,
-            pubnub_tribool::pbccFalse
-    );
+    pubnub_membership_opts opt = pubnub_membership_opts();
+    opt.count = pubnub_tribool::pbccTrue;
+    opt.filter = filter.c_str();
+    opt.include = include.c_str();
+    opt.limit = limit;
+    opt.sort = sort.c_str();
+    opt.page.next = page_next.c_str();
+    opt.page.prev = page_prev.c_str();
+    opt.uuid = user_id.c_str();
+
+    auto result = pubnub_get_memberships_ex(this->main_context.get(), opt);
 
     this->await_and_handle_error(result);
 

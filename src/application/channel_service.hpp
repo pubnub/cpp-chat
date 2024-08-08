@@ -88,6 +88,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         void emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text, const Pubnub::String &parent_channel_id = "") const;
         std::vector<Pubnub::Channel> get_channel_suggestions(Pubnub::String text, int limit = 10) const;
+        std::vector<Pubnub::Membership> get_user_suggestions_for_channel(const Pubnub::String& channel_id, ChannelDAO& channel_data, Pubnub::String text, int limit = 10) const;
 
 
         std::function<void()> stream_updates(Pubnub::Channel calling_channel, std::function<void(Pubnub::Channel)> channel_callback) const;
