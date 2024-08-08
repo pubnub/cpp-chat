@@ -335,11 +335,6 @@ PnCResult pn_chat_get_users(
     try {
         auto usersWrapper = chat->get_users(filter, sort, limit, Pubnub::Page({ next, prev }));
 
-        if (usersWrapper.users.size() == 0) {
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
-
         Pubnub::String usersPointers = "[";
         for (auto user : usersWrapper.users) {
             auto ptr = new Pubnub::User(user);
@@ -353,7 +348,9 @@ PnCResult pn_chat_get_users(
 
         }
 
-        usersPointers.erase(usersPointers.length() - 1);
+        if (usersPointers.length() > 1) {
+            usersPointers.erase(usersPointers.length() - 1);
+        }
         usersPointers += "]";
 
         auto j = nlohmann::json{
@@ -387,11 +384,6 @@ PnCResult pn_chat_get_channels(
     try {
         auto channelsWrapper = chat->get_channels(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        if (channelsWrapper.channels.size() == 0) {
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
-
         Pubnub::String channelPointers = "[";
         for (auto channel : channelsWrapper.channels) {
             auto ptr = new Pubnub::Channel(channel);
@@ -404,7 +396,9 @@ PnCResult pn_chat_get_channels(
             channelPointers += ",";
         }
 
-        channelPointers.erase(channelPointers.length() - 1);
+        if (channelPointers.length() > 1) {
+            channelPointers.erase(channelPointers.length() - 1);
+        }
         channelPointers += "]";
 
         auto j = nlohmann::json{
@@ -627,11 +621,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
     try {
         auto wrappers = chat->get_unread_messages_counts(filter, sort, limit, Pubnub::Page({next, prev}));
         
-        if (wrappers.size() == 0) {
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
-        
         Pubnub::String wrappers_json = "[";
         for (auto wrapper : wrappers) {
             auto channel_ptr = new Pubnub::Channel(wrapper.channel);
@@ -660,7 +649,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
             wrappers_json += ",";
         }
 
-        wrappers_json.erase(wrappers_json.length() - 1);
+        if (wrappers_json.length() > 1) {
+            wrappers_json.erase(wrappers_json.length() - 1);
+        }
         wrappers_json += "]";
 
         strcpy(result, wrappers_json.c_str());

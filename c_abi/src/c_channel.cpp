@@ -376,11 +376,6 @@ PnCResult pn_channel_get_members(
     try {
         auto membersWrapper = channel->get_members(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        if (membersWrapper.memberships.size() == 0) {
-            memcpy(result, "[]\0", 3);
-            return PN_C_OK;
-        }
-
         Pubnub::String membershipsPointers = "[";
         for (auto member : membersWrapper.memberships) {
             auto ptr = new Pubnub::Membership(member);
@@ -394,7 +389,9 @@ PnCResult pn_channel_get_members(
             membershipsPointers += ",";
         }   
 
-        membershipsPointers.erase(membershipsPointers.length() - 1);
+        if (membershipsPointers.length() > 1) {
+            membershipsPointers.erase(membershipsPointers.length() - 1);
+        }
         membershipsPointers += "]";
 
         auto j = nlohmann::json{
