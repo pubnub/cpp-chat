@@ -5,6 +5,7 @@
 #include "chat.hpp"
 #include "string.hpp"
 #include "restrictions.hpp"
+#include "nlohmann/json.hpp"
 #include <pubnub_helper.h>
 #include <string>
 #include <sstream>
@@ -325,36 +326,47 @@ PnCResult pn_chat_who_is_present(
 
 PnCResult pn_chat_get_users(
         Pubnub::Chat* chat,
-        const char* include,
+        const char* filter,
+        const char* sort,
         const int limit,
-        const char* start,
-        const char* end,
+        const char* next,
+        const char* prev,
         char* result) {
     try {
-        auto users = chat->get_users(include, limit, start, end);
+        auto usersWrapper = chat->get_users(filter, sort, limit, Pubnub::Page({ next, prev }));
 
-        if (users.size() == 0) {
+        if (usersWrapper.users.size() == 0) {
             memcpy(result, "[]\0", 3);
             return PN_C_OK;
         }
 
-        Pubnub::String string = "[";
-        for (auto user : users) {
+        Pubnub::String usersPointers = "[";
+        for (auto user : usersWrapper.users) {
             auto ptr = new Pubnub::User(user);
 #ifdef _WIN32
-            string += "0x";
+            usersPointers += "0x";
 #endif
             std::ostringstream oss;
             oss << static_cast<void*>(ptr);
-            string += oss.str();
-            string += ",";
+            usersPointers += oss.str();
+            usersPointers += ",";
 
         }
 
-        string.erase(string.length() - 1);
-        string += "]";
+        usersPointers.erase(usersPointers.length() - 1);
+        usersPointers += "]";
 
-        memcpy(result, string.c_str(), string.length() + 1);
+        auto j = nlohmann::json{
+            {"users", usersPointers.c_str()},
+            {"total", usersWrapper.total},
+            {"page", nlohmann::json{
+                        {"prev", usersWrapper.page.prev},
+                        {"next", usersWrapper.page.next},
+                    }
+            } 
+        };
+
+        strcpy(result, j.dump().c_str());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -366,35 +378,47 @@ PnCResult pn_chat_get_users(
 
 PnCResult pn_chat_get_channels(
         Pubnub::Chat* chat,
-        const char* include,
+        const char* filter,
+        const char* sort,
         const int limit,
-        const char* start,
-        const char* end,
+        const char* next,
+        const char* prev,
         char* result) {
     try {
-        auto channels = chat->get_channels(include, limit, start, end);
+        auto channelsWrapper = chat->get_channels(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        if (channels.size() == 0) {
+        if (channelsWrapper.channels.size() == 0) {
             memcpy(result, "[]\0", 3);
             return PN_C_OK;
         }
 
-        Pubnub::String string = "[";
-        for (auto channel : channels) {
+        Pubnub::String channelPointers = "[";
+        for (auto channel : channelsWrapper.channels) {
             auto ptr = new Pubnub::Channel(channel);
 #ifdef _WIN32
-            string += "0x";
+            channelPointers += "0x";
 #endif
             std::ostringstream oss;
             oss << static_cast<void*>(ptr);
-            string += oss.str();
-            string += ",";
+            channelPointers += oss.str();
+            channelPointers += ",";
         }
 
-        string.erase(string.length() - 1);
-        string += "]";
+        channelPointers.erase(channelPointers.length() - 1);
+        channelPointers += "]";
 
-        memcpy(result, string.c_str(), string.length() + 1);
+        auto j = nlohmann::json{
+            {"channels", channelPointers.c_str()},
+            {"total", channelsWrapper.total},
+            {"page", nlohmann::json{
+                        {"prev", channelsWrapper.page.prev},
+                        {"next", channelsWrapper.page.next},
+                    }
+            }
+        };
+
+        strcpy(result, j.dump().c_str());
+
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

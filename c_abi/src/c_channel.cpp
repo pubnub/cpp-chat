@@ -350,9 +350,11 @@ PnCResult pn_channel_get_user_restrictions(
         Pubnub::Channel* channel,
         const char* user_id,
         const char* channel_id,
-        int limit,
-        const char* start,
-        const char* end,
+        const char* filter,
+        const char* sort,
+        const int limit,
+        const char* next,
+        const char* prev,
         char* result
         ) {
     try {
@@ -373,35 +375,49 @@ PnCResult pn_channel_get_user_restrictions(
 
 PnCResult pn_channel_get_members(
         Pubnub::Channel* channel,
-        int limit,
-        const char* start,
-        const char* end,
+        const char* filter,
+        const char* sort,
+        const int limit,
+        const char* next,
+        const char* prev,
         char* result) {
     try {
-        auto members = channel->get_members(limit, start, end);
+        auto membersWrapper = channel->get_members(filter, sort, limit, Pubnub::Page({next, prev}));
 
-        if (members.size() == 0) {
+        if (membersWrapper.memberships.size() == 0) {
             memcpy(result, "[]\0", 3);
             return PN_C_OK;
         }
 
-        Pubnub::String string = "[";
-        for (auto member : members) {
+        Pubnub::String membershipsPointers = "[";
+        for (auto member : membersWrapper.memberships) {
             auto ptr = new Pubnub::Membership(member);
             // TODO: utils void* to string
 #ifdef _WIN32
-            string += "0x";
+            membershipsPointers += "0x";
 #endif
             std::ostringstream oss;
             oss << static_cast<void*>(ptr);
-            string += oss.str();
-            string += ",";
+            membershipsPointers += oss.str();
+            membershipsPointers += ",";
         }   
 
-        string.erase(string.length() - 1);
-        string += "]";
+        membershipsPointers.erase(membershipsPointers.length() - 1);
+        membershipsPointers += "]";
 
-        strcpy(result, string.c_str());
+        auto j = nlohmann::json{
+            {"memberships", membershipsPointers.c_str()},
+            {"total", membersWrapper.total},
+            {"page", nlohmann::json{
+                        {"prev", membersWrapper.page.prev},
+                        {"next", membersWrapper.page.next},
+                    }
+            },
+            {"status", membersWrapper.status}
+        };
+
+        strcpy(result, j.dump().c_str());
+        
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

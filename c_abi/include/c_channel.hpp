@@ -94,9 +94,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_user_restrictions(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_members(
         Pubnub::Channel* channel,
-        int limit,
-        const char* start,
-        const char* end,
+        const char* filter,
+        const char* sort,
+        const int limit,
+        const char* next,
+        const char* prev,
         char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_history(

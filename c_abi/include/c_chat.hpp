@@ -107,10 +107,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_get_user(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_users(
         Pubnub::Chat* chat,
-        const char* include,
+        const char* filter,
+        const char* sort,
         const int limit,
-        const char* start,
-        const char* end,
+        const char* next,
+        const char* prev,
         char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_update_user_dirty(
@@ -147,10 +148,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_who_is_present(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_channels(
         Pubnub::Chat* chat,
-        const char* include,
+        const char* filter,
+        const char* sort,
         const int limit,
-        const char* start,
-        const char* end,
+        const char* next,
+        const char* prev,
         char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_listen_for_events(
