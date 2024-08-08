@@ -278,7 +278,7 @@ Pubnub::String PubNub::get_channel_members(
 ) {
     pubnub_members_opts opt = pubnub_members_opts();
     opt.count = pubnub_tribool::pbccTrue;
-    //opt.filter = filter.empty() ? NULL : filter.c_str();
+    opt.filter = filter.empty() ? NULL : filter.c_str();
     opt.include = include.empty() ? NULL : include.c_str();
     opt.limit = limit;
     opt.sort = sort.empty() ? NULL : sort.c_str();

@@ -508,7 +508,7 @@ std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel
 
     //TODO:: cashe rezults here like in js
 
-    String filter = "name LIKE \"" + cache_key + "*\"";
+    String filter = "uuid.name LIKE \"" + cache_key + "*\"";
 
     return chat_shared->membership_service->get_channel_members(channel_id, channel_data, filter, "", limit);
 }
