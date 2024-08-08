@@ -514,7 +514,8 @@ std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel
 
     String filter = "uuid.name LIKE \"" + cache_key + "*\"";
 
-    return chat_shared->membership_service->get_channel_members(channel_id, channel_data, filter, "", limit);
+    auto members_tuple = chat_shared->membership_service->get_channel_members(channel_id, channel_data, filter, "", limit);
+    return std::get<0>(members_tuple);
 }
 
 std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const
@@ -636,8 +637,8 @@ std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String&
     };
     std::map<String, String, StringComparer> timetoken_per_user;
 
-    auto channel_members = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
-
+    auto members_tuple = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
+    auto channel_members = std::get<0>(members_tuple);
     for(auto membership : channel_members)
     {
         String last_read_timetoken = membership.last_read_message_timetoken();

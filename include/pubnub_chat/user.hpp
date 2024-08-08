@@ -33,6 +33,14 @@ namespace Pubnub
         Pubnub::String type = "";
     };
 
+    struct MembershipsResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::Membership> memberships;
+        Pubnub::Page page;
+        int total;
+        Pubnub::String status;
+    };
+
     class User
     {
         public:
@@ -53,7 +61,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
             PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_memberships(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+            PN_CHAT_EXPORT MembershipsResponseWrapper get_memberships(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 
             PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const User&)> user_callback) const;
             PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const;

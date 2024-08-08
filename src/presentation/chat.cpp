@@ -99,7 +99,6 @@ User Chat::get_user(const String& user_id) const {
 UsersResponseWrapper Chat::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     auto return_tuple = this->user_service->get_users(filter, sort, limit, page);
     return UsersResponseWrapper({Pubnub::Vector<User>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple)});
-;
 }
 
 User Chat::update_user(const String& user_id, const ChatUserData& user_data) const {
@@ -149,9 +148,9 @@ void Chat::forward_message(const Message& message, const Channel& channel) const
     this->message_service->forward_message(message, channel.channel_id());
 }
 
-Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_messages_counts(const String& start_timetoken, const String& end_timetoken, const String& filter, int limit) const
+Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_messages_counts(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const
 {
-    auto tuples = this->membership_service->get_all_unread_messages_counts(start_timetoken, end_timetoken, filter, limit);
+    auto tuples = this->membership_service->get_all_unread_messages_counts(filter, sort, limit, page);
 
     std::vector<UnreadMessageWrapper> return_wrappers;
     for(auto &tuple : tuples)

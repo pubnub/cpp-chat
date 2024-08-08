@@ -85,7 +85,7 @@ namespace Pubnub {
 
     struct UsersResponseWrapper
     {
-        Pubnub::Vector<Pubnub::User> channels;
+        Pubnub::Vector<Pubnub::User> users;
         Pubnub::Page page;
         int total;
     };
@@ -135,7 +135,7 @@ namespace Pubnub {
             /* MESSAGES */
 
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_messages_counts(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT MarkMessagesAsReadWrapper mark_all_messages_as_read(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 
 

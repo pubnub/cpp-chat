@@ -153,8 +153,9 @@ Message Channel::get_message(const String& timetoken) const {
     return message;
 }
 
-Pubnub::Vector<Membership> Channel::get_members(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
-    return Pubnub::Vector<Membership>(std::move(this->membership_service->get_channel_members(channel_id(), *this->data, filter, sort, limit, page)));
+MembersResponseWrapper Channel::get_members(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    auto return_tuple = this->membership_service->get_channel_members(channel_id(), *this->data, filter, sort, limit, page);
+    return MembersResponseWrapper({Pubnub::Vector<Membership>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple), std::get<3>(return_tuple)});
 }
 
 Membership Channel::invite(const User& user) const {

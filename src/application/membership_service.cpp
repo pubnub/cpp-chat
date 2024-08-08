@@ -27,7 +27,7 @@ MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr
     chat_service(chat_service)
 {}
 
-std::vector<Membership> MembershipService::get_channel_members(const String& channel_id, const ChannelDAO& channel_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> MembershipService::get_channel_members(const String& channel_id, const ChannelDAO& channel_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     String include_string = "custom,channel,totalCount,customChannel";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, filter, sort, page] {
@@ -61,10 +61,15 @@ std::vector<Membership> MembershipService::get_channel_members(const String& cha
         memberships.push_back(membership);
     }
 
-    return memberships;
+    int total_count = response_json.get_int("totalCount").value_or(0);
+    Page page_response({response_json.get_string("next").value_or(String("")), response_json.get_string("prev").value_or(String(""))});
+    String status = response_json.get_string("status").value_or(String(""));
+    std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> return_tuple = std::make_tuple(memberships, page_response, total_count, status);
+
+    return return_tuple;
 }
 
-std::vector<Membership> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
 
     auto get_memberships_response = [this, user_id, include_string, filter, sort,  limit, page] {
@@ -72,14 +77,14 @@ std::vector<Membership> MembershipService::get_user_memberships(const String& us
         return pubnub_handle->get_memberships(user_id, include_string, limit, filter, sort, page.next, page.prev);
     }();
 
-    json response_json = json::parse(get_memberships_response);
+    Json response_json = Json::parse(get_memberships_response);
 
     if(response_json.is_null())
     {
         throw std::runtime_error("can't get memberships, response is incorrect");
     }
 
-    json channels_array_json = response_json["data"];
+    Json channels_array_json = response_json["data"];
 
     auto chat_service_shared = chat_service.lock();
 
@@ -99,7 +104,12 @@ std::vector<Membership> MembershipService::get_user_memberships(const String& us
         memberships.push_back(membership);
     }
 
-    return memberships;
+    int total_count = response_json.get_int("totalCount").value_or(0);
+    Page page_response({response_json.get_string("next").value_or(String("")), response_json.get_string("prev").value_or(String(""))});
+    String status = response_json.get_string("status").value_or(String(""));
+    std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> return_tuple = std::make_tuple(memberships, page_response, total_count, status);
+
+    return return_tuple;
 }
 
 Membership MembershipService::invite_to_channel(const String& channel_id, const ChannelDAO& channel_data, const User& user) const {
@@ -266,13 +276,13 @@ int MembershipService::get_unread_messages_count_one_channel(const Membership& m
     return message_counts_map[membership.channel.channel_id()];
 }
 
-std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter, int limit) const {
+std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     auto chat_service_shared = chat_service.lock();
     std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> return_tuples;
 
     User current_user = chat_service_shared->user_service->get_current_user();
-    //TODO:: pass filter here when it will be supported in C-Core
-    auto user_memberships = current_user.get_memberships("", "", limit, Page({start_timetoken, end_timetoken}));
+
+    auto user_memberships = current_user.get_memberships(filter, sort, limit, page).memberships;
 
     if(user_memberships.size() == 0)
     {
@@ -317,7 +327,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
     std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> return_tuple;
 
     User current_user = chat_service_shared->user_service->get_current_user();
-    auto user_memberships = current_user.get_memberships(filter, sort, limit, page);
+    auto user_memberships = current_user.get_memberships(filter, sort, limit, page).memberships;
 
     if(user_memberships.size() == 0)
     {
