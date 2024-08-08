@@ -48,10 +48,10 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
 
     // TODO: domain
     std::vector<Membership> memberships;
-    for (auto element : users_array_json)
+    for (Json::Iterator single_data_json = users_array_json.begin(); single_data_json != users_array_json.end(); ++single_data_json)
     {
-        UserEntity user_entity = UserEntity::from_json(element["uuid"].dump());
-        String user_id = String(element["uuid"]["id"]);
+        UserEntity user_entity = UserEntity::from_json(single_data_json.value()["uuid"].dump());
+        String user_id = String(single_data_json.value()["uuid"]["id"]);
         User user = chat_service_shared->user_service->create_user_object({user_id, user_entity});
         //We don't need to add channel to entity repository, as this whole function is called from a channel object - it has to already exist
         Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
@@ -89,11 +89,12 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
     auto chat_service_shared = chat_service.lock();
 
     std::vector<Membership> memberships;
-    for (auto& element : channels_array_json)
+    
+    for (Json::Iterator single_data_json = channels_array_json.begin(); single_data_json != channels_array_json.end(); ++single_data_json)
     {
         //Create channel entity, as this channel maight be not in the repository yet. If it already is there, it will be updated
-        ChannelEntity channel_entity = ChannelEntity::from_json(String(element.dump()));
-        String channel_id = String(element["channel"]["id"]);
+        ChannelEntity channel_entity = ChannelEntity::from_json(String(single_data_json.value().dump()));
+        String channel_id = String(single_data_json.value()["channel"]["id"]);
 
         Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_entity});
 
