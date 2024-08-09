@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -78,6 +79,15 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_message_update_with_base_message(IntPtr message, IntPtr base_message);
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_mentioned_users(IntPtr message, IntPtr chat, StringBuilder result);
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_referenced_channels(IntPtr message, IntPtr chat, StringBuilder result);
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_message_quoted_message(IntPtr message);
+        [DllImport("pubnub-chat")]
+        private static extern int pn_message_text_links(IntPtr message, StringBuilder result);
         
         #endregion
 
@@ -182,6 +192,66 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        public List<User> MentionedUsers
+        {
+            get
+            {
+                var buffer = new StringBuilder(1024);
+                CUtilities.CheckCFunctionResult(pn_message_mentioned_users(pointer, chat.Pointer, buffer));
+                var usersJson = buffer.ToString();
+                if (!CUtilities.IsValidJson(usersJson))
+                {
+                    return new List<User>();
+                }
+                var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(usersJson);
+                if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
+                {
+                    return new List<User>();
+                }
+                return PointerParsers.ParseJsonUserPointers(chat, pointers);
+            }
+        }
+        
+        public List<Channel> ReferencedChannels
+        {
+            get
+            {
+                var buffer = new StringBuilder(1024);
+                CUtilities.CheckCFunctionResult(pn_message_referenced_channels(pointer, chat.Pointer, buffer));
+                var channelsJson = buffer.ToString();
+                if (!CUtilities.IsValidJson(channelsJson))
+                {
+                    return new List<Channel>();
+                }
+                var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(channelsJson);
+                if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
+                {
+                    return new List<Channel>();
+                }
+                return PointerParsers.ParseJsonChannelPointers(chat, pointers);
+            }
+        }
+        
+        public List<TextLink> TextLinks
+        {
+            get
+            {
+                var buffer = new StringBuilder(2048);
+                CUtilities.CheckCFunctionResult(pn_message_text_links(pointer, buffer));
+                var jsonString = buffer.ToString();
+                if (!CUtilities.IsValidJson(jsonString))
+                {
+                    return new List<TextLink>();
+                }
+                var textLinks = JsonConvert.DeserializeObject<Dictionary<string, List<TextLink>>>(jsonString);
+                if (textLinks == null || !textLinks.TryGetValue("value", out var links) || links == null)
+                {
+                    return new List<TextLink>();
+                }
+                return links;
+            }
+        }
+
         //TODO: format to list? We have the struct for it now
         //TODO: REMOVE THAT
         public string MessageActions
@@ -277,6 +347,18 @@ namespace PubNubChatAPI.Entities
             var newPointer = pn_message_edit_text(pointer, newText);
             CUtilities.CheckCFunctionResult(newPointer);
             UpdatePointer(newPointer);
+        }
+
+        public bool TryGetQuotedMessage(out Message quotedMessage)
+        {
+            var quotedMessagePointer = pn_message_quoted_message(pointer);
+            if (quotedMessagePointer == IntPtr.Zero)
+            {
+                Debug.WriteLine(CUtilities.GetErrorMessage());
+                quotedMessage = null;
+                return false;
+            }
+            return chat.TryGetMessage(quotedMessagePointer, out quotedMessage);
         }
 
         public bool HasThread()

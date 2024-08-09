@@ -280,6 +280,7 @@ namespace PubNubChatAPI.Entities
         #endregion
 
         private IntPtr chatPointer;
+        internal IntPtr Pointer => chatPointer;
         private Dictionary<string, Channel> channelWrappers = new();
         private Dictionary<string, User> userWrappers = new();
         private Dictionary<string, Membership> membershipWrappers = new();

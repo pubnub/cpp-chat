@@ -52,6 +52,45 @@ public class MessageTests
     }
 
     [Test]
+    public void TestReceivingMessageData()
+    {
+        var manualReceiveEvent = new ManualResetEvent(false);
+        channel.OnMessageReceived += message =>
+        {
+            if (message.MessageText == "message_to_be_quoted")
+            {
+                channel.SendText("message_with_data", new SendTextParams()
+                {
+                    MentionedUsers = new Dictionary<int, User>(){{0, user}},
+                    ReferencedChannels = new Dictionary<int, Channel>(){{0, channel}},
+                    TextLinks =
+                    [
+                        new TextLink()
+                        {
+                            StartIndex = 0,
+                            EndIndex = 13,
+                            Link = "www.google.com"
+                        }
+                    ],
+                    QuotedMessage = message
+                });
+            }
+            else if(message.MessageText == "message_with_data")
+            {
+                Assert.True(message.MentionedUsers.Any(x => x.Id == user.Id));
+                Assert.True(message.ReferencedChannels.Any(x => x.Id == channel.Id));
+                Assert.True(message.TextLinks.Any(x => x.Link == "www.google.com"));
+                Assert.True(message.TryGetQuotedMessage(out var quotedMessage) && quotedMessage.MessageText == "message_to_be_quoted");
+                manualReceiveEvent.Set();
+            }
+        };
+        channel.SendText("message_to_be_quoted");
+        
+        var received = manualReceiveEvent.WaitOne(7000);
+        Assert.IsTrue(received);
+    }
+
+    [Test]
     public void TestTryGetMessage()
     {
         var manualReceiveEvent = new ManualResetEvent(false);

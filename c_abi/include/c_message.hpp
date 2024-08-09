@@ -2,6 +2,7 @@
 #define PN_CHAT_C_MESSAGE_H
 
 #include "message.hpp"
+#include "chat.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 #include "c_errors.hpp"
@@ -56,5 +57,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_remove_thread(Pubnub::Message
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, Pubnub::Message* base_message);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_referenced_channels(Pubnub::Message* message, Pubnub::Chat* chat, char* result);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub::Message* message);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* message, char* result);
 
 #endif // PN_CHAT_C_MESSAGE_H

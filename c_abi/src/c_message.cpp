@@ -247,3 +247,98 @@ Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, P
         return PN_C_ERROR_PTR;
     }
 }
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
+    try {
+        auto mentioned_users = message->mentioned_users();
+        std::vector<intptr_t> user_pointers;
+        for (auto mentioned_user : mentioned_users)
+        {
+            try
+            {
+                auto user = chat->get_user(mentioned_user.id);
+                auto ptr = new Pubnub::User(user);
+                user_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+            }
+            catch (std::exception& e)
+            {
+                std::cout << "Wasn't able to get the mentioned user!" << std::endl;
+            }
+        }
+        auto j = nlohmann::json{
+                {"value", user_pointers}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_referenced_channels(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
+    try {
+        auto referenced_channels = message->referenced_channels();
+        std::vector<intptr_t> channel_pointers;
+        for (auto referenced_channel : referenced_channels)
+        {
+            try
+            {
+                auto channel = chat->get_channel(referenced_channel.id);
+                auto ptr = new Pubnub::Channel(channel);
+                channel_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+            }
+            catch (std::exception& e)
+            {
+                std::cout << "Wasn't able to get the referenced channel!" << std::endl;
+            }
+        }
+        auto j = nlohmann::json{
+                {"value", channel_pointers}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub::Message* message) {
+    try {
+        return new Pubnub::Message(message->quoted_message().value());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* message, char* result) {
+    try {
+        auto text_links = message->text_links();
+        std::vector<nlohmann::json> link_jsons;
+        for (auto link : text_links) {
+            link_jsons.push_back(nlohmann::json{
+                {"StartIndex", link.start_index},
+                {"EndIndex", link.end_index},
+                {"Link", link.link.c_str()},
+                });
+        }
+        auto j = nlohmann::json{
+                {"value", link_jsons}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
