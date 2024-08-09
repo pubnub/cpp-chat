@@ -29,16 +29,19 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_thread_channel_unpin_message_from_parent_channel(IntPtr thread_channel);
-
-        [DllImport("pubnub-chat")]
-        private static extern int pn_thread_channel_send_text(IntPtr thread_channel, string text);
         
         [DllImport("pubnub-chat")]
         private static extern int pn_thread_channel_get_parent_channel_id(IntPtr thread_channel, StringBuilder result);
-        
-        [DllImport("pubnub-chat")]
-        private static extern int pn_thread_channel_emit_user_mention(IntPtr thread_channel, string user_id, string timetoken, string text);
             
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_thread_channel_parent_message(IntPtr thread_channel);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_thread_channel_pin_message_to_thread(IntPtr thread_channel, IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_thread_channel_unpin_message_from_thread(IntPtr thread_channel);
+        
         #endregion
 
         public string ParentChannelId
@@ -51,6 +54,17 @@ namespace PubNubChatAPI.Entities
             }
         }
         
+        public Message ParentMessage
+        {
+            get
+            {
+                var parentMessagePointer = pn_thread_channel_parent_message(pointer);
+                CUtilities.CheckCFunctionResult(parentMessagePointer);
+                chat.TryGetMessage(parentMessagePointer, out var message);
+                return message;
+            }
+        }
+        
         internal static string MessageToThreadChannelId(Message message)
         {
             return $"PUBNUB_INTERNAL_THREAD_{message.ChannelId}_{message.Id}";
@@ -60,6 +74,20 @@ namespace PubNubChatAPI.Entities
             MessageToThreadChannelId(sourceMessage),
             channelPointer)
         {
+        }
+
+        public override void PinMessage(Message message)
+        {
+            var newPointer = pn_thread_channel_pin_message_to_thread(pointer, message.Pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
+        }
+
+        public override void UnpinMessage()
+        {
+            var newPointer = pn_thread_channel_unpin_message_from_thread(pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public List<ThreadMessage> GetThreadHistory(string startTimeToken, string endTimeToken, int count)
@@ -87,16 +115,6 @@ namespace PubNubChatAPI.Entities
             }
 
             return history;
-        }
-
-        public override void EmitUserMention(string userId, string timeToken, string text)
-        {
-            CUtilities.CheckCFunctionResult(pn_thread_channel_emit_user_mention(pointer, userId, timeToken, text));
-        }
-
-        public override void SendText(string message)
-        {
-            CUtilities.CheckCFunctionResult(pn_thread_channel_send_text(pointer, message));
         }
 
         public void PinMessageToParentChannel(Message message)

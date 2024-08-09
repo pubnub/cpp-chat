@@ -21,9 +21,22 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_thread_message_pin_to_parent_channel(IntPtr thread_message);
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_thread_message_parent_channel_id(IntPtr thread_message, StringBuilder result);
 
         #endregion
 
+        public string ParentChannelId
+        {
+            get
+            {
+                var buffer = new StringBuilder(128);
+                CUtilities.CheckCFunctionResult(pn_thread_message_parent_channel_id(pointer, buffer));
+                return buffer.ToString();
+            }
+        }
+        
         internal ThreadMessage(Chat chat, IntPtr messagePointer, string timeToken) : base(chat, messagePointer,
             timeToken)
         {

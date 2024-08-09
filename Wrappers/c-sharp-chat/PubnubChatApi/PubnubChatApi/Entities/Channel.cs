@@ -424,7 +424,7 @@ namespace PubNubChatAPI.Entities
             chat.ForwardMessage(message, this);
         }
 
-        public virtual void EmitUserMention(string userId, string timeToken, string text)
+        public void EmitUserMention(string userId, string timeToken, string text)
         {
             CUtilities.CheckCFunctionResult(pn_channel_emit_user_mention(pointer, userId, timeToken, text));
         }
@@ -439,14 +439,14 @@ namespace PubNubChatAPI.Entities
             CUtilities.CheckCFunctionResult(pn_channel_stop_typing(pointer));
         }
 
-        public void PinMessage(Message message)
+        public virtual void PinMessage(Message message)
         {
             var newPointer = pn_channel_pin_message(pointer, message.Pointer);
             CUtilities.CheckCFunctionResult(newPointer);
             UpdatePointer(newPointer);
         }
 
-        public void UnpinMessage()
+        public virtual void UnpinMessage()
         {
             var newPointer = pn_channel_unpin_message(pointer);
             CUtilities.CheckCFunctionResult(newPointer);
@@ -656,7 +656,7 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while sending the message.</exception>
         /// <seealso cref="OnMessageReceived"/>
-        public virtual void SendText(string message)
+        public void SendText(string message)
         {
             SendText(message, new SendTextParams());
         }
