@@ -63,6 +63,10 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_user_update_with_base(IntPtr user, IntPtr base_user);
 
+        [DllImport("pubnub-chat")]
+        private static extern int pn_user_get_channels_restrictions(IntPtr user, string sort, int limit, string next,
+            string prev, StringBuilder result);
+
         #endregion
 
         /// <summary>
@@ -293,7 +297,7 @@ namespace PubNubChatAPI.Entities
         {
             chat.SetRestriction(Id, channelId, banUser, muteUser, reason);
         }
-        
+
         public void SetRestriction(string channelId, Restriction restriction)
         {
             chat.SetRestriction(Id, channelId, restriction);
@@ -316,7 +320,7 @@ namespace PubNubChatAPI.Entities
         /// <exception cref="PubNubCCoreException">
         /// This exception might be thrown when any error occurs while getting the restrictions on the user for the channel.
         /// 
-        public Restriction GetChannelRestriction(Channel channel)
+        public Restriction GetChannelRestrictions(Channel channel)
         {
             var buffer = new StringBuilder(8192);
             CUtilities.CheckCFunctionResult(pn_user_get_channel_restrictions(pointer, channel.Pointer, buffer));
@@ -326,7 +330,23 @@ namespace PubNubChatAPI.Entities
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
+
             return restriction;
+        }
+        
+        public ChannelsRestrictionsWrapper GetChannelsRestrictions(string sort = "", int limit = 0, Page page = null)
+        {
+            page ??= new Page();
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_user_get_channels_restrictions(pointer, sort, limit, page.Next, page.Previous, buffer));
+            var restrictionsJson = buffer.ToString();
+            if (!CUtilities.IsValidJson(restrictionsJson))
+            {
+                return new ChannelsRestrictionsWrapper();
+            }
+            var wrapper = JsonConvert.DeserializeObject<ChannelsRestrictionsWrapper>(restrictionsJson);
+            wrapper ??= new ChannelsRestrictionsWrapper();
+            return wrapper;
         }
 
         /// <summary>
@@ -414,6 +434,7 @@ namespace PubNubChatAPI.Entities
                 channelIds = JsonConvert.DeserializeObject<List<string>>(jsonChannelIds);
                 channelIds ??= new List<string>();
             }
+
             return channelIds;
         }
 
@@ -443,7 +464,8 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="Membership"/>
-        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0, Page page = null)
+        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0,
+            Page page = null)
         {
             return chat.GetUserMemberships(Id, filter, sort, limit, page);
         }

@@ -701,6 +701,43 @@ PnCResult pn_channel_send_text_dirty(
     return PN_C_OK;
 }
 
+PnCResult pn_channel_get_users_restrictions(Pubnub::Channel* channel, const char* sort, int limit, const char* next, const char* prev, char* result) {
+    try {
+        auto wrapper = channel->get_users_restrictions(sort, limit, Pubnub::Page({next, prev}));
+        std::vector<nlohmann::json> restrictions;
+        for (auto restriction : wrapper.restrictions)
+        {
+            //TODO: put into util
+            auto restriction_json = nlohmann::json{
+                {"ban", restriction.ban},
+                {"mute", restriction.mute},
+                {"reason", restriction.reason.c_str()},
+                {"userId", restriction.user_id.c_str()},
+            };
+            restrictions.push_back(restriction_json);
+        }
+        auto j = nlohmann::json{
+                {"Restrictions", restrictions},
+                {"Page", nlohmann::json{
+                        {"Previous", wrapper.page.prev.c_str()},
+                        {"Next", wrapper.page.next.c_str()},
+                    }
+                },
+                {"Total", wrapper.total},
+                {"Status", wrapper.status.c_str()},
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+
 //Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
 //    char* user_suggestion_source, 
 //    bool is_typing_indicator_triggered, 

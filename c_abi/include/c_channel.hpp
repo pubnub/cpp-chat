@@ -141,6 +141,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text_dirty(
     const char* text_links_json,
     Pubnub::Message* quoted_message);
 
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_users_restrictions(Pubnub::Channel* channel, const char* sort, int limit, const char* next, const char* prev, char* result);
+
 //PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
 //    char* user_suggestion_source,
 //    bool is_typing_indicator_triggered,

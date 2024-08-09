@@ -34,7 +34,8 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_channel_disconnect(IntPtr channel, StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_join(IntPtr channel, string additional_params, StringBuilder result_messages);
+        private static extern int pn_channel_join(IntPtr channel, string additional_params,
+            StringBuilder result_messages);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_leave(IntPtr channel, StringBuilder result_messages);
@@ -121,16 +122,18 @@ namespace PubNubChatAPI.Entities
             bool is_typing_indicator_triggered,
             int user_limit,
             int channel_limit);
-        
+
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_emit_user_mention(IntPtr channel, string user_id, string timetoken, string text);
+        private static extern int pn_channel_emit_user_mention(IntPtr channel, string user_id, string timetoken,
+            string text);
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_channel_update_with_base(IntPtr channel, IntPtr base_channel);
-        
+
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_get_user_suggestions(IntPtr channel, string text, int limit, StringBuilder result);
-        
+        private static extern int pn_channel_get_user_suggestions(IntPtr channel, string text, int limit,
+            StringBuilder result);
+
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_send_text_dirty(
             IntPtr channel,
@@ -139,14 +142,18 @@ namespace PubNubChatAPI.Entities
             bool send_by_post,
             string meta,
             int mentioned_users_length,
-            int[] mentioned_users_indexes, 
+            int[] mentioned_users_indexes,
             IntPtr[] mentioned_users,
             int referenced_channels_length,
             int[] referenced_channels_indexes,
             IntPtr[] referenced_channels,
             string text_links_json,
             IntPtr quoted_message);
-        
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_get_users_restrictions(IntPtr channel, string sort, int limit, string next,
+            string prev, StringBuilder result);
+
         #endregion
 
         /// <summary>
@@ -336,7 +343,7 @@ namespace PubNubChatAPI.Entities
                 OnMessageReceived?.Invoke(message);
             }
         }
-        
+
         internal override void UpdateWithPartialPtr(IntPtr partialPointer)
         {
             var newFullPointer = pn_channel_update_with_base(partialPointer, pointer);
@@ -367,7 +374,7 @@ namespace PubNubChatAPI.Entities
             {
                 return false;
             }
-            
+
             var payloadDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(chatEvent.Payload);
             if (payloadDictionary == null)
             {
@@ -471,11 +478,13 @@ namespace PubNubChatAPI.Entities
             {
                 return new List<Membership>();
             }
+
             var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(resultJson);
             if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
             {
                 return new List<Membership>();
             }
+
             return PointerParsers.ParseJsonMembershipPointers(chat, pointers);
         }
 
@@ -619,7 +628,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while setting the restrictions.</exception>
-        /// <seealso cref="GetUserRestriction"/>
+        /// <seealso cref="GetUserRestrictions"/>
         public void SetRestrictions(string userId, bool banUser, bool muteUser, string reason)
         {
             CUtilities.CheckCFunctionResult(pn_channel_set_restrictions(pointer, userId, banUser, muteUser,
@@ -655,10 +664,10 @@ namespace PubNubChatAPI.Entities
         public void SendText(string message, SendTextParams sendTextParams)
         {
             CUtilities.CheckCFunctionResult(pn_channel_send_text_dirty(
-                pointer, 
-                message, 
-                sendTextParams.StoreInHistory, 
-                sendTextParams.SendByPost, 
+                pointer,
+                message,
+                sendTextParams.StoreInHistory,
+                sendTextParams.SendByPost,
                 sendTextParams.Meta,
                 sendTextParams.MentionedUsers.Count,
                 sendTextParams.MentionedUsers.Keys.ToArray(),
@@ -739,7 +748,7 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the user restrictions.</exception>
         /// <seealso cref="SetRestrictions"/>
-        public Restriction GetUserRestriction(User user)
+        public Restriction GetUserRestrictions(User user)
         {
             var buffer = new StringBuilder(4096);
             CUtilities.CheckCFunctionResult(pn_channel_get_user_restrictions(pointer, user.Pointer, buffer));
@@ -749,7 +758,23 @@ namespace PubNubChatAPI.Entities
             {
                 restriction = JsonConvert.DeserializeObject<Restriction>(restrictionJson);
             }
+
             return restriction;
+        }
+
+        public UsersRestrictionsWrapper GetUsersRestrictions(string sort = "", int limit = 0, Page page = null)
+        {
+            page ??= new Page();
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_channel_get_users_restrictions(pointer, sort, limit, page.Next, page.Previous, buffer));
+            var restrictionsJson = buffer.ToString();
+            if (!CUtilities.IsValidJson(restrictionsJson))
+            {
+                return new UsersRestrictionsWrapper();
+            }
+            var wrapper = JsonConvert.DeserializeObject<UsersRestrictionsWrapper>(restrictionsJson);
+            wrapper ??= new UsersRestrictionsWrapper();
+            return wrapper;
         }
 
         /// <summary>
@@ -831,7 +856,8 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <exception cref="PubnubCCoreException">Thrown when an error occurs while getting the list of memberships.</exception>
         /// <seealso cref="Membership"/>
-        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0, Page page = null)
+        public MembersResponseWrapper GetMemberships(string filter = "", string sort = "", int limit = 0,
+            Page page = null)
         {
             return chat.GetChannelMemberships(Id, filter, sort, limit, page);
         }

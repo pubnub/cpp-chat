@@ -273,3 +273,40 @@ Pubnub::User* pn_user_update_with_base(Pubnub::User* user, Pubnub::User* base_us
         return PN_C_ERROR_PTR;
     }
 }
+
+PnCResult pn_user_get_channels_restrictions(Pubnub::User* user, const char* sort, int limit, const char* next, const char* prev, char* result) {
+    try {
+        auto wrapper = user->get_channels_restrictions(sort, limit, Pubnub::Page({next, prev}));
+        std::vector<nlohmann::json> restrictions;
+        for (auto restriction : wrapper.restrictions)
+        {
+            //TODO: put into util
+            auto restriction_json = nlohmann::json{
+                {"ban", restriction.ban},
+                {"mute", restriction.mute},
+                {"reason", restriction.reason.c_str()},
+                {"channelId", restriction.channel_id.c_str()},
+            };
+            restrictions.push_back(restriction_json);
+        }
+        auto j = nlohmann::json{
+                {"Restrictions", restrictions},
+                {"Page", nlohmann::json{
+                        {"Previous", wrapper.page.prev.c_str()},
+                        {"Next", wrapper.page.next.c_str()},
+                    }
+                },
+                {"Total", wrapper.total},
+                {"Status", wrapper.status.c_str()},
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
