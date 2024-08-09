@@ -124,6 +124,9 @@ namespace PubNubChatAPI.Entities
         
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_emit_user_mention(IntPtr channel, string user_id, string timetoken, string text);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_channel_update_with_base(IntPtr channel, IntPtr base_channel);
         
         #endregion
 
@@ -314,6 +317,13 @@ namespace PubNubChatAPI.Entities
                 OnMessageReceived?.Invoke(message);
             }
         }
+        
+        internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            var newFullPointer = pn_channel_update_with_base(partialPointer, pointer);
+            CUtilities.CheckCFunctionResult(newFullPointer);
+            UpdatePointer(newFullPointer);
+        }
 
         internal void BroadcastChannelUpdate()
         {
@@ -433,14 +443,14 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        public MessageDraft CreateMessageDraft()
+        /*public MessageDraft CreateMessageDraft()
         {
             //TODO: hardcoded config
             var draftPointer = pn_channel_create_message_draft_dirty(
                 pointer, "channel", true, 10, 10);
             CUtilities.CheckCFunctionResult(draftPointer);
             return new MessageDraft(draftPointer);
-        }
+        }*/
 
         /// <summary>
         /// Connects to the channel.

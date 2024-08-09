@@ -18,6 +18,8 @@ namespace PubNubChatAPI.Entities
             pointer = newPointer;
         }
 
+        internal abstract void UpdateWithPartialPtr(IntPtr partialPointer);
+
         protected abstract void DisposePointer();
 
         ~PointerWrapper()

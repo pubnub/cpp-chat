@@ -343,7 +343,6 @@ namespace PubNubChatAPI.Entities
                                 {
                                     failedToInvoke = true;
                                 }
-
                                 break;
                             case PubnubChatEventType.Report:
                                 OnReportEvent?.Invoke(chatEvent);
@@ -400,13 +399,12 @@ namespace PubNubChatAPI.Entities
                     if (updatedMessagePointer != IntPtr.Zero)
                     {
                         Debug.WriteLine("Deserialized message update");
-                        Debug.WriteLine("TEMP: IGNORING MESSAGE UPDATE");
-                        /*var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
+                        var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            existingMessageWrapper.UpdatePointer(updatedMessagePointer);
+                            existingMessageWrapper.UpdateWithPartialPtr(updatedMessagePointer);
                             existingMessageWrapper.BroadcastMessageUpdate();
-                        }*/
+                        }
 
                         pn_dispose_message(pointer);
                         continue;
@@ -417,14 +415,13 @@ namespace PubNubChatAPI.Entities
                     if (channelPointer != IntPtr.Zero)
                     {
                         Debug.WriteLine("Deserialized channel update");
-
-                        Debug.WriteLine("TEMP: IGNORING CHANNEL UPDATE");
-                        /*var id = Channel.GetChannelIdFromPtr(channelPointer);
+                        
+                        var id = Channel.GetChannelIdFromPtr(channelPointer);
                         if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
-                            existingChannelWrapper.UpdatePointer(channelPointer);
+                            existingChannelWrapper.UpdateWithPartialPtr(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
-                        }*/
+                        }
 
                         pn_dispose_message(pointer);
                         continue;
@@ -439,7 +436,7 @@ namespace PubNubChatAPI.Entities
                         var id = User.GetUserIdFromPtr(userPointer);
                         if (userWrappers.TryGetValue(id, out var existingUserWrapper))
                         {
-                            existingUserWrapper.UpdatePointer(userPointer);
+                            existingUserWrapper.UpdateWithPartialPtr(userPointer);
                             existingUserWrapper.BroadcastUserUpdate();
                         }
 
@@ -456,7 +453,7 @@ namespace PubNubChatAPI.Entities
                         var id = Membership.GetMembershipIdFromPtr(membershipPointer);
                         if (membershipWrappers.TryGetValue(id, out var existingMembershipWrapper))
                         {
-                            existingMembershipWrapper.UpdatePointer(membershipPointer);
+                            existingMembershipWrapper.UpdateWithPartialPtr(membershipPointer);
                             existingMembershipWrapper.BroadcastMembershipUpdate();
                         }
 

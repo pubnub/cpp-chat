@@ -75,6 +75,9 @@ namespace PubNubChatAPI.Entities
         
         [DllImport("pubnub-chat")]
         private static extern int pn_message_has_thread(IntPtr message);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_message_update_with_base_message(IntPtr message, IntPtr base_message);
         
         #endregion
 
@@ -240,6 +243,13 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(512);
             pn_message_get_data_channel_id(messagePointer, buffer);
             return buffer.ToString();
+        }
+        
+        internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            var newFullPointer = pn_message_update_with_base_message(partialPointer, pointer);
+            CUtilities.CheckCFunctionResult(newFullPointer);
+            UpdatePointer(newFullPointer);
         }
 
         internal void BroadcastMessageUpdate()

@@ -52,6 +52,10 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_membership_get_unread_messages_count(IntPtr membership);
 
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_membership_update_with_base(IntPtr membership,
+            IntPtr base_membership);
+
         #endregion
 
         /// <summary>
@@ -116,6 +120,13 @@ namespace PubNubChatAPI.Entities
         internal void BroadcastMembershipUpdate()
         {
             OnMembershipUpdated?.Invoke(this);
+        }
+        
+        internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            var newFullPointer = pn_membership_update_with_base(partialPointer, pointer);
+            CUtilities.CheckCFunctionResult(newFullPointer);
+            UpdatePointer(newFullPointer);
         }
 
         /// <summary>

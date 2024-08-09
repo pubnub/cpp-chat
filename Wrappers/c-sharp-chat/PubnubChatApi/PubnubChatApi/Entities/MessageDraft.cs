@@ -15,6 +15,11 @@ namespace PubNubChatAPI.Entities
         internal MessageDraft(IntPtr pointer) : base(pointer)
         {
         }
+        
+        internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            throw new NotImplementedException();
+        }
 
         protected override void DisposePointer()
         {

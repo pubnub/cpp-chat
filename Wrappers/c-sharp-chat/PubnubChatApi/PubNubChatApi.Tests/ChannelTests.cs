@@ -140,7 +140,7 @@ public class ChannelTests
         Assert.IsTrue(received);
     }
     
-    [Test]
+    /*[Test]
     public void TestCreateMessageDraft()
     {
         var channel = chat.CreatePublicConversation("message_draft_test_channel");
@@ -153,7 +153,7 @@ public class ChannelTests
             Debug.WriteLine(e);
             Assert.Fail();
         }
-    }
+    }*/
 
     [Test]
     public void TestEmitUserMention()

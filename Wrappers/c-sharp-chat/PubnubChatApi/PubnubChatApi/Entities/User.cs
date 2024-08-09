@@ -60,6 +60,9 @@ namespace PubNubChatAPI.Entities
             IntPtr channel,
             StringBuilder result);
 
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_user_update_with_base(IntPtr user, IntPtr base_user);
+
         #endregion
 
         /// <summary>
@@ -206,6 +209,13 @@ namespace PubNubChatAPI.Entities
             var buffer = new StringBuilder(512);
             pn_user_get_user_id(userPointer, buffer);
             return buffer.ToString();
+        }
+
+        internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            var newFullPointer = pn_user_update_with_base(partialPointer, pointer);
+            CUtilities.CheckCFunctionResult(newFullPointer);
+            UpdatePointer(newFullPointer);
         }
 
         internal void BroadcastUserUpdate()
