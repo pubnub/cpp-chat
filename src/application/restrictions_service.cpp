@@ -216,8 +216,9 @@ std::tuple<std::vector<Pubnub::ChannelRestriction>, Pubnub::Page, int, Pubnub::S
             restriction.ban = custom_json.get_bool("ban").value_or(false);
             restriction.ban = custom_json.get_bool("mute").value_or(false);
             restriction.reason = custom_json.get_string("reason").value_or(String(""));
-            restriction.channel_id = single_data_json.value()["channel"]["id"];
-
+            String final_channel_id = single_data_json.value()["channel"]["id"];
+            final_channel_id.erase(0, INTERNAL_MODERATION_PREFIX.length());
+            restriction.channel_id = final_channel_id;
             final_restrictions.push_back(restriction);
         }
     }
