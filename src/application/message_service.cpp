@@ -92,6 +92,38 @@ bool MessageService::deleted(const MessageDAO& message) const {
     return message.get_entity().is_deleted();
 }
 
+Pubnub::Message MessageService::restore(const MessageDAO& message, const Pubnub::String& timetoken) const
+{
+    auto entity = message.to_entity();
+    if(!entity.is_deleted())
+    {
+        throw std::invalid_argument("This message has not been deleted");
+    }
+
+    std::vector<MessageAction> new_message_actions;
+    {
+        auto pubnub_handle = pubnub->lock();
+        for(auto action : entity.message_actions)
+        {
+            if(action.type == PMAT_Deleted)
+            {
+                String timetoken_no_quotes = action.timetoken;
+                timetoken_no_quotes.erase(0, 1);
+                timetoken_no_quotes.erase(timetoken_no_quotes.length() - 1, 1);
+                pubnub_handle->remove_message_action(entity.channel_id, timetoken, timetoken_no_quotes);
+            }
+            else
+            {
+                new_message_actions.push_back(action);
+            }
+        }
+    }
+
+    entity.message_actions = new_message_actions;
+
+    return this->create_message_object(std::make_pair(timetoken, entity));
+}
+
 Message MessageService::get_message(const String& timetoken, const String& channel_id) const {
     auto start_timetoken_int = std::stoull(timetoken.to_std_string()) + 1;
     String start_timetoken = std::to_string(start_timetoken_int);

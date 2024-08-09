@@ -51,6 +51,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Message delete_message() const;
             PN_CHAT_EXPORT bool delete_message_hard() const;
             PN_CHAT_EXPORT bool deleted() const;
+            PN_CHAT_EXPORT Pubnub::Message restore() const;
             PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type() const;
 
             PN_CHAT_EXPORT void pin() const;

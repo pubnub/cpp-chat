@@ -74,6 +74,11 @@ bool Message::deleted() const {
     return this->message_service->deleted(*this->data);
 }
 
+Message Message::restore() const
+{
+    return this->message_service->restore(*this->data, this->timetoken());
+}
+
 pubnub_chat_message_type Message::type() const {
     return this->message_data().type;
 }
