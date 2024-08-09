@@ -75,8 +75,19 @@ static Pubnub::String json_field_from_pn_block(struct pubnub_char_mem_block pn_b
 {
     auto outer_block = string_from_pn_block(pn_block); 
 
-    return outer_block.empty() ? Pubnub::String() : 
-        Json::parse(outer_block)
+    if (outer_block.empty())
+    {
+        return Pubnub::String();
+    }
+
+    auto parsed = Json::parse(outer_block);
+
+    if (!parsed.contains(field))
+    {
+        return Pubnub::String();
+    }
+
+    return parsed 
         [field]
         .get_string(subfield)
         .value_or(Pubnub::String());
