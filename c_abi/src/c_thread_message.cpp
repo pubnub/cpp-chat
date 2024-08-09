@@ -41,3 +41,17 @@ Pubnub::Channel* pn_thread_message_unpin_from_parent_channel(Pubnub::ThreadMessa
         return PN_C_ERROR_PTR;
     }
 }
+
+PnCResult pn_thread_message_parent_channel_id(Pubnub::ThreadMessage* thread_message, char* result) {
+    try {
+        auto parent_id = thread_message->parent_channel_id();
+        strcpy(result, parent_id.c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
