@@ -108,3 +108,36 @@ PnCResult pn_thread_channel_emit_user_mention(Pubnub::ThreadChannel* thread_chan
 
     return PN_C_OK;
 }
+
+Pubnub::Message* pn_thread_channel_parent_message(Pubnub::ThreadChannel* thread_channel) {
+    try {
+        return new Pubnub::Message(thread_channel->parent_message());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::ThreadChannel* pn_thread_channel_pin_message_to_thread(Pubnub::ThreadChannel* thread_channel, Pubnub::ThreadMessage* message) {
+    try {
+        return new Pubnub::ThreadChannel(thread_channel->pin_message_to_thread(*message));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::ThreadChannel* pn_thread_channel_unpin_message_from_thread(Pubnub::ThreadChannel* thread_channel) {
+    try {
+        return new Pubnub::ThreadChannel(thread_channel->unpin_message_from_thread());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
