@@ -124,6 +124,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_emit_user_mention(Pubnub::Cha
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_update_with_base(Pubnub::Channel* channel, Pubnub::Channel* base_channel);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_user_suggestions(Pubnub::Channel* channel, const char* text, int limit, char* result);
+
 //PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
 //    char* user_suggestion_source,
 //    bool is_typing_indicator_triggered,

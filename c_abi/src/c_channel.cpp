@@ -595,6 +595,34 @@ Pubnub::Channel* pn_channel_update_with_base(Pubnub::Channel* channel, Pubnub::C
     }
 }
 
+PnCResult pn_channel_get_user_suggestions(
+        Pubnub::Channel* channel, 
+        const char* text, 
+        int limit, 
+        char* result) {
+    try {
+        auto members = channel->get_user_suggestions(text, limit);
+        std::vector<intptr_t> membership_pointers;
+        for (auto membership : members)
+        {
+            auto ptr = new Pubnub::Membership(membership);
+            membership_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+        }
+        auto j = nlohmann::json{
+                {"value", membership_pointers}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+
 
 //Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
 //    char* user_suggestion_source, 

@@ -128,6 +128,9 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_channel_update_with_base(IntPtr channel, IntPtr base_channel);
         
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_get_user_suggestions(IntPtr channel, string text, int limit, StringBuilder result);
+        
         #endregion
 
         /// <summary>
@@ -441,6 +444,23 @@ namespace PubNubChatAPI.Entities
                 Debug.WriteLine(CUtilities.GetErrorMessage());
                 return false;
             }
+        }
+
+        public List<Membership> GetUserSuggestions(string text, int limit = 10)
+        {
+            var buffer = new StringBuilder(2048);
+            CUtilities.CheckCFunctionResult(pn_channel_get_user_suggestions(pointer, text, limit, buffer));
+            var resultJson = buffer.ToString();
+            if (!CUtilities.IsValidJson(resultJson))
+            {
+                return new List<Membership>();
+            }
+            var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(resultJson);
+            if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
+            {
+                return new List<Membership>();
+            }
+            return PointerParsers.ParseJsonMembershipPointers(chat, pointers);
         }
 
         /*public MessageDraft CreateMessageDraft()

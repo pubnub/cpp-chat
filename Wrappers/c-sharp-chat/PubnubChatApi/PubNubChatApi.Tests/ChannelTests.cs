@@ -17,8 +17,23 @@ public class ChannelTests
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
             "channel_tests_user");
-        user = chat.CreateUser("channel_tests_user");
+        user = chat.CreateUser("channel_tests_user", new ChatUserData()
+        {
+            Username = "the_channel_tests_user"
+        });
         talkUser = chat.CreateUser("talk_user");
+    }
+    
+    [Test]
+    public async Task TestGetUserSuggestions()
+    {
+        var channel = chat.CreatePublicConversation("user_suggestions_test_channel");
+        channel.Join();
+
+        await Task.Delay(5000);
+        
+        var suggestions = channel.GetUserSuggestions("@the");
+        Assert.True(suggestions.Any(x => x.UserId == user.Id));
     }
     
     [Test]

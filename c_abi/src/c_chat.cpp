@@ -720,6 +720,30 @@ PnCResult pn_chat_get_events_history(Pubnub::Chat* chat, const char* channel_id,
     return PN_C_OK;
 }
 
+PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit, char* result) {
+    try {
+        auto users = chat->get_user_suggestions(text, limit);
+        std::vector<intptr_t> user_pointers;
+        for (auto user : users)
+        {
+            auto ptr = new Pubnub::User(user);
+            user_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+        }
+        auto j = nlohmann::json{
+                {"value", user_pointers}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+
 
 
 

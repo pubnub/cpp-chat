@@ -21,6 +21,20 @@ public class ChatTests
         user = chat.CreateUser("chats_tests_user");
         channel.Join();
     }
+    
+    [Test]
+    public async Task TestGetUserSuggestions()
+    {
+        var suggestedUser = chat.CreateUser("some_guy", new ChatUserData()
+        {
+            Username = "THE_GUY"
+        });
+
+        await Task.Delay(5000);
+        
+        var suggestions = chat.GetUserSuggestions("@THE");
+        Assert.True(suggestions.Any(x => x.Id == suggestedUser.Id));
+    }
 
     [Test]
     public async Task TestGetEventHistory()

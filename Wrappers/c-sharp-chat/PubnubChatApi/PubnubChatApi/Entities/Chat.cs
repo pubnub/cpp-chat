@@ -263,13 +263,16 @@ namespace PubNubChatAPI.Entities
             StringBuilder result);
         
         [DllImport("pubnub-chat")]
-        private static extern int  pn_chat_get_events_history(
+        private static extern int pn_chat_get_events_history(
             IntPtr chat, 
             string channel_id, 
             string start_timetoken, 
             string end_timetoken, 
             int count, 
             StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_get_user_suggestions(IntPtr chat, string text, int limit, StringBuilder result);
         
         #endregion
 
@@ -819,6 +822,19 @@ namespace PubNubChatAPI.Entities
 
         #region Users
 
+        public List<User> GetUserSuggestions(string text, int limit = 10)
+        {
+            var buffer = new StringBuilder(2048);
+            CUtilities.CheckCFunctionResult(pn_chat_get_user_suggestions(chatPointer, text, limit, buffer));
+            var userPointersJson = buffer.ToString();
+            var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(userPointersJson);
+            if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
+            {
+                return new List<User>();
+            }
+            return PointerParsers.ParseJsonUserPointers(this, pointers);
+        }
+        
         /// <summary>
         /// Sets the restrictions for the user with the provided user ID.
         /// <para>
