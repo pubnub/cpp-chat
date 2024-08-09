@@ -110,6 +110,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::ThreadChannel create_thread_channel_object(std::pair<Pubnub::String, ChannelEntity> channel_data, Pubnub::Message parent_message) const;
         Pubnub::Channel create_presentation_object(Pubnub::String channel_id, ChannelDAO channel_data);
 
+        Pubnub::Channel update_channel_with_base(const Pubnub::Channel& channel, const Pubnub::Channel& base_channel) const;
+
         //TODO: Move this to config
         int TYPING_TIMEOUT = 5000;
         int TYPING_TIMEOUT_DIFFERENCE = 1000;

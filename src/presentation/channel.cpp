@@ -108,6 +108,10 @@ std::vector<pubnub_v2_message> Channel::disconnect() const {
 std::vector<pubnub_v2_message> Channel::leave() const {
     return this->channel_service->leave(channel_id_internal);
 }
+
+Channel Channel::update_with_base(const Channel& base_channel) const {
+    return this->channel_service->update_channel_with_base(*this, base_channel);
+}
 #endif
 
 

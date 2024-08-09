@@ -148,6 +148,7 @@ namespace Pubnub
         std::vector<pubnub_v2_message> join(const Pubnub::String& additional_params = "") const;
         std::vector<pubnub_v2_message> disconnect() const;
         std::vector<pubnub_v2_message> leave() const;
+        Pubnub::Channel update_with_base(const Pubnub::Channel& base_channel) const;
 #endif
     };
 };

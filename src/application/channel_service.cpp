@@ -525,11 +525,8 @@ std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_cha
     auto chat = this->chat_service.lock();
     std::vector<String> channels_ids;
     std::function<void(Channel)> final_channel_callback = [=](Channel channel){
-        ChannelEntity calling_channel_entity = ChannelDAO(calling_channel.channel_data()).to_entity();
-        ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
-        std::pair<String, ChannelEntity> pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(calling_channel_entity, channel_entity));
-        auto updated_channel = create_channel_object(pair);
-        
+        auto updated_channel = this->update_channel_with_base(channel, calling_channel);
+       
         channel_callback(updated_channel);
     };
     
@@ -941,6 +938,15 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
     String final_metadata = any_data_added ? String(message_json.dump()) : String("");
 
 	return final_metadata;
+}
+
+Pubnub::Channel ChannelService::update_channel_with_base(const Pubnub::Channel& channel, const Pubnub::Channel& base_channel) const
+{
+    ChannelEntity base_entity = ChannelDAO(base_channel.channel_data()).to_entity();
+    ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
+
+    return create_channel_object(
+            {channel.channel_id(), ChannelEntity::from_base_and_updated_channel(base_entity, channel_entity)});
 }
 
 #ifdef PN_CHAT_C_ABI

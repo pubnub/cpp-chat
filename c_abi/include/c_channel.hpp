@@ -122,6 +122,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_channel_get_pinned_message(Pub
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_emit_user_mention(Pubnub::Channel* channel, const char* user_id, const char* timetoken, const char* text);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_update_with_base(Pubnub::Channel* channel, Pubnub::Channel* base_channel);
 
 //PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
 //    char* user_suggestion_source,

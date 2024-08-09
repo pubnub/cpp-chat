@@ -1,5 +1,7 @@
 #include "c_channel.hpp"
+#include "application/dao/channel_dao.hpp"
 #include "chat.hpp"
+#include "domain/channel_entity.hpp"
 #include "message.hpp"
 #include "message_draft.hpp"
 #include "c_errors.hpp"
@@ -580,6 +582,17 @@ PnCResult pn_channel_emit_user_mention(Pubnub::Channel* channel, const char* use
     }
 
     return PN_C_OK;
+}
+
+Pubnub::Channel* pn_channel_update_with_base(Pubnub::Channel* channel, Pubnub::Channel* base_channel) {
+    try {
+        return new Pubnub::Channel(channel->update_with_base(*base_channel));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 
