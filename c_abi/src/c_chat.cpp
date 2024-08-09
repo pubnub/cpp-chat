@@ -652,7 +652,7 @@ PnCResult pn_chat_get_channel_suggestions(Pubnub::Chat* chat, const char* text, 
     return PN_C_OK;
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_mark_all_messages_as_read(
+PnCResult pn_chat_mark_all_messages_as_read(
         Pubnub::Chat* chat, 
         const char* filter, 
         const char* sort, 
@@ -688,6 +688,38 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_mark_all_messages_as_read(
 
     return PN_C_OK;
 }
+
+PnCResult pn_chat_get_events_history(Pubnub::Chat* chat, const char* channel_id, const char* start_timetoken, const char* end_timetoken, int count, char* result) {
+    try {
+        auto wrapper = chat->get_events_history(channel_id, start_timetoken, end_timetoken, count);
+        std::vector<nlohmann::json> events;
+        for (auto chat_event : wrapper.events)
+        {
+            //TODO: put into util
+            auto event_j = nlohmann::json{
+                {"timeToken", chat_event.timetoken.c_str()},
+                {"type", chat_event_type_to_string(chat_event.type).c_str()},
+                {"userId", chat_event.user_id.c_str()},
+                {"channelId", chat_event.channel_id.c_str()},
+                {"payload", chat_event.payload.c_str()}
+            };
+            events.push_back(event_j);
+        }
+        auto j = nlohmann::json{
+                {"events", events},
+                {"isMore", wrapper.is_more},
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
 
 
 

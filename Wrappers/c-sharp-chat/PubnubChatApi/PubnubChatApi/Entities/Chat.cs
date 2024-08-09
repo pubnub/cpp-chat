@@ -262,6 +262,15 @@ namespace PubNubChatAPI.Entities
             string prev, 
             StringBuilder result);
         
+        [DllImport("pubnub-chat")]
+        private static extern int  pn_chat_get_events_history(
+            IntPtr chat, 
+            string channel_id, 
+            string start_timetoken, 
+            string end_timetoken, 
+            int count, 
+            StringBuilder result);
+        
         #endregion
 
         private IntPtr chatPointer;
@@ -1495,6 +1504,18 @@ namespace PubNubChatAPI.Entities
 
         #region Events
 
+        public EventsHistoryWrapper GetEventsHistory(string channelId, string startTimeToken, string endTimeToken, int count)
+        {
+            var buffer = new StringBuilder(4096);
+            CUtilities.CheckCFunctionResult(pn_chat_get_events_history(chatPointer, channelId, startTimeToken, endTimeToken, count, buffer));
+            var wrapperJson = buffer.ToString();
+            if (!CUtilities.IsValidJson(wrapperJson))
+            {
+                return new EventsHistoryWrapper();;
+            }
+            return JsonConvert.DeserializeObject<EventsHistoryWrapper>(wrapperJson);
+        }
+        
         public void EmitEvent(PubnubChatEventType type, string channelId, string jsonPayload)
         {
             CUtilities.CheckCFunctionResult(pn_chat_emit_event(chatPointer, (byte)type, channelId, jsonPayload));

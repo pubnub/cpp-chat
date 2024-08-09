@@ -21,7 +21,18 @@ public class ChatTests
         user = chat.CreateUser("chats_tests_user");
         channel.Join();
     }
-    
+
+    [Test]
+    public async Task TestGetEventHistory()
+    {
+        chat.EmitEvent(PubnubChatEventType.Custom, channel.Id, "{\"test\":\"some_nonsense\"}");
+
+        await Task.Delay(5000);
+
+        var history = chat.GetEventsHistory(channel.Id, "99999999999999999", "00000000000000000", 50);
+        Assert.True(history.Events.Any(x => x.ChannelId == channel.Id));
+    }
+
     [Test]
     public async Task TestGetChannelSuggestions()
     {
