@@ -41,4 +41,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_set_last_read_me
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_set_last_read_message(Pubnub::Membership* membership, Pubnub::Message* message);
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_membership_get_unread_messages_count(Pubnub::Membership* membership);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_update_with_base(
+        Pubnub::Membership* membership,
+        Pubnub::Membership* base_membership);
+
 #endif // PN_CHAT_C_MEMBERSHIP_H

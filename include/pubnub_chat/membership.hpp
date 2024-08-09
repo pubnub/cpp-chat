@@ -47,7 +47,11 @@ namespace Pubnub
             std::unique_ptr<MembershipDAO> data;
 
             friend class ::MembershipService;
-    
+
+#ifdef PN_CHAT_C_ABI
+        public:
+            Pubnub::Membership update_with_base(const Pubnub::Membership& base_membership) const;
+#endif
     };
 }
 #endif /* PN_CHAT_MEMBERSHIP_H */

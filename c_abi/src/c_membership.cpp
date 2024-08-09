@@ -108,4 +108,14 @@ PnCResult pn_membership_get_unread_messages_count(Pubnub::Membership* membership
     return PN_C_OK;
 }
 
+Pubnub::Membership* pn_membership_update_with_base(Pubnub::Membership* membership, Pubnub::Membership* base_membership) {
+    try {
+        return new Pubnub::Membership(membership->update_with_base(*base_membership));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
 

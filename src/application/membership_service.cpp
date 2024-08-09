@@ -427,9 +427,7 @@ std::function<void()> MembershipService::stream_updates(Pubnub::Membership calli
     auto chat = this->chat_service.lock();
     std::vector<String> memberships_ids;
     std::function<void(Membership)> final_membership_callback = [=](Membership membership){
-        MembershipEntity calling_membership_entity = MembershipDAO(calling_membership.custom_data()).to_entity();
-        MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
-        auto updated_membership = create_membership_object(calling_membership.user, calling_membership.channel, MembershipEntity::from_base_and_updated_membership(calling_membership_entity, membership_entity));
+        auto updated_membership = this->update_membership_with_base(membership, calling_membership);
         
         membership_callback(updated_membership);
     };
@@ -523,4 +521,15 @@ MembershipEntity MembershipService::create_domain_membership(const String& custo
     new_membership_entity.custom_field = custom_object_json;
     return new_membership_entity;
     
+}
+
+Pubnub::Membership MembershipService::update_membership_with_base(const Pubnub::Membership& membership, const Pubnub::Membership& base_membership) const {
+        MembershipEntity base_entity = MembershipDAO(base_membership.custom_data()).to_entity();
+        MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
+
+        return create_membership_object(
+                base_membership.user,
+                base_membership.channel,
+                MembershipEntity::from_base_and_updated_membership(base_entity, membership_entity)
+        );
 }

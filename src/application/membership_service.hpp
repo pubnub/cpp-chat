@@ -40,6 +40,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel) const;
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel, const MembershipEntity& membership_entity) const;
 
+        Pubnub::Membership update_membership_with_base(const Pubnub::Membership& membership, const Pubnub::Membership& base_membership) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;

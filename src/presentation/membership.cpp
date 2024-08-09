@@ -75,3 +75,9 @@ CallbackStop Membership::stream_updates_on(Pubnub::Vector<Membership> membership
     };
     return CallbackStop(this->membership_service->stream_updates_on(*this, memberships_std, new_callback));
 }
+
+#ifdef PN_CHAT_C_ABI 
+Pubnub::Membership Membership::update_with_base(const Pubnub::Membership& base_membership) const {
+    return this->membership_service->update_membership_with_base(*this, base_membership);
+}
+#endif
