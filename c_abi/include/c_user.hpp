@@ -80,4 +80,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_memberships(
         const char* prev,
         char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_user_update_with_base(Pubnub::User* user, Pubnub::User* base_user);
+
 #endif // PN_CHAT_C_USER_HPP

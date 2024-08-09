@@ -263,3 +263,13 @@ PnCResult pn_user_get_memberships(
 
     return PN_C_OK;
 }
+
+Pubnub::User* pn_user_update_with_base(Pubnub::User* user, Pubnub::User* base_user) {
+    try {
+        return new Pubnub::User(user->update_with_base(*base_user));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}

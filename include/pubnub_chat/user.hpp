@@ -97,6 +97,11 @@ namespace Pubnub
             std::shared_ptr<const MembershipService> membership_service;
 
         friend class ::UserService;
+
+#ifdef PN_CHAT_C_ABI
+        public:
+        Pubnub::User update_with_base(const Pubnub::User& base_user) const;
+#endif
     };
 }
 #endif /* PN_CHAT_USER_H */

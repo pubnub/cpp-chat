@@ -106,3 +106,9 @@ CallbackStop User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::fu
     };
     return CallbackStop(this->user_service->stream_updates_on(*this, users_std, new_callback));
 }
+
+#ifdef PN_CHAT_C_ABI
+User User::update_with_base(const User& base_user) const {
+    return this->user_service->update_user_with_base(*this, base_user);
+}
+#endif

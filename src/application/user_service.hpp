@@ -32,6 +32,7 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::vector<Pubnub::User> get_users_suggestions(Pubnub::String text, int limit = 10) const;
 
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserDAO> user_data) const;
+        Pubnub::User update_user_with_base(const Pubnub::User& user, const Pubnub::User& base_user) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;

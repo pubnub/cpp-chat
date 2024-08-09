@@ -135,11 +135,8 @@ std::function<void()> UserService::stream_updates(Pubnub::User calling_user, std
 
     std::vector<String> users_ids;
     std::function<void(User)> final_user_callback = [=](User user){
-        UserEntity calling_user_entity = UserDAO(calling_user.user_data()).to_entity();
-        UserEntity user_entity = UserDAO(user.user_data()).to_entity();
-        std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(calling_user_entity, user_entity));
-        auto updated_user = create_user_object(pair);
-        
+        auto updated_user = this->update_user_with_base(user, calling_user);
+       
         user_callback(updated_user);
     };
     
@@ -253,4 +250,12 @@ User UserService::create_user_object(std::pair<String, UserDAO> user_data) const
     }
 
     throw std::runtime_error("Failed to create user object, chat service is not available");
+}
+
+User UserService::update_user_with_base(const User& user, const User& base_user) const {
+    auto user_data = UserDAO(user.user_data()).to_entity();
+    auto base_user_data = UserDAO(base_user.user_data()).to_entity();
+    auto updated_user_data = UserEntity::from_base_and_updated_user(base_user_data, user_data);
+
+    return this->create_user_object({user.user_id(), UserDAO(updated_user_data)});
 }
