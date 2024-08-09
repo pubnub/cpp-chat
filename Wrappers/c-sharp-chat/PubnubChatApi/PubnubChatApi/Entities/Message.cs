@@ -33,7 +33,7 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_message_text(IntPtr message, StringBuilder result);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_message_delete_message(IntPtr message);
+        private static extern IntPtr pn_message_delete_message(IntPtr message);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_message_delete_message_hard(IntPtr message);
@@ -91,6 +91,9 @@ namespace PubNubChatAPI.Entities
         private static extern IntPtr pn_message_quoted_message(IntPtr message);
         [DllImport("pubnub-chat")]
         private static extern int pn_message_text_links(IntPtr message, StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_message_restore(IntPtr message);
         
         #endregion
 
@@ -432,6 +435,13 @@ namespace PubNubChatAPI.Entities
             UpdatePointer(newPointer);
         }
 
+        public void Restore()
+        {
+            var newPointer = pn_message_restore(pointer);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
+        }
+
         /// <summary>
         /// Deletes the message.
         /// <para>
@@ -451,9 +461,16 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="OnMessageUpdated"/>
         public void Delete(bool soft)
         {
-            CUtilities.CheckCFunctionResult(soft
-                ? pn_message_delete_message(pointer)
-                : pn_message_delete_message_hard(pointer));
+            if (soft)
+            {
+                var newPointer = pn_message_delete_message(pointer);
+                CUtilities.CheckCFunctionResult(newPointer);
+                UpdatePointer(newPointer);
+            }
+            else
+            {
+                CUtilities.CheckCFunctionResult(pn_message_delete_message_hard(pointer));
+            }
         }
 
         protected override void DisposePointer()

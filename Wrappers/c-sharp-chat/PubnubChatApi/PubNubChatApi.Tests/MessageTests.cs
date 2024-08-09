@@ -145,6 +145,30 @@ public class MessageTests
         var received = manualReceivedEvent.WaitOne(4000);
         Assert.IsTrue(received);
     }
+    
+    [Test]
+    public void TestRestoreMessage()
+    {
+        var manualReceivedEvent = new ManualResetEvent(false);
+        channel.OnMessageReceived += async message =>
+        {
+            message.Delete(true);
+
+            await Task.Delay(2000);
+            
+            Assert.True(message.IsDeleted);
+            message.Restore();
+            
+            await Task.Delay(2000);
+            
+            Assert.False(message.IsDeleted);
+            manualReceivedEvent.Set();
+        };
+        channel.SendText("something");
+
+        var received = manualReceivedEvent.WaitOne(8000);
+        Assert.IsTrue(received);
+    }
 
     [Test]
     public async Task TestPinMessage()

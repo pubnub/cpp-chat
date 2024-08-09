@@ -34,16 +34,14 @@ PnCResult pn_message_text(
     return PN_C_OK;
 }
 
-PnCResult pn_message_delete_message(Pubnub::Message* message) {
+Pubnub::Message* pn_message_delete_message(Pubnub::Message* message) {
     try {
-        message->delete_message();
+        return new Pubnub::Message(message->delete_message());
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 PnCResult pn_message_delete_message_hard(Pubnub::Message* message) {
@@ -261,7 +259,7 @@ Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, P
     }
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
+PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
     try {
         auto mentioned_users = message->mentioned_users();
         std::vector<intptr_t> user_pointers;
@@ -291,7 +289,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_mentioned_users(Pubnub::Messa
 
     return PN_C_OK;
 }
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_referenced_channels(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
+PnCResult pn_message_referenced_channels(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
     try {
         auto referenced_channels = message->referenced_channels();
         std::vector<intptr_t> channel_pointers;
@@ -321,7 +319,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_referenced_channels(Pubnub::M
 
     return PN_C_OK;
 }
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub::Message* message) {
+Pubnub::Message* pn_message_quoted_message(Pubnub::Message* message) {
     try {
         return new Pubnub::Message(message->quoted_message().value());
     }
@@ -331,7 +329,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub:
         return PN_C_ERROR_PTR;
     }
 }
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* message, char* result) {
+PnCResult pn_message_text_links(Pubnub::Message* message, char* result) {
     try {
         auto text_links = message->text_links();
         std::vector<nlohmann::json> link_jsons;
@@ -354,4 +352,15 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* m
     }
 
     return PN_C_OK;
+}
+
+Pubnub::Message* pn_message_restore(Pubnub::Message* message) {
+    try {
+        return new Pubnub::Message(message->restore());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
