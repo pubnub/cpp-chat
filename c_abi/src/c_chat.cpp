@@ -629,3 +629,65 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
     return PN_C_OK;
 }
 
+PnCResult pn_chat_get_channel_suggestions(Pubnub::Chat* chat, const char* text, int limit, char* result) {
+    try {
+        auto suggestions = chat->get_channel_suggestions(text, limit);
+        std::vector<intptr_t> channel_pointers;
+        for (auto suggestion : suggestions)
+        {
+            auto ptr = new Pubnub::Channel(suggestion);
+            channel_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+        }
+        auto j = nlohmann::json{
+                {"value", channel_pointers}
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_mark_all_messages_as_read(
+        Pubnub::Chat* chat, 
+        const char* filter, 
+        const char* sort, 
+        int limit, 
+        const char* next, 
+        const char* prev, 
+        char* result) {
+    try {
+        auto wrapper = chat->mark_all_messages_as_read(filter, sort, limit, Pubnub::Page({next, prev}));
+        std::vector<intptr_t> membership_pointers;
+        for (auto membership : wrapper.memberships)
+        {
+            auto ptr = new Pubnub::Membership(membership);
+            membership_pointers.push_back(reinterpret_cast<intptr_t>(ptr));
+        }
+        auto j = nlohmann::json{
+                {"memberships", membership_pointers},
+                {"total", wrapper.total},
+                {"status", wrapper.status},
+                {"page", nlohmann::json{
+                        {"prev", wrapper.page.prev.c_str()},
+                        {"next", wrapper.page.next.c_str()},
+                    }
+            }
+        };
+        strcpy(result, j.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+
+

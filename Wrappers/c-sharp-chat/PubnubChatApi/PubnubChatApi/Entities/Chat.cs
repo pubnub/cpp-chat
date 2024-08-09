@@ -248,6 +248,20 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_get_channel_suggestions(IntPtr chat, string text, int limit,
+            StringBuilder result);
+        
+        [DllImport("pubnub-chat")]
+        private static extern int pn_chat_mark_all_messages_as_read(
+            IntPtr chat, 
+            string filter, 
+            string sort, 
+            int limit, 
+            string next, 
+            string prev, 
+            StringBuilder result);
+        
         #endregion
 
         private IntPtr chatPointer;
@@ -509,6 +523,21 @@ namespace PubNubChatAPI.Entities
                     channel.OnChannelUpdate += listener;
                 }
             }
+        }
+
+        public List<Channel> GetChannelSuggestions(string text, int limit = 10)
+        {
+            var buffer = new StringBuilder(2048);
+            CUtilities.CheckCFunctionResult(pn_chat_get_channel_suggestions(chatPointer, text, limit, buffer));
+            var suggestionsJson = buffer.ToString();
+            var jsonDict = JsonConvert.DeserializeObject<Dictionary<string, IntPtr[]>>(suggestionsJson);
+            var channels = new List<Channel>();
+            if (jsonDict == null || !jsonDict.TryGetValue("value", out var pointers) || pointers == null)
+            {
+                return channels;
+            }
+            channels = PointerParsers.ParseJsonChannelPointers(this, pointers);
+            return channels;
         }
 
         /// <summary>
@@ -1263,6 +1292,16 @@ namespace PubNubChatAPI.Entities
 
             var messagePointer = pn_channel_get_message(channel.Pointer, messageTimeToken);
             return TryGetMessage(messageTimeToken, messagePointer, out message);
+        }
+
+        public MarkMessagesAsReadWrapper MarkAllMessagesAsRead(string filter = "", string sort = "", int limit = 0, Page page = null)
+        {
+            page ??= new Page();
+            var buffer = new StringBuilder(2048);
+            CUtilities.CheckCFunctionResult(pn_chat_mark_all_messages_as_read(chatPointer, filter, sort, limit, page.Next, page.Previous, buffer));
+            var internalWrapperJson = buffer.ToString();
+            var internalWrapper = JsonConvert.DeserializeObject<InternalMarkMessagesAsReadWrapper>(internalWrapperJson);
+            return new MarkMessagesAsReadWrapper(this, internalWrapper);
         }
 
         private bool TryGetMessage(string timeToken, IntPtr messagePointer, out Message message)

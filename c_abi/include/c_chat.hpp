@@ -170,4 +170,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_emit_event(Pubnub::Chat* chat, P
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(Pubnub::Chat* chat, const char* filter, const char* sort, int limit, const char* next, const char* prev, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_channel_suggestions(Pubnub::Chat* chat, const char* text, int limit, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_mark_all_messages_as_read(Pubnub::Chat* chat, const char* filter, const char* sort, int limit, const char* next, const char* prev, char* result);
+
+
 #endif // PN_CHAT_C_CHAT_HPP

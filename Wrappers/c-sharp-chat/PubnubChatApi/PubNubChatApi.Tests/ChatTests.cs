@@ -1,4 +1,5 @@
 using PubNubChatAPI.Entities;
+using PubnubChatApi.Entities.Data;
 using PubnubChatApi.Enums;
 
 namespace PubNubChatApi.Tests;
@@ -19,6 +20,20 @@ public class ChatTests
         channel = chat.CreatePublicConversation("chat_tests_channel");
         user = chat.CreateUser("chats_tests_user");
         channel.Join();
+    }
+    
+    [Test]
+    public async Task TestGetChannelSuggestions()
+    {
+        var suggestedChannel = chat.CreatePublicConversation("suggested_channel", new ChatChannelData()
+        {
+            ChannelName = "SUGGESTED_CHANNEL_NAME"
+        });
+
+        await Task.Delay(5000);
+        
+        var suggestions = chat.GetChannelSuggestions("#SUGGESTED");
+        Assert.True(suggestions.Any(x => x.Id == suggestedChannel.Id));
     }
 
     [Test]
@@ -111,5 +126,21 @@ public class ChatTests
         await Task.Delay(3000);
         
         Assert.True(chat.GetUnreadMessagesCounts(limit:50).Any(x => x.Channel.Id == channel.Id && x.Count > 0));
+    }
+    
+    [Test]
+    public async Task TestMarkAllMessagesAsRead()
+    {
+        channel.SendText("wololo");
+
+        await Task.Delay(3000);
+        
+        Assert.True(chat.GetUnreadMessagesCounts().Any(x => x.Channel.Id == channel.Id && x.Count > 0));
+
+        chat.MarkAllMessagesAsRead();
+        
+        await Task.Delay(3000);
+        
+        Assert.False(chat.GetUnreadMessagesCounts().Any());
     }
 }
