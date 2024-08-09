@@ -108,8 +108,12 @@ Pubnub::Message MessageService::restore(const MessageDAO& message, const Pubnub:
             if(action.type == PMAT_Deleted)
             {
                 String timetoken_no_quotes = action.timetoken;
-                timetoken_no_quotes.erase(0, 1);
-                timetoken_no_quotes.erase(timetoken_no_quotes.length() - 1, 1);
+                //If action timetoken has quotes we need to remove them here
+                if(action.timetoken.front() == '\"')
+                {
+                    timetoken_no_quotes.erase(0, 1);
+                    timetoken_no_quotes.erase(timetoken_no_quotes.length() - 1, 1);
+                }
                 pubnub_handle->remove_message_action(entity.channel_id, timetoken, timetoken_no_quotes);
             }
             else
