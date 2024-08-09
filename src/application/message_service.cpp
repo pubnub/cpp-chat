@@ -285,6 +285,41 @@ Pubnub::String MessageService::get_phrase_to_look_for(const Pubnub::String& look
     return String(result);
 }
 
+Pubnub::String MessageService::get_channel_phrase_to_look_for(const Pubnub::String& look_text) const
+{
+    std::string text = look_text.to_std_string();
+    size_t lastAtIndex = text.find_last_of('#');
+    
+    // If there is no '@' or if there are fewer than 3 characters after the last '#'
+    if (lastAtIndex == std::string::npos || text.size() - lastAtIndex - 1 < 3) {
+        return "";
+    }
+
+    // Get the substring after the last '#'
+    std::string charactersAfterAt = text.substr(lastAtIndex + 1);
+
+    // Split the substring by spaces
+    std::istringstream iss(charactersAfterAt);
+    std::vector<std::string> splitWords;
+    std::string word;
+    while (iss >> word) {
+        splitWords.push_back(word);
+    }
+
+    // If there are more than 2 words after the '#', return null
+    if (splitWords.size() > 2) {
+        return "";
+    }
+
+    // Combine the first two words (if they exist) with a space in between
+    std::string result = splitWords[0];
+    if (splitWords.size() > 1) {
+        result += " " + splitWords[1];
+    }
+
+    return String(result);
+}
+
 Pubnub::Message MessageService::update_message_with_base(const Pubnub::Message& message, const Pubnub::Message& base_message) const {
     MessageEntity base_entity = MessageDAO(base_message.message_data()).to_entity();
     MessageEntity message_entity = MessageDAO(message.message_data()).to_entity();

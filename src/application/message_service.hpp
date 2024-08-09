@@ -46,6 +46,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::ThreadMessage create_thread_message_object(const Pubnub::Message& base_message, const Pubnub::String& parent_channel_id) const;
 
         Pubnub::String get_phrase_to_look_for(const Pubnub::String& look_text) const;
+        Pubnub::String get_channel_phrase_to_look_for(const Pubnub::String& look_text) const;
 
         Pubnub::Message update_message_with_base(const Pubnub::Message& message, const Pubnub::Message& base_message) const;
 

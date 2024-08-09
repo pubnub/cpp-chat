@@ -38,6 +38,11 @@ ChannelEntity ChannelEntity::from_json(Json channel_json) {
         new_entity.channel_name = channel_json["channel"].get_string("name").value_or(Pubnub::String(""));
         new_entity.description = channel_json["channel"].get_string("description").value_or(Pubnub::String(""));
     }
+    else
+    {
+        new_entity.channel_name = channel_json.get_string("name").value_or(Pubnub::String(""));
+        new_entity.description = channel_json.get_string("description").value_or(Pubnub::String(""));
+    }
     new_entity.custom_data_json = channel_json.contains("custom") ? channel_json["custom"].dump() : Pubnub::String("");
     new_entity.updated = channel_json.get_string("updated").value_or(Pubnub::String(""));
     new_entity.status = channel_json.get_string("status").value_or(Pubnub::String(""));

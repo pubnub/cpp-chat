@@ -136,7 +136,7 @@ Channel ChannelService::get_channel(const String& channel_id) const {
 }
 
 std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> ChannelService::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
-    Pubnub::String include = "custom,totalCount";
+    Pubnub::String include = "custom,totalCount,channel";
     auto channels_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
         return pubnub_handle->get_all_channels_metadata(include, limit, filter, sort, page.next, page.prev);
@@ -476,10 +476,10 @@ std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::Str
 
     if(!chat_shared)
     {
-        throw std::runtime_error("can't get users suggestions, chat service is invalid");
+        throw std::runtime_error("can't get channel suggestions, chat service is invalid");
     }
 
-    String cache_key = chat_shared->message_service->get_phrase_to_look_for(text);
+    String cache_key = chat_shared->message_service->get_channel_phrase_to_look_for(text);
 
     if(cache_key.empty())
     {
