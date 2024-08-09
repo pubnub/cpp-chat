@@ -207,3 +207,9 @@ Pubnub::Vector<TextLink> Message::text_links() const
     auto text_links = this->data->to_entity().get_text_links();
     return Pubnub::Vector<TextLink>(std::move(text_links));
 }
+
+#ifdef PN_CHAT_C_ABI
+Pubnub::Message Pubnub::Message::update_with_base(const Pubnub::Message& base_message) const {
+    return this->message_service->update_message_with_base(*this, base_message);
+}
+#endif

@@ -147,10 +147,7 @@ std::function<void()> MessageService::stream_updates(Pubnub::Message calling_mes
 
     std::vector<String> messages_ids;
     std::function<void(Message)> final_message_callback = [=](Message message){
-        MessageEntity calling_message_entity = MessageDAO(calling_message.message_data()).to_entity();
-        MessageEntity message_entity = MessageDAO(message.message_data()).to_entity();
-        std::pair<String, MessageEntity> pair = std::make_pair(message.timetoken(), MessageEntity::from_base_and_updated_message(calling_message_entity, message_entity));
-        auto updated_message = create_message_object(pair);
+        auto updated_message = this->update_message_with_base(message, calling_message);
         
         message_callback(updated_message);
     };
@@ -286,4 +283,13 @@ Pubnub::String MessageService::get_phrase_to_look_for(const Pubnub::String& look
     }
 
     return String(result);
+}
+
+Pubnub::Message MessageService::update_message_with_base(const Pubnub::Message& message, const Pubnub::Message& base_message) const {
+    MessageEntity base_entity = MessageDAO(base_message.message_data()).to_entity();
+    MessageEntity message_entity = MessageDAO(message.message_data()).to_entity();
+
+    return this->create_message_object(
+            {message.timetoken(), MessageEntity::from_base_and_updated_message(base_entity, message_entity)});
+
 }

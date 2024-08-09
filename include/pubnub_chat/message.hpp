@@ -91,6 +91,11 @@ namespace Pubnub
             std::shared_ptr<const RestrictionsService> restrictions_service;
 
         friend class ::MessageService;
+
+#ifdef PN_CHAT_C_ABI
+        public:
+            Pubnub::Message update_with_base(const Pubnub::Message& base_message) const;
+#endif
     };
 }
 #endif /* PN_CHAT_MESSAGE_H */

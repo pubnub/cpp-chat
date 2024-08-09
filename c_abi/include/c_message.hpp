@@ -54,5 +54,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadChannel* pn_message_get_thread(Pubnu
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_remove_thread(Pubnub::Message* message);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, Pubnub::Message* base_message);
+
 
 #endif // PN_CHAT_C_MESSAGE_H

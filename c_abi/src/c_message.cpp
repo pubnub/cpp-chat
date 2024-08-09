@@ -237,3 +237,13 @@ PnCResult pn_message_remove_thread(Pubnub::Message* message) {
     return PN_C_OK;
 }
 
+Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, Pubnub::Message* base_message) {
+    try {
+        return new Pubnub::Message(message->update_with_base(*base_message));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}

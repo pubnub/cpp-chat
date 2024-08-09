@@ -47,6 +47,8 @@ class MessageService : public std::enable_shared_from_this<MessageService>
 
         Pubnub::String get_phrase_to_look_for(const Pubnub::String& look_text) const;
 
+        Pubnub::Message update_message_with_base(const Pubnub::Message& message, const Pubnub::Message& base_message) const;
+
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
