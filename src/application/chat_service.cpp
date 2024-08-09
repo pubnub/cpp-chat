@@ -9,6 +9,7 @@
 #include "application/callback_service.hpp"
 #include "application/access_manager_service.hpp"
 #include "chat.hpp"
+#include "domain/parsers.hpp"
 #include "domain/json.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
@@ -65,6 +66,56 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const 
 
     auto pubnub_handle = this->pubnub->lock();
     pubnub_handle->publish(channel_id, event_message);
+}
+
+std::tuple<std::vector<Pubnub::Event>, bool> ChatService::get_events_history(const Pubnub::String &channel_id, const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
+{
+    auto fetch_history_response = [this, channel_id, start_timetoken, end_timetoken, count] {
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->fetch_history(channel_id, start_timetoken, end_timetoken, count);
+    }();
+
+    Json response_json = Json::parse(fetch_history_response);
+
+    if(response_json.is_null())
+    {
+        throw std::runtime_error("can't get history, response is incorrect");
+    }
+
+    if(!response_json.contains("channels") && !response_json["channels"].contains(channel_id))
+    {
+        throw std::runtime_error("can't get events history, response doesn't have this channel info");
+    }
+
+    Json messages_array_json = response_json["channels"];
+
+    std::vector<Event> events;
+
+    for (auto element : messages_array_json[channel_id])
+    {
+        if(!element.contains("message") || element["message"].is_null())
+        {
+            continue;
+        }
+
+        Json message_json = element["message"];
+
+        if(!Parsers::PubnubJson::is_event(message_json.dump()))
+        {
+            continue;
+        }
+        
+        Event event;
+        event.channel_id = channel_id;
+        event.timetoken = element.get_string("timetoken").value_or(String(""));
+        event.user_id = element.get_string("uuid").value_or(String(""));
+        event.type = chat_event_type_from_string(message_json.get_string("type").value_or(String("")));
+        event.payload = message_json.dump();
+        events.push_back(event);
+    }
+    bool is_more = count == messages_array_json.size();
+    std::tuple<std::vector<Pubnub::Event>, bool> return_tuple = std::make_tuple(events, is_more);
+    return return_tuple;
 }
 
 #ifndef PN_CHAT_C_ABI

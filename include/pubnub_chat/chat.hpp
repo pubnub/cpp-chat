@@ -90,6 +90,12 @@ namespace Pubnub {
         int total;
     };
 
+    struct EventsHistoryWrapper
+    {
+        Pubnub::Vector<Pubnub::Event> events;
+        bool is_more;
+    };
+
 
 
     class Chat {
@@ -129,6 +135,7 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
             PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
+            PN_CHAT_EXPORT EventsHistoryWrapper get_events_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
 #ifndef PN_CHAT_C_ABI
             PN_CHAT_EXPORT Pubnub::CallbackStop listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
 #endif
@@ -145,6 +152,8 @@ namespace Pubnub {
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
+
+            
 
         private:
             std::shared_ptr<const ChatService> chat_service;

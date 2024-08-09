@@ -140,6 +140,12 @@ void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, const String&
     this->chat_service->emit_chat_event(chat_event_type, channel_id, payload);
 }
 
+EventsHistoryWrapper Pubnub::Chat::get_events_history(const Pubnub::String &channel_id, const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
+{
+    auto return_tuple = this->chat_service->get_events_history(channel_id, start_timetoken, end_timetoken, count);
+    return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
+}
+
 #ifndef PN_CHAT_C_ABI
 CallbackStop Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
     return CallbackStop(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));

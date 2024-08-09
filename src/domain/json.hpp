@@ -41,6 +41,8 @@ class Json {
         bool is_array() const;
         bool is_object() const;
         void erase(Pubnub::String key);
+        size_t size();
+
 
         void insert_or_update(Pubnub::String key, Json value);
         void insert_or_update(Pubnub::String key, Pubnub::String value);

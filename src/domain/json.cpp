@@ -58,6 +58,11 @@ void Json::erase(Pubnub::String key) {
     this->json.erase(key);
 }
 
+size_t Json::size()
+{
+    return this->json.size();
+}
+
 std::optional<Pubnub::String> Json::get_string(Pubnub::String key) const {
     if(this->json.contains(key) && this->json[key].is_string() && !this->json[key].is_null())
     {
