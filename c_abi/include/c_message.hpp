@@ -18,6 +18,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_edit_text(
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text(Pubnub::Message* message, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_delete_message(Pubnub::Message* message);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_delete_message_hard(Pubnub::Message* message);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_message_deleted(Pubnub::Message* message);
 

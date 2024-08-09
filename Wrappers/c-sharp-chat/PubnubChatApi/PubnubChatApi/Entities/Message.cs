@@ -36,6 +36,9 @@ namespace PubNubChatAPI.Entities
         private static extern int pn_message_delete_message(IntPtr message);
 
         [DllImport("pubnub-chat")]
+        private static extern int pn_message_delete_message_hard(IntPtr message);
+
+        [DllImport("pubnub-chat")]
         private static extern int pn_message_deleted(IntPtr message);
 
         [DllImport("pubnub-chat")]
@@ -446,9 +449,11 @@ namespace PubNubChatAPI.Entities
         /// </example>
         /// <seealso cref="IsDeleted"/>
         /// <seealso cref="OnMessageUpdated"/>
-        public void Delete()
+        public void Delete(bool soft)
         {
-            CUtilities.CheckCFunctionResult(pn_message_delete_message(pointer));
+            CUtilities.CheckCFunctionResult(soft
+                ? pn_message_delete_message(pointer)
+                : pn_message_delete_message_hard(pointer));
         }
 
         protected override void DisposePointer()

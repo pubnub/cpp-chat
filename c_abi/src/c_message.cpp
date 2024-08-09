@@ -46,6 +46,19 @@ PnCResult pn_message_delete_message(Pubnub::Message* message) {
     return PN_C_OK;
 }
 
+PnCResult pn_message_delete_message_hard(Pubnub::Message* message) {
+    try {
+        message->delete_message_hard();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
 PnCTribool pn_message_deleted(Pubnub::Message* message) {
     try {
         return message->deleted() ? PN_C_TRUE : PN_C_FALSE;
