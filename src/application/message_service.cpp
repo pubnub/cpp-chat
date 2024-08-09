@@ -54,6 +54,12 @@ String MessageService::text(const MessageDAO& message) const {
 }
 
 Pubnub::Message MessageService::delete_message(const MessageDAO& message, const Pubnub::String& timetoken) const {
+
+    if(message.has_thread())
+    {
+        message.get_thread().delete_channel();
+    }
+
     pubnub_message_action_type deleted_action_type = pubnub_message_action_type::PMAT_Deleted;
     String deleted_value = "\"deleted\"";
    
@@ -67,6 +73,25 @@ Pubnub::Message MessageService::delete_message(const MessageDAO& message, const 
     auto new_message_entity = entity.delete_message(deleted_value, action_timetoken);
 
     return this->create_message_object(std::make_pair(timetoken, new_message_entity));
+}
+
+bool MessageService::delete_message_hard(const Pubnub::Message& message) const {
+
+    if(message.has_thread())
+    {
+        message.get_thread().delete_channel();
+    }
+
+    auto entity = message.get_entity();
+    auto start_timetoken_int = std::stoull(message.timetoken().to_std_string()) + 1;
+    String start_timetoken = std::to_string(start_timetoken_int);
+
+    bool message_deleted = [this, message, timetoken, start_timetoken] {
+        auto pubnub_handle = pubnub->lock();
+        return pubnub_handle->delete_messages(message.message_data().channel_id, start_timetoken, message.timetoken());
+    }();
+
+    return message_deleted;
 }
 
 bool MessageService::deleted(const MessageDAO& message) const {

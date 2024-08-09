@@ -566,6 +566,25 @@ std::map<Pubnub::String, int, Pubnub::StringComparer> PubNub::message_counts(con
     return final_map;
 }
 
+bool PubNub::delete_messages(const Pubnub::String channel, const Pubnub::String start, const Pubnub::String end)
+{
+    auto opt = pubnub_delete_messages_defopts();
+    opt.start = start.c_str();
+    opt.end = end.c_str();
+
+    auto result = pubnub_delete_messages(this->main_context.get(), channel.c_str(), opt);
+
+    try {
+        this->await_and_handle_error(result);
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {

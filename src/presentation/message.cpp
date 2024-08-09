@@ -63,6 +63,13 @@ Message Message::delete_message() const {
     return this->message_service->delete_message(*this->data, this->timetoken());
 }
 
+bool Pubnub::Message::delete_message_hard() const
+{
+    //somehow it was returning false if wasn't passed to a variable
+    bool deleted = this->message_service->delete_message_hard(*this->data, this->timetoken());
+    return deleted;
+}
+
 bool Message::deleted() const {
     return this->message_service->deleted(*this->data);
 }

@@ -64,7 +64,8 @@ public:
     Pubnub::String add_message_action(const Pubnub::String channel, const Pubnub::String message_time_token, const Pubnub::String message_action_type, const Pubnub::String value);
     void remove_message_action(const Pubnub::String channel, const Pubnub::String message_timetoken, const Pubnub::String action_timetoken);
     std::map<Pubnub::String, int, Pubnub::StringComparer> message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps);
-
+    bool delete_messages(const Pubnub::String channel, const Pubnub::String start, const Pubnub::String end);
+    
     Pubnub::String parse_token(const Pubnub::String auth_key) ;
 
 private:

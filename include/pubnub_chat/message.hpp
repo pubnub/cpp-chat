@@ -49,6 +49,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Message edit_text(const Pubnub::String& new_text) const;
             PN_CHAT_EXPORT Pubnub::String text() const;
             PN_CHAT_EXPORT Pubnub::Message delete_message() const;
+            PN_CHAT_EXPORT bool delete_message_hard() const;
             PN_CHAT_EXPORT bool deleted() const;
             PN_CHAT_EXPORT Pubnub::pubnub_chat_message_type type() const;
 

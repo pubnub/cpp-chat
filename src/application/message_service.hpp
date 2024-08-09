@@ -29,6 +29,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::Message edit_text(const Pubnub::String& timetoken, const MessageDAO& message_data, const Pubnub::String& new_text) const;
         Pubnub::String text(const MessageDAO& message) const;
         Pubnub::Message delete_message(const MessageDAO& message, const Pubnub::String& timetoken) const;
+        bool delete_message_hard(const Pubnub::Message& message) const;
         bool deleted(const MessageDAO& message) const;
 
         Pubnub::Message get_message(const Pubnub::String& timetoken, const Pubnub::String& channel_id) const;
