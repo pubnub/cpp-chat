@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using PubNubChatAPI.Entities;
+using PubnubChatApi.Entities.Data;
 
 namespace PubNubChatApi.Tests;
 
@@ -7,6 +8,7 @@ public class MessageTests
 {
     private Chat chat;
     private Channel channel;
+    private User user;
 
     [SetUp]
     public void Setup()
@@ -16,6 +18,7 @@ public class MessageTests
             PubnubTestsParameters.SubscribeKey,
             "message_tests_user");
         channel = chat.CreatePublicConversation("message_tests_channel_2");
+        user = chat.CreateUser("message_tests_user");
         channel.Join();
     }
 
@@ -29,7 +32,20 @@ public class MessageTests
             Assert.True(message.MessageText == "Test message text");
             manualReceiveEvent.Set();
         };
-        channel.SendText("Test message text");
+        channel.SendText("Test message text", new SendTextParams()
+        {
+            MentionedUsers = new Dictionary<int, User>(){{0, user}},
+            ReferencedChannels = new Dictionary<int, Channel>(){{0, channel}},
+            TextLinks =
+            [
+                new TextLink()
+                {
+                    StartIndex = 0,
+                    EndIndex = 13,
+                    Link = "www.google.com"
+                }
+            ]
+        });
         
         var received = manualReceiveEvent.WaitOne(4000);
         Assert.IsTrue(received);

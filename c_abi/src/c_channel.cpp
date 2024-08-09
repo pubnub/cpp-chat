@@ -622,7 +622,84 @@ PnCResult pn_channel_get_user_suggestions(
     return PN_C_OK;
 }
 
+PnCResult pn_channel_send_text_dirty(
+        Pubnub::Channel* channel,
+        const char* message,
+        bool store_in_history,
+        bool send_by_post,
+        const char* meta,
+        int mentioned_users_length,
+        int* mentioned_users_indexes,
+        Pubnub::User** mentioned_users,
+        int referenced_channels_length,
+        int* referenced_channels_indexes,
+        Pubnub::Channel** referenced_channels,
+        const char* text_links_json,
+        Pubnub::Message* quoted_message) {
+    try {
+        
+        Pubnub::SendTextParams params;
 
+        //The easy ones
+        params.store_in_history = store_in_history;
+        params.send_by_post = send_by_post;
+        params.meta = meta;
+
+        //Mentioned users
+        std::map<int, Pubnub::MentionedUser> mentioned_users_map;
+        for (int i = 0; i < mentioned_users_length; i++)
+        {
+            auto user = *mentioned_users[i];
+            auto mentioned_user = Pubnub::MentionedUser();
+            mentioned_user.id = user.user_id();
+            mentioned_user.name = user.user_data().user_name;
+            mentioned_users_map.emplace(std::make_pair(mentioned_users_indexes[i], mentioned_user));
+        }
+        params.mentioned_users = mentioned_users_map;
+
+        //Referenced channels
+        std::map<int, Pubnub::ReferencedChannel> referenced_channels_map;
+        for (int i = 0; i < referenced_channels_length; i++)
+        {
+            auto channel = *referenced_channels[i];
+            auto referenced_channel = Pubnub::ReferencedChannel();
+            referenced_channel.id = channel.channel_id();
+            referenced_channel.name = channel.channel_data().channel_name;
+            referenced_channels_map.emplace(std::make_pair(referenced_channels_indexes[i], referenced_channel));
+        }
+        params.referenced_channels = referenced_channels_map;
+
+        //Text links
+        auto parsed_links_json = nlohmann::json::parse(text_links_json);
+        Pubnub::Vector<Pubnub::TextLink> links;
+        for (auto link_json : parsed_links_json) {
+            Pubnub::TextLink link;
+            link.start_index = link_json["StartIndex"];
+            link.end_index = link_json["EndIndex"];
+            link.link = link_json["Link"];
+            links.push_back(link);
+        }
+        params.text_links = links;
+
+        //Quoted message
+        if (quoted_message == nullptr)
+        {
+            params.quoted_message = Pubnub::Option<Pubnub::Message>::none();
+        }
+        else {
+            params.quoted_message = Pubnub::Option<Pubnub::Message>(*quoted_message);
+        }
+
+        channel->send_text(message, params);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
 
 //Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
 //    char* user_suggestion_source, 

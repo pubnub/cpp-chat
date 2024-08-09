@@ -126,6 +126,21 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_update_with_base(Pubnu
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_user_suggestions(Pubnub::Channel* channel, const char* text, int limit, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text_dirty(
+    Pubnub::Channel* channel,
+    const char* message,
+    bool store_in_history,
+    bool send_by_post,
+    const char* meta,
+    int mentioned_users_length,
+    int* mentioned_users_indexes,
+    Pubnub::User** mentioned_users,
+    int referenced_channels_length,
+    int* referenced_channels_indexes,
+    Pubnub::Channel** referenced_channels,
+    const char* text_links_json,
+    Pubnub::Message* quoted_message);
+
 //PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
 //    char* user_suggestion_source,
 //    bool is_typing_indicator_triggered,

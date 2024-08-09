@@ -131,6 +131,22 @@ namespace PubNubChatAPI.Entities
         [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_user_suggestions(IntPtr channel, string text, int limit, StringBuilder result);
         
+        [DllImport("pubnub-chat")]
+        private static extern int pn_channel_send_text_dirty(
+            IntPtr channel,
+            string message,
+            bool store_in_history,
+            bool send_by_post,
+            string meta,
+            int mentioned_users_length,
+            int[] mentioned_users_indexes, 
+            IntPtr[] mentioned_users,
+            int referenced_channels_length,
+            int[] referenced_channels_indexes,
+            IntPtr[] referenced_channels,
+            string text_links_json,
+            IntPtr quoted_message);
+        
         #endregion
 
         /// <summary>
@@ -633,8 +649,25 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="OnMessageReceived"/>
         public virtual void SendText(string message)
         {
-            CUtilities.CheckCFunctionResult(pn_channel_send_text(pointer, message,
-                (byte)PubnubChatMessageType.Text, string.Empty));
+            SendText(message, new SendTextParams());
+        }
+
+        public void SendText(string message, SendTextParams sendTextParams)
+        {
+            CUtilities.CheckCFunctionResult(pn_channel_send_text_dirty(
+                pointer, 
+                message, 
+                sendTextParams.StoreInHistory, 
+                sendTextParams.SendByPost, 
+                sendTextParams.Meta,
+                sendTextParams.MentionedUsers.Count,
+                sendTextParams.MentionedUsers.Keys.ToArray(),
+                sendTextParams.MentionedUsers.Values.Select(x => x.Pointer).ToArray(),
+                sendTextParams.ReferencedChannels.Count,
+                sendTextParams.ReferencedChannels.Keys.ToArray(),
+                sendTextParams.ReferencedChannels.Values.Select(x => x.Pointer).ToArray(),
+                JsonConvert.SerializeObject(sendTextParams.TextLinks),
+                sendTextParams.QuotedMessage == null ? IntPtr.Zero : sendTextParams.QuotedMessage.Pointer));
         }
 
         /// <summary>
