@@ -587,7 +587,7 @@ PnCResult pn_chat_emit_event(Pubnub::Chat* chat, Pubnub::pubnub_chat_event_type 
     return PN_C_OK;
 }
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_unread_messages_counts(
+PnCResult pn_chat_get_unread_messages_counts(
         Pubnub::Chat* chat, 
         const char* filter, 
         const char* sort, 
@@ -742,6 +742,18 @@ PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit
 
     return PN_C_OK;
 }
+
+Pubnub::User* pn_chat_current_user(Pubnub::Chat* chat) {
+    try {
+        return new Pubnub::User(chat->current_user());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 
 
 

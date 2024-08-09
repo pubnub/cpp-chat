@@ -21,7 +21,13 @@ public class ChatTests
         user = chat.CreateUser("chats_tests_user");
         channel.Join();
     }
-    
+
+    [Test]
+    public void TestGetCurrentUser()
+    {
+        Assert.True(chat.TryGetCurrentUser(out var currentUser) && currentUser.Id == user.Id);
+    }
+
     [Test]
     public async Task TestGetUserSuggestions()
     {

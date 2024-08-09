@@ -273,6 +273,9 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern int pn_chat_get_user_suggestions(IntPtr chat, string text, int limit, StringBuilder result);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_chat_current_user(IntPtr chat);
         
         #endregion
 
@@ -822,6 +825,13 @@ namespace PubNubChatAPI.Entities
 
         #region Users
 
+        public bool TryGetCurrentUser(out User user)
+        {
+            var userPointer = pn_chat_current_user(chatPointer);
+            CUtilities.CheckCFunctionResult(userPointer);
+            return TryGetUser(userPointer, out user);
+        }
+        
         public List<User> GetUserSuggestions(string text, int limit = 10)
         {
             var buffer = new StringBuilder(2048);
@@ -1057,6 +1067,12 @@ namespace PubNubChatAPI.Entities
         {
             var userPointer = pn_chat_get_user(chatPointer, userId);
             return TryGetUser(userId, userPointer, out user);
+        }
+
+        internal bool TryGetUser(IntPtr userPointer, out User user)
+        {
+            var id = User.GetUserIdFromPtr(userPointer);
+            return TryGetUser(id, userPointer, out user);
         }
 
         internal bool TryGetUser(string userId, IntPtr userPointer, out User user)
