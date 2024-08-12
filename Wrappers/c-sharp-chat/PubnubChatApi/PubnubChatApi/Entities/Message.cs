@@ -258,18 +258,6 @@ namespace PubNubChatAPI.Entities
             }
         }
 
-        //TODO: format to list? We have the struct for it now
-        //TODO: REMOVE THAT
-        public string MessageActions
-        {
-            get
-            {
-                var buffer = new StringBuilder(4096);
-                pn_message_get_data_message_actions(pointer, buffer);
-                return buffer.ToString();
-            }
-        }
-
         /// <summary>
         /// The data type of the message.
         /// <para>
