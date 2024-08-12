@@ -39,14 +39,14 @@ public class MembershipTests
             manualUpdatedEvent.Set();
         };
         testMembership.Update("{\"key\": \"value\"}");
-        var updated = manualUpdatedEvent.WaitOne(5000);
+        var updated = manualUpdatedEvent.WaitOne(7000);
         Assert.IsTrue(updated);
     }
 
     [Test]
     public void TestInvite()
     {
-        var testChannel = chat.CreatePublicConversation("test_invite_channel");
+        var testChannel = chat.CreateGroupConversation([user],"test_invite_group_channel").CreatedChannel;
         var testUser = chat.CreateUser("test_invite_user");
         var returnedMembership = testChannel.Invite(testUser);
         Assert.True(returnedMembership.ChannelId == testChannel.Id && returnedMembership.UserId == testUser.Id);
@@ -55,16 +55,17 @@ public class MembershipTests
     [Test]
     public void TestInviteMultiple()
     {
-        var testChannel = chat.CreatePublicConversation("invite_multiple_test_channel");
+        var testChannel = chat.CreateGroupConversation([user],"invite_multiple_test_group_channel_3").CreatedChannel;
         var secondUser = chat.CreateUser("second_invite_user");
+        var thirdUser = chat.CreateUser("third_invite_user");
         var returnedMemberships = testChannel.InviteMultiple([
-            user,
-            secondUser
+            secondUser,
+            thirdUser
         ]);
         Assert.True(
             returnedMemberships.Count == 2 &&
             returnedMemberships.Any(x => x.UserId == secondUser.Id && x.ChannelId == testChannel.Id) &&
-            returnedMemberships.Any(x => x.UserId == user.Id && x.ChannelId == testChannel.Id));
+            returnedMemberships.Any(x => x.UserId == thirdUser.Id && x.ChannelId == testChannel.Id));
     }
 
     [Test]

@@ -87,10 +87,10 @@ public class ChatTests
         var convoUser = chat.CreateUser("direct_conversation_user");
         var directConversation =
             chat.CreateDirectConversation(convoUser, "direct_conversation_test");
-        Assert.True(directConversation.createdChannel is { Id: "direct_conversation_test" });
-        Assert.True(directConversation.hostMembership != null && directConversation.hostMembership.UserId == user.Id);
-        Assert.True(directConversation.inviteeMembership != null &&
-                    directConversation.inviteeMembership.UserId == convoUser.Id);
+        Assert.True(directConversation.CreatedChannel is { Id: "direct_conversation_test" });
+        Assert.True(directConversation.HostMembership != null && directConversation.HostMembership.UserId == user.Id);
+        Assert.True(directConversation.InviteesMemberships != null &&
+                    directConversation.InviteesMemberships.First().UserId == convoUser.Id);
     }
 
     [Test]
@@ -101,10 +101,10 @@ public class ChatTests
         var convoUser3 = chat.CreateUser("group_conversation_user_3");
         var groupConversation =
             chat.CreateGroupConversation([convoUser1, convoUser2, convoUser3], "group_conversation_test");
-        Assert.True(groupConversation.createdChannel is { Id: "group_conversation_test" });
-        Assert.True(groupConversation.hostMembership != null && groupConversation.hostMembership.UserId == user.Id);
-        Assert.True(groupConversation.inviteeMemberships is { Count: 3 });
-        Assert.True(groupConversation.inviteeMemberships.Any(x =>
+        Assert.True(groupConversation.CreatedChannel is { Id: "group_conversation_test" });
+        Assert.True(groupConversation.HostMembership != null && groupConversation.HostMembership.UserId == user.Id);
+        Assert.True(groupConversation.InviteesMemberships is { Count: 3 });
+        Assert.True(groupConversation.InviteesMemberships.Any(x =>
             x.UserId == convoUser1.Id && x.ChannelId == "group_conversation_test"));
     }
 

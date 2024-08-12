@@ -344,7 +344,6 @@ namespace PubNubChatAPI.Entities
 
                 foreach (var pointer in pubnubV2MessagePointers)
                 {
-                    //TODO: this handling is temporary until Events are actual entities
                     //Events (json for now)
                     var allEventsBuffer = new StringBuilder(16384);
                     if (pn_deserialize_event(pointer, allEventsBuffer) != -1)
@@ -622,14 +621,12 @@ namespace PubNubChatAPI.Entities
             return channel;
         }
 
-        public (Channel createdChannel, Membership hostMembership, Membership inviteeMembership)
-            CreateDirectConversation(User user, string channelId)
+        public CreatedChannelWrapper CreateDirectConversation(User user, string channelId)
         {
             return CreateDirectConversation(user, channelId, new ChatChannelData());
         }
 
-        public (Channel createdChannel, Membership hostMembership, Membership inviteeMembership)
-            CreateDirectConversation(User user, string channelId, ChatChannelData channelData)
+        public CreatedChannelWrapper CreateDirectConversation(User user, string channelId, ChatChannelData channelData)
         {
             var wrapperPointer = pn_chat_create_direct_conversation_dirty(chatPointer, user.Pointer, channelId,
                 channelData.ChannelName,
@@ -652,17 +649,20 @@ namespace PubNubChatAPI.Entities
 
             pn_chat_dispose_created_channel_wrapper(wrapperPointer);
 
-            return (createdChannel, hostMembership, inviteeMembership);
+            return new CreatedChannelWrapper()
+            {
+                CreatedChannel = createdChannel,
+                HostMembership = hostMembership,
+                InviteesMemberships = new List<Membership>() { inviteeMembership }
+            };
         }
 
-        public (Channel createdChannel, Membership hostMembership, List<Membership> inviteeMemberships)
-            CreateGroupConversation(List<User> users, string channelId)
+        public CreatedChannelWrapper CreateGroupConversation(List<User> users, string channelId)
         {
             return CreateGroupConversation(users, channelId, new ChatChannelData());
         }
 
-        public (Channel createdChannel, Membership hostMembership, List<Membership> inviteeMemberships)
-            CreateGroupConversation(List<User> users, string channelId, ChatChannelData channelData)
+        public CreatedChannelWrapper CreateGroupConversation(List<User> users, string channelId, ChatChannelData channelData)
         {
             var wrapperPointer = pn_chat_create_group_conversation_dirty(chatPointer,
                 users.Select(x => x.Pointer).ToArray(), users.Count, channelId, channelData.ChannelName,
@@ -685,7 +685,12 @@ namespace PubNubChatAPI.Entities
 
             pn_chat_dispose_created_channel_wrapper(wrapperPointer);
 
-            return (createdChannel, hostMembership, inviteeMemberships);
+            return new CreatedChannelWrapper()
+            {
+                CreatedChannel = createdChannel,
+                HostMembership = hostMembership,
+                InviteesMemberships = inviteeMemberships
+            };
         }
 
         /// <summary>
@@ -1154,6 +1159,7 @@ namespace PubNubChatAPI.Entities
             {
                 existingUserWrapper.UpdatePointer(newPointer);
             }
+            //TODO: could and should this ever actually happen?
             else
             {
                 userWrappers.Add(userId, new User(this, userId, newPointer));
@@ -1533,8 +1539,6 @@ namespace PubNubChatAPI.Entities
 
         #endregion
 
-        //TODO: use enum instead of all these methods?
-
         #region Events
 
         public EventsHistoryWrapper GetEventsHistory(string channelId, string startTimeToken, string endTimeToken, int count)
@@ -1578,8 +1582,7 @@ namespace PubNubChatAPI.Entities
         {
             ListenForEvents(userId, PubnubChatEventType.Moderation);
         }
-
-        //TODO: I added that here but probably it is not the best place:
+        
         /// <summary>
         /// Starts listening for events.
         /// <para>

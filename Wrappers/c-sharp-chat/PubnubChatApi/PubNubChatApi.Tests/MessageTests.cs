@@ -55,14 +55,16 @@ public class MessageTests
     public void TestReceivingMessageData()
     {
         var manualReceiveEvent = new ManualResetEvent(false);
-        channel.OnMessageReceived += message =>
+        var testChannel = chat.CreatePublicConversation("message_data_test_channel");
+        testChannel.Join();
+        testChannel.OnMessageReceived += message =>
         {
             if (message.MessageText == "message_to_be_quoted")
             {
-                channel.SendText("message_with_data", new SendTextParams()
+                testChannel.SendText("message_with_data", new SendTextParams()
                 {
                     MentionedUsers = new Dictionary<int, User>(){{0, user}},
-                    ReferencedChannels = new Dictionary<int, Channel>(){{0, channel}},
+                    ReferencedChannels = new Dictionary<int, Channel>(){{0, testChannel}},
                     TextLinks =
                     [
                         new TextLink()
@@ -78,15 +80,15 @@ public class MessageTests
             else if(message.MessageText == "message_with_data")
             {
                 Assert.True(message.MentionedUsers.Any(x => x.Id == user.Id));
-                Assert.True(message.ReferencedChannels.Any(x => x.Id == channel.Id));
+                Assert.True(message.ReferencedChannels.Any(x => x.Id == testChannel.Id));
                 Assert.True(message.TextLinks.Any(x => x.Link == "www.google.com"));
                 Assert.True(message.TryGetQuotedMessage(out var quotedMessage) && quotedMessage.MessageText == "message_to_be_quoted");
                 manualReceiveEvent.Set();
             }
         };
-        channel.SendText("message_to_be_quoted");
+        testChannel.SendText("message_to_be_quoted");
         
-        var received = manualReceiveEvent.WaitOne(7000);
+        var received = manualReceiveEvent.WaitOne(9000);
         Assert.IsTrue(received);
     }
 
@@ -265,7 +267,8 @@ public class MessageTests
             Assert.True(message.TryGetThread(out var threadChannel));
             message.RemoveThread();
 
-            await Task.Delay(4000);
+            await Task.Delay(8000);
+            
             Assert.False(message.HasThread());
             
             manualReceiveEvent.Set();

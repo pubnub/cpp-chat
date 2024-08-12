@@ -227,7 +227,7 @@
             </code>
             </example>
             <exception cref="!:PubnubCCoreException">Thrown when an error occurs while setting the restrictions.</exception>
-            <seealso cref="M:PubNubChatAPI.Entities.Channel.GetUserRestriction(System.String,System.Int32,System.String,System.String)"/>
+            <seealso cref="M:PubNubChatAPI.Entities.Channel.GetUserRestrictions(PubNubChatAPI.Entities.User)"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.Channel.SendText(System.String)">
             <summary>
@@ -247,7 +247,7 @@
             <exception cref="!:PubnubCCoreException">Thrown when an error occurs while sending the message.</exception>
             <seealso cref="E:PubNubChatAPI.Entities.Channel.OnMessageReceived"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Channel.UpdateChannel(PubNubChatAPI.Entities.ChatChannelData)">
+        <member name="M:PubNubChatAPI.Entities.Channel.Update(PubnubChatApi.Entities.Data.ChatChannelData)">
             <summary>
             Updates the channel.
             <para>
@@ -269,9 +269,9 @@
             </example>
             <exception cref="!:PubnubCCoreException">Thrown when an error occurs while updating the channel.</exception>
             <seealso cref="E:PubNubChatAPI.Entities.Channel.OnChannelUpdate"/>
-            <seealso cref="T:PubNubChatAPI.Entities.ChatChannelData"/>
+            <seealso cref="T:PubnubChatApi.Entities.Data.ChatChannelData"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Channel.DeleteChannel">
+        <member name="M:PubNubChatAPI.Entities.Channel.Delete">
             <summary>
             Deletes the channel.
             <para>
@@ -286,7 +286,7 @@
             </example>
             <exception cref="!:PubnubCCoreException">Thrown when an error occurs while deleting the channel.</exception>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Channel.GetUserRestriction(System.String,System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.Channel.GetUserRestrictions(PubNubChatAPI.Entities.User)">
             <summary>
             Gets the user restrictions.
             <para>
@@ -351,7 +351,7 @@
             <exception cref="!:PubnubCCoreException">Thrown when an error occurs while getting the list of users present in the channel.</exception>
             <seealso cref="M:PubNubChatAPI.Entities.Channel.IsUserPresent(System.String)"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Channel.GetMemberships(System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.Channel.GetMemberships(System.String,System.String,System.Int32,PubnubChatApi.Entities.Data.Page)">
             <summary>
             Gets the list of the <c>Membership</c> objects.
             <para>
@@ -395,33 +395,6 @@
             </code>
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Message"/>
-        </member>
-        <member name="T:PubNubChatAPI.Entities.ChatUserData">
-            <summary>
-            Data class for the chat user.
-            <para>
-            Contains all the data related to the chat user.
-            </para>
-            </summary>
-            <remarks>
-            By default, all the properties are set to empty strings.
-            </remarks>
-        </member>
-        <member name="T:PubNubChatAPI.Entities.ChatChannelData">
-            <summary>
-            Data class for the chat channel.
-            <para>
-            Contains all the data related to the chat channel.
-            </para>
-            </summary>
-            <remarks>
-            By default, all the properties are set to empty strings.
-            </remarks>
-        </member>
-        <member name="T:PubNubChatAPI.Entities.Restriction">
-            <summary>
-            Data struct for restriction.
-            </summary>
         </member>
         <member name="T:PubNubChatAPI.Entities.Chat">
             <summary>
@@ -470,7 +443,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Channel"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.CreatePublicConversation(System.String,PubNubChatAPI.Entities.ChatChannelData)">
+        <member name="M:PubNubChatAPI.Entities.Chat.CreatePublicConversation(System.String,PubnubChatApi.Entities.Data.ChatChannelData)">
             <summary>
             Creates a new public conversation.
             <para>
@@ -491,7 +464,7 @@
             </code>
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Channel"/>
-            <seealso cref="T:PubNubChatAPI.Entities.ChatChannelData"/>
+            <seealso cref="T:PubnubChatApi.Entities.Data.ChatChannelData"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.Chat.TryGetChannel(System.String,PubNubChatAPI.Entities.Channel@)">
             <summary>
@@ -513,7 +486,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Channel"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.UpdateChannel(System.String,PubNubChatAPI.Entities.ChatChannelData)">
+        <member name="M:PubNubChatAPI.Entities.Chat.UpdateChannel(System.String,PubnubChatApi.Entities.Data.ChatChannelData)">
             <summary>
             Updates the channel with the provided channel ID.
             <para>
@@ -532,7 +505,7 @@
              });
             </code>
             </example>
-            <seealso cref="T:PubNubChatAPI.Entities.ChatChannelData"/>
+            <seealso cref="T:PubnubChatApi.Entities.Data.ChatChannelData"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.Chat.DeleteChannel(System.String)">
             <summary>
@@ -591,7 +564,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.User"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.CreateUser(System.String,PubNubChatAPI.Entities.ChatUserData)">
+        <member name="M:PubNubChatAPI.Entities.Chat.CreateUser(System.String,PubnubChatApi.Entities.Data.ChatUserData)">
             <summary>
             Creates a new user with the provided user ID.
             <para>
@@ -697,7 +670,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.User"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.GetUsers(System.String,System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.Chat.GetUsers(System.String,System.String,System.Int32,PubnubChatApi.Entities.Data.Page)">
             <summary>
             Gets the list of users with the provided parameters.
             <para>
@@ -726,7 +699,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.User"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.UpdateUser(System.String,PubNubChatAPI.Entities.ChatUserData)">
+        <member name="M:PubNubChatAPI.Entities.Chat.UpdateUser(System.String,PubnubChatApi.Entities.Data.ChatUserData)">
             <summary>
             Updates the user with the provided user ID.
             <para>
@@ -745,7 +718,7 @@
             });
             </code>
             </example>
-            <seealso cref="T:PubNubChatAPI.Entities.ChatUserData"/>
+            <seealso cref="T:PubnubChatApi.Entities.Data.ChatUserData"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.Chat.DeleteUser(System.String)">
             <summary>
@@ -763,7 +736,7 @@
             </code>
             </example>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.GetUserMemberships(System.String,System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.Chat.GetUserMemberships(System.String,System.String,System.String,System.Int32,PubnubChatApi.Entities.Data.Page)">
             <summary>
             Gets the memberships of the user with the provided user ID.
             <para>
@@ -793,7 +766,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Membership"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.GetChannelMemberships(System.String,System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.Chat.GetChannelMemberships(System.String,System.String,System.String,System.Int32,PubnubChatApi.Entities.Data.Page)">
             <summary>
             Gets the memberships of the channel with the provided channel ID.
             <para>
@@ -870,18 +843,7 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Message"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.StartListeningForUserModerationEvents(System.String)">
-            <summary>
-            Start listening for Moderation Events for this UserId.
-            </summary>
-            <param name="userId">User whose Moderation Events are to be broadcast.</param>
-        </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.StartListeningForReportEvents">
-            <summary>
-            Start listening for Report Events.
-            </summary>
-        </member>
-        <member name="M:PubNubChatAPI.Entities.Chat.ListenForEvents(System.String)">
+        <member name="M:PubNubChatAPI.Entities.Chat.ListenForEvents(System.String,PubnubChatApi.Enums.PubnubChatEventType)">
             <summary>
             Starts listening for events.
             <para>
@@ -1025,7 +987,7 @@
             </para>
             </summary>
         </member>
-        <member name="P:PubNubChatAPI.Entities.Message.DataType">
+        <member name="P:PubNubChatAPI.Entities.Message.Type">
             <summary>
             The data type of the message.
             <para>
@@ -1053,7 +1015,7 @@
             </code>
             </example>
             <seealso cref="M:PubNubChatAPI.Entities.Message.EditMessageText(System.String)"/>
-            <seealso cref="M:PubNubChatAPI.Entities.Message.DeleteMessage"/>
+            <seealso cref="M:PubNubChatAPI.Entities.Message.Delete(System.Boolean)"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.Message.EditMessageText(System.String)">
             <summary>
@@ -1072,7 +1034,7 @@
             </example>
             <seealso cref="E:PubNubChatAPI.Entities.Message.OnMessageUpdated"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.Message.DeleteMessage">
+        <member name="M:PubNubChatAPI.Entities.Message.Delete(System.Boolean)">
             <summary>
             Deletes the message.
             <para>
@@ -1172,10 +1134,10 @@
             };
             </code>
             </example>
-            <seealso cref="M:PubNubChatAPI.Entities.User.UpdateUser(PubNubChatAPI.Entities.ChatUserData)"/>
+            <seealso cref="M:PubNubChatAPI.Entities.User.Update(PubnubChatApi.Entities.Data.ChatUserData)"/>
             <seealso cref="T:PubNubChatAPI.Entities.User"/>
         </member>
-        <member name="M:PubNubChatAPI.Entities.User.UpdateUser(PubNubChatAPI.Entities.ChatUserData)">
+        <member name="M:PubNubChatAPI.Entities.User.Update(PubnubChatApi.Entities.Data.ChatUserData)">
             <summary>
             Updates the user.
             <para>
@@ -1195,7 +1157,7 @@
             });
             </code>
             </example>
-            <seealso cref="T:PubNubChatAPI.Entities.ChatUserData"/>
+            <seealso cref="T:PubnubChatApi.Entities.Data.ChatUserData"/>
         </member>
         <member name="M:PubNubChatAPI.Entities.User.DeleteUser">
             <summary>
@@ -1237,7 +1199,7 @@
             </code>
             </example>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:PubNubChatAPI.Entities.User.GetChannelRestriction(System.String,System.Int32,System.String,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:PubNubChatAPI.Entities.User.GetChannelRestrictions(PubNubChatAPI.Entities.Channel)" -->
         <member name="M:PubNubChatAPI.Entities.User.ReportUser(System.String)">
             <summary>
             Reports the user.
@@ -1306,7 +1268,7 @@
             </code>
             </example>
         </member>
-        <member name="M:PubNubChatAPI.Entities.User.GetMemberships(System.Int32,System.String,System.String)">
+        <member name="M:PubNubChatAPI.Entities.User.GetMemberships(System.String,System.String,System.Int32,PubnubChatApi.Entities.Data.Page)">
             <summary>
             Gets the list of memberships of the user.
             <para>
@@ -1334,7 +1296,34 @@
             </example>
             <seealso cref="T:PubNubChatAPI.Entities.Membership"/>
         </member>
-        <member name="T:PubnubChatApi.Enums.pubnub_chat_message_type">
+        <member name="T:PubnubChatApi.Entities.Data.ChatChannelData">
+            <summary>
+            Data class for the chat channel.
+            <para>
+            Contains all the data related to the chat channel.
+            </para>
+            </summary>
+            <remarks>
+            By default, all the properties are set to empty strings.
+            </remarks>
+        </member>
+        <member name="T:PubnubChatApi.Entities.Data.ChatUserData">
+            <summary>
+            Data class for the chat user.
+            <para>
+            Contains all the data related to the chat user.
+            </para>
+            </summary>
+            <remarks>
+            By default, all the properties are set to empty strings.
+            </remarks>
+        </member>
+        <member name="T:PubnubChatApi.Entities.Data.Restriction">
+            <summary>
+            Data struct for restriction.
+            </summary>
+        </member>
+        <member name="T:PubnubChatApi.Enums.PubnubChatMessageType">
             <summary>
             Represents the type of a chat message.
             <para>

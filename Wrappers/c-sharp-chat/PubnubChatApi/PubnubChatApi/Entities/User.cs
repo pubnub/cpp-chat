@@ -349,6 +349,7 @@ namespace PubNubChatAPI.Entities
             return wrapper;
         }
 
+        //TODO: fully remove once 100% sure it's obsolete
         /// <summary>
         /// Reports the user.
         /// <para>
@@ -366,10 +367,10 @@ namespace PubNubChatAPI.Entities
         /// user.ReportUser("Inappropriate behavior");
         /// </code>
         /// </example>
-        public void ReportUser(string reason)
+        /*public void ReportUser(string reason)
         {
             CUtilities.CheckCFunctionResult(pn_user_report(pointer, reason));
-        }
+        }*/
 
         /// <summary>
         /// Checks if the user is present on the channel.

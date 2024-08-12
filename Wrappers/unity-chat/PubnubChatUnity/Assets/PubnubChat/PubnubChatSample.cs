@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using PubNubChatAPI.Entities;
+using PubnubChatApi.Entities.Data;
 using UnityEngine;
 
 /// <summary>
@@ -19,14 +20,14 @@ public class PubnubChatSample : MonoBehaviour
         }
         
         //Define the main user ID
-        var mainUserId = "mainUser";
+        var mainUserId = "mainUser_5";
         //Initialize Chat instance with Pubnub keys + user ID
         var chat = new Chat(pubnubPubKey, pubnubSubKey, mainUserId);
         //Create main user handle
         var user = chat.CreateUser(mainUserId);
         
         //Create a new channel
-        var channel = chat.CreatePublicConversation("MainChannel");
+        var channel = chat.CreatePublicConversation("MainChannel_5");
         //Define reaction on receiving new messages
         channel.OnMessageReceived += message => Debug.Log($"Received message: {message.MessageText}");
         //Join channel
@@ -35,13 +36,13 @@ public class PubnubChatSample : MonoBehaviour
         channel.SendText("Hello World from Pubnub!");
         
         //React on user data being updated
-        user.OnUserUpdated += updatedUser =>
+        /*user.OnUserUpdated += updatedUser =>
             Debug.Log($"{updatedUser.Id} has been updated! Their name is now {updatedUser.UserName}");
         //Update our user data
-        user.UpdateUser(new ChatUserData()
+        user.Update(new ChatUserData()
         {
             Username = "FancyUserName"
-        });
+        });*/
         
         //Send a few more messages
         channel.SendText("Hi!");
@@ -50,7 +51,7 @@ public class PubnubChatSample : MonoBehaviour
         channel.SendText("Me!");
 
         //Wait a moment to wait for them to be processed
-        await Task.Delay(3000);
+        await Task.Delay(15000);
         
         //Fetch message history (from all time)
         foreach (var historyMessage in channel.GetMessageHistory("99999999999999999", "00000000000000000", 50))
@@ -59,8 +60,8 @@ public class PubnubChatSample : MonoBehaviour
         }
         
         //Get main users memberships
-        var userMemberships = user.GetMemberships(50, "99999999999999999", "00000000000000000");
-        foreach (var userMembership in userMemberships)
+        var userMembershipsWrapper = user.GetMemberships();
+        foreach (var userMembership in userMembershipsWrapper.Memberships)
         {
             Debug.Log($"Membership - User: {userMembership.UserId}, Channel: {userMembership.ChannelId}");
         }
@@ -74,10 +75,10 @@ public class PubnubChatSample : MonoBehaviour
         });
        
         //Wait a moment to wait for the restriction to be registered
-        await Task.Delay(3000);
+        await Task.Delay(15000);
         
         //Print channel's user restriction
-        var restriction = channel.GetUserRestriction(user.Id, 50, "99999999999999999", "00000000000000000");
+        var restriction = channel.GetUserRestrictions(user);
         Debug.Log($"{user.Id}'s ban status is: {restriction.Ban}, reason: {restriction.Reason}");
     }
 }

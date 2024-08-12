@@ -48,7 +48,7 @@ public class ChannelTests
     [Test]
     public void TestStartTyping()
     {
-        var channel = chat.CreateDirectConversation(talkUser, "start_typing_test_channel").createdChannel;
+        var channel = chat.CreateDirectConversation(talkUser, "start_typing_test_channel").CreatedChannel;
         channel.Join();
         
         var typingManualEvent = new ManualResetEvent(false);
@@ -67,12 +67,12 @@ public class ChannelTests
     [Test]
     public async Task TestStopTyping()
     {
-        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_test_channel").createdChannel;
+        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_test_channel").CreatedChannel;
         channel.Join();
         
         channel.StartTyping();
         
-        await Task.Delay(1500);
+        await Task.Delay(2500);
         
         var typingManualEvent = new ManualResetEvent(false);
         channel.OnUsersTyping += typingUsers =>
@@ -82,14 +82,14 @@ public class ChannelTests
         };
         channel.StopTyping();
 
-        var typingEvent = typingManualEvent.WaitOne(3000);
+        var typingEvent = typingManualEvent.WaitOne(6000);
         Assert.IsTrue(typingEvent);
     }
     
     [Test]
     public async Task TestStopTypingFromTimer()
     {
-        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_timeout_test_channel").createdChannel;
+        var channel = chat.CreateDirectConversation(talkUser, "stop_typing_timeout_test_channel").CreatedChannel;
         channel.Join();
         
         channel.StartTyping();

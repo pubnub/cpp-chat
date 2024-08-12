@@ -21,7 +21,8 @@ public class ChatEventTests
         channel.Join();
     }
     
-    [Test]
+    //TODO: fully remove once 100% sure it's obsolete
+    /*[Test]
     public void TestReportEvents()
     {
         var manualReportedEvent = new ManualResetEvent(false);
@@ -34,7 +35,7 @@ public class ChatEventTests
         user.ReportUser("some_reason");
         var reported = manualReportedEvent.WaitOne(4000);
         Assert.IsTrue(reported);
-    }
+    }*/
     
     [Test]
     public void TestModerationEvents()

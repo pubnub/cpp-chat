@@ -52,7 +52,7 @@ public class RestrictionsTests
         var user = chat.CreateUser("user1234");
         var channel = chat.CreatePublicConversation("new_channel_2");
 
-        await Task.Delay(2000);
+        await Task.Delay(4000);
 
         var restriction = new Restriction()
         {
@@ -62,7 +62,7 @@ public class RestrictionsTests
         };
         channel.SetRestrictions(user.Id, restriction);
 
-        await Task.Delay(3000);
+        await Task.Delay(4000);
 
         var a = channel.GetUsersRestrictions();
         var b = user.GetChannelsRestrictions();

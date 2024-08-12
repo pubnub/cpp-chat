@@ -59,7 +59,7 @@ Pubnub::User* pn_user_update_dirty(
     user_data.type = type;
 
     try {
-        new Pubnub::User(user->update(user_data));
+        return new Pubnub::User(user->update(user_data));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
