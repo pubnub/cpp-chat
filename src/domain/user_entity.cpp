@@ -35,22 +35,39 @@ Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
 }
 
 UserEntity UserEntity::from_json(Json user_json) {
-    return UserEntity{
-        user_json.get_string("name").value_or(Pubnub::String()),
-        user_json.get_string("externalId").value_or(Pubnub::String()),
-        user_json.get_string("profileUrl").value_or(Pubnub::String()),
-        user_json.get_string("email").value_or(Pubnub::String()),
-        user_json.contains("custom") ? user_json["custom"].dump() : Pubnub::String(),
-        user_json.get_string("status").value_or(Pubnub::String()),
-        user_json.get_string("type").value_or(Pubnub::String())
-    };
+    UserEntity new_entity;
+    if(user_json.contains("uuid") && !user_json["uuid"].is_null())
+    {
+        new_entity.user_name = user_json["uuid"].get_string("name").value_or(Pubnub::String());
+        new_entity.external_id = user_json["uuid"].get_string("externalId").value_or(Pubnub::String());
+        new_entity.profile_url = user_json["uuid"].get_string("profileUrl").value_or(Pubnub::String());
+        new_entity.email = user_json["uuid"].get_string("email").value_or(Pubnub::String());
+    }
+    else
+    {
+        new_entity.user_name = user_json.get_string("name").value_or(Pubnub::String());
+        new_entity.external_id = user_json.get_string("externalId").value_or(Pubnub::String());
+        new_entity.profile_url = user_json.get_string("profileUrl").value_or(Pubnub::String());
+        new_entity.email = user_json.get_string("email").value_or(Pubnub::String());
+    
+    }
+    new_entity.custom_data_json = user_json.contains("custom") ? user_json["custom"].dump() : Pubnub::String();
+    new_entity.status = user_json.get_string("status").value_or(Pubnub::String()),
+    new_entity.type = user_json.get_string("type").value_or(Pubnub::String());
+    
+    return new_entity;
 }
 
 UserEntity UserEntity::from_user_response(Json response) {
-    //In most responses this data field is an array but in some cases (for example in get_user) it's just an object.
-    Json user_data_json = response["data"].is_array() ? response["data"][0] : response["data"];
-
-    return UserEntity::from_json(user_data_json);
+    return UserEntity{
+        response.get_string("name").value_or(Pubnub::String()),
+        response.get_string("externalId").value_or(Pubnub::String()),
+        response.get_string("profileUrl").value_or(Pubnub::String()),
+        response.get_string("email").value_or(Pubnub::String()),
+        response.contains("custom") ? response["custom"].dump() : Pubnub::String(),
+        response.get_string("status").value_or(Pubnub::String()),
+        response.get_string("type").value_or(Pubnub::String())
+    };
 }
 
 std::vector<std::pair<UserEntity::UserId, UserEntity>> UserEntity::from_user_list_response(Json response) {

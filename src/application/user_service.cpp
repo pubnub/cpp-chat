@@ -64,7 +64,7 @@ User UserService::get_user(const String& user_id) const
     }
 
     //In most responses this data field is an array but in some cases (for example in get_channel) it's just an object.
-    UserEntity new_user_entity = UserEntity::from_user_response(response_json);
+    UserEntity new_user_entity = UserEntity::from_user_response(response_json["data"]);
 
     return this->create_user_object({user_id, UserDAO(new_user_entity)});
 }
