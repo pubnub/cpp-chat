@@ -96,23 +96,6 @@ void pn_message_get_data_meta(Pubnub::Message* message, char* result) {
     strcpy(result, data_meta.c_str());
 }
 
-void pn_message_get_data_message_actions(Pubnub::Message* message, char* result) {
-    // TODO: implement
-}
-
-PnCResult pn_message_pin(Pubnub::Message* message) {
-    try {
-        message->pin();
-    }
-    catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
-
-        return PN_C_ERROR;
-    }
-
-    return PN_C_OK;
-}
-
 // TODO: utils
 static void message_action_to_json(nlohmann::json& j, const Pubnub::MessageAction data) {
     j = nlohmann::json{
@@ -149,6 +132,35 @@ const char* jsonize_reactions(std::vector<Pubnub::MessageAction> reactions) {
     memcpy(c_result, result.c_str(), result.length() + 1);
 
     return c_result;
+}
+
+PnCResult pn_message_get_data_message_actions(Pubnub::Message* message, char* result) {
+    try {
+        auto message_actions = message->message_data().message_actions.into_std_vector();
+        auto jsonised = jsonize_reactions(message_actions);
+        strcpy(result, jsonised);
+        delete[] jsonised;
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_message_pin(Pubnub::Message* message) {
+    try {
+        message->pin();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
 }
 
 PnCResult pn_message_get_reactions(Pubnub::Message* message, char* reactions_json) {

@@ -214,7 +214,7 @@ public class MessageTests
 
             var has = message.HasUserReaction("happy");
             Assert.True(has);
-            var reactions = message.Reactions(); 
+            var reactions = message.Reactions; 
             Assert.True(reactions.Count == 1 && reactions.Any(x => x.Value == "happy"));
             manualReset.Set();
         };

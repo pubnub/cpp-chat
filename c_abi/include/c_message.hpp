@@ -36,7 +36,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_get_data_user_id(Pubnub::Message* 
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_get_data_meta(Pubnub::Message* message, char* result);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_get_data_message_actions(Pubnub::Message* message, char* result);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_get_data_message_actions(Pubnub::Message* message, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_pin(Pubnub::Message* message);
 

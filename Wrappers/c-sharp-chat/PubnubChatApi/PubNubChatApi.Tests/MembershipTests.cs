@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PubNubChatAPI.Entities;
 
 namespace PubNubChatApi.Tests;
@@ -30,8 +31,13 @@ public class MembershipTests
     [Test]
     public void TestUpdateMemberships()
     {
-        var memberships = user.GetMemberships(limit:50);
-        var testMembership = memberships.Memberships[0];
+        var memberships = user.GetMemberships();
+        var testMembership = memberships.Memberships.FirstOrDefault(x => x.ChannelId == channel.Id);
+        if (testMembership == null)
+        {
+            Assert.Fail();
+            return;
+        }
         var manualUpdatedEvent = new ManualResetEvent(false);
         testMembership.OnMembershipUpdated += membership =>
         {
@@ -110,13 +116,7 @@ public class MembershipTests
     [Test]
     public async Task TestUnreadMessagesCount()
     {
-        if (chat.TryGetChannel("unread_count_test_channel", out var existingChannel))
-        {
-            chat.DeleteChannel(existingChannel.Id);
-            await Task.Delay(6000);
-        }
-
-        var unreadChannel = chat.CreatePublicConversation("unread_count_test_channel");
+        var unreadChannel = chat.CreatePublicConversation($"test_channel_{Guid.NewGuid()}");
         unreadChannel.Join();
         unreadChannel.SendText("one");
         unreadChannel.SendText("two");

@@ -60,7 +60,7 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_message_get_data_meta(IntPtr message, StringBuilder result);
 
         [DllImport("pubnub-chat")]
-        private static extern void pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
+        private static extern int pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
 
         [DllImport("pubnub-chat")]
         private static extern int pn_message_pin(IntPtr message);
@@ -258,6 +258,37 @@ namespace PubNubChatAPI.Entities
             }
         }
 
+        private List<MessageAction> DeserializeMessageActions(string json)
+        {
+            var reactions = new List<MessageAction>();
+            if (CUtilities.IsValidJson(json))
+            {
+                reactions = JsonConvert.DeserializeObject<List<MessageAction>>(json);
+                reactions ??= new List<MessageAction>();
+            }
+            return reactions;
+        }
+        
+        public List<MessageAction> MessageActions
+        {
+            get
+            {
+                var buffer = new StringBuilder(4096);
+                CUtilities.CheckCFunctionResult(pn_message_get_data_message_actions(pointer, buffer));
+                return DeserializeMessageActions(buffer.ToString());
+            }
+        }
+        
+        public List<MessageAction> Reactions
+        {
+            get
+            {
+                var buffer = new StringBuilder(4096);
+                CUtilities.CheckCFunctionResult(pn_message_get_reactions(pointer, buffer));
+                return DeserializeMessageActions(buffer.ToString());
+            }
+        }
+
         /// <summary>
         /// The data type of the message.
         /// <para>
@@ -393,20 +424,6 @@ namespace PubNubChatAPI.Entities
             {
                 chat.ForwardMessage(this, channel);
             }
-        }
-
-        public List<MessageAction> Reactions()
-        {
-            var buffer = new StringBuilder(4096);
-            CUtilities.CheckCFunctionResult(pn_message_get_reactions(pointer, buffer));
-            var reactionsJson = buffer.ToString();
-            var reactions = new List<MessageAction>();
-            if (CUtilities.IsValidJson(reactionsJson))
-            {
-                reactions = JsonConvert.DeserializeObject<List<MessageAction>>(reactionsJson);
-                reactions ??= new List<MessageAction>();
-            }
-            return reactions;
         }
 
         public bool HasUserReaction(string reactionValue)
