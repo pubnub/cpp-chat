@@ -520,8 +520,16 @@ void PubNub::remove_message_action(const Pubnub::String channel, const Pubnub::S
 {
     //TODO:: pubnub_str_2_chamebl_t could be used instead but it gives Linker error. There should be an easier way to achieve this
     
-    Pubnub::String msg_timetoken_with_quotes = Pubnub::String("\"") + message_timetoken + Pubnub::String("\"");
-    Pubnub::String action_timetoken_with_quotes = Pubnub::String("\"") + action_timetoken + Pubnub::String("\"");
+    Pubnub::String msg_timetoken_with_quotes = message_timetoken;
+    if ((message_timetoken.front() != '\"' && message_timetoken.back() != '\"'))
+    {
+        msg_timetoken_with_quotes = Pubnub::String("\"") + message_timetoken + Pubnub::String("\"");
+    }
+    Pubnub::String action_timetoken_with_quotes = action_timetoken;
+    if ((action_timetoken.front() != '\"' && action_timetoken.back() != '\"'))
+    {
+        action_timetoken_with_quotes = Pubnub::String("\"") + action_timetoken + Pubnub::String("\"");
+    }
   
     // Allocate memory for message_timetoken_char and copy the content
     char* message_timetoken_char = new char[msg_timetoken_with_quotes.length() + 1];
