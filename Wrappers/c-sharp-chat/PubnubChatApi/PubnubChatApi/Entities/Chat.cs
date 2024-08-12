@@ -28,7 +28,12 @@ namespace PubNubChatAPI.Entities
         #region DLL Imports
 
         [DllImport("pubnub-chat")]
-        private static extern IntPtr pn_chat_new(string publish, string subscribe, string user_id);
+        private static extern IntPtr pn_chat_new(
+            string publish,
+            string subscribe, 
+            string user_id, 
+            string secret_key,
+            string auth_key);
 
         [DllImport("pubnub-chat")]
         private static extern void pn_chat_delete(IntPtr chat);
@@ -303,15 +308,13 @@ namespace PubNubChatAPI.Entities
         /// Creates a new chat instance.
         /// </para>
         /// </summary>
-        /// <param name="publishKey">The PubNub publish key.</param>
-        /// <param name="subscribeKey">The PubNub subscribe key.</param>
-        /// <param name="userId">The user ID.</param>
+        /// <param name="config">Config with PubNub keys and values</param>
         /// <remarks>
-        /// The constructor initializes the chat instance with the provided keys and user ID.
+        /// The constructor initializes the chat instance with the provided keys and user ID from the Config.
         /// </remarks>
-        public Chat(string publishKey, string subscribeKey, string userId)
+        public Chat(PubnubChatConfig config)
         {
-            chatPointer = pn_chat_new(publishKey, subscribeKey, userId);
+            chatPointer = pn_chat_new(config.PublishKey, config.SubscribeKey, config.UserId, config.SecretKey, config.AuthKey);
             CUtilities.CheckCFunctionResult(chatPointer);
 
             fetchUpdatesThread = new Thread(FetchUpdatesLoop) { IsBackground = true };

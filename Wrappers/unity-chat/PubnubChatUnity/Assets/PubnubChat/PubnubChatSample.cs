@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using PubnubChat;
 using PubNubChatAPI.Entities;
 using PubnubChatApi.Entities.Data;
 using UnityEngine;
@@ -8,26 +9,17 @@ using UnityEngine;
 /// </summary>
 public class PubnubChatSample : MonoBehaviour
 {
-    [SerializeField] private string pubnubPubKey;
-    [SerializeField] private string pubnubSubKey;
+    [SerializeField] private PubnubChatConfigAsset configAsset;
     
     private async void Start()
     {
-        if (string.IsNullOrEmpty(pubnubSubKey) || string.IsNullOrEmpty(pubnubPubKey))
-        {
-            Debug.LogError("Provide Pubnub keys to run Chat example!");
-            return;
-        }
-        
-        //Define the main user ID
-        var mainUserId = "mainUser_5";
         //Initialize Chat instance with Pubnub keys + user ID
-        var chat = new Chat(pubnubPubKey, pubnubSubKey, mainUserId);
-        //Create main user handle
-        var user = chat.CreateUser(mainUserId);
+        var chat = new Chat(configAsset);
+        //Create config-defined user id handle
+        var user = chat.CreateUser(configAsset.UserId);
         
         //Create a new channel
-        var channel = chat.CreatePublicConversation("MainChannel_5");
+        var channel = chat.CreatePublicConversation("MainChannel");
         //Define reaction on receiving new messages
         channel.OnMessageReceived += message => Debug.Log($"Received message: {message.MessageText}");
         //Join channel
@@ -36,13 +28,13 @@ public class PubnubChatSample : MonoBehaviour
         channel.SendText("Hello World from Pubnub!");
         
         //React on user data being updated
-        /*user.OnUserUpdated += updatedUser =>
+        user.OnUserUpdated += updatedUser =>
             Debug.Log($"{updatedUser.Id} has been updated! Their name is now {updatedUser.UserName}");
         //Update our user data
         user.Update(new ChatUserData()
         {
             Username = "FancyUserName"
-        });*/
+        });
         
         //Send a few more messages
         channel.SendText("Hi!");

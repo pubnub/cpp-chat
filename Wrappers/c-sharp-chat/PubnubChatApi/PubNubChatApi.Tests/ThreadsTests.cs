@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using PubNubChatAPI.Entities;
+using PubnubChatApi.Entities.Data;
 
 namespace PubNubChatApi.Tests;
 
@@ -12,10 +13,11 @@ public class ThreadsTests
     [SetUp]
     public void Setup()
     {
-        chat = new Chat(
+        chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "threads_tests_user");
+            "threads_tests_user")
+        );
         channel = chat.CreatePublicConversation("threads_tests_channel_37");
         user = chat.CreateUser("threads_tests_user");
         channel.Join();

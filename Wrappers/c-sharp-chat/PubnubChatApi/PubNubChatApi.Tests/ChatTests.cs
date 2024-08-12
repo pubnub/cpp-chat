@@ -13,10 +13,11 @@ public class ChatTests
     [SetUp]
     public void Setup()
     {
-        chat = new Chat(
+        chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "chats_tests_user");
+            "chats_tests_user")
+        );
         channel = chat.CreatePublicConversation("chat_tests_channel");
         user = chat.CreateUser("chats_tests_user");
         channel.Join();

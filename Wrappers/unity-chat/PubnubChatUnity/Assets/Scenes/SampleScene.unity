@@ -246,8 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce95f549514a8a4c831b088b252a5f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pubnubPubKey: pub-c-79961364-c3e6-4e48-8d8d-fe4f34e228bf
-  pubnubSubKey: sub-c-2b4db8f2-c025-4a76-9e23-326123298667
+  configAsset: {fileID: 11400000, guid: a0d5ef8abae135e4fbf5d8c83d011223, type: 2}
 --- !u!4 &737609720
 Transform:
   m_ObjectHideFlags: 0

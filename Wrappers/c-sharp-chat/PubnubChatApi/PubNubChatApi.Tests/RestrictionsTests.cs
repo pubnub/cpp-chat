@@ -10,10 +10,11 @@ public class RestrictionsTests
     [SetUp]
     public void Setup()
     {
-        chat = new Chat(
+        chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "restrictions_tests_user");
+            "restrictions_tests_user")
+        );
     }
 
     [Test]

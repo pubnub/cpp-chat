@@ -13,10 +13,11 @@ public class MessageTests
     [SetUp]
     public void Setup()
     {
-        chat = new Chat(
+        chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "message_tests_user");
+            "message_tests_user")
+        );
         channel = chat.CreatePublicConversation("message_tests_channel_2");
         user = chat.CreateUser("message_tests_user");
         channel.Join();
@@ -26,7 +27,7 @@ public class MessageTests
     public void TestSendAndReceive()
     {
         var manualReceiveEvent = new ManualResetEvent(false);
-        
+
         channel.OnMessageReceived += message =>
         {
             Assert.True(message.MessageText == "Test message text");
@@ -34,8 +35,8 @@ public class MessageTests
         };
         channel.SendText("Test message text", new SendTextParams()
         {
-            MentionedUsers = new Dictionary<int, User>(){{0, user}},
-            ReferencedChannels = new Dictionary<int, Channel>(){{0, channel}},
+            MentionedUsers = new Dictionary<int, User>() { { 0, user } },
+            ReferencedChannels = new Dictionary<int, Channel>() { { 0, channel } },
             TextLinks =
             [
                 new TextLink()
@@ -46,7 +47,7 @@ public class MessageTests
                 }
             ]
         });
-        
+
         var received = manualReceiveEvent.WaitOne(4000);
         Assert.IsTrue(received);
     }
@@ -63,8 +64,8 @@ public class MessageTests
             {
                 testChannel.SendText("message_with_data", new SendTextParams()
                 {
-                    MentionedUsers = new Dictionary<int, User>(){{0, user}},
-                    ReferencedChannels = new Dictionary<int, Channel>(){{0, testChannel}},
+                    MentionedUsers = new Dictionary<int, User>() { { 0, user } },
+                    ReferencedChannels = new Dictionary<int, Channel>() { { 0, testChannel } },
                     TextLinks =
                     [
                         new TextLink()
@@ -77,17 +78,18 @@ public class MessageTests
                     QuotedMessage = message
                 });
             }
-            else if(message.MessageText == "message_with_data")
+            else if (message.MessageText == "message_with_data")
             {
                 Assert.True(message.MentionedUsers.Any(x => x.Id == user.Id));
                 Assert.True(message.ReferencedChannels.Any(x => x.Id == testChannel.Id));
                 Assert.True(message.TextLinks.Any(x => x.Link == "www.google.com"));
-                Assert.True(message.TryGetQuotedMessage(out var quotedMessage) && quotedMessage.MessageText == "message_to_be_quoted");
+                Assert.True(message.TryGetQuotedMessage(out var quotedMessage) &&
+                            quotedMessage.MessageText == "message_to_be_quoted");
                 manualReceiveEvent.Set();
             }
         };
         testChannel.SendText("message_to_be_quoted");
-        
+
         var received = manualReceiveEvent.WaitOne(9000);
         Assert.IsTrue(received);
     }
@@ -109,7 +111,7 @@ public class MessageTests
         var received = manualReceiveEvent.WaitOne(4000);
         Assert.IsTrue(received);
     }
-    
+
     [Test]
     public void TestEditMessage()
     {
@@ -128,7 +130,7 @@ public class MessageTests
         var receivedAndUpdated = manualUpdatedEvent.WaitOne(4000);
         Assert.IsTrue(receivedAndUpdated);
     }
-    
+
     [Test]
     public void TestDeleteMessage()
     {
@@ -138,7 +140,7 @@ public class MessageTests
             message.Delete(true);
 
             await Task.Delay(2000);
-            
+
             Assert.True(message.IsDeleted);
             manualReceivedEvent.Set();
         };
@@ -147,7 +149,7 @@ public class MessageTests
         var received = manualReceivedEvent.WaitOne(4000);
         Assert.IsTrue(received);
     }
-    
+
     [Test]
     public void TestRestoreMessage()
     {
@@ -157,12 +159,12 @@ public class MessageTests
             message.Delete(true);
 
             await Task.Delay(2000);
-            
+
             Assert.True(message.IsDeleted);
             message.Restore();
-            
+
             await Task.Delay(2000);
-            
+
             Assert.False(message.IsDeleted);
             manualReceivedEvent.Set();
         };
@@ -180,9 +182,10 @@ public class MessageTests
             chat.DeleteChannel(existingChannel.Id);
             await Task.Delay(4000);
         }
+
         var pinTestChannel = chat.CreatePublicConversation("pin_test_2");
         pinTestChannel.Join();
-       
+
         var manualReceivedEvent = new ManualResetEvent(false);
         pinTestChannel.OnMessageReceived += async message =>
         {
@@ -214,7 +217,7 @@ public class MessageTests
 
             var has = message.HasUserReaction("happy");
             Assert.True(has);
-            var reactions = message.Reactions; 
+            var reactions = message.Reactions;
             Assert.True(reactions.Count == 1 && reactions.Any(x => x.Value == "happy"));
             manualReset.Set();
         };
@@ -222,7 +225,7 @@ public class MessageTests
         var reacted = manualReset.WaitOne(7000);
         Assert.True(reacted);
     }
-    
+
     [Test]
     public void TestMessageReport()
     {
@@ -234,10 +237,7 @@ public class MessageTests
             Assert.True(reportEvent.Payload.Contains("bad_message"));
             reportManualEvent.Set();
         };
-        channel.OnMessageReceived += message =>
-        {
-            message.Report("bad_message");
-        };
+        channel.OnMessageReceived += message => { message.Report("bad_message"); };
         channel.SendText("message_to_be_reported");
         var reported = reportManualEvent.WaitOne(12000);
         Assert.True(reported);
@@ -263,18 +263,21 @@ public class MessageTests
                 Console.WriteLine(e);
                 Assert.Fail();
             }
+
             Assert.True(hasThread);
             Assert.True(message.TryGetThread(out var threadChannel));
             message.RemoveThread();
 
             await Task.Delay(8000);
-            
+
+            //TODO: temporary way to get latest message pointer since remove_thread doesn't return a new pointer
+            chat.TryGetMessage(channel.Id, message.Id, out message);
             Assert.False(message.HasThread());
-            
+
             manualReceiveEvent.Set();
         };
         channel.SendText("thread_start_message");
-        
+
         var received = manualReceiveEvent.WaitOne(20000);
         Assert.IsTrue(received);
     }
