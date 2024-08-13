@@ -76,7 +76,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
 #ifndef PN_CHAT_C_ABI
         void connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
-        void join(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
+        void join(const Pubnub::Channel& channel, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;
 #endif

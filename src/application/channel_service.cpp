@@ -283,22 +283,31 @@ std::vector<pubnub_v2_message> ChannelService::disconnect(const String& channel_
 }
 
 #ifndef PN_CHAT_C_ABI
-void ChannelService::join(const String& channel_id, std::function<void(Message)> message_callback, const String& additional_params) const {
+void ChannelService::join(const Channel& channel, std::function<void(Message)> message_callback, const String& additional_params) const {
 #else
-std::vector<pubnub_v2_message> ChannelService::join(const String& channel_id, const String& additional_params) const {
+std::vector<pubnub_v2_message> ChannelService::join(const Channel& channel, const String& additional_params) const {
 #endif // PN_CHAT_C_ABI
-    String set_object_string = create_set_memberships_object(channel_id, additional_params);
+    String set_object_string = create_set_memberships_object(channel.channel_id(), additional_params);
 
-    {
+    auto memberships_response = [this, set_object_string] {
         auto pubnub_handle = this->pubnub->lock();
-        String user_id = pubnub_handle->get_user_id();
-        pubnub_handle->set_memberships(user_id, set_object_string);
-    }
+        return pubnub_handle->set_memberships(pubnub_handle->get_user_id(), set_object_string);
+    }();
+
+    auto chat_service_shared = chat_service.lock();
+
+    auto user = chat_service_shared->user_service->get_current_user();
+    MembershipEntity membership_entity;
+    membership_entity.custom_field = additional_params;
+    
+    auto membership = chat_service_shared->membership_service->create_membership_object(user, channel, membership_entity);
+
+    auto new_membership = membership.set_last_read_message_timetoken(Pubnub::get_now_timetoken());
 
 #ifndef PN_CHAT_C_ABI
-    this->connect(channel_id, message_callback);
+    this->connect(channel.channel_id(), message_callback);
 #else
-    return this->connect(channel_id);
+    return this->connect(channel.channel_id());
 #endif // PN_CHAT_C_ABI
 }
     
@@ -610,10 +619,10 @@ std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String&
 {
     if(channel_data.get_entity().type == String("public"))
     {
-        throw std::runtime_error("Read receipts are not supported in Public chats");
+        //throw std::runtime_error("Read receipts are not supported in Public chats");
     }
 
-    auto chat_service_shared = chat_service.lock();
+    auto chat_service_shared = this->chat_service.lock();
 
     auto generate_receipts = [=](std::map<String, String, StringComparer> in_timetoken_per_user) -> std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>
     {

@@ -82,7 +82,7 @@ void Channel::connect(std::function<void(Message)> message_callback) const {
 }
 
 void Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
-    this->channel_service->join(channel_id_internal, message_callback, additional_params);
+    this->channel_service->join(*this, message_callback, additional_params);
 }
 
 void Channel::disconnect() const {
