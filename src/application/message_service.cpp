@@ -129,6 +129,11 @@ Pubnub::Message MessageService::restore(const MessageDAO& message, const Pubnub:
 }
 
 Message MessageService::get_message(const String& timetoken, const String& channel_id) const {
+    if(timetoken.empty())
+    {
+        throw std::invalid_argument("Can't get message, timetoken is empty");
+    }
+
     auto start_timetoken_int = std::stoull(timetoken.to_std_string()) + 1;
     String start_timetoken = std::to_string(start_timetoken_int);
     auto chat_service_shared = chat_service.lock();
