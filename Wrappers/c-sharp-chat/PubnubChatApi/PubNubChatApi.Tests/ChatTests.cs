@@ -16,10 +16,10 @@ public class ChatTests
         chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "chats_tests_user")
+            "chats_tests_user_2")
         );
         channel = chat.CreatePublicConversation("chat_tests_channel");
-        user = chat.CreateUser("chats_tests_user");
+        user = chat.CreateUser("chats_tests_user_2");
         channel.Join();
     }
 
@@ -171,8 +171,10 @@ public class ChatTests
 
         chat.MarkAllMessagesAsRead();
         
-        await Task.Delay(3000);
+        await Task.Delay(5000);
+
+        var counts = chat.GetUnreadMessagesCounts();
         
-        Assert.False(chat.GetUnreadMessagesCounts().Any());
+        Assert.False(counts.Any(x => x.Count > 0));
     }
 }

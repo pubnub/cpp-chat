@@ -15,7 +15,6 @@ Pubnub::Chat* pn_chat_new(
         const char* publish,
         const char* subscribe,
         const char* user_id,
-        const char* secret_key,
         const char* auth_key
     ) {
 
@@ -24,7 +23,6 @@ Pubnub::Chat* pn_chat_new(
             config.publish_key = publish;
             config.subscribe_key = subscribe;
             config.user_id = user_id;
-            config.secret_key = secret_key;
             config.auth_key = auth_key;
 
         auto* chat = new Pubnub::Chat(config);

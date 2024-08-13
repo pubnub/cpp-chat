@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -18,7 +19,7 @@ namespace PubNubChatAPI.Entities
     /// <seealso cref="Chat"/>
     /// <seealso cref="User"/>
     /// <seealso cref="Channel"/>
-    public class Membership : UniquePointerWrapper
+    public class Membership : UniqueChatEntity
     {
         #region DLL Imports
 
@@ -102,8 +103,17 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="Update"/>
         public event Action<Membership> OnMembershipUpdated;
 
-        internal Membership(IntPtr membershipPointer, string membershipId) : base(membershipPointer, membershipId)
+        private Chat chat;
+        
+        public override void StartListeningForUpdates()
         {
+            //TODO: hacky way to subscribe to this channel
+            chat.ListenForEvents(ChannelId, PubnubChatEventType.Custom);
+        }
+
+        internal Membership(Chat chat, IntPtr membershipPointer, string membershipId) : base(membershipPointer, membershipId)
+        {
+            this.chat = chat;
         }
 
         internal static string GetMembershipIdFromPtr(IntPtr membershipPointer)

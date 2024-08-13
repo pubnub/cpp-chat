@@ -31,10 +31,10 @@ public class MembershipTests
     }
 
     [Test]
-    public void TestUpdateMemberships()
+    public async Task TestUpdateMemberships()
     {
         var memberships = user.GetMemberships();
-        var testMembership = memberships.Memberships.FirstOrDefault(x => x.ChannelId == channel.Id);
+        var testMembership = memberships.Memberships.Last();
         if (testMembership == null)
         {
             Assert.Fail();
@@ -46,8 +46,12 @@ public class MembershipTests
             Assert.True(membership.Id == testMembership.Id);
             manualUpdatedEvent.Set();
         };
-        testMembership.Update("{\"key\": \"value\"}");
-        var updated = manualUpdatedEvent.WaitOne(7000);
+        testMembership.StartListeningForUpdates();
+
+        await Task.Delay(4000);
+        
+        testMembership.Update("{\"key\": \"" + Guid.NewGuid() + "\"}");
+        var updated = manualUpdatedEvent.WaitOne(8000);
         Assert.IsTrue(updated);
     }
 

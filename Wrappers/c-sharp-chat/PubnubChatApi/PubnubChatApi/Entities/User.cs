@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
 using PubnubChatApi.Entities.Data;
+using PubnubChatApi.Enums;
 using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
@@ -14,7 +15,7 @@ namespace PubNubChatAPI.Entities
     /// You can get information about the user, update the user's data, delete the user, set restrictions on the user,
     /// </para>
     /// </summary>
-    public class User : UniquePointerWrapper
+    public class User : UniqueChatEntity
     {
         #region DLL Imports
 
@@ -202,6 +203,12 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="Update"/>
         /// <seealso cref="User"/>
         public event Action<User> OnUserUpdated;
+        
+        public override void StartListeningForUpdates()
+        {
+            //TODO: hacky way to subscribe to this channel
+            chat.ListenForEvents(Id, PubnubChatEventType.Custom);
+        }
 
         internal User(Chat chat, string userId, IntPtr userPointer) : base(userPointer, userId)
         {

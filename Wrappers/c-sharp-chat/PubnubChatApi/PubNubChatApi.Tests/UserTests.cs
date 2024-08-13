@@ -27,13 +27,18 @@ public class UserTests
     public async Task TestUserUpdate()
     {
         var updatedReset = new ManualResetEvent(false);
+        var testUser = chat.CreateUser("wolololo");
+
+        await Task.Delay(5000);
+        
         var newRandomUserName = Guid.NewGuid().ToString();
-        user.OnUserUpdated += updatedUser =>
+        testUser.OnUserUpdated += updatedUser =>
         {
             Assert.True(updatedUser.UserName == newRandomUserName);
             updatedReset.Set();
         };
-        user.Update(new ChatUserData()
+        testUser.StartListeningForUpdates();
+        testUser.Update(new ChatUserData()
         {
             Username = newRandomUserName
         });

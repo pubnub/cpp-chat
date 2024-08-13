@@ -32,7 +32,6 @@ namespace PubNubChatAPI.Entities
             string publish,
             string subscribe, 
             string user_id, 
-            string secret_key,
             string auth_key);
 
         [DllImport("pubnub-chat")]
@@ -314,7 +313,7 @@ namespace PubNubChatAPI.Entities
         /// </remarks>
         public Chat(PubnubChatConfig config)
         {
-            chatPointer = pn_chat_new(config.PublishKey, config.SubscribeKey, config.UserId, config.SecretKey, config.AuthKey);
+            chatPointer = pn_chat_new(config.PublishKey, config.SubscribeKey, config.UserId, config.AuthKey);
             CUtilities.CheckCFunctionResult(chatPointer);
 
             fetchUpdatesThread = new Thread(FetchUpdatesLoop) { IsBackground = true };
@@ -449,7 +448,16 @@ namespace PubNubChatAPI.Entities
                         Debug.WriteLine("Deserialized channel update");
                         
                         var id = Channel.GetChannelIdFromPtr(channelPointer);
-                        if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
+                        
+                        //TODO: temporary get_channel update for ThreadChannels
+                        if (id.Contains("PUBNUB_INTERNAL_THREAD"))
+                        {
+                            //This has a check for "PUBNUB_INTERNAL_THREAD" and will correctly update the pointer
+                            TryGetChannel(id, out var existingThreadChannel);
+                            //TODO: broadcast thread channel update (very low priority because I don't think they have that in JS chat)
+                            existingThreadChannel.BroadcastChannelUpdate();
+                        } 
+                        else if (channelWrappers.TryGetValue(id, out var existingChannelWrapper))
                         {
                             existingChannelWrapper.UpdateWithPartialPtr(channelPointer);
                             existingChannelWrapper.BroadcastChannelUpdate();
@@ -1306,7 +1314,7 @@ namespace PubNubChatAPI.Entities
         internal bool TryGetMembership(string membershipId, IntPtr membershipPointer, out Membership membership)
         {
             return TryGetWrapper(membershipWrappers, membershipId, membershipPointer,
-                () => new Membership(membershipPointer, membershipId), out membership);
+                () => new Membership(this, membershipPointer, membershipId), out membership);
         }
 
         #endregion
@@ -1620,7 +1628,7 @@ namespace PubNubChatAPI.Entities
         #endregion
 
         private bool TryGetWrapper<T>(Dictionary<string, T> wrappers, string id, IntPtr pointer, Func<T> createWrapper,
-            out T wrapper) where T : PointerWrapper
+            out T wrapper) where T : ChatEntity
         {
             if (wrappers.TryGetValue(id, out wrapper))
             {

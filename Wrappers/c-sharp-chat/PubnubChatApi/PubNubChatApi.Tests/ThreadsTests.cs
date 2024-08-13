@@ -55,6 +55,8 @@ public class ThreadsTests
             thread.Join();
             thread.OnMessageReceived += threadMessage =>
             {
+                //TODO: those will fail if the ThreadChannel true updates are enabled
+                Debug.WriteLine(thread.ParentChannelId);
                 thread.PinMessageToParentChannel(threadMessage);
             };
             thread.SendText("some_thread_message");

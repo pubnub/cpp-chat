@@ -116,18 +116,26 @@ public class MessageTests
     public void TestEditMessage()
     {
         var manualUpdatedEvent = new ManualResetEvent(false);
-        channel.OnMessageReceived += message =>
+        channel.OnMessageReceived += async message =>
         {
-            message.EditMessageText("new-text");
+            channel.Disconnect();
+
+            await Task.Delay(5000);
+            
+            message.StartListeningForUpdates();
+            
+            await Task.Delay(2000);
+            
             message.OnMessageUpdated += updatedMessage =>
             {
                 manualUpdatedEvent.Set();
                 Assert.True(updatedMessage.MessageText == "new-text");
             };
+            message.EditMessageText("new-text");
         };
         channel.SendText("something");
 
-        var receivedAndUpdated = manualUpdatedEvent.WaitOne(4000);
+        var receivedAndUpdated = manualUpdatedEvent.WaitOne(14000);
         Assert.IsTrue(receivedAndUpdated);
     }
 

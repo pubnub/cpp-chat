@@ -20,7 +20,7 @@ namespace PubNubChatAPI.Entities
     /// A channel is a entity that allows users to publish and receive messages.
     /// </para>
     /// </summary>
-    public class Channel : UniquePointerWrapper
+    public class Channel : UniqueChatEntity
     {
         #region DLL Imports
 
@@ -301,6 +301,15 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         public event Action<Channel> OnChannelUpdate;
+
+        public override void StartListeningForUpdates()
+        {
+            if (connected)
+            {
+                return;
+            }
+            Connect();
+        }
 
         /// <summary>
         /// Event that is triggered when any presence update occurs.

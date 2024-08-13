@@ -2,12 +2,12 @@ using System;
 
 namespace PubNubChatAPI.Entities
 {
-    public abstract class PointerWrapper
+    public abstract class ChatEntity
     {
         protected IntPtr pointer;
         internal IntPtr Pointer => pointer;
         
-        internal PointerWrapper(IntPtr pointer)
+        internal ChatEntity(IntPtr pointer)
         {
             this.pointer = pointer;
         }
@@ -22,8 +22,14 @@ namespace PubNubChatAPI.Entities
 
         protected abstract void DisposePointer();
 
-        ~PointerWrapper()
+        public abstract void StartListeningForUpdates();
+        
+        //TODO: only after c-core event engine apparently
+        //public abstract void StopListeningForUpdates();
+
+        ~ChatEntity()
         {
+            //StopListeningForUpdates();
             DisposePointer();
         }
     }

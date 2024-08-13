@@ -10,7 +10,6 @@ namespace PubnubChat
         [field: SerializeField] public string PublishKey { get; private set; }
         [field: SerializeField] public string SubscribeKey { get; private set; }
         [field: SerializeField] public string UserId { get; private set; }
-        [field: SerializeField] public string SecretKey { get; private set; }
         [field: SerializeField] public string AuthKey { get; private set; }
     
         public static implicit operator PubnubChatConfig(PubnubChatConfigAsset asset) {
@@ -24,8 +23,7 @@ namespace PubnubChat
                 throw new NullReferenceException("You need to set the SubscribeKey before passing configuration");
             }
 
-            return new PubnubChatConfig(asset.PublishKey, asset.SubscribeKey, asset.UserId, asset.SecretKey,
-                asset.AuthKey);
+            return new PubnubChatConfig(asset.PublishKey, asset.SubscribeKey, asset.UserId, asset.AuthKey);
         }
     }
 }

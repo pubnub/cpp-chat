@@ -12,7 +12,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* publish,
         const char* subscribe,
         const char* user_id,
-        const char* secret_key,
         const char* auth_key); 
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete(Pubnub::Chat* chat);

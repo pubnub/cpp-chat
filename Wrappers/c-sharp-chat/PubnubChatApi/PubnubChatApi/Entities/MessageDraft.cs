@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace PubNubChatAPI.Entities
 {
-    public class MessageDraft : PointerWrapper
+    public class MessageDraft : ChatEntity
     {
         #region DLL Imports
 
@@ -17,6 +17,11 @@ namespace PubNubChatAPI.Entities
         }
         
         internal override void UpdateWithPartialPtr(IntPtr partialPointer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void StartListeningForUpdates()
         {
             throw new NotImplementedException();
         }

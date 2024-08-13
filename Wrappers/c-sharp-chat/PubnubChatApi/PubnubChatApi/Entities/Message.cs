@@ -19,7 +19,7 @@ namespace PubNubChatAPI.Entities
     /// </summary>
     /// <seealso cref="Chat"/>
     /// <seealso cref="Channel"/>
-    public class Message : UniquePointerWrapper
+    public class Message : UniqueChatEntity
     {
         #region DLL Imports
 
@@ -320,6 +320,12 @@ namespace PubNubChatAPI.Entities
         /// <seealso cref="EditMessageText"/>
         /// <seealso cref="Delete"/>
         public event Action<Message> OnMessageUpdated;
+        
+        public override void StartListeningForUpdates()
+        {
+            //TODO: hacky way to subscribe to this channel
+            chat.ListenForEvents(ChannelId, PubnubChatEventType.Custom);
+        }
 
         internal Message(Chat chat, IntPtr messagePointer, string timeToken) : base(messagePointer, timeToken)
         {
