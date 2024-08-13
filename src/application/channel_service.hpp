@@ -80,7 +80,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;
 #endif
-        void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type, const Pubnub::String& meta_data) const;
         void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;

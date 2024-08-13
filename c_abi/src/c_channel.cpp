@@ -247,13 +247,14 @@ PnCResult pn_channel_send_text(
     Pubnub::pubnub_chat_message_type type,
     const char* metadata
     ) {
-    try {
-        channel->send_text(message, type, metadata);
-    } catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
+    // try {
+    //     channel->send_text(message, type, metadata);
+    // } catch (std::exception& e) {
+    //     pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
-    }
+    //     return PN_C_ERROR;
+    // }
+    //IMPORTANT TODO: @Jakub Remove all functions from Unity/C# that use this send_text overload
 
     return PN_C_OK;
 }

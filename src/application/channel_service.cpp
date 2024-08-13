@@ -331,11 +331,6 @@ std::vector<pubnub_v2_message> ChannelService::leave(const String& channel_id) c
 #endif // PN_CHAT_C_ABI
 }
 
-void ChannelService::send_text(const String& channel_id, const String& message, pubnub_chat_message_type message_type, const String& meta_data) const {
-    auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, message_type), meta_data);
-}
-
 void ChannelService::send_text(const Pubnub::String& channel_id, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
 {
     if(!text_params.quoted_message.timetoken.empty() && text_params.quoted_message.channel_id != channel_id)
