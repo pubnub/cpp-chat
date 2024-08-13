@@ -659,13 +659,29 @@ std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String&
 
     read_receipts_callback(generate_receipts(timetoken_per_user));
 
-    auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::Event& event){
+    auto receipt_event_callback = [=, &channel_data](const Pubnub::Event& event){
+
+        std::map<String, String, StringComparer> timetoken_per_user_in;
+
+        auto members_tuple2 = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
+        auto channel_members2 = std::get<0>(members_tuple);
+        for(auto membership : channel_members2)
+        {
+            String last_read_timetoken = membership.last_read_message_timetoken();
+            if(last_read_timetoken.empty())
+            {
+                continue;
+            }
+
+            timetoken_per_user_in[membership.user.user_id()] =  last_read_timetoken;
+            
+        }
 
         Json payload_json = Json::parse(event.payload);
 
-        timetoken_per_user[event.user_id] = payload_json.get_string("messageTimetoken").value_or(String(""));
+        timetoken_per_user_in[event.user_id] = payload_json.get_string("messageTimetoken").value_or(String(""));
 
-        read_receipts_callback(generate_receipts(timetoken_per_user));
+        read_receipts_callback(generate_receipts(timetoken_per_user_in));
     };
 
 #ifndef PN_CHAT_C_ABI
