@@ -207,7 +207,7 @@ std::function<void()> MessageService::stream_updates(Pubnub::Message calling_mes
         message_callback(updated_message);
     };
     
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.timetoken()});
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
     chat->callback_service->broadcast_messages(messages);
     chat->callback_service->register_message_update_callback(calling_message.timetoken(), final_message_callback);
 
@@ -262,7 +262,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::Message calling_
         chat->callback_service->register_message_update_callback(message.timetoken(), single_message_callback);
     }
 
-    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(messages_ids);
+    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
     chat->callback_service->broadcast_messages(subscribe_messages);
 
     //stop streaming callback
@@ -320,7 +320,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage ca
         chat->callback_service->register_thread_message_update_callback(message.timetoken(), single_message_callback);
     }
 
-    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(messages_ids);
+    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
     chat->callback_service->broadcast_messages(subscribe_messages);
 
     //stop streaming callback
