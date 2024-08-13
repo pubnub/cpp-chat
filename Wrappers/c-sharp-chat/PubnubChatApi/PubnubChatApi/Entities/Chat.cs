@@ -280,6 +280,9 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_chat_current_user(IntPtr chat);
+
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_deserialize_thread_message_update(IntPtr chat, IntPtr message_update);
         
         #endregion
 
@@ -300,6 +303,8 @@ namespace PubNubChatAPI.Entities
         public event Action<ChatEvent> OnInviteEvent;
         public event Action<ChatEvent> OnCustomEvent;
         public event Action<ChatEvent> OnAnyEvent;
+        
+        public ChatAccessManager ChatAccessManager { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Chat"/> class.
@@ -315,6 +320,8 @@ namespace PubNubChatAPI.Entities
         {
             chatPointer = pn_chat_new(config.PublishKey, config.SubscribeKey, config.UserId, config.AuthKey);
             CUtilities.CheckCFunctionResult(chatPointer);
+
+            ChatAccessManager = new ChatAccessManager(chatPointer);
 
             fetchUpdatesThread = new Thread(FetchUpdatesLoop) { IsBackground = true };
             fetchUpdatesThread.Start();
@@ -424,6 +431,32 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
+                    
+                    //Updated existing thread message
+                    var updatedThreadMessagePointer = pn_deserialize_thread_message_update(chatPointer, pointer);
+                    if (updatedThreadMessagePointer != IntPtr.Zero)
+                    {
+                        Debug.WriteLine("Deserialized thread message update");
+                        var id = Message.GetMessageIdFromPtr(updatedThreadMessagePointer);
+                        Debug.WriteLine(id);
+                        if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
+                        {
+                            Debug.WriteLine("YES");
+                            existingMessageWrapper.UpdateWithPartialPtr(updatedThreadMessagePointer);
+                            existingMessageWrapper.BroadcastMessageUpdate();
+                        }
+                        else
+                        {
+                            Debug.WriteLine("NO");
+                            foreach (var pair in messageWrappers)
+                            {
+                                Debug.WriteLine($"{pair.Key}:{pair.Value.MessageText}");
+                            }
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
 
                     //Updated existing message
                     var updatedMessagePointer = pn_deserialize_message_update(chatPointer, pointer);
@@ -431,10 +464,20 @@ namespace PubNubChatAPI.Entities
                     {
                         Debug.WriteLine("Deserialized message update");
                         var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
+                        Debug.WriteLine(id);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
+                            Debug.WriteLine("YES");
                             existingMessageWrapper.UpdateWithPartialPtr(updatedMessagePointer);
                             existingMessageWrapper.BroadcastMessageUpdate();
+                        }
+                        else
+                        {
+                            Debug.WriteLine("NO");
+                            foreach (var pair in messageWrappers)
+                            {
+                                Debug.WriteLine($"{pair.Key}:{pair.Value.MessageText}");
+                            }
                         }
 
                         pn_dispose_message(pointer);

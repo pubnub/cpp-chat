@@ -129,4 +129,34 @@ public class ThreadsTests
         var read = historyReadReset.WaitOne(15000);
         Assert.True(read);
     }
+
+    [Test]
+    public void TestThreadMessageUpdate()
+    {
+        var messageUpdatedReset = new ManualResetEvent(false);
+        channel.OnMessageReceived += async message =>
+        {
+            var thread = message.CreateThread();
+            thread.Join();
+            thread.SendText("one");
+            thread.SendText("two");
+            thread.SendText("three");
+            
+            await Task.Delay(3000);
+            
+            var history = thread.GetThreadHistory("99999999999999999", "00000000000000000", 3);
+            var threadMessage = history[0];
+            
+            threadMessage.StartListeningForUpdates();
+            threadMessage.OnThreadMessageUpdated += updatedThreadMessage =>
+            {
+                Assert.True(updatedThreadMessage.MessageText == "new_text");
+                messageUpdatedReset.Set();
+            };
+            threadMessage.EditMessageText("new_text");
+        };
+        channel.SendText("thread_start_message");
+        var updated = messageUpdatedReset.WaitOne(15000);
+        Assert.True(updated);
+    }
 }

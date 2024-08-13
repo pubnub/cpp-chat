@@ -169,12 +169,49 @@ public class ChatTests
         
         Assert.True(chat.GetUnreadMessagesCounts().Any(x => x.Channel.Id == channel.Id && x.Count > 0));
 
-        chat.MarkAllMessagesAsRead();
+        var res = chat.MarkAllMessagesAsRead();
         
         await Task.Delay(5000);
 
         var counts = chat.GetUnreadMessagesCounts();
         
         Assert.False(counts.Any(x => x.Count > 0));
+    }
+
+    [Test]
+    public async Task TestReadReceipts()
+    {
+        var otherChat = new Chat(new PubnubChatConfig(
+            PubnubTestsParameters.PublishKey,
+            PubnubTestsParameters.SubscribeKey,
+            "other_chat_user")
+        );
+        if(!otherChat.TryGetChannel(channel.Id, out var otherChatChannel))
+        {
+            Assert.Fail();
+            return;
+        }
+        otherChatChannel.Join();
+
+        var receiptReset = new ManualResetEvent(false);
+        otherChat.OnReceiptEvent += receiptEvent =>
+        {
+            Assert.True(receiptEvent.ChannelId == channel.Id && receiptEvent.UserId == user.Id);
+            receiptReset.Set();
+        };
+        otherChatChannel.SendText("READ MEEEE");
+
+        await Task.Delay(5000);
+
+        chat.MarkAllMessagesAsRead();
+        var receipt = receiptReset.WaitOne(15000);
+        Assert.True(receipt);
+    }
+
+    [Test]
+    public void TestCanI()
+    {
+        Assert.False(chat.ChatAccessManager.CanI(PubnubAccessPermission.Write, PubnubAccessResourceType.Channels, "can_i_test_channel"));
+        Assert.True(chat.ChatAccessManager.CanI(PubnubAccessPermission.Read, PubnubAccessResourceType.Channels, "can_i_test_channel"));
     }
 }

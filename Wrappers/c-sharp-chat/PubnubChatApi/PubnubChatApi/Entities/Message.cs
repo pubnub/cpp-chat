@@ -353,7 +353,7 @@ namespace PubNubChatAPI.Entities
             UpdatePointer(newFullPointer);
         }
 
-        internal void BroadcastMessageUpdate()
+        internal virtual void BroadcastMessageUpdate()
         {
             OnMessageUpdated?.Invoke(this);
         }

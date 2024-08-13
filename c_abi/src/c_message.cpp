@@ -271,7 +271,7 @@ Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, P
     }
 }
 
-Pubnub::Message* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message) {
+Pubnub::ThreadMessage* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message) {
     try {
         return new Pubnub::ThreadMessage(message->update_with_thread_base(*base_message));
     }

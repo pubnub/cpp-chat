@@ -58,7 +58,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_remove_thread(Pubnub::Message
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, Pubnub::Message* base_message);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadMessage* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result);
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_referenced_channels(Pubnub::Message* message, Pubnub::Chat* chat, char* result);
