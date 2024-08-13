@@ -36,11 +36,9 @@ class CallbackService;
 
 namespace Pubnub {
     struct ChatConfig {
-        Pubnub::String publish_key = "";
-        Pubnub::String subscribe_key = "";
-        Pubnub::String secret_key = "";
-        Pubnub::String user_id = "";
         Pubnub::String auth_key = "";
+        int TYPING_TIMEOUT = 5000;
+        int TYPING_TIMEOUT_DIFFERENCE = 1000;
     };
 
     struct CreatedChannelWrapper
@@ -100,7 +98,7 @@ namespace Pubnub {
 
     class Chat {
         public:
-            PN_CHAT_EXPORT Chat(const ChatConfig& config);
+            PN_CHAT_EXPORT static Pubnub::Chat init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
 
             /* CHANNELS */
 
@@ -153,9 +151,8 @@ namespace Pubnub {
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
 
-            
-
         private:
+            Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const ChannelService> channel_service;
             std::shared_ptr<const UserService> user_service;

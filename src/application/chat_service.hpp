@@ -48,6 +48,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<const PresenceService> presence_service;
         std::shared_ptr<const RestrictionsService> restrictions_service;
         std::shared_ptr<const AccessManagerService> access_manager_service;
+        Pubnub::ChatConfig chat_config;
 
         std::shared_ptr<CallbackService> callback_service;
 

@@ -111,10 +111,6 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
         Pubnub::Channel update_channel_with_base(const Pubnub::Channel& channel, const Pubnub::Channel& base_channel) const;
 
-        //TODO: Move this to config
-        int TYPING_TIMEOUT = 5000;
-        int TYPING_TIMEOUT_DIFFERENCE = 1000;
-
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;

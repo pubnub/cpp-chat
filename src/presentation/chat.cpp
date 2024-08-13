@@ -22,10 +22,10 @@ extern "C" {
 
 using namespace Pubnub;
 
-Chat::Chat(const ChatConfig& config) :
+Chat::Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config) :
     chat_service(
             std::make_shared<ChatService>(
-                ChatService::create_pubnub(config.publish_key, config.subscribe_key, config.user_id)
+                ChatService::create_pubnub(publish_key, subscribe_key, user_id)
             )
         )
 {
@@ -41,6 +41,21 @@ Chat::Chat(const ChatConfig& config) :
 #ifndef PN_CHAT_C_ABI
     callback_service = chat_service->callback_service;
 #endif
+}
+
+Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig &config)
+{
+    Chat chat(publish_key, subscribe_key, user_id, config);
+    try
+    {
+        chat.get_user(user_id);
+    }
+    catch (...)
+    {
+        chat.create_user(user_id, ChatUserData());
+    }
+    
+    return chat;
 }
 
 Channel Chat::create_public_conversation(const String& channel_id, const ChatChannelData& channel_data) const {

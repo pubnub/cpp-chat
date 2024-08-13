@@ -37,6 +37,7 @@ void ChatService::init_services(const ChatConfig& config) {
     presence_service = std::make_shared<PresenceService>(pubnub, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, weak_from_this());
     access_manager_service = std::make_shared<AccessManagerService>(pubnub, config.auth_key);
+    this->chat_config = config;
 #ifndef PN_CHAT_C_ABI
     auto service_bundle = EntityServicesBundle{
         channel_service,

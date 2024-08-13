@@ -20,12 +20,10 @@ Pubnub::Chat* pn_chat_new(
 
     try {
         Pubnub::ChatConfig config; 
-            config.publish_key = publish;
-            config.subscribe_key = subscribe;
-            config.user_id = user_id;
             config.auth_key = auth_key;
+            //IMPORTANT TODO: @Jakub add remaining parameters to config
 
-        auto* chat = new Pubnub::Chat(config);
+        auto* chat = new Pubnub::Chat(Pubnub::Chat::init(publish, subscribe, user_id, config));
         return chat;
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
