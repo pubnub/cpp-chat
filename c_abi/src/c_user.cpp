@@ -106,13 +106,13 @@ PnCResult pn_user_set_restrictions(
 PnCResult pn_user_report(
         Pubnub::User* user,
         const char* reason) {
-    try {
-        user->report(reason);
-    } catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
+    // try {
+    //     user->report(reason);
+    // } catch (std::exception& e) {
+    //     pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
-    }
+    //     return PN_C_ERROR;
+    // }
 
     return PN_C_OK;
 }

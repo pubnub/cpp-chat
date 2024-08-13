@@ -71,7 +71,8 @@ namespace Pubnub
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
             PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::Channel& channel) const;
             PN_CHAT_EXPORT ChannelsRestrictionsWrapper get_channels_restrictions(const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
-            PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
+            //Deprecated in JS chat
+            //PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
             PN_CHAT_EXPORT MembershipsResponseWrapper get_memberships(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 

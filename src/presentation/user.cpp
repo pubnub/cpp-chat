@@ -84,9 +84,10 @@ ChannelsRestrictionsWrapper User::get_channels_restrictions(const Pubnub::String
     return ChannelsRestrictionsWrapper({Pubnub::Vector<ChannelRestriction>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple), std::get<3>(return_tuple)});
 }
 
-void User::report(const String& reason) const {
-    this->restrictions_service->report_user(user_id(), reason);
-}
+//Deprecated in JS chat
+// void User::report(const String& reason) const {
+//     this->restrictions_service->report_user(user_id(), reason);
+// }
 
 MembershipsResponseWrapper User::get_memberships(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     auto return_tuple = this->membership_service->get_user_memberships(user_id(), *this->data, filter, sort, limit, page);
