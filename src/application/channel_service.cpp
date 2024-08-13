@@ -652,9 +652,9 @@ std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String&
 
     auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::Event& event){
 
-        json payload_json = json::parse(event.payload);
+        Json payload_json = Json::parse(event.payload);
 
-        timetoken_per_user[String(payload_json["user_id"])] = String(payload_json["messageTimetoken"]);
+        timetoken_per_user[event.user_id] = payload_json.get_string("messageTimetoken").value_or(String(""));
 
         read_receipts_callback(generate_receipts(timetoken_per_user));
     };

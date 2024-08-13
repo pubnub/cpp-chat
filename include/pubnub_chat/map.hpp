@@ -7,11 +7,19 @@
 
 namespace Pubnub {
 
-    template <typename T, typename K>
+    template <typename T, typename K, typename C = std::less<K>>
     struct Map
     {
         Map(){};
         Map(std::map<T, K> in_map) {
+            for(auto it = in_map.begin(); it != in_map.end(); it++)
+            {
+                keys.push_back(it->first);
+                values.push_back(it->second);
+            }
+        }
+
+        Map(std::map<T, K, C> in_map) {
             for(auto it = in_map.begin(); it != in_map.end(); it++)
             {
                 keys.push_back(it->first);
@@ -26,6 +34,15 @@ namespace Pubnub {
         }
 
         Map& operator=(const std::map<T, K>&& other) {
+            for(auto it = other.begin(); it != other.end(); it++)
+            {
+                keys.push_back(it->first);
+                values.push_back(it->second);
+            }
+            return *this;
+        }
+
+        Map& operator=(const std::map<T, K, C>&& other) {
             for(auto it = other.begin(); it != other.end(); it++)
             {
                 keys.push_back(it->first);
