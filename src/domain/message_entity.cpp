@@ -79,9 +79,18 @@ std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> MessageEn
 
     for (auto element : messages_array_json[channel_id])
     {
-        auto new_message_entity = MessageEntity::from_json(element.dump(), channel_id);
+        //Make sure this is actually a chat message as get history also return technical messages
+        if(element.contains("message") && !element["message"].is_null())
+        {
+            Json message_json = element["message"];
+            //TODO:: use enum instead of hardcoded type "text"
+            if(message_json.contains("type") && message_json["type"] == "text")
+            {
+                auto new_message_entity = MessageEntity::from_json(element.dump(), channel_id);
+                messages.push_back(std::make_pair(element["timetoken"], new_message_entity));
+            }
+        }
 
-        messages.push_back(std::make_pair(element["timetoken"], new_message_entity));
     }
 
     return messages;
