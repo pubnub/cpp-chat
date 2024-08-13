@@ -132,7 +132,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 #ifdef PN_CHAT_C_ABI
     public:
         std::vector<pubnub_v2_message> connect(const Pubnub::String& channel_id) const;
-        std::vector<pubnub_v2_message> join(const Pubnub::String& channel_id, const Pubnub::String& additional_params = "") const;
+        std::vector<pubnub_v2_message> join(const Pubnub::Channel& channel, const Pubnub::String& additional_params = "") const;
         std::vector<pubnub_v2_message> disconnect(const Pubnub::String& channel_id) const;
         std::vector<pubnub_v2_message> leave(const Pubnub::String& channel_id) const;
         void stream_updates_on(const std::vector<Pubnub::String>& channel_ids) const;

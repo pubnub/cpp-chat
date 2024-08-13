@@ -98,7 +98,7 @@ std::vector<pubnub_v2_message> Channel::connect() const {
 }
 
 std::vector<pubnub_v2_message> Channel::join(const Pubnub::String& additional_params) const {
-    return this->channel_service->join(channel_id_internal, additional_params);
+    return this->channel_service->join(*this, additional_params);
 }
 
 std::vector<pubnub_v2_message> Channel::disconnect() const {
