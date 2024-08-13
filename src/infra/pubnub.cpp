@@ -178,14 +178,26 @@ std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
 
 std::vector<pubnub_v2_message> PubNub::unsubscribe_from_channel_and_get_messages(Pubnub::String channel) {
     auto messages = this->pause_subscription_and_get_messages();
-    this->subscribed_channels.erase(
-            std::remove(
-                this->subscribed_channels.begin(),
-                this->subscribed_channels.end(),
-                channel
-            ),
-            this->subscribed_channels.end()
-        );
+    std::vector<Pubnub::String> new_channels;
+    for (auto& channel : this->subscribed_channels)
+    {
+        if (channel != channel)
+        {
+            new_channels.push_back(channel);
+        }
+    }
+
+    this->subscribed_channels = new_channels;
+
+    //This didn't work, maybe because of StringParser
+    //this->subscribed_channels.erase(
+    //        std::remove(
+    //            this->subscribed_channels.begin(),
+    //            this->subscribed_channels.end(),
+    //            channel
+    //        ),
+    //        this->subscribed_channels.end()
+    //    );
 
     if (this->subscribed_channels.empty()) {
         this->is_subscribed = false;
