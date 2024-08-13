@@ -332,6 +332,8 @@ namespace PubNubChatAPI.Entities
         public event Action<List<string>> OnPresenceUpdate;
 
         public event Action<List<string>> OnUsersTyping;
+        
+        public event Action<ChatEvent> OnReadReceiptEvent;
 
         internal Channel(Chat chat, string channelId, IntPtr channelPointer) : base(channelPointer, channelId)
         {
@@ -351,6 +353,11 @@ namespace PubNubChatAPI.Entities
             {
                 OnMessageReceived?.Invoke(message);
             }
+        }
+
+        internal void BroadcastReadReceipt(ChatEvent readReceiptEvent)
+        {
+            OnReadReceiptEvent?.Invoke(readReceiptEvent);
         }
 
         internal override void UpdateWithPartialPtr(IntPtr partialPointer)

@@ -298,7 +298,7 @@ namespace PubNubChatAPI.Entities
         public event Action<ChatEvent> OnReportEvent;
         public event Action<ChatEvent> OnModerationEvent;
         public event Action<ChatEvent> OnTypingEvent;
-        public event Action<ChatEvent> OnReceiptEvent;
+        public event Action<ChatEvent> OnReadReceiptEvent;
         public event Action<ChatEvent> OnMentionEvent;
         public event Action<ChatEvent> OnInviteEvent;
         public event Action<ChatEvent> OnCustomEvent;
@@ -372,8 +372,8 @@ namespace PubNubChatAPI.Entities
                         switch (chatEvent.Type)
                         {
                             case PubnubChatEventType.Typing:
-                                if (TryGetChannel(chatEvent.ChannelId, out var channel)
-                                    && channel.TryParseAndBroadcastTypingEvent(chatEvent))
+                                if (TryGetChannel(chatEvent.ChannelId, out var typingChannel)
+                                    && typingChannel.TryParseAndBroadcastTypingEvent(chatEvent))
                                 {
                                     OnTypingEvent?.Invoke(chatEvent);
                                 }
@@ -386,7 +386,11 @@ namespace PubNubChatAPI.Entities
                                 OnReportEvent?.Invoke(chatEvent);
                                 break;
                             case PubnubChatEventType.Receipt:
-                                OnReceiptEvent?.Invoke(chatEvent);
+                                OnReadReceiptEvent?.Invoke(chatEvent);
+                                if (TryGetChannel(chatEvent.ChannelId, out var readReceiptChannel))
+                                {
+                                    readReceiptChannel.BroadcastReadReceipt(chatEvent);
+                                }
                                 break;
                             case PubnubChatEventType.Mention:
                                 OnMentionEvent?.Invoke(chatEvent);

@@ -194,7 +194,7 @@ public class ChatTests
         otherChatChannel.Join();
 
         var receiptReset = new ManualResetEvent(false);
-        otherChat.OnReceiptEvent += receiptEvent =>
+        otherChat.OnReadReceiptEvent += receiptEvent =>
         {
             Assert.True(receiptEvent.ChannelId == channel.Id && receiptEvent.UserId == user.Id);
             receiptReset.Set();
