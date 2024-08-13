@@ -42,6 +42,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         
         std::function<void()> stream_updates(Pubnub::Message calling_message, std::function<void(const Pubnub::Message)> message_callback) const;
         std::function<void()> stream_updates_on(Pubnub::Message calling_message, const std::vector<Pubnub::Message>& messages, std::function<void(std::vector<Pubnub::Message>)> message_callback) const;
+        std::function<void()> stream_updates_on(Pubnub::ThreadMessage calling_message, const std::vector<Pubnub::ThreadMessage>& messages, std::function<void(std::vector<Pubnub::ThreadMessage>)> message_callback) const;
 
         Pubnub::Message create_message_object(std::pair<Pubnub::String, MessageEntity> message_data) const;
         Pubnub::ThreadMessage create_thread_message_object(std::pair<Pubnub::String, MessageEntity> message_data, Pubnub::String parent_channel_id) const;

@@ -1,4 +1,5 @@
 #include "thread_message.hpp"
+#include "application/message_service.hpp"
 #include "channel.hpp"
 #include "application/channel_service.hpp"
 #include "application/dao/message_dao.hpp"
@@ -50,5 +51,16 @@ Pubnub::Channel Pubnub::ThreadMessage::unpin_from_parent_channel() const
 {
     auto parent_channel = this->channel_service->get_channel(parent_channel_id_internal);
     return parent_channel.unpin_message();
+}
+
+CallbackStop Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::ThreadMessage> messages, std::function<void(Pubnub::Vector<Pubnub::ThreadMessage>)> callback) const
+{
+    auto messages_std = messages.into_std_vector();
+
+    auto new_callback = [=](std::vector<Pubnub::ThreadMessage> vec)
+    {
+        callback(std::move(vec));
+    };
+    return CallbackStop(this->message_service->stream_updates_on(*this, messages_std, new_callback));
 }
 

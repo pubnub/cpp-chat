@@ -1,7 +1,10 @@
 #ifndef PN_CHAT_THREAD_MESSAGE_HPP
 #define PN_CHAT_THREAD_MESSAGE_HPP
 
+#include "callback_stop.hpp"
+#include "helpers/export.hpp"
 #include "pubnub_chat/message.hpp"
+#include "vector.hpp"
 
 
 namespace Pubnub 
@@ -18,6 +21,8 @@ namespace Pubnub
 
         PN_CHAT_EXPORT Pubnub::Channel pin_to_parent_channel() const;
         PN_CHAT_EXPORT Pubnub::Channel unpin_from_parent_channel() const;
+
+        PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::ThreadMessage>, std::function<void(Pubnub::Vector<Pubnub::ThreadMessage>)> callback) const;
 
         private:
             PN_CHAT_EXPORT ThreadMessage(

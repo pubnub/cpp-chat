@@ -3,6 +3,7 @@
 
 #include "message.hpp"
 #include "channel.hpp"
+#include "thread_message.hpp"
 #include "user.hpp"
 #include "membership.hpp"
 #include "event.hpp"
@@ -19,6 +20,7 @@ class CallbacksRepository {
         CallbacksRepository() = default;
 
         FunctionRepository<Pubnub::Message>& get_message_callbacks();
+        FunctionRepository<Pubnub::ThreadMessage>& get_thread_message_callbacks();
         TupleFunctionRepository<Pubnub::String, Pubnub::Message>& get_message_update_callbacks();
         FunctionRepository<Pubnub::Channel>& get_channel_callbacks();
         TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::Event>& get_event_callbacks();
@@ -28,6 +30,7 @@ class CallbacksRepository {
 
     private:
         FunctionRepository<Pubnub::Message> message_callbacks;
+        FunctionRepository<Pubnub::ThreadMessage> thread_message_callbacks;
         TupleFunctionRepository<Pubnub::String, Pubnub::Message> message_update_callbacks;
         FunctionRepository<Pubnub::Channel> channel_callbacks;
         TupleFunctionRepository<Pubnub::pubnub_chat_event_type, Pubnub::Event> event_callbacks;

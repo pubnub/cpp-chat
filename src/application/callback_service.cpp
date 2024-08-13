@@ -44,6 +44,16 @@ void CallbackService::remove_message_callback(Pubnub::String channel_id)
     this->callbacks.get_message_callbacks().remove(channel_id);
 }
 
+void CallbackService::register_thread_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::ThreadMessage)> thread_message_callback)
+{
+    this->callbacks.get_thread_message_callbacks().update_or_insert(channel_id, thread_message_callback);
+}
+
+void CallbackService::remove_thread_message_callback(Pubnub::String channel_id)
+{
+    this->callbacks.get_thread_message_callbacks().remove(channel_id);
+}
+
 void CallbackService::register_message_update_callback(
         Pubnub::String message_timetoken,
         Pubnub::String channel_id,
