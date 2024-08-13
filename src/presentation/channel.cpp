@@ -14,6 +14,17 @@
 
 using namespace Pubnub;
 
+Channel::Channel() :
+    channel_id_internal(""),
+    chat_service(nullptr),
+    channel_service(nullptr),
+    presence_service(nullptr),
+    restrictions_service(nullptr),
+    message_service(nullptr),
+    membership_service(nullptr),
+    data(nullptr)
+{}
+
 Channel::Channel(
         String channel_id,
         std::shared_ptr<const ChatService> chat_service,

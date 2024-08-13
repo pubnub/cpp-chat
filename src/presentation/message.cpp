@@ -7,6 +7,15 @@
 
 using namespace Pubnub;
 
+Message::Message() :
+timetoken_internal(""),
+chat_service(nullptr),
+message_service(nullptr),
+channel_service(nullptr),
+restrictions_service(nullptr),
+data(nullptr)
+{}
+
 Message::Message(String timetoken, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MessageService> message_service, std::shared_ptr<const ChannelService> channel_service, std::shared_ptr<const RestrictionsService> restrictions_service, std::unique_ptr<MessageDAO> data) :
 timetoken_internal(timetoken),
 chat_service(chat_service),

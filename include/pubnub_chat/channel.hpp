@@ -76,6 +76,7 @@ namespace Pubnub
 
     class Channel {
         public:
+            PN_CHAT_EXPORT Channel();
             PN_CHAT_EXPORT Channel(const Channel& other);
             PN_CHAT_EXPORT ~Channel();
 
@@ -92,6 +93,7 @@ namespace Pubnub
             PN_CHAT_EXPORT void leave() const;
 #endif
             PN_CHAT_EXPORT void delete_channel() const;
+            // TODO: ambiguous call on send_text
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, Pubnub::pubnub_chat_message_type message_type = Pubnub::pubnub_chat_message_type::PCMT_TEXT, const Pubnub::String& meta_data = "");
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, SendTextParams text_params = SendTextParams());
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::String> who_is_present() const;

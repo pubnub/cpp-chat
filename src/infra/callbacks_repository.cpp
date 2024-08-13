@@ -5,12 +5,12 @@ CallbacksRepository::FunctionRepository<Pubnub::Message>& CallbacksRepository::g
     return this->message_callbacks;
 }
 
-CallbacksRepository::FunctionRepository<Pubnub::ThreadMessage>& CallbacksRepository::get_thread_message_callbacks()
+CallbacksRepository::FunctionRepository<Pubnub::ThreadMessage>& CallbacksRepository::get_thread_message_update_callbacks()
 {
     return this->thread_message_callbacks;
 }
 
-CallbacksRepository::TupleFunctionRepository<Pubnub::String, Pubnub::Message>& CallbacksRepository::get_message_update_callbacks()
+CallbacksRepository::FunctionRepository<Pubnub::Message>& CallbacksRepository::get_message_update_callbacks()
 {
     return this->message_update_callbacks;
 }

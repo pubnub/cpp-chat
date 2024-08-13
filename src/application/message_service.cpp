@@ -209,11 +209,11 @@ std::function<void()> MessageService::stream_updates(Pubnub::Message calling_mes
     
     auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.timetoken()});
     chat->callback_service->broadcast_messages(messages);
-    chat->callback_service->register_message_callback(calling_message.timetoken(), final_message_callback);
+    chat->callback_service->register_message_update_callback(calling_message.timetoken(), final_message_callback);
 
     //stop streaming callback
     std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_message_callback(calling_message.timetoken());
+        chat->callback_service->remove_message_update_callback(calling_message.timetoken());
     };
 
     return stop_streaming;
@@ -259,7 +259,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::Message calling_
     for(auto message : messages)
     {
         messages_ids.push_back(message.timetoken());
-        chat->callback_service->register_message_callback(message.timetoken(), single_message_callback);
+        chat->callback_service->register_message_update_callback(message.timetoken(), single_message_callback);
     }
 
     auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(messages_ids);
@@ -269,7 +269,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::Message calling_
     std::function<void()> stop_streaming = [=, &messages_ids](){
         for(auto id : messages_ids)
         {
-            chat->callback_service->remove_message_callback(id);
+            chat->callback_service->remove_message_update_callback(id);
         }
     };
 
@@ -300,7 +300,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage ca
 
             if(stream_message.timetoken() == message.timetoken())
             {
-                auto updated_message = this->update_message_with_base(stream_message, message);
+                auto updated_message = this->update_thread_message_with_base(stream_message, message);
 
                 updated_messages.push_back(Pubnub::ThreadMessage(updated_message, stream_message.parent_channel_id()));
             }
@@ -317,7 +317,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage ca
     for(auto message : messages)
     {
         messages_ids.push_back(message.timetoken());
-        chat->callback_service->register_thread_message_callback(message.timetoken(), single_message_callback);
+        chat->callback_service->register_thread_message_update_callback(message.timetoken(), single_message_callback);
     }
 
     auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(messages_ids);
@@ -327,7 +327,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage ca
     std::function<void()> stop_streaming = [=, &messages_ids](){
         for(auto id : messages_ids)
         {
-            chat->callback_service->remove_thread_message_callback(id);
+            chat->callback_service->remove_thread_message_update_callback(id);
         }
     };
 
@@ -439,4 +439,13 @@ Pubnub::Message MessageService::update_message_with_base(const Pubnub::Message& 
     return this->create_message_object(
             {message.timetoken(), MessageEntity::from_base_and_updated_message(base_entity, message_entity)});
 
+}
+
+Pubnub::ThreadMessage MessageService::update_thread_message_with_base(const Pubnub::ThreadMessage& message, const Pubnub::Message& base_message) const {
+    MessageEntity base_entity = MessageDAO(base_message.message_data()).to_entity();
+    MessageEntity message_entity = MessageDAO(message.message_data()).to_entity();
+
+    return this->create_thread_message_object(
+            {message.timetoken(), MessageEntity::from_base_and_updated_message(base_entity, message_entity)},
+            message.parent_channel_id());
 }

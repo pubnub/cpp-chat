@@ -36,15 +36,14 @@ class CallbackService {
         void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
         void remove_message_callback(Pubnub::String channel_id);
 
-        void register_thread_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::ThreadMessage)> thread_message_callback);
-        void remove_thread_message_callback(Pubnub::String channel_id);
-
         void register_message_update_callback(
                 Pubnub::String message_timetoken,
-                Pubnub::String channel_id,
                 std::function<void(Pubnub::Message)> message_update_callback
         );
         void remove_message_update_callback(Pubnub::String message_timetoken);
+
+        void register_thread_message_update_callback(Pubnub::String channel_id, std::function<void(Pubnub::ThreadMessage)> thread_message_callback);
+        void remove_thread_message_update_callback(Pubnub::String channel_id);
 
         void register_channel_callback(Pubnub::String channel_id, std::function<void(Pubnub::Channel)> channel_callback);
         void remove_channel_callback(Pubnub::String channel_id);

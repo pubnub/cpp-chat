@@ -35,8 +35,27 @@ int main() {
     // Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
 
     Pubnub::Channel channel = chat.get_channel("my_test_channel3");
-    auto message = channel.get_message("17224104171400850");
 
+    Pubnub::Message xdddd;
+
+    channel.join([&xdddd](Pubnub::Message message)
+    {
+        std::cout << "message: " << message.text() << std::endl;
+        xdddd = message;
+    });
+
+    channel.send_text("xd", Pubnub::pubnub_chat_message_type::PCMT_TEXT, "");
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    xdddd.stream_updates([](Pubnub::Message message)
+    {
+        std::cout << "message update: " << message.text() << std::endl;
+    });
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    xdddd.edit_text("xd2");
 
     // auto read_receipts_callback = [=](std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> result)
     // {

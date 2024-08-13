@@ -3,6 +3,7 @@
 
 #include "channel.hpp"
 #include "message.hpp"
+#include "thread_message.hpp"
 #include "user.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
@@ -28,6 +29,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_event(pubnub_v2_message* 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_deserialize_presence(pubnub_v2_message* presence, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_deserialize_message_update(Pubnub::Chat* chat, pubnub_v2_message* message_update);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadMessage* pn_deserialize_thread_message_update(Pubnub::Chat* chat, pubnub_v2_message* thread_message_update);
 
 //Membership updates
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_deserialize_membership(Pubnub::Chat* chat, pubnub_v2_message* membership);

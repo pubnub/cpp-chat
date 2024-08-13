@@ -2,6 +2,7 @@
 #include "domain/channel_entity.hpp"
 #include "enums.hpp"
 #include "json.hpp"
+#include "message_action.hpp"
 #include <pubnub_helper.h>
 #include <pubnub_memory_block.h>
 
@@ -109,6 +110,29 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
     );
 }
 
+std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
+{
+    return std::make_pair(
+        string_from_pn_block(pn_message.tt),
+        MessageEntity{
+            // TODO: leak of presentation
+            Pubnub::pubnub_chat_message_type::PCMT_TEXT,
+            json_field_from_pn_block(pn_message.payload, "data", "value"),
+            string_from_pn_block(pn_message.channel),
+            string_from_pn_block(pn_message.publisher),
+            string_from_pn_block(pn_message.metadata),
+            // TODO: I'm 100% sure that we're losing some data here
+            //       There is need to get the whole array of actions
+            {Pubnub::MessageAction{
+            Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
+                json_field_from_pn_block(pn_message.payload, "data", "value"),
+                json_field_from_pn_block(pn_message.payload, "data", "uuid"),
+                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken")
+            }}
+        }
+    );
+}
+
 std::pair<Parsers::PubnubJson::ChannelId, ChannelEntity> Parsers::PubnubJson::to_channel(pubnub_v2_message pn_message) {
     auto json = Json::parse(string_from_pn_block(pn_message.payload));
 
@@ -166,4 +190,9 @@ Pubnub::String Parsers::PubnubJson::membership_user(Pubnub::String message_json)
 
 Pubnub::String Parsers::PubnubJson::membership_custom_field(Pubnub::String message_json) {
     return Json::parse(message_json)["custom"];
+}
+
+bool Parsers::PubnubJson::contains_parent_message(Pubnub::String message_json_string) {
+    auto message_json = Json::parse(message_json_string)["data"];
+    return message_json.contains("parentMessage");
 }

@@ -26,6 +26,7 @@ namespace Parsers {
         bool is_membership_update(Pubnub::String message_json_string);
 
         std::pair<Timetoken, MessageEntity> to_message(pubnub_v2_message pn_message);
+        std::pair<Timetoken, MessageEntity> to_message_update(pubnub_v2_message pn_message);
         std::pair<ChannelId, ChannelEntity> to_channel(pubnub_v2_message pn_message);
         std::pair<UserId, UserEntity> to_user(pubnub_v2_message pn_message);
         MembershipEntity membership_from_string(Pubnub::String message_json);
@@ -37,6 +38,8 @@ namespace Parsers {
         Pubnub::String membership_channel(Pubnub::String message_json);
         Pubnub::String membership_user(Pubnub::String message_json);
         Pubnub::String membership_custom_field(Pubnub::String message_json);
+
+        bool contains_parent_message(Pubnub::String message_json_string);
     }
 }
 

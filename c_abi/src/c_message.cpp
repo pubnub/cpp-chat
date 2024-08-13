@@ -271,6 +271,17 @@ Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, P
     }
 }
 
+Pubnub::Message* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message) {
+    try {
+        return new Pubnub::ThreadMessage(message->update_with_thread_base(*base_message));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
     try {
         auto mentioned_users = message->mentioned_users();

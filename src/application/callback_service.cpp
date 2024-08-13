@@ -1,11 +1,13 @@
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
+#include "const_values.hpp"
 #include "enums.hpp"
 #include "infra/serialization.hpp"
 #include "infra/sync.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include "message.hpp"
+#include <cstring>
 #include <pubnub_helper.h>
 
 using json = nlohmann::json;
@@ -44,23 +46,22 @@ void CallbackService::remove_message_callback(Pubnub::String channel_id)
     this->callbacks.get_message_callbacks().remove(channel_id);
 }
 
-void CallbackService::register_thread_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::ThreadMessage)> thread_message_callback)
+void CallbackService::register_thread_message_update_callback(Pubnub::String channel_id, std::function<void(Pubnub::ThreadMessage)> thread_message_callback)
 {
-    this->callbacks.get_thread_message_callbacks().update_or_insert(channel_id, thread_message_callback);
+    this->callbacks.get_thread_message_update_callbacks().update_or_insert(channel_id, thread_message_callback);
 }
 
-void CallbackService::remove_thread_message_callback(Pubnub::String channel_id)
+void CallbackService::remove_thread_message_update_callback(Pubnub::String channel_id)
 {
-    this->callbacks.get_thread_message_callbacks().remove(channel_id);
+    this->callbacks.get_thread_message_update_callbacks().remove(channel_id);
 }
 
 void CallbackService::register_message_update_callback(
         Pubnub::String message_timetoken,
-        Pubnub::String channel_id,
         std::function<void(Pubnub::Message)> message_update_callback
 )
 {
-    this->callbacks.get_message_update_callbacks().update_or_insert(message_timetoken, std::make_pair(channel_id, message_update_callback));
+    this->callbacks.get_message_update_callbacks().update_or_insert(message_timetoken, message_update_callback);
 }
 
 void CallbackService::remove_message_update_callback(Pubnub::String message_timetoken)
@@ -233,16 +234,24 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
 
     if (Parsers::PubnubJson::is_message_update(message_string)) {
         Pubnub::String message_timetoken = Parsers::PubnubJson::message_update_timetoken(message_string);
+
+        auto parsed_message = this->message_service
+            .lock()
+            ->create_message_object(Parsers::PubnubJson::to_message_update(message));
         
-        auto maybe_callback = this->callbacks.get_message_update_callbacks().get(message_timetoken);
-        if (maybe_callback.has_value()) {
-            Pubnub::String message_channel;
-            std::function<void(Pubnub::Message)> callback;
-            std::tie(message_channel, callback) = maybe_callback.value();
-            if (auto service = this->channel_service.lock()) {
-                callback(service->get_channel(message_channel).get_message(message_timetoken));
-            } else {
-                throw std::runtime_error("Channel service is not available to call callback");
+        if (std::strncmp(
+                    message.channel.ptr,
+                    Pubnub::MESSAGE_THREAD_ID_PREFIX,
+                    std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1
+            ) == 0) {
+            auto maybe_callback = this->callbacks.get_thread_message_update_callbacks().get(message_timetoken);
+            if (maybe_callback.has_value()) {
+                maybe_callback.value()(Pubnub::ThreadMessage(parsed_message, Pubnub::String(message.channel.ptr, message.channel.size)));
+            }
+        } else {       
+            auto maybe_callback = this->callbacks.get_message_update_callbacks().get(message_timetoken);
+            if (maybe_callback.has_value()) {
+                maybe_callback.value()(parsed_message);
             }
         }
     }

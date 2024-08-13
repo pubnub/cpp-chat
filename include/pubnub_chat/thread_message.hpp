@@ -6,6 +6,7 @@
 #include "pubnub_chat/message.hpp"
 #include "vector.hpp"
 
+class CallbackService;
 
 namespace Pubnub 
 {
@@ -38,6 +39,11 @@ namespace Pubnub
 
             Pubnub::String parent_channel_id_internal;
         friend class ::MessageService;
+        friend class ::CallbackService;
+#ifdef PN_CHAT_C_ABI
+        public:
+        Pubnub::ThreadMessage update_with_thread_base(const Pubnub::ThreadMessage& base_message) const;
+#endif
       
     };
 };

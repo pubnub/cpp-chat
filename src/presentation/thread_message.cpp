@@ -64,3 +64,10 @@ CallbackStop Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::Thr
     return CallbackStop(this->message_service->stream_updates_on(*this, messages_std, new_callback));
 }
 
+#ifdef PN_CHAT_C_ABI
+ThreadMessage ThreadMessage::update_with_thread_base(const Pubnub::ThreadMessage& base_message) const
+{
+    return this->message_service->update_thread_message_with_base(*this, base_message);
+}
+#endif
+
