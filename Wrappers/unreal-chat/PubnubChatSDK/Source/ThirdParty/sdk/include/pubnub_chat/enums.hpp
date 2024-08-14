@@ -31,6 +31,22 @@ enum pubnub_chat_message_type : uint8_t
     PCMT_TEXT
 };
 
+enum EventMethod {
+    Default,
+    Publish,
+    Signal
+};
+
+static inline EventMethod event_method_from_event_type(pubnub_chat_event_type type) {
+    switch(type) {
+        case pubnub_chat_event_type::PCET_TYPING:
+        case pubnub_chat_event_type::PCET_RECEPIT:
+            return EventMethod::Signal;
+        default:
+            return EventMethod::Publish;
+    }
+};
+
 static inline Pubnub::String message_action_type_to_string(pubnub_message_action_type message_action_type)
 {
     switch(message_action_type)
