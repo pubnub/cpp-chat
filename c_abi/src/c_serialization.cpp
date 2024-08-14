@@ -43,6 +43,34 @@ Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* m
     }
 }
 
+Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_v2_message* message) {
+    if (!Parsers::PubnubJson::is_message(Pubnub::String(message->payload.ptr, message->payload.size))) {
+        pn_c_set_error_message("Message is not a chat message");
+
+        return PN_C_ERROR_PTR;
+    }
+
+    if (std::strncmp(
+                message->channel.ptr,
+                Pubnub::MESSAGE_THREAD_ID_PREFIX,
+                std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1
+        ) != 0) {
+        pn_c_set_error_message("Message is not a chat thread message");
+
+        return PN_C_ERROR_PTR;
+    }
+
+    try {
+        auto parsed_message = Parsers::PubnubJson::to_message(*message);
+        return new Pubnub::ThreadMessage(chat->get_chat_service()->message_service->create_thread_message_object(
+                    Parsers::PubnubJson::to_message_update(*message), Pubnub::String(message->channel.ptr, message->channel.size)));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 Pubnub::Channel* pn_deserialize_channel(Pubnub::Chat* chat, pubnub_v2_message* channel_json) {
     if (!Parsers::PubnubJson::is_channel_update(Pubnub::String(channel_json->payload.ptr, channel_json->payload.size))) {
         pn_c_set_error_message("Message is not a chat channel");

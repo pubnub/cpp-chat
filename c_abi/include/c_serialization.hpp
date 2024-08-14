@@ -16,6 +16,8 @@ extern "C" {
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_deserialize_message(Pubnub::Chat* chat, pubnub_v2_message* message);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_v2_message* thread_message);
+
 //Channel updates (not new channels)
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_deserialize_channel(Pubnub::Chat* chat, pubnub_v2_message* channel);
 
