@@ -113,7 +113,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
 {
     return std::make_pair(
-        string_from_pn_block(pn_message.tt),
+        json_field_from_pn_block(pn_message.payload, "data", "messageTimetoken"),
         MessageEntity{
             // TODO: leak of presentation
             Pubnub::pubnub_chat_message_type::PCMT_TEXT,
