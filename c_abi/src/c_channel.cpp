@@ -241,24 +241,6 @@ PnCResult pn_channel_set_restrictions(
     return PN_C_OK;
 }
 
-PnCResult pn_channel_send_text(
-    Pubnub::Channel* channel,
-    const char* message,
-    Pubnub::pubnub_chat_message_type type,
-    const char* metadata
-    ) {
-    // try {
-    //     channel->send_text(message, type, metadata);
-    // } catch (std::exception& e) {
-    //     pn_c_set_error_message(e.what());
-
-    //     return PN_C_ERROR;
-    // }
-    //IMPORTANT TODO: @Jakub Remove all functions from Unity/C# that use this send_text overload
-
-    return PN_C_OK;
-}
-
 void pn_channel_get_channel_id(
         Pubnub::Channel* channel,
         char* result

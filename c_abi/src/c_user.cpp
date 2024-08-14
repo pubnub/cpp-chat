@@ -103,21 +103,6 @@ PnCResult pn_user_set_restrictions(
     return PN_C_OK;
 }
 
-PnCResult pn_user_report(
-        Pubnub::User* user,
-        const char* reason) {
-    // try {
-    //     user->report(reason);
-    // } catch (std::exception& e) {
-    //     pn_c_set_error_message(e.what());
-
-    //     return PN_C_ERROR;
-    // }
-    //IMPORTANT TODO: @Jakub Remove all functions from Unity/C# that use this function
-
-    return PN_C_OK;
-}
-
 PnCResult pn_user_where_present(Pubnub::User* user, char* result_json) {
     std::vector<Pubnub::String> channels;
 

@@ -45,12 +45,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_set_restrictions(
         bool mute,
         const char* reason);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text(
-        Pubnub::Channel* channel,
-        const char* message,
-        Pubnub::pubnub_chat_message_type type,
-        const char* metadata);
-
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_channel_get_channel_id(
         Pubnub::Channel* channel,
         char* result);

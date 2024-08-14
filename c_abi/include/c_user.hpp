@@ -42,10 +42,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_set_restrictions(
         bool mute_user,
         const char* reason);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_report(
-        Pubnub::User* user,
-        const char* reason);
-
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_where_present(Pubnub::User* user, char* result_json);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_user_is_present_on(Pubnub::User* user, const char* channel_id);

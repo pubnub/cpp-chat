@@ -23,9 +23,6 @@ namespace PubNubChatAPI.Entities
         private static extern void pn_user_destroy(IntPtr user);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_user_report(IntPtr user, string reason);
-
-        [DllImport("pubnub-chat")]
         private static extern int pn_user_is_present_on(IntPtr user, string channel_id);
 
         [DllImport("pubnub-chat")]
@@ -355,29 +352,6 @@ namespace PubNubChatAPI.Entities
             wrapper ??= new ChannelsRestrictionsWrapper();
             return wrapper;
         }
-
-        //TODO: fully remove once 100% sure it's obsolete
-        /// <summary>
-        /// Reports the user.
-        /// <para>
-        /// This method reports the user.
-        /// Reason for reporting the user is to report the user for any inappropriate behavior.
-        /// </para>
-        /// </summary>
-        /// <param name="reason">The reason for reporting the user.</param>
-        /// <exception cref="PubNubCCoreException">
-        /// This exception might be thrown when any error occurs while reporting the user.
-        /// </exception>
-        /// <example>
-        /// <code>
-        /// var user = // ...;
-        /// user.ReportUser("Inappropriate behavior");
-        /// </code>
-        /// </example>
-        /*public void ReportUser(string reason)
-        {
-            CUtilities.CheckCFunctionResult(pn_user_report(pointer, reason));
-        }*/
 
         /// <summary>
         /// Checks if the user is present on the channel.

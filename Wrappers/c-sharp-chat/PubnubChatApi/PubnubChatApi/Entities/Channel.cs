@@ -50,9 +50,6 @@ namespace PubNubChatAPI.Entities
             StringBuilder result);
 
         [DllImport("pubnub-chat")]
-        private static extern int pn_channel_send_text(IntPtr channel, string message, byte type, string metadata);
-
-        [DllImport("pubnub-chat")]
         private static extern int pn_channel_get_user_restrictions(
             IntPtr channel,
             IntPtr user,
