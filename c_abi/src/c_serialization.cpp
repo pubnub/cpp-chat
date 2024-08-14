@@ -50,10 +50,18 @@ Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_
         return PN_C_ERROR_PTR;
     }
 
+    auto prefix_length = std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1;
+
+    if (message->channel.size < prefix_length) {
+        pn_c_set_error_message("Message is not a chat thread message");
+
+        return PN_C_ERROR_PTR;
+    }
+
     if (std::strncmp(
                 message->channel.ptr,
                 Pubnub::MESSAGE_THREAD_ID_PREFIX,
-                std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1
+                prefix_length
         ) != 0) {
         pn_c_set_error_message("Message is not a chat thread message");
 

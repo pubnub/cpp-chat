@@ -239,10 +239,11 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             .lock()
             ->create_message_object(Parsers::PubnubJson::to_message_update(message));
         
-        if (std::strncmp(
+        auto prefix_length = std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1;
+        if (message.channel.size >= prefix_length && std::strncmp(
                     message.channel.ptr,
                     Pubnub::MESSAGE_THREAD_ID_PREFIX,
-                    std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1
+                    prefix_length
             ) == 0) {
             auto maybe_callback = this->callbacks.get_thread_message_update_callbacks().get(message_timetoken);
             if (maybe_callback.has_value()) {
