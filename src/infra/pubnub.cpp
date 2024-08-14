@@ -63,6 +63,13 @@ void PubNub::publish(const Pubnub::String channel, const Pubnub::String message,
     this->await_and_handle_error(result);
 }
 
+void PubNub::signal(const Pubnub::String channel, const Pubnub::String message)
+{
+    auto result = pubnub_signal(main_context.get(), channel.c_str(), message.c_str());
+
+    this->await_and_handle_error(result);
+}
+
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
     return this->subscribe_to_multiple_channels_and_get_messages({channel});
@@ -614,6 +621,8 @@ bool PubNub::delete_messages(const Pubnub::String channel, const Pubnub::String 
 void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {
+        auto error = pubnub_last_publish_result(this->main_context.get());
+        ;
         throw std::runtime_error(pubnub_res_2_string(result));
     }
 

@@ -8,6 +8,7 @@
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
+#include "enums.hpp"
 #include <vector>
 
 extern "C" {
@@ -151,8 +152,8 @@ void Chat::set_restrictions(const String& user_id, const String& channel_id, con
     this->restrictions_service->set_restrictions(user_id, channel_id, restrictions);
 }
 
-void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload) const {
-    this->chat_service->emit_chat_event(chat_event_type, channel_id, payload);
+void Chat::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload, EventMethod event_method) const {
+    this->chat_service->emit_chat_event(chat_event_type, channel_id, payload, event_method);
 }
 
 EventsHistoryWrapper Pubnub::Chat::get_events_history(const Pubnub::String &channel_id, const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const

@@ -407,7 +407,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
         memberships.push_back(membership);
 
         //Emit events for updated memberships
-        String event_payload = "{\"messageTimetoken\": \"" + now_timetoken +"\", \"userId\": \"" + membership.user.user_id() + "\"}";
+        String event_payload = "{\"messageTimetoken\": \"" + now_timetoken +"\"}";
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, channel_id, event_payload);
     }
     int total = response_json.get_int("totalCount").value_or(0);

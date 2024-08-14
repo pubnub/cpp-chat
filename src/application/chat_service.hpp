@@ -35,7 +35,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
 
         static ThreadSafePtr<PubNub> create_pubnub(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const Pubnub::String& auth_key);
 
-        void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
+        void emit_chat_event(Pubnub::pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload, Pubnub::EventMethod event_method = Pubnub::EventMethod::Default) const;
         std::tuple<std::vector<Pubnub::Event>, bool> get_events_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
 #ifndef PN_CHAT_C_ABI
         std::function<void()> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;

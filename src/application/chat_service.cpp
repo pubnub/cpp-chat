@@ -11,6 +11,7 @@
 #include "chat.hpp"
 #include "domain/parsers.hpp"
 #include "domain/json.hpp"
+#include "enums.hpp"
 #include "infra/pubnub.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
@@ -58,7 +59,7 @@ ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, cons
     return std::make_shared<Mutex<PubNub>>(publish_key, subscribe_key, user_id, auth_key);
 }
 
-void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload) const {
+void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload, EventMethod event_method) const {
     //Payload is in form of Json: {"param1": "param1value", "param2": "param2value" ... }. So in order to get just parameters, we remove first and last curl bracket
 	String payload_parameters = payload;
     payload_parameters.erase(0, 1);
@@ -66,7 +67,14 @@ void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const 
 	String event_message = String("{") + payload_parameters + String(", \"type\": \"") + chat_event_type_to_string(chat_event_type) + String("\"}");
 
     auto pubnub_handle = this->pubnub->lock();
-    pubnub_handle->publish(channel_id, event_message);
+    if (event_method == EventMethod::Default)
+    {
+        event_method = event_method_from_event_type(chat_event_type);
+    }
+
+    event_method == EventMethod::Signal 
+        ? pubnub_handle->signal(channel_id, event_message) 
+        : pubnub_handle->publish(channel_id, event_message);
 }
 
 std::tuple<std::vector<Pubnub::Event>, bool> ChatService::get_events_history(const Pubnub::String &channel_id, const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
