@@ -55,7 +55,7 @@ bool AccessManagerLogic::can_i(Pubnub::AccessManager::Permission permission, Pub
     }
 
     auto patterns = token["pat"];
-    auto pattern = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? patterns["uuids"] : patterns["channels"];
+    auto pattern = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? patterns["uuid"] : patterns["chan"];
 
     if (pattern.is_null()) {
         return false;
