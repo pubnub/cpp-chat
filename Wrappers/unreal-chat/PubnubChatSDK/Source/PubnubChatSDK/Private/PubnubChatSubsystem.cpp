@@ -26,12 +26,21 @@ UPubnubChat* UPubnubChatSubsystem::InitChat(FString PublishKey, FString Subscrib
 	}
 	
 	Pubnub::ChatConfig CppConfig;
-	CppConfig.publish_key = UPubnubChatUtilities::FStringToPubnubString(PublishKey);
-	CppConfig.subscribe_key = UPubnubChatUtilities::FStringToPubnubString(SubscribeKey);
-	CppConfig.user_id = UPubnubChatUtilities::FStringToPubnubString(UserID);
+	CppConfig.auth_key = UPubnubChatUtilities::FStringToPubnubString(Config.AuthKey);
+	CppConfig.typing_timeout = Config.TypingTimeout;
+	CppConfig.typing_timeout_difference = Config.TypingTimeoutDifference;
+	try
+	{
+		Chat = UPubnubChat::Create(Pubnub::Chat::init(UPubnubChatUtilities::FStringToPubnubString(PublishKey),
+	UPubnubChatUtilities::FStringToPubnubString(SubscribeKey),UPubnubChatUtilities::FStringToPubnubString(UserID), CppConfig));
+		return Chat;
+	}
+	catch (std::exception& Exception)
+	{
+		UE_LOG(PubnubLog, Error, TEXT("Can't create chat. Error: %s"), UTF8_TO_TCHAR(Exception.what()));
+	}
+	return nullptr;
 	
-	Chat = UPubnubChat::Create(Pubnub::Chat(CppConfig));
-	return Chat;
 }
 
 UPubnubChat* UPubnubChatSubsystem::GetChat()

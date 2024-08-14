@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHAT_HPP
 #define PN_CHAT_CHAT_HPP
 
+#include "access_manager.hpp"
 #include "string.hpp"
 #include "channel.hpp"
 #include "thread_channel.hpp"
@@ -10,6 +11,8 @@
 #include "restrictions.hpp"
 #include "vector.hpp"
 #include "page.hpp"
+#include "event.hpp"
+#include "callback_stop.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -34,11 +37,9 @@ class CallbackService;
 
 namespace Pubnub {
     struct ChatConfig {
-        Pubnub::String publish_key = "";
-        Pubnub::String subscribe_key = "";
-        Pubnub::String secret_key = "";
-        Pubnub::String user_id = "";
         Pubnub::String auth_key = "";
+        int typing_timeout = 5000;
+        int typing_timeout_difference = 1000;
     };
 
     struct CreatedChannelWrapper
@@ -74,10 +75,31 @@ namespace Pubnub {
         Pubnub::Vector<Pubnub::Membership> memberships;
     };
 
+    struct ChannelsResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::Channel> channels;
+        Pubnub::Page page;
+        int total;
+    };
+
+    struct UsersResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::User> users;
+        Pubnub::Page page;
+        int total;
+    };
+
+    struct EventsHistoryWrapper
+    {
+        Pubnub::Vector<Pubnub::Event> events;
+        bool is_more;
+    };
+
+
 
     class Chat {
         public:
-            PN_CHAT_EXPORT Chat(const ChatConfig& config);
+            PN_CHAT_EXPORT static Pubnub::Chat init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
 
             /* CHANNELS */
 
@@ -85,19 +107,22 @@ namespace Pubnub {
             PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(Pubnub::Vector<Pubnub::User> users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
             PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
-            PN_CHAT_EXPORT Pubnub::Vector<Channel> get_channels(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT ChannelsResponseWrapper get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
             PN_CHAT_EXPORT void delete_channel(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT void pin_message_to_channel(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
             PN_CHAT_EXPORT void unpin_message_from_channel(const Pubnub::Channel& channel) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Channel> get_channel_suggestions(Pubnub::String text, int limit = 10) const;
 
             /* USERS */
 
+            PN_CHAT_EXPORT Pubnub::User current_user();
             PN_CHAT_EXPORT Pubnub::User create_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT Pubnub::User get_user(const Pubnub::String& user_id) const;
-            PN_CHAT_EXPORT Pubnub::Vector<User> get_users(const Pubnub::String& include, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
+            PN_CHAT_EXPORT UsersResponseWrapper get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::User update_user(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
             PN_CHAT_EXPORT void delete_user(const Pubnub::String& user_id) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::User> get_user_suggestions(Pubnub::String text, int limit = 10) const;
 
             /* PRESENCE */
 
@@ -109,14 +134,15 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
             PN_CHAT_EXPORT void emit_chat_event(pubnub_chat_event_type chat_event_type, const Pubnub::String& channel_id, const Pubnub::String& payload) const;
+            PN_CHAT_EXPORT EventsHistoryWrapper get_events_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count = 100) const;
 #ifndef PN_CHAT_C_ABI
-            PN_CHAT_EXPORT void listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::String&)> event_callback) const;
+            PN_CHAT_EXPORT Pubnub::CallbackStop listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
 #endif
 
             /* MESSAGES */
 
             PN_CHAT_EXPORT void forward_message(const Pubnub::Message& message, const Pubnub::Channel& channel) const;
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_messages_counts(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, const Pubnub::String& filter = "", int limit = 0) const;
+            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::UnreadMessageWrapper> get_unread_messages_counts(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT MarkMessagesAsReadWrapper mark_all_messages_as_read(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 
 
@@ -126,7 +152,11 @@ namespace Pubnub {
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
 
+            /* PAM */
+            PN_CHAT_EXPORT Pubnub::AccessManager access_manager() const;
+
         private:
+            Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const ChannelService> channel_service;
             std::shared_ptr<const UserService> user_service;
@@ -139,7 +169,7 @@ namespace Pubnub {
 #else
         public:
             const ChatService* get_chat_service() const;
-            void listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
+            std::vector<pubnub_v2_message> listen_for_events(const Pubnub::String& channel_id, pubnub_chat_event_type chat_event_type) const;
             std::vector<pubnub_v2_message> get_chat_updates() const;
 #endif
 

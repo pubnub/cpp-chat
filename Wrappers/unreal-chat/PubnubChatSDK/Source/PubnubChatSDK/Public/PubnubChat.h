@@ -4,17 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "PubnubChannel.h"
+#include "PubnubUser.h"
 #include "PubnubMembership.h"
 #include "PubnubChatStructLibrary.h"
 #include "PubnubChat.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubEventReceived, FString, Event);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubEventReceived, FPubnubEvent, Event);
 
 class UPubnubChannel;
 class UPubnubUser;
 class UPubnubMessage;
 class UPubnubMembership;
 class UPubnubThreadChannel;
+class UPubnubCallbackStop;
+class UPubnubAccessManager;
 
 USTRUCT(BlueprintType)
 struct FPubnubUnreadMessageWrapper
@@ -26,7 +29,7 @@ struct FPubnubUnreadMessageWrapper
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Count;
 
 	FPubnubUnreadMessageWrapper() = default;
-	FPubnubUnreadMessageWrapper(Pubnub::UnreadMessageWrapper MessageWrapper) :
+	FPubnubUnreadMessageWrapper(Pubnub::UnreadMessageWrapper& MessageWrapper) :
 	Count(MessageWrapper.count)
 	{
 		Channel = UPubnubChannel::Create(MessageWrapper.channel);
@@ -81,6 +84,72 @@ struct FPubnubCreatedChannelWrapper
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FPubnubChannelsResponseWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<UPubnubChannel*> Channels;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+
+	FPubnubChannelsResponseWrapper() = default;
+	FPubnubChannelsResponseWrapper(Pubnub::ChannelsResponseWrapper& Wrapper) :
+	Page(Wrapper.page),
+	Total(Wrapper.total)
+	{
+		auto CppChannels = Wrapper.channels.into_std_vector();
+		for(auto Channel : CppChannels)
+		{
+			Channels.Add(UPubnubChannel::Create(Channel));
+		}
+	}
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubUsersResponseWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<UPubnubUser*> Users;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+
+	FPubnubUsersResponseWrapper() = default;
+	FPubnubUsersResponseWrapper(Pubnub::UsersResponseWrapper& Wrapper) :
+	Page(Wrapper.page),
+	Total(Wrapper.total)
+	{
+		auto CppUsers = Wrapper.users.into_std_vector();
+		for(auto User : CppUsers)
+		{
+			Users.Add(UPubnubUser::Create(User));
+		}
+	}
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubEventsHistoryWrapper
+{
+	GENERATED_BODY();
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FPubnubEvent> Events;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool IsMore;
+
+	FPubnubEventsHistoryWrapper() = default;
+	FPubnubEventsHistoryWrapper(Pubnub::EventsHistoryWrapper& Wrapper) :
+	IsMore(Wrapper.is_more)
+	{
+		auto CppEvents = Wrapper.events.into_std_vector();
+		for(auto Event : CppEvents)
+		{
+			Events.Add(Event);
+		}
+	}
+};
+
 /**
  * 
  */
@@ -109,7 +178,7 @@ public:
 	UPubnubChannel* GetChannel(FString ChannelID);
 	
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|Channel")
-	TArray<UPubnubChannel*> GetChannels(FString Include,  int Limit, FString Start, FString End);
+	FPubnubChannelsResponseWrapper GetChannels(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|Channel")
 	UPubnubChannel* UpdateChannel(FString ChannelID, FPubnubChatChannelData ChannelData);
@@ -123,9 +192,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|Channel")
 	void UnpinMessageFromChannel(UPubnubChannel* Channel);
 
+	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
+	TArray<UPubnubChannel*> GetChannelSuggestions(FString Text, int Limit = 10);
+
 	
 	/* USERS */
 
+	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
+	UPubnubUser* CurrentUser();
+	
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
 	UPubnubUser* CreateUser(FString UserID, FPubnubChatUserData UserData);
 
@@ -133,13 +208,16 @@ public:
 	UPubnubUser* GetUser(FString UserID);
 
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
-	TArray<UPubnubUser*> GetUsers(FString Include,  int Limit, FString Start, FString End);
+	FPubnubUsersResponseWrapper GetUsers(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
 	UPubnubUser* UpdateUser(FString UserID, FPubnubChatUserData UserData);
 
 	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
 	void DeleteUser(FString UserID);
+
+	UFUNCTION(BlueprintCallable, Category="Pubnub Chat|User")
+	TArray<UPubnubUser*> GetUserSuggestions(FString Text, int Limit = 10);
 
 
 	/* PRESENCE */
@@ -163,15 +241,18 @@ public:
 	void EmitChatEvent(EPubnubChatEventType ChatEventType, FString ChannelID, FString Payload);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Moderation")
-	void ListenForEvents(FString ChannelID, EPubnubChatEventType ChatEventType, FOnPubnubEventReceived EventCallback);
+	UPubnubCallbackStop* ListenForEvents(FString ChannelID, EPubnubChatEventType ChatEventType, FOnPubnubEventReceived EventCallback);
 
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Moderation")
+	FPubnubEventsHistoryWrapper GetEventsHistory(FString ChannelID, FString StartTimetoken, FString EndTimetoken, int Count = 100);
+	
 	/* MESSAGES */
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Messages")
 	void ForwardMessage(UPubnubChannel* Channel, UPubnubMessage* Message);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Messages")
-	TArray<FPubnubUnreadMessageWrapper> GetUnreadMessagesCounts(int Limit, FString Start, FString End, FString Filter = "");
+	TArray<FPubnubUnreadMessageWrapper> GetUnreadMessagesCounts(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Messages")
 	FPubnubMarkMessagesAsReadWrapper MarkAllMessagesAsRead(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
@@ -187,6 +268,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Messages")
 	void RemoveThreadChannel(UPubnubMessage* Message);
+
+
+	/* ACCESS MANAGER */
+	
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Chat|Access Manager")
+	UPubnubAccessManager* GetAccessManager();
     
     
 private:

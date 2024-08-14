@@ -7,6 +7,8 @@
 #include "PubnubUser.h"
 #include "PubnubMessage.h"
 #include "PubnubMembership.h"
+#include "PubnubThreadMessage.h"
+#include "PubnubThreadChannel.h"
 
 
 FString UPubnubChatUtilities::PubnubStringToFString(Pubnub::String PubnubString)
@@ -83,6 +85,18 @@ TArray<UPubnubMessage*> UPubnubChatUtilities::CppMessagesToUnrealMessages(Pubnub
 	return PubnubMessages;
 }
 
+TArray<UPubnubThreadMessage*> UPubnubChatUtilities::CppThreadMessagesToUnrealTMessages(Pubnub::Vector<Pubnub::ThreadMessage>& CppThreadMessages)
+{
+	TArray<UPubnubThreadMessage*> PubnubMessages;
+	auto CppStdMessages = CppThreadMessages.into_std_vector();
+
+	for(auto &CppMessage : CppStdMessages)
+	{
+		PubnubMessages.Add(UPubnubThreadMessage::Create(CppMessage));
+	}
+	return PubnubMessages;
+}
+
 TArray<UPubnubMembership*> UPubnubChatUtilities::CppMembershipsToUnrealMemberships(Pubnub::Vector<Pubnub::Membership> &CppMemberships)
 {
 	TArray<UPubnubMembership*> PubnubMembership;
@@ -137,6 +151,17 @@ Pubnub::Vector<Pubnub::Message> UPubnubChatUtilities::UnrealMessagesToCppMessage
 	for(auto &PubnubMessage : PubnubMessages)
 	{
 		CppMessages.push_back(*PubnubMessage->GetInternalMessage());
+	}
+	return CppMessages;
+}
+
+Pubnub::Vector<Pubnub::ThreadMessage> UPubnubChatUtilities::UnrealThreadMessagesToCppTMessages(TArray<UPubnubThreadMessage*>& PubnubThreadMessages)
+{
+	Pubnub::Vector<Pubnub::ThreadMessage> CppMessages;
+
+	for(auto &PubnubMessage : PubnubThreadMessages)
+	{
+		CppMessages.push_back(*PubnubMessage->GetInternalThreadMessage());
 	}
 	return CppMessages;
 }

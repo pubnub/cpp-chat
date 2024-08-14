@@ -579,7 +579,17 @@ namespace Pubnub {
     {
         bool operator()(const String& lhs, const String& rhs) const
         {
-            return lhs == rhs;
+            auto comparison_bounds = std::min(lhs.length(), rhs.length());
+
+            for (std::size_t i = 0; i < comparison_bounds; i++) {
+                if (lhs[i] < rhs[i]) {
+                    return true;
+                } else if (lhs[i] > rhs[i]) {
+                    return false;
+                }
+            }
+
+            return lhs.length() < rhs.length();
         }
     };
 }

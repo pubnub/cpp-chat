@@ -5,6 +5,8 @@
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "vector.hpp"
+#include "callback_stop.hpp"
+#include "page.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -19,6 +21,7 @@ class UserDAO;
 namespace Pubnub
 {
     class Membership;
+    class Channel;
 
     struct ChatUserData
     {
@@ -30,6 +33,24 @@ namespace Pubnub
         Pubnub::String status = "";
         Pubnub::String type = "";
     };
+
+    struct MembershipsResponseWrapper
+    {
+        Pubnub::Vector<Pubnub::Membership> memberships;
+        Pubnub::Page page;
+        int total;
+        Pubnub::String status;
+    };
+
+    
+    struct ChannelsRestrictionsWrapper
+    {
+        Pubnub::Vector<Pubnub::ChannelRestriction> restrictions;
+        Pubnub::Page page;
+        int total;
+        Pubnub::String status;
+    };
+
 
     class User
     {
@@ -48,13 +69,15 @@ namespace Pubnub
             PN_CHAT_EXPORT bool is_present_on(const Pubnub::String& channel_id) const;
 
             PN_CHAT_EXPORT void set_restrictions(const Pubnub::String& channel_id, const Pubnub::Restriction& restrictions) const;
-            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::String& user_id, const Pubnub::String& channel_id, int limit, const Pubnub::String& start, const Pubnub::String& end) const;
-            PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
+            PN_CHAT_EXPORT Pubnub::Restriction get_channel_restrictions(const Pubnub::Channel& channel) const;
+            PN_CHAT_EXPORT ChannelsRestrictionsWrapper get_channels_restrictions(const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
+            //Deprecated in JS chat
+            //PN_CHAT_EXPORT void report(const Pubnub::String& reason) const;
 
-            PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_memberships(int limit, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken) const;
+            PN_CHAT_EXPORT MembershipsResponseWrapper get_memberships(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(const User&)> user_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(const Pubnub::User&)> user_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const User&)> user_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const;
 
         private:
             PN_CHAT_EXPORT User(
@@ -75,6 +98,11 @@ namespace Pubnub
             std::shared_ptr<const MembershipService> membership_service;
 
         friend class ::UserService;
+
+#ifdef PN_CHAT_C_ABI
+        public:
+        Pubnub::User update_with_base(const Pubnub::User& base_user) const;
+#endif
     };
 }
 #endif /* PN_CHAT_USER_H */

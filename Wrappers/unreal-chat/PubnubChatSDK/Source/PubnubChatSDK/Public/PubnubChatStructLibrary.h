@@ -9,6 +9,24 @@
 class UPubnubChannel;
 class UPubnubMembership;
 
+
+USTRUCT(BlueprintType)
+struct FPubnubStringArrayWrapper
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FString> Strings;
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubReadReceiptsWrapper
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TMap<FString, FPubnubStringArrayWrapper> Receipts;
+	
+};
+
 USTRUCT(BlueprintType)
 struct FPubnubChatChannelData
 {
@@ -97,7 +115,7 @@ struct FPubnubMessageAction
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString UserID = "";
 
 	FPubnubMessageAction() = default;
-	FPubnubMessageAction(Pubnub::MessageAction MessageAction) :
+	FPubnubMessageAction(Pubnub::MessageAction& MessageAction) :
 	Type((EPubnubMessageActionType)(uint8)MessageAction.type),
 	Value(UPubnubChatUtilities::PubnubStringToFString(MessageAction.value)),
 	Timetoken(UPubnubChatUtilities::PubnubStringToFString(MessageAction.timetoken)),
@@ -130,7 +148,7 @@ struct FPubnubChatMessageData
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FPubnubMessageAction> MessageActions;
 
 	FPubnubChatMessageData() = default;
-	FPubnubChatMessageData(Pubnub::ChatMessageData ChatMessageData) :
+	FPubnubChatMessageData(Pubnub::ChatMessageData& ChatMessageData) :
 	Type((EPubnubChatMessageType)(uint8)ChatMessageData.type),
 	Text(UPubnubChatUtilities::PubnubStringToFString(ChatMessageData.text)),
 	ChannelID(UPubnubChatUtilities::PubnubStringToFString(ChatMessageData.channel_id)),
@@ -183,7 +201,7 @@ struct FPubnubRestriction
 	FPubnubRestriction(Pubnub::Restriction Restriction) :
 	Ban(Restriction.ban),
 	Mute(Restriction.mute),
-	Reason(Restriction.reason)
+	Reason(UPubnubChatUtilities::PubnubStringToFString(Restriction.reason))
 	{};
 
 	//Internal use only
@@ -200,15 +218,81 @@ struct FPubnubRestriction
 };
 
 USTRUCT(BlueprintType)
+struct FPubnubChannelRestriction
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool Ban = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool Mute = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Reason = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString ChannelID = "";
+
+	FPubnubChannelRestriction() = default;
+	FPubnubChannelRestriction(Pubnub::ChannelRestriction Restriction) :
+	Ban(Restriction.ban),
+	Mute(Restriction.mute),
+	Reason(UPubnubChatUtilities::PubnubStringToFString(Restriction.reason)),
+	ChannelID(UPubnubChatUtilities::PubnubStringToFString(Restriction.channel_id))
+	
+	{};
+
+	//Internal use only
+	Pubnub::ChannelRestriction GetCppRestriction()
+	{
+		return Pubnub::ChannelRestriction(
+			{
+				Ban,
+				Mute,
+				UPubnubChatUtilities::FStringToPubnubString(Reason),
+				UPubnubChatUtilities::FStringToPubnubString(ChannelID)
+			});
+	}
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubUserRestriction
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool Ban = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool Mute = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Reason = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString UserID = "";
+
+	FPubnubUserRestriction() = default;
+	FPubnubUserRestriction(Pubnub::UserRestriction Restriction) :
+	Ban(Restriction.ban),
+	Mute(Restriction.mute),
+	Reason(UPubnubChatUtilities::PubnubStringToFString(Restriction.reason)),
+	UserID(UPubnubChatUtilities::PubnubStringToFString(Restriction.user_id))
+	
+	{};
+
+	//Internal use only
+	Pubnub::UserRestriction GetCppRestriction()
+	{
+		return Pubnub::UserRestriction(
+			{
+				Ban,
+				Mute,
+				UPubnubChatUtilities::FStringToPubnubString(Reason),
+				UPubnubChatUtilities::FStringToPubnubString(UserID)
+			});
+	}
+	
+};
+
+USTRUCT(BlueprintType)
 struct FPubnubPage
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Next;
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Prev;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Next = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Prev = "";
 
 	FPubnubPage() = default;
-	FPubnubPage(Pubnub::Page Page) :
+	FPubnubPage(Pubnub::Page& Page) :
 	Next(UPubnubChatUtilities::PubnubStringToFString(Page.next)),
 	Prev(UPubnubChatUtilities::PubnubStringToFString(Page.prev))
 	{};
@@ -223,4 +307,103 @@ struct FPubnubPage
 			});
 	}
 	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubMentionedUser
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString ID = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Name = "";
+
+	FPubnubMentionedUser() = default;
+	FPubnubMentionedUser(Pubnub::MentionedUser MentionedUser) :
+	ID(UPubnubChatUtilities::PubnubStringToFString(MentionedUser.id)),
+	Name(UPubnubChatUtilities::PubnubStringToFString(MentionedUser.name))
+	{};
+
+	//Internal use only
+	Pubnub::MentionedUser GetCppMentionedUser()
+	{
+		return Pubnub::MentionedUser(
+			{
+				UPubnubChatUtilities::FStringToPubnubString(ID),
+				UPubnubChatUtilities::FStringToPubnubString(Name)
+			});
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubReferencedChannel
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString ID = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Name = "";
+
+	FPubnubReferencedChannel() = default;
+	FPubnubReferencedChannel(Pubnub::ReferencedChannel ReferencedChannel) :
+	ID(UPubnubChatUtilities::PubnubStringToFString(ReferencedChannel.id)),
+	Name(UPubnubChatUtilities::PubnubStringToFString(ReferencedChannel.name))
+	{};
+
+	//Internal use only
+	Pubnub::ReferencedChannel GetCppReferencedChannel()
+	{
+		return Pubnub::ReferencedChannel(
+			{
+				UPubnubChatUtilities::FStringToPubnubString(ID),
+				UPubnubChatUtilities::FStringToPubnubString(Name)
+			});
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubTextLink
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Start_Index = 0;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int End_Index = 0;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Link = "";
+
+	FPubnubTextLink() = default;
+	FPubnubTextLink(Pubnub::TextLink& TextLink) :
+	Start_Index(TextLink.start_index),
+	End_Index(TextLink.end_index),
+	Link(UPubnubChatUtilities::PubnubStringToFString(TextLink.link))
+	{};
+
+	//Internal use only
+	Pubnub::TextLink GetCppTextLink()
+	{
+		return Pubnub::TextLink(
+			{
+				Start_Index,
+				End_Index,
+				UPubnubChatUtilities::FStringToPubnubString(Link)
+			});
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Timetoken = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) EPubnubChatEventType Type;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString ChannelID = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString UserID = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Payload = "";
+
+	FPubnubEvent() = default;
+	FPubnubEvent(Pubnub::Event event) :
+	Timetoken(UPubnubChatUtilities::PubnubStringToFString(event.timetoken)),
+	Type((EPubnubChatEventType)(uint8)event.type),
+	ChannelID(UPubnubChatUtilities::PubnubStringToFString(event.channel_id)),
+	UserID(UPubnubChatUtilities::PubnubStringToFString(event.user_id)),
+	Payload(UPubnubChatUtilities::PubnubStringToFString(event.payload))
+	{};
 };

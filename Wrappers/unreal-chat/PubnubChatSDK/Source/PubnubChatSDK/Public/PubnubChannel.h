@@ -12,11 +12,66 @@ class UPubnubMessage;
 class UPubnubChannel;
 class UPubnubMembership;
 class UPubnubUser;
+class UPubnubCallbackStop;
+
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelMessageReceived, UPubnubMessage*, PubnubMessage);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelStreamUpdateReceived, UPubnubChannel*, PubnubChannel);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelsStreamUpdateOnReceived, const TArray<UPubnubChannel*>&, PubnubChannels);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelStreamPresenceReceived, const TArray<FString>&, PresentUsersIDs);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelTypingReceived, const TArray<FString>&, TypingUsersIDs);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubChannelStreamReadReceiptsReceived, FPubnubReadReceiptsWrapper, Receipts);
+
+
+USTRUCT(BlueprintType)
+struct FSendTextParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool StoreInHistory = true;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) bool SendByPost = false;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Meta = "";
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TMap<int, FPubnubMentionedUser> MentionedUsers;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TMap<int, FPubnubReferencedChannel> ReferencedChannels;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FPubnubTextLink> TextLinks;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) UPubnubMessage* QuotedMessage;
+
+	FSendTextParams() = default;
+
+	//Internal use only
+	Pubnub::SendTextParams GetCppSendTextParams();
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubMembersResponseWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<UPubnubMembership*> Memberships;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Status;
+
+	FPubnubMembersResponseWrapper() = default;
+	FPubnubMembersResponseWrapper(Pubnub::MembersResponseWrapper& Wrapper);
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubUsersRestrictionsWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FPubnubUserRestriction> Restrictions;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Status;
+
+	FPubnubUsersRestrictionsWrapper() = default;
+	FPubnubUsersRestrictionsWrapper(Pubnub::UsersRestrictionsWrapper& Wrapper);
+	
+};
+
 
 /**
  * 
@@ -56,16 +111,16 @@ public:
 	void DeleteChannel();
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	void SendText(FString Message, FString MetaData);
+	void SendText(FString Message, FSendTextParams SendTextParams = FSendTextParams());
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	void StreamUpdates(FOnPubnubChannelStreamUpdateReceived ChannelUpdateCallback);
+	UPubnubCallbackStop* StreamUpdates(FOnPubnubChannelStreamUpdateReceived ChannelUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	void StreamUpdatesOn(TArray<UPubnubChannel*> Channels, FOnPubnubChannelStreamUpdateReceived ChannelUpdateCallback);
+	UPubnubCallbackStop* StreamUpdatesOn(TArray<UPubnubChannel*> Channels, FOnPubnubChannelsStreamUpdateOnReceived ChannelUpdateCallback);
 	
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	void StreamPresence(FOnPubnubChannelStreamPresenceReceived PresenceCallback);
+	UPubnubCallbackStop* StreamPresence(FOnPubnubChannelStreamPresenceReceived PresenceCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
 	TArray<FString> WhoIsPresent();
@@ -77,16 +132,19 @@ public:
 	void SetRestrictions(FString UserID, FPubnubRestriction Restrictions);
 	
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	FPubnubRestriction GetUserRestrictions(FString UserID, int Limit, FString Start, FString End);
+	FPubnubRestriction GetUserRestrictions(UPubnubUser* User);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
+	FPubnubUsersRestrictionsWrapper GetUsersRestrictions(FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
 	UPubnubMessage* GetMessage(FString Timetoken);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	TArray<UPubnubMessage*> GetHistory(int Limit, FString Start, FString End);
+	TArray<UPubnubMessage*> GetHistory(FString StartTimetoken, FString EndTimetoken, int Count = 25);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	TArray<UPubnubMembership*> GetMembers(int Limit, FString Start, FString End);
+	FPubnubMembersResponseWrapper GetMembers(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
 	UPubnubMembership* Invite(UPubnubUser* User);
@@ -101,7 +159,7 @@ public:
 	void StopTyping();
 	
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
-	void GetTyping(FOnPubnubChannelTypingReceived TypingCallback);
+	UPubnubCallbackStop* GetTyping(FOnPubnubChannelTypingReceived TypingCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
 	UPubnubChannel* PinMessage(UPubnubMessage* Message);
@@ -114,10 +172,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
 	void ForwardMessage(UPubnubMessage* Message);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
+	void EmitUserMention(FString UserID, FString Timetoken, FString Text);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
+	TArray<UPubnubMembership*> GetUserSuggestions(FString Text, int Limit = 10);
+	
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
+	UPubnubCallbackStop* StreamReadReceipts(FOnPubnubChannelStreamReadReceiptsReceived ReadReceiptsCallback);
+	
 	
 	//Internal usage only
 	Pubnub::Channel* GetInternalChannel(){return InternalChannel;};
 
+	
 protected:
 	Pubnub::Channel* InternalChannel;
 

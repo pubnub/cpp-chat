@@ -10,8 +10,10 @@
 
 class UPubnubMessage;
 class UPubnubThreadChannel;
+class UPubnubCallbackStop;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubMessageStreamUpdateReceived, UPubnubMessage*, PubnubMessage);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubMessagesStreamUpdateOnReceived, const TArray<UPubnubMessage*>&, PubnubMessages);
 
 
 /**
@@ -23,7 +25,7 @@ class PUBNUBCHATSDK_API UPubnubMessage : public UObject
 	GENERATED_BODY()
 public:
 	static UPubnubMessage* Create(Pubnub::Message Message);
-	~UPubnubMessage(){delete InternalMessage;}
+	~UPubnubMessage();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pubnub Message")
 	FString GetTimetoken();
@@ -38,10 +40,16 @@ public:
 	FString Text();
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
-	UPubnubMessage* DeleteMessage ();
+	UPubnubMessage* DeleteMessage();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	bool DeleteMessageHard();
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
 	bool Deleted();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	UPubnubMessage* Restore();
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
 	EPubnubChatMessageType Type();
@@ -68,10 +76,10 @@ public:
 	void Report(FString Reason);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
-	void StreamUpdates(FOnPubnubMessageStreamUpdateReceived MessageUpdateCallback);
+	UPubnubCallbackStop* StreamUpdates(FOnPubnubMessageStreamUpdateReceived MessageUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
-	void StreamUpdatesOn(TArray<UPubnubMessage*> Messages, FOnPubnubMessageStreamUpdateReceived MessageUpdateCallback);
+	UPubnubCallbackStop* StreamUpdatesOn(TArray<UPubnubMessage*> Messages, FOnPubnubMessagesStreamUpdateOnReceived MessageUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message | Threads")
 	UPubnubThreadChannel* CreateThread();
@@ -84,6 +92,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Message | Threads")
 	void RemoveThread();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	TArray<FPubnubMentionedUser> MentionedUsers();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	TArray<FPubnubReferencedChannel> ReferencedChannels();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	UPubnubMessage* QuotedMessage();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Message")
+	TArray<FPubnubTextLink> TextLinks();
 	
 
 
@@ -91,8 +111,9 @@ public:
 	//Internal usage only
 	Pubnub::Message* GetInternalMessage(){return InternalMessage;};
 
-private:
+protected:
 	Pubnub::Message* InternalMessage;
 
 	bool IsInternalMessageValid();
+	bool IsThreadMessage = false;
 };

@@ -11,8 +11,10 @@ class UPubnubChannel;
 class UPubnubUser;
 class UPubnubMembership;
 class UPubnubMessage;
+class UPubnubCallbackStop;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubMembershipStreamUpdateReceived, UPubnubMembership*, PubnubMembership);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubMembershipsStreamUpdateOnReceived, const TArray<UPubnubMembership*>&, PubnubMemberships);
 
 /**
  * 
@@ -38,10 +40,10 @@ public:
 	UPubnubMembership* Update(FString CustomData);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Membership")
-	void StreamUpdates(FOnPubnubMembershipStreamUpdateReceived MembershipUpdateCallback);
+	UPubnubCallbackStop* StreamUpdates(FOnPubnubMembershipStreamUpdateReceived MembershipUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Membership")
-	void StreamUpdatesOn(TArray<UPubnubMembership*> Memberships, FOnPubnubMembershipStreamUpdateReceived MembershipUpdateCallback);
+	UPubnubCallbackStop* StreamUpdatesOn(TArray<UPubnubMembership*> Memberships, FOnPubnubMembershipsStreamUpdateOnReceived MembershipUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub Membership")
 	FString LastReadMessageTimetoken();

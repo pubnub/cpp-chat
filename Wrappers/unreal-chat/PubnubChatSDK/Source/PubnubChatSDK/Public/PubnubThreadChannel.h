@@ -9,6 +9,7 @@
 
 
 class UPubnubMessage;
+class UPubnubThreadMessage;
 
 /**
  * 
@@ -27,6 +28,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Pubnub Thread Channel")
 	FString GetParentChannelID();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Thread Channel")
+	TArray<UPubnubThreadMessage*> GetThreadHistory(int Limit, FString Start, FString End);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Thread Channel")
+	UPubnubThreadChannel* PinMessageToThread(UPubnubThreadMessage* ThreadMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Thread Channel")
+	UPubnubThreadChannel* UnpinMessageFromThread();
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Thread Channel")
+	UPubnubChannel* PinMessageToParentChannel(UPubnubThreadMessage* ThreadMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Thread Channel")
+	UPubnubChannel* UnpinMessageFromParentChannel();
 
 	//Internal usage only
 	Pubnub::ThreadChannel* GetInternalThreadChannel();

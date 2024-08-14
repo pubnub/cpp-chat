@@ -5,6 +5,7 @@
 #include "helpers/export.hpp"
 #include "user.hpp"
 #include "channel.hpp"
+#include "callback_stop.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -36,8 +37,8 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Membership set_last_read_message(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT int get_unread_messages_count() const;
 
-            PN_CHAT_EXPORT void stream_updates(std::function<void(const Pubnub::Membership&)> membership_callback) const;
-            PN_CHAT_EXPORT void stream_updates_on(Pubnub::Vector<Pubnub::Membership> memberships, std::function<void(const Pubnub::Membership&)> membership_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const Pubnub::Membership&)> membership_callback) const;
+            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::Membership> memberships, std::function<void(Pubnub::Vector<Pubnub::Membership>)> membership_callback) const;
 
         private:
             Membership(Pubnub::User user, Pubnub::Channel channel, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const MembershipService> membership_service, std::unique_ptr<MembershipDAO> data);
@@ -46,7 +47,11 @@ namespace Pubnub
             std::unique_ptr<MembershipDAO> data;
 
             friend class ::MembershipService;
-    
+
+#ifdef PN_CHAT_C_ABI
+        public:
+            Pubnub::Membership update_with_base(const Pubnub::Membership& base_membership) const;
+#endif
     };
 }
 #endif /* PN_CHAT_MEMBERSHIP_H */

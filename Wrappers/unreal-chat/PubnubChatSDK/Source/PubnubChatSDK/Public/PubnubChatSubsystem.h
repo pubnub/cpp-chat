@@ -16,9 +16,8 @@ struct FPubnubChatConfig
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere) FString AuthKey = "";
 	UPROPERTY(BlueprintReadWrite, EditAnywhere) int TypingTimeout = 5000;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere) int StoreUserActivityInterval = 600000;
-
-	//TODO:: To Cpp Config
+	UPROPERTY(BlueprintReadWrite, EditAnywhere) int TypingTimeoutDifference = 1000;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere) int StoreUserActivityInterval = 600000;
 };
 
 

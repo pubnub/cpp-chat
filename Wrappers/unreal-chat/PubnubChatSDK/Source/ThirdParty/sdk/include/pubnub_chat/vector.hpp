@@ -167,6 +167,26 @@ namespace Pubnub {
                     return data[len - 1];
                 }
 
+                bool constains(const T& element) const {
+                    for (int i = 0; i < len; i++) {
+                        if(data[i] == element) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                int find(const T& element) const {
+                    for (int i = 0; i < len; i++) {
+                        if(data[i] == element) {
+                            return i;
+                        }
+                    }
+
+                    return -1;
+                }
+
                 std::vector<T> into_std_vector() {
                     std::vector<T> std_vec(data, data + len);
 

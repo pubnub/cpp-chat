@@ -10,8 +10,40 @@
 
 class UPubnubUser;
 class UPubnubMembership;
+class UPubnubCallbackStop;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubUserStreamUpdateReceived, UPubnubUser*, PubnubUser);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPubnubUsersStreamUpdateOnReceived, const TArray<UPubnubUser*>&, PubnubUsers);
+
+USTRUCT(BlueprintType)
+struct FPubnubMembershipsResponseWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<UPubnubMembership*> Memberships;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Status;
+
+	FPubnubMembershipsResponseWrapper() = default;
+	FPubnubMembershipsResponseWrapper(Pubnub::MembershipsResponseWrapper& Wrapper);
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPubnubChannelsRestrictionsWrapper
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) TArray<FPubnubChannelRestriction> Restrictions;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FPubnubPage Page;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) int Total;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere) FString Status;
+
+	FPubnubChannelsRestrictionsWrapper() = default;
+	FPubnubChannelsRestrictionsWrapper(Pubnub::ChannelsRestrictionsWrapper& Wrapper);
+	
+};
 
 /**
  * 
@@ -46,22 +78,27 @@ public:
 	void SetRestrictions(FString ChannelID, FPubnubRestriction Restrictions);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub User")
-	FPubnubRestriction GetChannelRestriction(FString ChannelID, int Limit, FString Start, FString End);
+	FPubnubRestriction GetChannelRestrictions(UPubnubChannel* Channel);
+
+	UFUNCTION(BlueprintCallable, Category = "Pubnub Channel")
+	FPubnubChannelsRestrictionsWrapper GetChannelsRestrictions(FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
+
+	//Deprecated in JS chat
+	//UFUNCTION(BlueprintCallable, Category = "Pubnub User")
+	//void Report(FString Reason);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub User")
-	void Report(FString Reason);
-
-	UFUNCTION(BlueprintCallable, Category = "Pubnub User")
-	TArray<UPubnubMembership*> GetMemberships(int Limit, FString Start, FString End);
+	FPubnubMembershipsResponseWrapper GetMemberships(FString Filter = "", FString Sort = "", int Limit = 0, FPubnubPage Page = FPubnubPage());
 	
 	UFUNCTION(BlueprintCallable, Category = "Pubnub User")
-	void StreamUpdates(FOnPubnubUserStreamUpdateReceived UserUpdateCallback);
+	UPubnubCallbackStop* StreamUpdates(FOnPubnubUserStreamUpdateReceived UserUpdateCallback);
 
 	UFUNCTION(BlueprintCallable, Category = "Pubnub User")
-	void StreamUpdatesOn(TArray<UPubnubUser*> Userss, FOnPubnubUserStreamUpdateReceived UserUpdateCallback);
+	UPubnubCallbackStop* StreamUpdatesOn(TArray<UPubnubUser*> Users, FOnPubnubUsersStreamUpdateOnReceived UserUpdateCallback);
 	
 	//Internal usage only
 	Pubnub::User* GetInternalUser(){return InternalUser;};
+
 
 private:
 	Pubnub::User* InternalUser;
