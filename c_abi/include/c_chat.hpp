@@ -181,4 +181,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_user_suggestions(Pubnub::Cha
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_current_user(Pubnub::Chat* chat);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_pam_can_i(Pubnub::Chat* chat, Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const char* resource_name);
+
 #endif // PN_CHAT_C_CHAT_HPP

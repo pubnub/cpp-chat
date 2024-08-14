@@ -15,13 +15,16 @@ Pubnub::Chat* pn_chat_new(
         const char* publish,
         const char* subscribe,
         const char* user_id,
-        const char* auth_key
+        const char* auth_key,
+        int typing_timeout,
+        int typing_timeout_difference
     ) {
 
     try {
         Pubnub::ChatConfig config; 
             config.auth_key = auth_key;
-            //IMPORTANT TODO: @Jakub add remaining parameters to config
+            config.typing_timeout = typing_timeout;
+            config.typing_timeout_difference = typing_timeout_difference;
 
         auto* chat = new Pubnub::Chat(Pubnub::Chat::init(publish, subscribe, user_id, config));
         return chat;
@@ -755,6 +758,16 @@ Pubnub::User* pn_chat_current_user(Pubnub::Chat* chat) {
     }
 }
 
+PnCTribool pn_pam_can_i(Pubnub::Chat *chat, Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const char *resource_name) {
+    try {
+        return chat->access_manager().can_i(permission, resource_type, resource_name) ? PN_C_TRUE : PN_C_FALSE;
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_UNKNOWN;
+    }
+}
 
 
 

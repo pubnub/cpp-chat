@@ -372,7 +372,7 @@ void ChannelService::start_typing(const String& channel_id, ChannelDAO& channel_
         return pubnub_handle->get_user_id();
     }();
 
-    channel_data.start_typing(chat_service_shared->chat_config.TYPING_TIMEOUT - chat_service_shared->chat_config.TYPING_TIMEOUT_DIFFERENCE);
+    channel_data.start_typing(chat_service_shared->chat_config.typing_timeout - chat_service_shared->chat_config.typing_timeout_difference);
 
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, true));
 }
@@ -400,7 +400,7 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
 
 std::function<void()> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
     auto chat_service_shared = chat_service.lock();
-    auto typing_timeout = chat_service_shared->chat_config.TYPING_TIMEOUT;
+    auto typing_timeout = chat_service_shared->chat_config.typing_timeout;
     std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
     {
         auto maybe_typing = Typing::typing_user_from_event(event);

@@ -38,8 +38,8 @@ class CallbackService;
 namespace Pubnub {
     struct ChatConfig {
         Pubnub::String auth_key = "";
-        int TYPING_TIMEOUT = 5000;
-        int TYPING_TIMEOUT_DIFFERENCE = 1000;
+        int typing_timeout = 5000;
+        int typing_timeout_difference = 1000;
     };
 
     struct CreatedChannelWrapper

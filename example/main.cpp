@@ -15,11 +15,8 @@ int main() {
     std::string user = "hehehe";
 
     Pubnub::ChatConfig config;
-    config.publish_key = pub_key;
-    config.subscribe_key = sub_key;
-    config.user_id = user;
 
-    Pubnub::Chat chat(config);
+    Pubnub::Chat chat = Pubnub::Chat::init(pub_key, sub_key, user, config);
 
     // auto vecint = chat.TestVector();
 
@@ -34,8 +31,7 @@ int main() {
     // channel_data.description = "Wha";
     // Pubnub::Channel channel = chat.create_public_conversation("my_test_channel2", channel_data);
 
-    Pubnub::Channel channel = chat.get_channel("my_test_channel3");
-    auto message = channel.get_message("17224104171400850");
+    chat.access_manager().can_i(Pubnub::AccessManager::Permission::READ, Pubnub::AccessManager::ResourceType::CHANNELS, "my_test_channel3");
 
 
     // auto read_receipts_callback = [=](std::map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> result)
