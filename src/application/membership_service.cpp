@@ -259,7 +259,7 @@ Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Memb
             AccessManager::Permission::WRITE, AccessManager::ResourceType::CHANNELS, membership.channel.channel_id());
 
     if(can_i_emit) {
-        String event_payload = "{\"messageTimetoken\": \"" + timetoken + "\", \"userId\": \"" + membership.user.user_id() + "\"}";
+        String event_payload = "{\"messageTimetoken\": \"" + timetoken + "\"}";
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_RECEPIT, membership.channel.channel_id(), event_payload);
     } else {
         // TODO: right now we don't have a logger yet
