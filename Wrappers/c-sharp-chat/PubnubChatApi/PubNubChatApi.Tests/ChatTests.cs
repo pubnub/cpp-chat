@@ -206,15 +206,17 @@ public class ChatTests
     }
 
     [Test]
-    public void TestCanI()
+    public async Task TestCanI()
     {
+        await Task.Delay(4000);
+        
         var accessChat = new Chat(
             new PubnubChatConfig(
                 PubnubTestsParameters.PublishKey,
                 PubnubTestsParameters.SubscribeKey,
                 "can_i_test_user",
-                authKey: "qEF2AkF0Gma7iy1DdHRsGX0AQ3Jlc6VEY2hhbqFyY2FuX2lfdGVzdF9jaGFubmVsAUNncnCgQ3NwY6BDdXNyoER1dWlkoENwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgRHV1aWRvY2FuX2lfdGVzdF91c2VyQ3NpZ1ggXxTpXRBYG8V68UHDUxMTq_3L9ErHNTg4mHZ4zZsQGWU="));
-
+                authKey: "qEF2AkF0Gma8TDFDdHRsGX0AQ3Jlc6VEY2hhbqFyY2FuX2lfdGVzdF9jaGFubmVsEUNncnCgQ3NwY6BDdXNyoER1dWlkoW9jYW5faV90ZXN0X3VzZXIY_0NwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgRHV1aWRvY2FuX2lfdGVzdF91c2VyQ3NpZ1ggAEijACv1wHoiwQulMhEPFRKEb1C4MYIgfS0wyYMCj3Y="
+                ));
         Assert.False(accessChat.ChatAccessManager.CanI(PubnubAccessPermission.Write, PubnubAccessResourceType.Channels,
             "can_i_test_channel"));
         Assert.True(accessChat.ChatAccessManager.CanI(PubnubAccessPermission.Read, PubnubAccessResourceType.Channels,

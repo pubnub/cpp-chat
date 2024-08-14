@@ -22,22 +22,6 @@ public class ChatEventTests
         channel.Join();
     }
     
-    //TODO: fully remove once 100% sure it's obsolete
-    /*[Test]
-    public void TestReportEvents()
-    {
-        var manualReportedEvent = new ManualResetEvent(false);
-        chat.OnReportEvent += reportEvent =>
-        {
-            Assert.True(reportEvent.Payload.Contains("some_reason"));
-            manualReportedEvent.Set();
-        };
-        chat.StartListeningForReportEvents(channel.Id);
-        user.ReportUser("some_reason");
-        var reported = manualReportedEvent.WaitOne(4000);
-        Assert.IsTrue(reported);
-    }*/
-    
     [Test]
     public void TestModerationEvents()
     {
