@@ -446,11 +446,11 @@ Pubnub::Message MessageService::update_message_with_base(const Pubnub::Message& 
 
 }
 
-Pubnub::ThreadMessage MessageService::update_thread_message_with_base(const Pubnub::ThreadMessage& message, const Pubnub::Message& base_message) const {
+Pubnub::ThreadMessage MessageService::update_thread_message_with_base(const Pubnub::ThreadMessage& message, const Pubnub::ThreadMessage& base_message) const {
     MessageEntity base_entity = MessageDAO(base_message.message_data()).to_entity();
     MessageEntity message_entity = MessageDAO(message.message_data()).to_entity();
 
     return this->create_thread_message_object(
             {message.timetoken(), MessageEntity::from_base_and_updated_message(base_entity, message_entity)},
-            message.parent_channel_id());
+            base_message.parent_channel_id());
 }

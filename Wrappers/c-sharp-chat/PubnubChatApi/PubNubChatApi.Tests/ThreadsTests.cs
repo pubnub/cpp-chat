@@ -150,6 +150,7 @@ public class ThreadsTests
             threadMessage.OnThreadMessageUpdated += updatedThreadMessage =>
             {
                 Assert.True(updatedThreadMessage.MessageText == "new_text");
+                Assert.True(updatedThreadMessage.ParentChannelId == threadMessage.ParentChannelId);
                 messageUpdatedReset.Set();
             };
             threadMessage.EditMessageText("new_text");

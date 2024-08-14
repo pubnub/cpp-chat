@@ -14,6 +14,10 @@ namespace PubNubChatAPI.Entities
 
         internal void UpdatePointer(IntPtr newPointer)
         {
+            if (newPointer == pointer)
+            {
+                return;
+            }
             DisposePointer();
             pointer = newPointer;
         }

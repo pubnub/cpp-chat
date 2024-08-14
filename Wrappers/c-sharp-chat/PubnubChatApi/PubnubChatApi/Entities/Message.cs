@@ -374,7 +374,7 @@ namespace PubNubChatAPI.Entities
         /// </code>
         /// </example>
         /// <seealso cref="OnMessageUpdated"/>
-        public void EditMessageText(string newText)
+        public virtual void EditMessageText(string newText)
         {
             var newPointer = pn_message_edit_text(pointer, newText);
             CUtilities.CheckCFunctionResult(newPointer);

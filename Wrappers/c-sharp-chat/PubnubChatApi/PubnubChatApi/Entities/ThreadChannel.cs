@@ -111,8 +111,7 @@ namespace PubNubChatAPI.Entities
 
             foreach (var messagePointer in messagePointers)
             {
-                var id = ThreadMessage.GetThreadMessageIdFromPtr(messagePointer);
-                if(chat.TryGetMessage(Id, id, out var message) && message is ThreadMessage threadMessage)
+                if(chat.TryGetMessage(messagePointer, out var message) && message is ThreadMessage threadMessage)
                 {
                     history.Add(threadMessage);
                 }

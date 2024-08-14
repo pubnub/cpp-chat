@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using PubnubChatApi.Utilities;
@@ -24,10 +23,13 @@ namespace PubNubChatAPI.Entities
         private static extern IntPtr pn_thread_message_pin_to_parent_channel(IntPtr thread_message);
         
         [DllImport("pubnub-chat")]
-        private static extern int pn_thread_message_parent_channel_id(IntPtr thread_message, StringBuilder result);
+        public static extern int pn_thread_message_parent_channel_id(IntPtr thread_message, StringBuilder result);
         
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_thread_message_update_with_base_message(IntPtr message, IntPtr base_message);
+        
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_thread_message_edit_text(IntPtr message, string text);
 
         #endregion
         
@@ -51,8 +53,6 @@ namespace PubNubChatAPI.Entities
         internal override void BroadcastMessageUpdate()
         {
             base.BroadcastMessageUpdate();
-            Debug.WriteLine("NO JA KURWA PIERDOLĘ CO JEEEEEEEEST");
-            Debug.WriteLine(Id);
             OnThreadMessageUpdated?.Invoke(this);
         }
 
@@ -68,6 +68,13 @@ namespace PubNubChatAPI.Entities
             var newFullPointer = pn_thread_message_update_with_base_message(partialPointer, pointer);
             CUtilities.CheckCFunctionResult(newFullPointer);
             UpdatePointer(newFullPointer);
+        }
+
+        public override void EditMessageText(string newText)
+        {
+            var newPointer = pn_thread_message_edit_text(pointer, newText);
+            CUtilities.CheckCFunctionResult(newPointer);
+            UpdatePointer(newPointer);
         }
 
         public void PinMessageToParentChannel()
@@ -88,7 +95,6 @@ namespace PubNubChatAPI.Entities
 
         protected override void DisposePointer()
         {
-            Debug.WriteLine($"On delete - ID is {Id}");
             pn_thread_message_dispose(pointer);
         }
     }

@@ -435,15 +435,10 @@ namespace PubNubChatAPI.Entities
                         var id = Message.GetChannelIdFromMessagePtr(threadMessagePointer);
                         if (channelWrappers.TryGetValue(id, out var channel))
                         {
-                            Debug.WriteLine("AAAAAAAAAAAAAAAA");
                             var timeToken = Message.GetMessageIdFromPtr(threadMessagePointer);
                             var message = new ThreadMessage(this, threadMessagePointer, timeToken);
                             messageWrappers[timeToken] = message;
                             channel.BroadcastMessageReceived(message);
-                        }
-                        else
-                        {
-                            Debug.WriteLine("BBBBBBBBBBB");
                         }
 
                         pn_dispose_message(pointer);
@@ -477,10 +472,8 @@ namespace PubNubChatAPI.Entities
                         var id = Message.GetMessageIdFromPtr(updatedThreadMessagePointer);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            Debug.WriteLine("KURWA");
                             if (existingMessageWrapper is ThreadMessage existingThreadMessageWrapper)
                             {
-                                Debug.WriteLine("MAĆ");
                                 existingThreadMessageWrapper.UpdateWithPartialPtr(updatedThreadMessagePointer);
                                 existingThreadMessageWrapper.BroadcastMessageUpdate();
                             }
@@ -489,10 +482,6 @@ namespace PubNubChatAPI.Entities
                                 Debug.WriteLine(
                                     "Thread message was stored as a regular message - SHOULD NEVER HAPPEN!");
                             }
-                        }
-                        else
-                        {
-                            Debug.WriteLine("CHUJ");
                         }
 
                         pn_dispose_message(pointer);
@@ -503,8 +492,8 @@ namespace PubNubChatAPI.Entities
                     var updatedMessagePointer = pn_deserialize_message_update(chatPointer, pointer);
                     if (updatedMessagePointer != IntPtr.Zero)
                     {
-                        Debug.WriteLine("Deserialized message update");
                         var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
+                        Debug.WriteLine($"Deserialized message update: {id}");
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
                             existingMessageWrapper.UpdateWithPartialPtr(updatedMessagePointer);

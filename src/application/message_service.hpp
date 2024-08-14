@@ -52,7 +52,7 @@ class MessageService : public std::enable_shared_from_this<MessageService>
         Pubnub::String get_channel_phrase_to_look_for(const Pubnub::String& look_text) const;
 
         Pubnub::Message update_message_with_base(const Pubnub::Message& message, const Pubnub::Message& base_message) const;
-        Pubnub::ThreadMessage update_thread_message_with_base(const Pubnub::ThreadMessage& message, const Pubnub::Message& base_message) const;
+        Pubnub::ThreadMessage update_thread_message_with_base(const Pubnub::ThreadMessage& message, const Pubnub::ThreadMessage& base_message) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;
