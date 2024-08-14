@@ -9,6 +9,7 @@
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
 #include "enums.hpp"
+#include <algorithm>
 #include <vector>
 
 extern "C" {
@@ -186,6 +187,13 @@ Pubnub::Vector<UnreadMessageWrapper> Chat::get_unread_messages_counts(const Pubn
         UnreadMessageWrapper wrapper = {std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple)};
         return_wrappers.push_back(wrapper);
     }
+
+    return_wrappers.erase(
+            std::remove_if(
+                return_wrappers.begin(),
+                return_wrappers.end(),
+                [](const UnreadMessageWrapper& wrapper) { return wrapper.count <= 0; }),
+            return_wrappers.end());
 
     return Pubnub::Vector<UnreadMessageWrapper>(std::move(return_wrappers));
 }
