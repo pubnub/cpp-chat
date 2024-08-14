@@ -71,7 +71,7 @@ Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_
     try {
         auto parsed_message = Parsers::PubnubJson::to_message(*message);
         return new Pubnub::ThreadMessage(chat->get_chat_service()->message_service->create_thread_message_object(
-                    Parsers::PubnubJson::to_message_update(*message), Pubnub::String(message->channel.ptr, message->channel.size)));
+                    Parsers::PubnubJson::to_message(*message), Pubnub::String(message->channel.ptr, message->channel.size)));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

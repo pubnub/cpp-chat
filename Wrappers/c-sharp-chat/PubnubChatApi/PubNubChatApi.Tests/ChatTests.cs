@@ -16,9 +16,8 @@ public class ChatTests
         chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "chats_tests_user_2"));
+            "chats_tests_user_10_no_calkiem_nowy"));
         channel = chat.CreatePublicConversation("chat_tests_channel");
-        user = chat.CreateUser("chats_tests_user_2");
         channel.Join();
     }
 

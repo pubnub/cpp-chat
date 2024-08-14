@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -111,7 +112,14 @@ namespace PubNubChatAPI.Entities
             foreach (var messagePointer in messagePointers)
             {
                 var id = ThreadMessage.GetThreadMessageIdFromPtr(messagePointer);
-                history.Add(new ThreadMessage(chat, messagePointer, id));
+                if(chat.TryGetMessage(Id, id, out var message) && message is ThreadMessage threadMessage)
+                {
+                    history.Add(threadMessage);
+                }
+                else
+                {
+                    Debug.WriteLine("Thread history messages aren't found/aren't thread messages - SHOULD BE IMPOSSIBLE!");
+                }
             }
 
             return history;

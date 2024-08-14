@@ -30,7 +30,7 @@ namespace PubNubChatAPI.Entities
         private static extern IntPtr pn_thread_message_update_with_base_message(IntPtr message, IntPtr base_message);
 
         #endregion
-
+        
         public event Action<ThreadMessage> OnThreadMessageUpdated;
 
         public string ParentChannelId
@@ -47,11 +47,12 @@ namespace PubNubChatAPI.Entities
             timeToken)
         {
         }
-
+        
         internal override void BroadcastMessageUpdate()
         {
             base.BroadcastMessageUpdate();
-            Debug.WriteLine("WOLOLOLO");
+            Debug.WriteLine("NO JA KURWA PIERDOLĘ CO JEEEEEEEEST");
+            Debug.WriteLine(Id);
             OnThreadMessageUpdated?.Invoke(this);
         }
 
@@ -87,6 +88,7 @@ namespace PubNubChatAPI.Entities
 
         protected override void DisposePointer()
         {
+            Debug.WriteLine($"On delete - ID is {Id}");
             pn_thread_message_dispose(pointer);
         }
     }

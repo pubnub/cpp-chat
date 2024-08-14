@@ -5,6 +5,19 @@ void pn_thread_message_dispose(Pubnub::ThreadMessage* thread_message){
     delete thread_message;
 }
 
+Pubnub::ThreadMessage* pn_thread_message_edit_text(
+    Pubnub::ThreadMessage* message,
+    const char* text) {
+    try {
+        //return new Pubnub::ThreadMessage(message->);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 PnCResult pn_thread_message_get_timetoken(Pubnub::ThreadMessage* thread_message, char* result) {
     try {
         strcpy(result, thread_message->timetoken());

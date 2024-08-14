@@ -19,7 +19,6 @@ public class ThreadsTests
             "threads_tests_user")
         );
         channel = chat.CreatePublicConversation("threads_tests_channel_37");
-        user = chat.CreateUser("threads_tests_user");
         channel.Join();
     }
 

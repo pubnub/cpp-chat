@@ -100,6 +100,9 @@ namespace PubNubChatAPI.Entities
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
+        
+        [DllImport("pubnub-chat")]
+        private static extern IntPtr pn_deserialize_thread_message(IntPtr chat, IntPtr message);
 
         [DllImport("pubnub-chat")]
         private static extern IntPtr pn_deserialize_channel(IntPtr chat, IntPtr channel);
@@ -422,6 +425,30 @@ namespace PubNubChatAPI.Entities
                         pn_dispose_message(pointer);
                         continue;
                     }
+                    
+                    //New Thread message
+                    var threadMessagePointer = pn_deserialize_thread_message(chatPointer, pointer);
+                    if (threadMessagePointer != IntPtr.Zero)
+                    {
+                        Debug.WriteLine("Deserialized new thread message");
+
+                        var id = Message.GetChannelIdFromMessagePtr(threadMessagePointer);
+                        if (channelWrappers.TryGetValue(id, out var channel))
+                        {
+                            Debug.WriteLine("AAAAAAAAAAAAAAAA");
+                            var timeToken = Message.GetMessageIdFromPtr(threadMessagePointer);
+                            var message = new ThreadMessage(this, threadMessagePointer, timeToken);
+                            messageWrappers[timeToken] = message;
+                            channel.BroadcastMessageReceived(message);
+                        }
+                        else
+                        {
+                            Debug.WriteLine("BBBBBBBBBBB");
+                        }
+
+                        pn_dispose_message(pointer);
+                        continue;
+                    }
 
                     //New message
                     var messagePointer = pn_deserialize_message(chatPointer, pointer);
@@ -448,20 +475,24 @@ namespace PubNubChatAPI.Entities
                     {
                         Debug.WriteLine("Deserialized thread message update");
                         var id = Message.GetMessageIdFromPtr(updatedThreadMessagePointer);
-                        Debug.WriteLine(id);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            Debug.WriteLine("YES");
-                            existingMessageWrapper.UpdateWithPartialPtr(updatedThreadMessagePointer);
-                            existingMessageWrapper.BroadcastMessageUpdate();
+                            Debug.WriteLine("KURWA");
+                            if (existingMessageWrapper is ThreadMessage existingThreadMessageWrapper)
+                            {
+                                Debug.WriteLine("MAĆ");
+                                existingThreadMessageWrapper.UpdateWithPartialPtr(updatedThreadMessagePointer);
+                                existingThreadMessageWrapper.BroadcastMessageUpdate();
+                            }
+                            else
+                            {
+                                Debug.WriteLine(
+                                    "Thread message was stored as a regular message - SHOULD NEVER HAPPEN!");
+                            }
                         }
                         else
                         {
-                            Debug.WriteLine("NO");
-                            foreach (var pair in messageWrappers)
-                            {
-                                Debug.WriteLine($"{pair.Key}:{pair.Value.MessageText}");
-                            }
+                            Debug.WriteLine("CHUJ");
                         }
 
                         pn_dispose_message(pointer);
@@ -474,20 +505,10 @@ namespace PubNubChatAPI.Entities
                     {
                         Debug.WriteLine("Deserialized message update");
                         var id = Message.GetMessageIdFromPtr(updatedMessagePointer);
-                        Debug.WriteLine(id);
                         if (messageWrappers.TryGetValue(id, out var existingMessageWrapper))
                         {
-                            Debug.WriteLine("YES");
                             existingMessageWrapper.UpdateWithPartialPtr(updatedMessagePointer);
                             existingMessageWrapper.BroadcastMessageUpdate();
-                        }
-                        else
-                        {
-                            Debug.WriteLine("NO");
-                            foreach (var pair in messageWrappers)
-                            {
-                                Debug.WriteLine($"{pair.Key}:{pair.Value.MessageText}");
-                            }
                         }
 
                         pn_dispose_message(pointer);
