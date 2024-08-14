@@ -32,8 +32,24 @@ User UserService::create_user(const String& user_id, const UserDAO& user_data) c
         throw std::invalid_argument("Failed to create user, user_id is empty");
     }
 
-    auto new_user_entity = user_data.to_entity();
+    bool user_exists = true;
 
+    try
+    {
+        get_user(user_id);
+
+    }
+    catch(...)
+    {
+        user_exists = false;
+    }
+
+    if(user_exists)
+    {
+        throw std::invalid_argument("User with this ID already exists");
+    }
+    
+    auto new_user_entity = user_data.to_entity();
     {
         auto pubnub_handle = this->pubnub->lock();
         pubnub_handle->set_user_metadata(user_id, new_user_entity.get_user_metadata_json_string(user_id));
