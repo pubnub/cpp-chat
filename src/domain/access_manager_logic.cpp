@@ -39,8 +39,9 @@ static int calculate_permission(Pubnub::AccessManager::Permission permission, in
 }
 
 bool AccessManagerLogic::can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Json& token, const Pubnub::String& resource_name) {
+    auto test = token.dump();
     auto resources = token["res"];
-    auto resource = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? resources["uuids"] : resources["channels"];
+    auto resource = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? resources["uuid"] : resources["chan"];
 
     // TODO: refactor a little bit to make it more readable
     if (!resource.is_null() && resource.contains(resource_name)) {
