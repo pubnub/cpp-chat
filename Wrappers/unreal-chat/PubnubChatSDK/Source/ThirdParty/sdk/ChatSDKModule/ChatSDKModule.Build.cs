@@ -27,7 +27,6 @@ public class ChatSDKModule : ModuleRules
 		else if(Target.Platform == UnrealTargetPlatform.Mac)
 		{
 			PublicDelayLoadDLLs.Add(Path.Combine(SDKPath, "lib", "macos", "libpubnub-chat.dylib"));
-			//TODO:: I think this should be added to Binaries instead of source, but needs to check 
 			RuntimeDependencies.Add("$(PluginDir)/Source/ThirdParty/sdk/lib/macos/libpubnub-chat.dylib");
 		}
 
