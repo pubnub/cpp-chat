@@ -16,8 +16,7 @@ public class ChatTests
         chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "chats_tests_user_2")
-        );
+            "chats_tests_user_2"));
         channel = chat.CreatePublicConversation("chat_tests_channel");
         user = chat.CreateUser("chats_tests_user_2");
         channel.Join();
@@ -38,7 +37,7 @@ public class ChatTests
         });
 
         await Task.Delay(5000);
-        
+
         var suggestions = chat.GetUserSuggestions("@THE");
         Assert.True(suggestions.Any(x => x.Id == suggestedUser.Id));
     }
@@ -63,7 +62,7 @@ public class ChatTests
         });
 
         await Task.Delay(5000);
-        
+
         var suggestions = chat.GetChannelSuggestions("#SUGGESTED");
         Assert.True(suggestions.Any(x => x.Id == suggestedChannel.Id));
     }
@@ -74,7 +73,7 @@ public class ChatTests
         var users = chat.GetUsers();
         Assert.True(users.Users.Any(x => x.Id == user.Id));
     }
-    
+
     [Test]
     public void TestGetChannels()
     {
@@ -113,7 +112,7 @@ public class ChatTests
     public void TestForwardMessage()
     {
         var messageForwardReceivedManualEvent = new ManualResetEvent(false);
-        
+
         var forwardingChannel = chat.CreatePublicConversation("forwarding_channel");
         forwardingChannel.OnMessageReceived += message =>
         {
@@ -121,19 +120,16 @@ public class ChatTests
             messageForwardReceivedManualEvent.Set();
         };
         forwardingChannel.Join();
-        
+
         channel.Join();
-        channel.OnMessageReceived += message =>
-        {
-            chat.ForwardMessage(message, forwardingChannel);
-        };
-        
+        channel.OnMessageReceived += message => { chat.ForwardMessage(message, forwardingChannel); };
+
         channel.SendText("message_to_forward");
 
         var forwarded = messageForwardReceivedManualEvent.WaitOne(6000);
         Assert.True(forwarded);
     }
-    
+
     [Test]
     public void TestEmitEvent()
     {
@@ -156,25 +152,25 @@ public class ChatTests
         channel.SendText("wololo");
 
         await Task.Delay(3000);
-        
-        Assert.True(chat.GetUnreadMessagesCounts(limit:50).Any(x => x.Channel.Id == channel.Id && x.Count > 0));
+
+        Assert.True(chat.GetUnreadMessagesCounts(limit: 50).Any(x => x.Channel.Id == channel.Id && x.Count > 0));
     }
-    
+
     [Test]
     public async Task TestMarkAllMessagesAsRead()
     {
         channel.SendText("wololo");
 
         await Task.Delay(3000);
-        
+
         Assert.True(chat.GetUnreadMessagesCounts().Any(x => x.Channel.Id == channel.Id && x.Count > 0));
 
         var res = chat.MarkAllMessagesAsRead();
-        
+
         await Task.Delay(5000);
 
         var counts = chat.GetUnreadMessagesCounts();
-        
+
         Assert.False(counts.Any(x => x.Count > 0));
     }
 
@@ -186,11 +182,12 @@ public class ChatTests
             PubnubTestsParameters.SubscribeKey,
             "other_chat_user")
         );
-        if(!otherChat.TryGetChannel(channel.Id, out var otherChatChannel))
+        if (!otherChat.TryGetChannel(channel.Id, out var otherChatChannel))
         {
             Assert.Fail();
             return;
         }
+
         otherChatChannel.Join();
 
         var receiptReset = new ManualResetEvent(false);
@@ -211,7 +208,16 @@ public class ChatTests
     [Test]
     public void TestCanI()
     {
-        Assert.False(chat.ChatAccessManager.CanI(PubnubAccessPermission.Write, PubnubAccessResourceType.Channels, "can_i_test_channel"));
-        Assert.True(chat.ChatAccessManager.CanI(PubnubAccessPermission.Read, PubnubAccessResourceType.Channels, "can_i_test_channel"));
+        var accessChat = new Chat(
+            new PubnubChatConfig(
+                PubnubTestsParameters.PublishKey,
+                PubnubTestsParameters.SubscribeKey,
+                "can_i_test_user",
+                authKey: "qEF2AkF0Gma7iy1DdHRsGX0AQ3Jlc6VEY2hhbqFyY2FuX2lfdGVzdF9jaGFubmVsAUNncnCgQ3NwY6BDdXNyoER1dWlkoENwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgRHV1aWRvY2FuX2lfdGVzdF91c2VyQ3NpZ1ggXxTpXRBYG8V68UHDUxMTq_3L9ErHNTg4mHZ4zZsQGWU="));
+
+        Assert.False(accessChat.ChatAccessManager.CanI(PubnubAccessPermission.Write, PubnubAccessResourceType.Channels,
+            "can_i_test_channel"));
+        Assert.True(accessChat.ChatAccessManager.CanI(PubnubAccessPermission.Read, PubnubAccessResourceType.Channels,
+            "can_i_test_channel"));
     }
 }
