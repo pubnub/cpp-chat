@@ -14,10 +14,14 @@ namespace Pubnub {
         enum class ResourceType { UUIDS, CHANNELS };
         enum class Permission { READ, WRITE, MANAGE, DELETE, GET, JOIN, UPDATE };
 
-        AccessManager() = default;
-        ~AccessManager() = default;
+        PN_CHAT_EXPORT AccessManager() = default;
+        PN_CHAT_EXPORT ~AccessManager() = default;
 
-        bool can_i(AccessManager::Permission permission, AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
+        PN_CHAT_EXPORT AccessManager(const AccessManager& other);
+        PN_CHAT_EXPORT AccessManager& operator=(const AccessManager& other);
+
+
+        PN_CHAT_EXPORT bool can_i(AccessManager::Permission permission, AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
 
         private:
         AccessManager(std::shared_ptr<const AccessManagerService> access_manager_service);
