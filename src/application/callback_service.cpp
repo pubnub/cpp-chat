@@ -247,7 +247,14 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
             ) == 0) {
             auto maybe_callback = this->callbacks.get_thread_message_update_callbacks().get(message_timetoken);
             if (maybe_callback.has_value()) {
-                maybe_callback.value()(Pubnub::ThreadMessage(parsed_message, Pubnub::String(message.channel.ptr, message.channel.size)));
+                const auto timetoken_length = 17;
+                const auto underscores = 2;
+                const auto channel_padding_length = timetoken_length + prefix_length + underscores;
+
+                auto channel = Pubnub::String(message.channel.ptr, message.channel.size);
+                auto parent_channel = channel.substring(prefix_length, channel.length() - channel_padding_length);
+
+                maybe_callback.value()(Pubnub::ThreadMessage(parsed_message, parent_channel));
             }
         } else {       
             auto maybe_callback = this->callbacks.get_message_update_callbacks().get(message_timetoken);

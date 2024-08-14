@@ -50,7 +50,7 @@ Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_
         return PN_C_ERROR_PTR;
     }
 
-    auto prefix_length = std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX) - 1;
+    auto prefix_length = std::strlen(Pubnub::MESSAGE_THREAD_ID_PREFIX);
 
     if (message->channel.size < prefix_length) {
         pn_c_set_error_message("Message is not a chat thread message");
@@ -68,10 +68,17 @@ Pubnub::ThreadMessage* pn_deserialize_thread_message(Pubnub::Chat* chat, pubnub_
         return PN_C_ERROR_PTR;
     }
 
+    const auto timetoken_length = 17;
+    const auto underscores = 2;
+    const auto channel_padding_length = timetoken_length + prefix_length + underscores;
+
+    auto channel = Pubnub::String(message->channel.ptr, message->channel.size);
+    auto parent_channel = channel.substring(prefix_length, channel.length() - channel_padding_length);
+
     try {
         auto parsed_message = Parsers::PubnubJson::to_message(*message);
         return new Pubnub::ThreadMessage(chat->get_chat_service()->message_service->create_thread_message_object(
-                    Parsers::PubnubJson::to_message(*message), Pubnub::String(message->channel.ptr, message->channel.size)));
+                    Parsers::PubnubJson::to_message(*message), parent_channel));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
