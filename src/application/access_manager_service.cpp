@@ -1,5 +1,6 @@
 #include "access_manager_service.hpp"
-#include "domain/access_manager.hpp"
+#include "access_manager.hpp"
+#include "domain/access_manager_logic.hpp"
 #include "domain/json.hpp"
 
 AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key):
@@ -7,7 +8,7 @@ AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub:
     auth_key(auth_key)
 {}
 
-bool AccessManagerService::can_i(AccessManager::Permission permission, AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const {
+bool AccessManagerService::can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const {
     if (this->auth_key.empty()) {
         return true;
     }
@@ -28,5 +29,5 @@ bool AccessManagerService::can_i(AccessManager::Permission permission, AccessMan
         return true;
     }
 
-    return AccessManager::can_i(permission, resource_type, json_token, resource_name);
+    return AccessManagerLogic::can_i(permission, resource_type, json_token, resource_name);
 }

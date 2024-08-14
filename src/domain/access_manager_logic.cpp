@@ -1,3 +1,4 @@
+#include "access_manager_logic.hpp"
 #include "access_manager.hpp"
 #include "domain/json.hpp"
 #include <regex>
@@ -6,32 +7,30 @@ extern "C" {
 #include <pubnub_grant_token_api.h>
 }
 
-using namespace AccessManager;
-
-static int calculate_permission(Permission permission, int permission_value) {
+static int calculate_permission(Pubnub::AccessManager::Permission permission, int permission_value) {
     int result_mask = -1;
 
     // acording to the pubnub_grant_token_api.h file
     switch (permission) {
-        case Permission::READ:
+        case Pubnub::AccessManager::Permission::READ:
             result_mask = permission_value & 1;
             break;
-        case Permission::WRITE:
+        case Pubnub::AccessManager::Permission::WRITE:
             result_mask = permission_value & 2;
             break;
-        case Permission::MANAGE:
+        case Pubnub::AccessManager::Permission::MANAGE:
             result_mask = permission_value & 4;
             break;
-        case Permission::DELETE:
+        case Pubnub::AccessManager::Permission::DELETE:
             result_mask = permission_value & 8;
             break;
-        case Permission::GET:
+        case Pubnub::AccessManager::Permission::GET:
             result_mask = permission_value & 32;
             break;
-        case Permission::JOIN:
+        case Pubnub::AccessManager::Permission::JOIN:
             result_mask = permission_value & 128;
             break;
-        case Permission::UPDATE:
+        case Pubnub::AccessManager::Permission::UPDATE:
             result_mask = permission_value & 64;
             break;
     };
@@ -39,9 +38,9 @@ static int calculate_permission(Permission permission, int permission_value) {
     return result_mask;
 }
 
-bool AccessManager::can_i(Permission permission, ResourceType resource_type, const Json& token, const Pubnub::String& resource_name) {
+bool AccessManagerLogic::can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Json& token, const Pubnub::String& resource_name) {
     auto resources = token["res"];
-    auto resource = resource_type == ResourceType::UUIDS ? resources["uuids"] : resources["channels"];
+    auto resource = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? resources["uuids"] : resources["channels"];
 
     // TODO: refactor a little bit to make it more readable
     if (!resource.is_null() && resource.contains(resource_name)) {
@@ -55,7 +54,7 @@ bool AccessManager::can_i(Permission permission, ResourceType resource_type, con
     }
 
     auto patterns = token["pat"];
-    auto pattern = resource_type == ResourceType::UUIDS ? patterns["uuids"] : patterns["channels"];
+    auto pattern = resource_type == Pubnub::AccessManager::ResourceType::UUIDS ? patterns["uuids"] : patterns["channels"];
 
     if (pattern.is_null()) {
         return false;

@@ -6,7 +6,7 @@
 #include "application/channel_service.hpp"
 #include "application/access_manager_service.hpp"
 #include "chat_helpers.hpp"
-#include "domain/access_manager.hpp"
+#include "domain/access_manager_logic.hpp"
 #include "domain/membership_entity.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"

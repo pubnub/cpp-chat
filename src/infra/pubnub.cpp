@@ -28,10 +28,11 @@ extern "C" {
 
 using json = nlohmann::json;
 
-PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String secret_key):
+PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id, const Pubnub::String auth_key):
     publish_key(publish_key),
     subscribe_key(subscribe_key),
-    user_id(secret_key),
+    user_id(user_id),
+    auth_key(auth_key),
     main_context(pubnub_alloc(), pubnub_free),
     long_poll_context(pubnub_alloc(), pubnub_free)
 {
@@ -43,6 +44,11 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
 
     pubnub_set_blocking_io(this->main_context.get());
     pubnub_set_non_blocking_io(this->long_poll_context.get());
+
+    if (!auth_key.empty()) {
+        pubnub_set_auth(this->main_context.get(), this->auth_key.c_str());
+        pubnub_set_auth(this->long_poll_context.get(), this->auth_key.c_str());
+    }
 }
 
 void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)

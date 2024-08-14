@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHAT_HPP
 #define PN_CHAT_CHAT_HPP
 
+#include "access_manager.hpp"
 #include "string.hpp"
 #include "channel.hpp"
 #include "thread_channel.hpp"
@@ -150,6 +151,9 @@ namespace Pubnub {
             PN_CHAT_EXPORT Pubnub::ThreadChannel create_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT Pubnub::ThreadChannel get_thread_channel(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT void remove_thread_channel(const Pubnub::Message& message) const;
+
+            /* PAM */
+            PN_CHAT_EXPORT Pubnub::AccessManager access_manager() const;
 
         private:
             Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);

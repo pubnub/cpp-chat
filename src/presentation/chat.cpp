@@ -25,7 +25,7 @@ using namespace Pubnub;
 Chat::Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config) :
     chat_service(
             std::make_shared<ChatService>(
-                ChatService::create_pubnub(publish_key, subscribe_key, user_id)
+                ChatService::create_pubnub(publish_key, subscribe_key, user_id, config.auth_key)
             )
         )
 {
@@ -214,6 +214,11 @@ ThreadChannel Chat::get_thread_channel(const Pubnub::Message& message) const
 void Chat::remove_thread_channel(const Pubnub::Message& message) const
 {
     this->channel_service->remove_thread_channel(message);
+}
+
+AccessManager Chat::access_manager() const
+{
+    return AccessManager(this->chat_service->access_manager_service);
 }
 
 #ifdef PN_CHAT_C_ABI

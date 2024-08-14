@@ -54,8 +54,8 @@ void ChatService::init_services(const ChatConfig& config) {
 #endif
 }
 
-ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, const String& subscribe_key, const String& user_id) {
-    return std::make_shared<Mutex<PubNub>>(publish_key, subscribe_key, user_id);
+ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, const String& subscribe_key, const String& user_id, const String& auth_key) {
+    return std::make_shared<Mutex<PubNub>>(publish_key, subscribe_key, user_id, auth_key);
 }
 
 void ChatService::emit_chat_event(pubnub_chat_event_type chat_event_type, const String& channel_id, const String& payload) const {

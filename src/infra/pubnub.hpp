@@ -29,7 +29,7 @@ namespace Pubnub
 // TODO: format file
 class PubNub {
 public:
-    PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id);
+    PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id, const Pubnub::String auth_key);
     ~PubNub() = default;
 
     void publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata = "", const bool store_in_history = true, const bool send_by_post = false);
@@ -80,6 +80,7 @@ private:
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
     Pubnub::String user_id;
+    Pubnub::String auth_key;
 
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> main_context;
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;

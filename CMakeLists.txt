@@ -93,7 +93,7 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/parsers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp)
 
 set(APP_SOURCES
@@ -120,6 +120,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/membership.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_message.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/access_manager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )
