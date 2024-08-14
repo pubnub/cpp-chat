@@ -24,114 +24,114 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_delete(IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_connect(IntPtr channel, StringBuilder result_messages);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_disconnect(IntPtr channel, StringBuilder result_messages);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_join(IntPtr channel, string additional_params,
             StringBuilder result_messages);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_leave(IntPtr channel, StringBuilder result_messages);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_set_restrictions(IntPtr channel, string user_id, bool ban_user,
             bool mute_user, string reason);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_channel_id(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_get_user_restrictions(
             IntPtr channel,
             IntPtr user,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_channel_name(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_description(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_custom_data_json(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_updated(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_status(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_channel_get_data_type(
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_is_present(IntPtr channel, string user_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_who_is_present(IntPtr channel, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_invite_user(IntPtr channel, IntPtr user);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_invite_multiple(IntPtr channel, IntPtr[] users, int users_length,
             StringBuilder result_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_start_typing(IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_stop_typing(IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_pin_message(IntPtr channel, IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_unpin_message(IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_get_pinned_message(IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_create_message_draft_dirty(IntPtr channel,
             string user_suggestion_source,
             bool is_typing_indicator_triggered,
             int user_limit,
             int channel_limit);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_emit_user_mention(IntPtr channel, string user_id, string timetoken,
             string text);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_update_with_base(IntPtr channel, IntPtr base_channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_get_user_suggestions(IntPtr channel, string text, int limit,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_send_text_dirty(
             IntPtr channel,
             string message,
@@ -147,7 +147,7 @@ namespace PubNubChatAPI.Entities
             string text_links_json,
             IntPtr quoted_message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_get_users_restrictions(IntPtr channel, string sort, int limit, string next,
             string prev, StringBuilder result);
 

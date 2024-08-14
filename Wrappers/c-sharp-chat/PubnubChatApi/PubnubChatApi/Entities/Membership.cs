@@ -23,37 +23,37 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_membership_delete(IntPtr membership);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_membership_get_user_id(
             IntPtr membership,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_membership_get_channel_id(
             IntPtr membership,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_membership_update_dirty(
             IntPtr membership,
             string custom_object_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_membership_last_read_message_timetoken(IntPtr membership, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_membership_set_last_read_message_timetoken(IntPtr membership, string timetoken);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_membership_set_last_read_message(IntPtr membership, IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_membership_get_unread_messages_count(IntPtr membership);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_membership_update_with_base(IntPtr membership,
             IntPtr base_membership);
 

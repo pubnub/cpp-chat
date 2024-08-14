@@ -27,7 +27,7 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_new(
             string publish,
             string subscribe,
@@ -36,10 +36,10 @@ namespace PubNubChatAPI.Entities
             int typing_timeout,
             int typing_timeout_difference);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_chat_delete(IntPtr chat);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_create_public_conversation_dirty(IntPtr chat,
             string channel_id,
             string channel_name,
@@ -49,7 +49,7 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_update_channel_dirty(IntPtr chat,
             string channel_id,
             string channel_name,
@@ -59,7 +59,7 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_set_restrictions(IntPtr chat,
             string user_id,
             string channel_id,
@@ -67,10 +67,10 @@ namespace PubNubChatAPI.Entities
             bool mute_user,
             string reason);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_delete_channel(IntPtr chat, string channel_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_create_user_dirty(IntPtr chat,
             string user_id,
             string user_name,
@@ -81,7 +81,7 @@ namespace PubNubChatAPI.Entities
             string status,
             string type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_update_user_dirty(IntPtr chat,
             string user_id,
             string user_name,
@@ -92,40 +92,40 @@ namespace PubNubChatAPI.Entities
             string status,
             string type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_delete_user(IntPtr chat, string user_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_updates(IntPtr chat, StringBuilder messages_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_message(IntPtr chat, IntPtr message);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_thread_message(IntPtr chat, IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_channel(IntPtr chat, IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_user(IntPtr chat, IntPtr user);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_membership(IntPtr chat, IntPtr membership);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_message_update(IntPtr chat, IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_deserialize_event(IntPtr eventPtr, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_deserialize_presence(IntPtr presence, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_dispose_message(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_users(
             IntPtr chat,
             string filter,
@@ -135,17 +135,17 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_get_user(
             IntPtr chat,
             string user_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         public static extern IntPtr pn_chat_get_channel(
             IntPtr chat,
             string channel_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_user_get_memberships(
             IntPtr user,
             string filter,
@@ -155,7 +155,7 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_get_members(
             IntPtr channel,
             string filter,
@@ -165,10 +165,10 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_channel_get_message(IntPtr channel, string timetoken);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_channel_get_history(
             IntPtr channel,
             string start,
@@ -176,7 +176,7 @@ namespace PubNubChatAPI.Entities
             int count,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_channels(
             IntPtr chat,
             string filter,
@@ -186,14 +186,14 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_listen_for_events(
             IntPtr chat,
             string channel_id,
             byte event_type,
             StringBuilder result_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_create_direct_conversation_dirty(
             IntPtr chat,
             IntPtr user, string channel_id,
@@ -204,7 +204,7 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_create_group_conversation_dirty(
             IntPtr chat,
             IntPtr[] users,
@@ -216,38 +216,38 @@ namespace PubNubChatAPI.Entities
             string channel_status,
             string channel_type);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_get_created_channel_wrapper_channel(
             IntPtr wrapper);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_get_created_channel_wrapper_host_membership(
             IntPtr wrapper);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_created_channel_wrapper_invited_memberships(
             IntPtr wrapper, StringBuilder result_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_chat_dispose_created_channel_wrapper(IntPtr wrapper);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_forward_message(IntPtr chat, IntPtr message, IntPtr channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_emit_event(IntPtr chat, byte chat_event_type, string channel_id,
             string payload);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_create_thread(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_get_thread(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_remove_thread(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_unread_messages_counts(
             IntPtr chat,
             string filter,
@@ -257,11 +257,11 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_channel_suggestions(IntPtr chat, string text, int limit,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_mark_all_messages_as_read(
             IntPtr chat,
             string filter,
@@ -271,7 +271,7 @@ namespace PubNubChatAPI.Entities
             string prev,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_events_history(
             IntPtr chat,
             string channel_id,
@@ -280,14 +280,14 @@ namespace PubNubChatAPI.Entities
             int count,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_chat_get_user_suggestions(IntPtr chat, string text, int limit,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_chat_current_user(IntPtr chat);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_deserialize_thread_message_update(IntPtr chat, IntPtr message_update);
 
         #endregion

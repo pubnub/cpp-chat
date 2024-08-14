@@ -9,7 +9,7 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_pam_can_i(IntPtr chat, byte permission, byte resource_type, string resource_name);
 
         #endregion

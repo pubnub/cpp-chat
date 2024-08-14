@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using PubnubChatApi.Utilities;
 
 namespace PubNubChatAPI.Entities
 {
@@ -7,7 +8,7 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_draft_delete(IntPtr message_draft);
         
         #endregion

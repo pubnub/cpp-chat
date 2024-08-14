@@ -8,7 +8,7 @@ public class ChatTests
 {
     private Chat chat;
     private Channel channel;
-    private User user;
+    private string userId = "chats_tests_user_10_no_calkiem_nowy";
 
     [SetUp]
     public void Setup()
@@ -16,7 +16,7 @@ public class ChatTests
         chat = new Chat(new PubnubChatConfig(
             PubnubTestsParameters.PublishKey,
             PubnubTestsParameters.SubscribeKey,
-            "chats_tests_user_10_no_calkiem_nowy"));
+            userId));
         channel = chat.CreatePublicConversation("chat_tests_channel");
         channel.Join();
     }
@@ -24,7 +24,7 @@ public class ChatTests
     [Test]
     public void TestGetCurrentUser()
     {
-        Assert.True(chat.TryGetCurrentUser(out var currentUser) && currentUser.Id == user.Id);
+        Assert.True(chat.TryGetCurrentUser(out var currentUser) && currentUser.Id == userId);
     }
 
     [Test]
@@ -70,7 +70,7 @@ public class ChatTests
     public void TestGetUsers()
     {
         var users = chat.GetUsers();
-        Assert.True(users.Users.Any(x => x.Id == user.Id));
+        Assert.True(users.Users.Any(x => x.Id == userId));
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class ChatTests
         var directConversation =
             chat.CreateDirectConversation(convoUser, "direct_conversation_test");
         Assert.True(directConversation.CreatedChannel is { Id: "direct_conversation_test" });
-        Assert.True(directConversation.HostMembership != null && directConversation.HostMembership.UserId == user.Id);
+        Assert.True(directConversation.HostMembership != null && directConversation.HostMembership.UserId == userId);
         Assert.True(directConversation.InviteesMemberships != null &&
                     directConversation.InviteesMemberships.First().UserId == convoUser.Id);
     }
@@ -101,7 +101,7 @@ public class ChatTests
         var groupConversation =
             chat.CreateGroupConversation([convoUser1, convoUser2, convoUser3], "group_conversation_test");
         Assert.True(groupConversation.CreatedChannel is { Id: "group_conversation_test" });
-        Assert.True(groupConversation.HostMembership != null && groupConversation.HostMembership.UserId == user.Id);
+        Assert.True(groupConversation.HostMembership != null && groupConversation.HostMembership.UserId == userId);
         Assert.True(groupConversation.InviteesMemberships is { Count: 3 });
         Assert.True(groupConversation.InviteesMemberships.Any(x =>
             x.UserId == convoUser1.Id && x.ChannelId == "group_conversation_test"));
@@ -192,7 +192,7 @@ public class ChatTests
         var receiptReset = new ManualResetEvent(false);
         otherChat.OnReadReceiptEvent += receiptEvent =>
         {
-            Assert.True(receiptEvent.ChannelId == channel.Id && receiptEvent.UserId == user.Id);
+            Assert.True(receiptEvent.ChannelId == channel.Id && receiptEvent.UserId == userId);
             receiptReset.Set();
         };
         otherChatChannel.SendText("READ MEEEE");

@@ -23,76 +23,76 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_delete(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_edit_text(IntPtr message, string text);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_text(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_delete_message(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_delete_message_hard(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_deleted(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_get_timetoken(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_get_data_type(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_get_data_text(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_get_data_channel_id(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_get_data_user_id(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_message_get_data_meta(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_get_data_message_actions(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_pin(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_get_reactions(IntPtr message, StringBuilder reactions_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_toggle_reaction(IntPtr message, string reaction);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_has_user_reaction(IntPtr message, string reaction);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_report(IntPtr message, string reason);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_has_thread(IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_update_with_base_message(IntPtr message, IntPtr base_message);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_mentioned_users(IntPtr message, IntPtr chat, StringBuilder result);
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_referenced_channels(IntPtr message, IntPtr chat, StringBuilder result);
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_quoted_message(IntPtr message);
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_message_text_links(IntPtr message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_message_restore(IntPtr message);
         
         #endregion

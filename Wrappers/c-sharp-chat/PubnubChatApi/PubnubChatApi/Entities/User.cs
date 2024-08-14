@@ -19,49 +19,49 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_destroy(IntPtr user);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_user_is_present_on(IntPtr user, string channel_id);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_user_where_present(IntPtr user, StringBuilder result_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_user_id(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_user_name(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_external_id(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_profile_url(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_email(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_custom_data(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_status(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_user_get_data_type(IntPtr user, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_user_get_channel_restrictions(
             IntPtr user,
             IntPtr channel,
             StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_user_update_with_base(IntPtr user, IntPtr base_user);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_user_get_channels_restrictions(IntPtr user, string sort, int limit, string next,
             string prev, StringBuilder result);
 

@@ -9,26 +9,26 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_thread_message_dispose(
             IntPtr thread_message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_thread_message_get_timetoken(IntPtr thread_message, StringBuilder result);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_message_unpin_from_parent_channel(IntPtr thread_message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_message_pin_to_parent_channel(IntPtr thread_message);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         public static extern int pn_thread_message_parent_channel_id(IntPtr thread_message, StringBuilder result);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_message_update_with_base_message(IntPtr message, IntPtr base_message);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_message_edit_text(IntPtr message, string text);
 
         #endregion

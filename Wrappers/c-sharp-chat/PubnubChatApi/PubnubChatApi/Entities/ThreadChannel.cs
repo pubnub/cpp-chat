@@ -12,11 +12,11 @@ namespace PubNubChatAPI.Entities
     {
         #region DLL Imports
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern void pn_thread_channel_dispose(
             IntPtr thread_channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_thread_channel_get_history(
             IntPtr thread_channel,
             string start_timetoken,
@@ -24,23 +24,23 @@ namespace PubNubChatAPI.Entities
             int count,
             StringBuilder thread_messages_pointers_json);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_channel_pin_message_to_parent_channel(IntPtr thread_channel,
             IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_channel_unpin_message_from_parent_channel(IntPtr thread_channel);
         
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern int pn_thread_channel_get_parent_channel_id(IntPtr thread_channel, StringBuilder result);
             
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_channel_parent_message(IntPtr thread_channel);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_channel_pin_message_to_thread(IntPtr thread_channel, IntPtr message);
 
-        [DllImport("pubnub-chat")]
+        [DllImport(DllImportSettings.DllName)]
         private static extern IntPtr pn_thread_channel_unpin_message_from_thread(IntPtr thread_channel);
         
         #endregion
