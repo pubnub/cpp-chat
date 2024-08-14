@@ -6,6 +6,7 @@
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
 #include "c_errors.hpp"
+#include "thread_message.hpp"
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_delete(Pubnub::Message* message);
 
@@ -66,5 +67,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub:
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* message, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_restore(Pubnub::Message* message);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadMessage* pn_thread_message_edit_text(
+        Pubnub::ThreadMessage* message,
+        const char* text);
 
 #endif // PN_CHAT_C_MESSAGE_H

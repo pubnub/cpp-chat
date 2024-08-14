@@ -2,6 +2,7 @@
 #include "c_thread_channel.hpp"
 #include "c_errors.hpp"
 #include "nlohmann/json.hpp"
+#include "thread_message.hpp"
 
 void pn_message_delete(Pubnub::Message* message) {
     delete message;
@@ -380,6 +381,17 @@ PnCResult pn_message_text_links(Pubnub::Message* message, char* result) {
 Pubnub::Message* pn_message_restore(Pubnub::Message* message) {
     try {
         return new Pubnub::Message(message->restore());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::ThreadMessage* pn_thread_message_edit_text(Pubnub::ThreadMessage* message, const char* text) {
+    try {
+        return new Pubnub::ThreadMessage(message->edit_text(text), message->parent_channel_id());
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());
