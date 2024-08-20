@@ -724,6 +724,60 @@ PnCResult pn_chat_get_events_history(Pubnub::Chat* chat, const char* channel_id,
     return PN_C_OK;
 }
 
+PnCResult pn_chat_get_current_user_mentions(Pubnub::Chat *chat, const char *start_timetoken, const char *end_timetoken, int count, char *result) {
+    try {
+        auto mentions = chat->get_current_user_mentions(start_timetoken, end_timetoken, count);
+        std::vector<nlohmann::json> mentions_json;
+        for (auto mention : mentions.user_mention_data)
+        {
+            //TODO: put into util
+            auto event_json = nlohmann::json{
+                {"timeToken", mention.event.timetoken.c_str()},
+                {"type", chat_event_type_to_string(mention.event.type).c_str()},
+                {"userId", mention.event.user_id.c_str()},
+                {"channelId", mention.event.channel_id.c_str()},
+                {"payload", mention.event.payload.c_str()}
+            };
+
+            auto msg_ptr = new Pubnub::Message(mention.message);
+            Pubnub::String msg_str = "";
+#ifdef _WIN32 
+            auto msg_ptr_str = "0x";
+#endif
+            std::ostringstream oss;
+            oss << static_cast<void*>(msg_ptr);
+            msg_str += oss.str();
+
+            auto mention_json = nlohmann::json {
+                {"channelId", mention.channel_id.c_str()},
+                {"userId", mention.user_id.c_str()},
+                {"event", event_json},
+                {"message", msg_str.c_str()},
+           };
+
+           if (mention.thread_channel_id.has_value() && mention.parent_channel_id.has_value())
+           {
+               mention_json["threadChannelId"] = mention.thread_channel_id.value().c_str();
+               mention_json["parentChannelId"] = mention.parent_channel_id.value().c_str();
+           }
+
+           mentions_json.push_back(mention_json);
+        }
+
+        auto json = nlohmann::json {
+            {"userMentionData", mentions_json},
+            {"isMore", mentions.is_more}
+        };
+
+        strcpy(result, json.dump().c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
 PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit, char* result) {
     try {
         auto users = chat->get_user_suggestions(text, limit);

@@ -179,6 +179,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_mark_all_messages_as_read(Pubnub
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_events_history(Pubnub::Chat* chat, const char* channel_id, const char* start_timetoken, const char* end_timetoken, int count, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_current_user_mentions(Pubnub::Chat* chat, const char* start_timetoken, const char* end_timetoken, int count, char* result);
+
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_current_user(Pubnub::Chat* chat);
