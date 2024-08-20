@@ -102,7 +102,13 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChatService::get_events_history(con
     Json messages_array_json = response_json["channels"];
 
     std::vector<Event> events;
+    bool is_more = count == messages_array_json.size();
 
+    if (!messages_array_json.contains(channel_id))
+    {
+        std::tuple<std::vector<Pubnub::Event>, bool> return_tuple = std::make_tuple(events, is_more);
+        return return_tuple;
+    }
     for (auto element : messages_array_json[channel_id])
     {
         if(!element.contains("message") || element["message"].is_null())
@@ -125,7 +131,7 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChatService::get_events_history(con
         event.payload = message_json.dump();
         events.push_back(event);
     }
-    bool is_more = count == messages_array_json.size();
+
     std::tuple<std::vector<Pubnub::Event>, bool> return_tuple = std::make_tuple(events, is_more);
     return return_tuple;
 }

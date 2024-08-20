@@ -7,6 +7,16 @@
 
 using namespace Pubnub;
 
+User::User() :
+    user_id_internal(""),
+    chat_service(nullptr),
+    user_service(nullptr),
+    presence_service(nullptr),
+    restrictions_service(nullptr),
+    membership_service(nullptr),
+    data(nullptr)
+{}
+
 User::User(Pubnub::String user_id, std::shared_ptr<const ChatService> chat_service, std::shared_ptr<const UserService> user_service, std::shared_ptr<const PresenceService> presence_service, std::shared_ptr<const RestrictionsService> restrictions_service, std::shared_ptr<const MembershipService> membership_service, std::unique_ptr<UserDAO> data) :
 user_id_internal(user_id),
 chat_service(chat_service),

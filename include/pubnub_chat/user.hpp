@@ -55,6 +55,7 @@ namespace Pubnub
     class User
     {
         public:
+            PN_CHAT_EXPORT User();
             PN_CHAT_EXPORT User(const User& other);
             PN_CHAT_EXPORT ~User();
 

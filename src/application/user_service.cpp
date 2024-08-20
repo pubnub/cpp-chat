@@ -22,7 +22,8 @@ User UserService::get_current_user() const
         return pubnub_handle->get_user_id();
     }();
 
-    return this->create_user_object({user_id, UserDAO()});
+    // TODO: it should be saved in the UserService
+    return this->get_user(user_id);
 }
 
 User UserService::create_user(const String& user_id, const UserDAO& user_data) const
