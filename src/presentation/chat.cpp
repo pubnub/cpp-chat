@@ -214,10 +214,12 @@ MarkMessagesAsReadWrapper Pubnub::Chat::mark_all_messages_as_read(const Pubnub::
 UserMentionDataList Pubnub::Chat::get_current_user_mentions(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
 {
     auto return_tuple = this->chat_service->get_current_user_mentions(start_timetoken, end_timetoken, count);
-    return UserMentionDataList{
-        .user_mention_data = Pubnub::Vector<Pubnub::UserMentionData>(std::move(std::get<0>(return_tuple))),
-        .is_more = std::get<1>(return_tuple)
-    };
+
+    UserMentionDataList return_list;
+    return_list.user_mention_data = Pubnub::Vector<Pubnub::UserMentionData>(std::move(std::get<0>(return_tuple)));
+    return_list.is_more = std::get<1>(return_tuple);
+
+    return return_list;
 }
 
 ThreadChannel Chat::create_thread_channel(const Pubnub::Message& message) const
