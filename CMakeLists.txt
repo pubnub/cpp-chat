@@ -94,7 +94,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/json.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp

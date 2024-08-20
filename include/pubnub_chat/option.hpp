@@ -47,6 +47,14 @@ namespace Pubnub {
             Option(T value): maybe(value) {};
 
             /**
+             * Gets an Option object that represents the presence of a value from
+             * std::optional.
+             *
+             * @param value The optional value to be wrapped by the Option object.
+             */
+            Option(std::optional<T> value): maybe(value) {};
+
+            /**
              * Creates an Option object that represents the absence of a value.
              */
             static Option<T> none() {

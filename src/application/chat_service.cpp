@@ -11,11 +11,14 @@
 #include "chat.hpp"
 #include "domain/parsers.hpp"
 #include "domain/json.hpp"
+#include "domain/timetoken.hpp"
 #include "enums.hpp"
 #include "infra/pubnub.hpp"
+#include "mentions.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include <pubnub_helper.h>
+#include "mentions.hpp"
 
 #ifdef PN_CHAT_C_ABI
 extern "C" {
@@ -125,6 +128,89 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChatService::get_events_history(con
     bool is_more = count == messages_array_json.size();
     std::tuple<std::vector<Pubnub::Event>, bool> return_tuple = std::make_tuple(events, is_more);
     return return_tuple;
+}
+
+std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_user_mentions(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const
+{
+    // TODO: overcomplicated with this user id
+    auto current_user = this->pubnub->lock()->get_user_id();
+    auto events_history = this->get_events_history(current_user, start_timetoken, end_timetoken, count);
+
+    auto events = std::get<0>(events_history);
+
+    events.erase(
+            std::remove_if(
+                events.begin(),
+                events.end(),
+                [current_user](const Event& event) {
+                    return event.type != pubnub_chat_event_type::PCET_MENTION;
+                }),
+            events.end()
+    );
+
+    std::vector<Pubnub::UserMentionData> enchanced_events;
+
+    std::transform(
+            events.begin(),
+            events.end(),
+            std::back_inserter(enchanced_events),
+            [this](const Event& event) {
+                Event enchanced_event = event;
+                auto payload_json = Json::parse(event.payload);
+
+                auto timetoken = payload_json.get_string("messageTimetoken");
+                auto channel_id = payload_json.get_string("channel");
+
+                if(!timetoken.has_value())
+                {
+                    throw std::runtime_error("can't get message timetoken from payload");
+                }
+
+                if(!channel_id.has_value())
+                {
+                    throw std::runtime_error("can't get channel id from payload");
+                }
+
+                auto previous_timetoken = Timetoken::increase_by_one(timetoken.value());
+
+                auto messages = [this, previous_timetoken, timetoken, channel_id] {
+                    auto pubnub_handle = this->pubnub->lock();
+                    return pubnub_handle->fetch_history(channel_id.value(), previous_timetoken, timetoken.value(), 1);
+                }();
+
+                auto messages_json = Json::parse(messages);
+
+                auto message = this
+                    ->message_service
+                    ->create_message_object(
+                            MessageEntity::from_history_json(messages_json, channel_id.value())[0]
+                    );
+
+                if (!messages_json.contains("parentChannel)")) {
+                    return UserMentionData{
+                        .channel_id =  channel_id.value(),
+                        .user_id = event.user_id,
+                        .event = event,
+                        .message = message,
+                        .parent_channel_id = Pubnub::Option<Pubnub::String>::none(),
+                        .thread_channel_id = Pubnub::Option<Pubnub::String>::none()
+                    };
+                }
+
+                return UserMentionData{
+                    .channel_id =  channel_id.value(),
+                    .user_id = event.user_id,
+                    .event = event,
+                    .message = message,
+                    .parent_channel_id = messages_json.get_string("parentChannel"),
+                    .thread_channel_id = messages_json.get_string("threadChannel")
+                };
+            }
+    );
+
+    bool is_more = std::get<1>(events_history);
+
+    return std::make_tuple(enchanced_events, is_more);
 }
 
 #ifndef PN_CHAT_C_ABI

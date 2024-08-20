@@ -9,6 +9,7 @@
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
 #include "enums.hpp"
+#include "mentions.hpp"
 #include <algorithm>
 #include <vector>
 
@@ -208,6 +209,15 @@ MarkMessagesAsReadWrapper Pubnub::Chat::mark_all_messages_as_read(const Pubnub::
     Wrapper.memberships = std::move(std::get<3>(return_tuple));
 
     return Wrapper;
+}
+
+UserMentionDataList Pubnub::Chat::get_current_user_mentions(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
+{
+    auto return_tuple = this->chat_service->get_current_user_mentions(start_timetoken, end_timetoken, count);
+    return UserMentionDataList{
+        .user_mention_data = Pubnub::Vector<Pubnub::UserMentionData>(std::move(std::get<0>(return_tuple))),
+        .is_more = std::get<1>(return_tuple)
+    };
 }
 
 ThreadChannel Chat::create_thread_channel(const Pubnub::Message& message) const
