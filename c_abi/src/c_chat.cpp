@@ -740,19 +740,12 @@ PnCResult pn_chat_get_current_user_mentions(Pubnub::Chat *chat, const char *star
             };
 
             auto msg_ptr = new Pubnub::Message(mention.message);
-            Pubnub::String msg_str = "";
-#ifdef _WIN32 
-            auto msg_ptr_str = "0x";
-#endif
-            std::ostringstream oss;
-            oss << static_cast<void*>(msg_ptr);
-            msg_str += oss.str();
 
             auto mention_json = nlohmann::json {
                 {"channelId", mention.channel_id.c_str()},
                 {"userId", mention.user_id.c_str()},
                 {"event", event_json},
-                {"message", msg_str.c_str()},
+                {"message", reinterpret_cast<intptr_t>(msg_ptr)},
            };
 
            if (mention.thread_channel_id.has_value() && mention.parent_channel_id.has_value())
