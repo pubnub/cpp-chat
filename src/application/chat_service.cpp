@@ -188,22 +188,22 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
 
                 if (!messages_json.contains("parentChannel)")) {
                     return UserMentionData{
-                        .channel_id =  channel_id.value(),
-                        .user_id = event.user_id,
-                        .event = event,
-                        .message = message,
-                        .parent_channel_id = Pubnub::Option<Pubnub::String>::none(),
-                        .thread_channel_id = Pubnub::Option<Pubnub::String>::none()
+                        channel_id.value(),
+                        event.user_id,
+                        event,
+                        message,
+                        Pubnub::Option<Pubnub::String>::none(),
+                        Pubnub::Option<Pubnub::String>::none()
                     };
                 }
 
                 return UserMentionData{
-                    .channel_id =  channel_id.value(),
-                    .user_id = event.user_id,
-                    .event = event,
-                    .message = message,
-                    .parent_channel_id = messages_json.get_string("parentChannel"),
-                    .thread_channel_id = messages_json.get_string("threadChannel")
+                    channel_id.value(),
+                    event.user_id,
+                    event,
+                    message,
+                    messages_json.get_string("parentChannel"),
+                    messages_json.get_string("threadChannel")
                 };
             }
     );
