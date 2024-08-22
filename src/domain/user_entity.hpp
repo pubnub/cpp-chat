@@ -9,13 +9,13 @@
 struct UserEntity {
     using UserId = Pubnub::String;
 
-    Pubnub::String user_name;
-    Pubnub::String external_id;
-    Pubnub::String profile_url;
-    Pubnub::String email;
-    Pubnub::String custom_data_json;
-    Pubnub::String status;
-    Pubnub::String type;
+    Pubnub::String user_name = Pubnub::String("");
+    Pubnub::String external_id = Pubnub::String("");
+    Pubnub::String profile_url = Pubnub::String("");
+    Pubnub::String email = Pubnub::String("");
+    Pubnub::String custom_data_json = Pubnub::String("");
+    Pubnub::String status = Pubnub::String("");
+    Pubnub::String type = Pubnub::String("");
 
     Pubnub::String get_user_metadata_json_string(Pubnub::String user_id);
 

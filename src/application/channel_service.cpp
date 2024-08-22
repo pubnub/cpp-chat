@@ -337,13 +337,10 @@ void ChannelService::send_text(const Pubnub::String& channel_id, const Pubnub::S
         throw std::invalid_argument("You cannot quote messages from other channels");
     }
     
-    {
+    String mention_timetoken = [this, channel_id, message, text_params](){
         auto pubnub_handle = this->pubnub->lock();
-        pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
-    }
-
-    //TODO::This actually should be published message timetoken, but at the moment we don't have any way to get this from C-Core
-    String mention_timetoken = get_now_timetoken();
+        return pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
+    }();
 
     if(text_params.mentioned_users.size() > 0)
     {

@@ -51,7 +51,7 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     }
 }
 
-void PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)
+Pubnub::String PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)
 {
     auto publish_options = pubnub_publish_defopts();
     publish_options.store = store_in_history;
@@ -61,13 +61,21 @@ void PubNub::publish(const Pubnub::String channel, const Pubnub::String message,
     auto result = pubnub_publish_ex(main_context.get(), channel.c_str(), message.c_str(), publish_options);
 
     this->await_and_handle_error(result);
+
+    // TODO: this is hacky as fuck...
+    //       We should add the posibility to retrieve timetoken from c-core in proper way...
+    return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
-void PubNub::signal(const Pubnub::String channel, const Pubnub::String message)
+Pubnub::String PubNub::signal(const Pubnub::String channel, const Pubnub::String message)
 {
     auto result = pubnub_signal(main_context.get(), channel.c_str(), message.c_str());
 
     this->await_and_handle_error(result);
+
+    // TODO: this is hacky as fuck...
+    //       We should add the posibility to retrieve timetoken from c-core in proper way...
+    return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)

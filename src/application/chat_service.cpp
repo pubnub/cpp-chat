@@ -161,7 +161,6 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
             events.end(),
             std::back_inserter(enchanced_events),
             [this](const Event& event) {
-                Event enchanced_event = event;
                 auto payload_json = Json::parse(event.payload);
 
                 auto timetoken = payload_json.get_string("messageTimetoken");
@@ -186,11 +185,8 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
 
                 auto messages_json = Json::parse(messages);
 
-                auto message = this
-                    ->message_service
-                    ->create_message_object(
-                            MessageEntity::from_history_json(messages_json, channel_id.value())[0]
-                    );
+                auto message = this->message_service->create_message_object(
+                        MessageEntity::from_history_json(messages_json, channel_id.value())[0]);
 
                 if (!messages_json.contains("parentChannel)")) {
                     return UserMentionData{
