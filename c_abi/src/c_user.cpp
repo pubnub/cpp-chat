@@ -296,3 +296,13 @@ PnCResult pn_user_get_channels_restrictions(Pubnub::User* user, const char* sort
     return PN_C_OK;
 }
 
+PnCTribool pn_user_active(Pubnub::User* user) {
+    try {
+        return user->active() ? PN_C_TRUE : PN_C_FALSE;
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_UNKNOWN;
+    }
+}
+

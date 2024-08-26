@@ -80,5 +80,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_user_update_with_base(Pubnub::Use
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channels_restrictions(Pubnub::User* user, const char* sort, int limit, const char* next, const char* prev, char* result);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_user_active(Pubnub::User* user);
+
 
 #endif // PN_CHAT_C_USER_HPP
