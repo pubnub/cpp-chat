@@ -80,6 +80,8 @@ namespace Pubnub
             PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const User&)> user_callback) const;
             PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const;
 
+            PN_CHAT_EXPORT bool active() const;
+
         private:
             PN_CHAT_EXPORT User(
                     Pubnub::String user_id,

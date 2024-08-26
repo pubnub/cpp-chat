@@ -18,7 +18,7 @@ struct UserEntity;
 class UserService : public std::enable_shared_from_this<UserService>
 {
     public:
-        UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
+        UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, int store_user_active_interval);
 
         Pubnub::User get_current_user() const;
 
@@ -34,9 +34,12 @@ class UserService : public std::enable_shared_from_this<UserService>
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserDAO> user_data) const;
         Pubnub::User update_user_with_base(const Pubnub::User& user, const Pubnub::User& base_user) const;
 
+        bool active(const UserDAO& user_data) const;
+
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
+        int store_user_active_interval;
 
         friend class ::MembershipService;
 

@@ -42,6 +42,8 @@ namespace Pubnub {
         Pubnub::String auth_key = "";
         int typing_timeout = 5000;
         int typing_timeout_difference = 1000;
+        int store_user_activity_interval = 600000;
+        bool store_user_activity_timestamps = false;
     };
 
     struct CreatedChannelWrapper

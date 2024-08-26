@@ -34,6 +34,15 @@ Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
     return user_data_json.dump();
 }
 
+bool UserEntity::is_active(int activity_interval) const
+{
+    auto now = std::chrono::system_clock::now();
+    auto epoch = now.time_since_epoch();
+    long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
+
+    return last_timestamp.has_value() && nanoseconds - std::stol(last_timestamp.value())  <= activity_interval;
+}
+
 UserEntity UserEntity::from_json(Json user_json) {
     UserEntity new_entity;
     if(user_json.contains("uuid") && !user_json["uuid"].is_null())

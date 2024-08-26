@@ -35,7 +35,7 @@ pubnub(pubnub)
 
 void ChatService::init_services(const ChatConfig& config) {
     channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this());
-    user_service = std::make_shared<UserService>(pubnub, weak_from_this());
+    user_service = std::make_shared<UserService>(pubnub, weak_from_this(), config.store_user_activity_interval);
     message_service = std::make_shared<MessageService>(pubnub, weak_from_this());
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, weak_from_this());

@@ -4,6 +4,7 @@
 #include "domain/json.hpp"
 #include "string.hpp"
 #include "user.hpp"
+#include <optional>
 #include <vector>
 
 struct UserEntity {
@@ -16,8 +17,10 @@ struct UserEntity {
     Pubnub::String custom_data_json = Pubnub::String("");
     Pubnub::String status = Pubnub::String("");
     Pubnub::String type = Pubnub::String("");
+    std::optional<Pubnub::String> last_timestamp = std::nullopt;
 
     Pubnub::String get_user_metadata_json_string(Pubnub::String user_id);
+    bool is_active(int activity_interval) const;
 
     static UserEntity from_json(Json user_json);
     static UserEntity from_user_response(Json response);

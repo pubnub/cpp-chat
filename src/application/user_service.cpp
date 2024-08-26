@@ -10,9 +10,10 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service):
+UserService::UserService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, int store_user_active_interval):
     pubnub(pubnub),
-    chat_service(chat_service)
+    chat_service(chat_service),
+    store_user_active_interval(store_user_active_interval)
 {}
 
 User UserService::get_current_user() const
@@ -276,4 +277,8 @@ User UserService::update_user_with_base(const User& user, const User& base_user)
     auto updated_user_data = UserEntity::from_base_and_updated_user(base_user_data, user_data);
 
     return this->create_user_object({user.user_id(), UserDAO(updated_user_data)});
+}
+
+bool UserService::active(const UserDAO& user_data) const {
+    return user_data.to_entity().is_active(this->store_user_active_interval);
 }
