@@ -40,7 +40,7 @@ bool UserEntity::is_active(int activity_interval) const
     auto epoch = now.time_since_epoch();
     long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
 
-    return last_timestamp.has_value() && nanoseconds - std::stol(last_timestamp.value())  <= activity_interval;
+    return last_active_timestamp.has_value() && nanoseconds - std::stol(last_active_timestamp.value())  <= activity_interval;
 }
 
 UserEntity UserEntity::from_json(Json user_json) {

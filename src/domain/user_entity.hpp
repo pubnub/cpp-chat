@@ -17,7 +17,7 @@ struct UserEntity {
     Pubnub::String custom_data_json = Pubnub::String("");
     Pubnub::String status = Pubnub::String("");
     Pubnub::String type = Pubnub::String("");
-    std::optional<Pubnub::String> last_timestamp = std::nullopt;
+    std::optional<Pubnub::String> last_active_timestamp = std::nullopt;
 
     Pubnub::String get_user_metadata_json_string(Pubnub::String user_id);
     bool is_active(int activity_interval) const;

@@ -282,3 +282,7 @@ User UserService::update_user_with_base(const User& user, const User& base_user)
 bool UserService::active(const UserDAO& user_data) const {
     return user_data.to_entity().is_active(this->store_user_active_interval);
 }
+
+Pubnub::Option<Pubnub::String> UserService::last_active_timestamp(const UserDAO& user_data) const {
+    return user_data.to_entity().last_active_timestamp;
+}

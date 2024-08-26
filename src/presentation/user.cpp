@@ -122,6 +122,10 @@ bool User::active() const {
     return this->user_service->active(*this->data);
 }
 
+Pubnub::Option<Pubnub::String> User::last_active_timestamp() const {
+    return this->user_service->last_active_timestamp(*this->data);
+}
+
 #ifdef PN_CHAT_C_ABI
 User User::update_with_base(const User& base_user) const {
     return this->user_service->update_user_with_base(*this, base_user);

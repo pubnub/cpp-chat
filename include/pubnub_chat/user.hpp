@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_USER_H
 #define PN_CHAT_USER_H
 
+#include "option.hpp"
 #include "string.hpp"
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
@@ -81,6 +82,7 @@ namespace Pubnub
             PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const;
 
             PN_CHAT_EXPORT bool active() const;
+            PN_CHAT_EXPORT Pubnub::Option<Pubnub::String> last_active_timestamp() const;
 
         private:
             PN_CHAT_EXPORT User(

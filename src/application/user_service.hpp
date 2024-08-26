@@ -35,6 +35,7 @@ class UserService : public std::enable_shared_from_this<UserService>
         Pubnub::User update_user_with_base(const Pubnub::User& user, const Pubnub::User& base_user) const;
 
         bool active(const UserDAO& user_data) const;
+        Pubnub::Option<Pubnub::String> last_active_timestamp(const UserDAO& user_data) const;
 
     private:
         ThreadSafePtr<PubNub> pubnub;
