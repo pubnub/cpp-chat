@@ -82,5 +82,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channels_restrictions(Pubnub
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_user_active(Pubnub::User* user);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_last_active_timestamp(Pubnub::User* user, char* result);
+
 
 #endif // PN_CHAT_C_USER_HPP

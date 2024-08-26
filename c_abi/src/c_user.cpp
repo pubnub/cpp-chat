@@ -306,3 +306,23 @@ PnCTribool pn_user_active(Pubnub::User* user) {
     }
 }
 
+
+PnCResult pn_user_last_active_timestamp(Pubnub::User* user, char* result) {
+    try {
+        auto timestamp = user->last_active_timestamp();
+        if (timestamp.has_value()) {
+            strcpy(result, timestamp.value().c_str());
+        } else {
+            strcpy(result, "");
+        }
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+
+}
+
+
