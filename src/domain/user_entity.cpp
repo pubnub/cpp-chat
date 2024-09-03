@@ -30,6 +30,9 @@ Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
     if(!type.empty()) {
         user_data_json.insert_or_update("type", type);
     }
+    if (last_active_timestamp.has_value()) {
+        user_data_json.insert_or_update("lastActiveTimestamp", last_active_timestamp.value());
+    }
 
     return user_data_json.dump();
 }
