@@ -287,7 +287,7 @@ bool UserService::active(const UserDAO& user_data) const {
 }
 
 Pubnub::Option<Pubnub::String> UserService::last_active_timestamp(const UserDAO& user_data) const {
-    return user_data.to_entity().last_active_timestamp;
+    return user_data.to_entity().get_last_active_timestamp();
 }
 
 void UserService::store_user_activity_timestamp() const {
@@ -333,7 +333,7 @@ void UserService::run_save_timestamp_interval(UserEntity user_entity) const {
 void UserService::save_timestamp_function(UserEntity user_entity) const {
         auto pubnub_handle = this->pubnub->lock();
 
-        user_entity.last_active_timestamp = Timetoken::now();
+        user_entity.set_last_active_timestamp(Timetoken::now());
 
         auto user_id = pubnub_handle->get_user_id();
         // TODO: set this metadata
