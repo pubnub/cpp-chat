@@ -57,6 +57,10 @@ Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscri
     {
         chat.create_user(user_id, ChatUserData());
     }
+
+    if (config.store_user_activity_timestamps) {
+        chat.store_user_activity_timestamp();
+    }
     
     return chat;
 }
@@ -240,6 +244,11 @@ void Chat::remove_thread_channel(const Pubnub::Message& message) const
 AccessManager Chat::access_manager() const
 {
     return AccessManager(this->chat_service->access_manager_service);
+}
+
+void Chat::store_user_activity_timestamp() const
+{
+    this->user_service->store_user_activity_timestamp(this->user_service->get_current_user().user_id());
 }
 
 #ifdef PN_CHAT_C_ABI

@@ -5,7 +5,9 @@
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
 #include "callback_service.hpp"
+#include <chrono>
 #include <memory>
+#include <optional>
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -285,4 +287,21 @@ bool UserService::active(const UserDAO& user_data) const {
 
 Pubnub::Option<Pubnub::String> UserService::last_active_timestamp(const UserDAO& user_data) const {
     return user_data.to_entity().last_active_timestamp;
+}
+
+void UserService::store_user_activity_timestamp() const {
+    if (this->lastSavedActivityInterval.has_value()) {
+        //this->lastSavedActivityInterval.reset();
+    }
+
+    const auto user = this->get_current_user();
+
+    if (user.last_active_timestamp().has_value()) {
+        this->run_save_timestamp_interval();
+        return;
+    }
+
+    const auto current_time = std::chrono::system_clock::now();
+    const auto elapsed_time_since_last_check = current_time - user.data->get_entity().last_active_timestamp.value();
+    
 }

@@ -1,11 +1,13 @@
 #ifndef PN_CHAT_USER_SERVICE_HPP
 #define PN_CHAT_USER_SERVICE_HPP
 
+#include "infra/interval_task.hpp"
 #include "user.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include "page.hpp"
 #include <memory>
+#include <optional>
 #include <vector>
 #include <functional>
 #include "application/dao/user_dao.hpp"
@@ -37,10 +39,15 @@ class UserService : public std::enable_shared_from_this<UserService>
         bool active(const UserDAO& user_data) const;
         Pubnub::Option<Pubnub::String> last_active_timestamp(const UserDAO& user_data) const;
 
+        void store_user_activity_timestamp() const;
+
     private:
+        void run_save_timestamp_interval() const;
+
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
         int store_user_active_interval;
+        std::optional<IntervalTask> lastSavedActivityInterval;
 
         friend class ::MembershipService;
 
