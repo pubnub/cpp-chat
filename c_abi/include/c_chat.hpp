@@ -14,7 +14,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         const char* user_id,
         const char* auth_key,
         int typing_timeout,
-        int typing_timeout_difference);
+        int typing_timeout_difference,
+        int store_user_activity_interval,
+        bool store_user_activity_timestamps);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete(Pubnub::Chat* chat);
 
