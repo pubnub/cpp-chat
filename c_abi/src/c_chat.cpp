@@ -17,7 +17,9 @@ Pubnub::Chat* pn_chat_new(
         const char* user_id,
         const char* auth_key,
         int typing_timeout,
-        int typing_timeout_difference
+        int typing_timeout_difference,
+        int store_user_activity_interval,
+        bool store_user_activity_timestamps
     ) {
 
     try {
@@ -25,6 +27,8 @@ Pubnub::Chat* pn_chat_new(
             config.auth_key = auth_key;
             config.typing_timeout = typing_timeout;
             config.typing_timeout_difference = typing_timeout_difference;
+            config.store_user_activity_interval = store_user_activity_interval;
+            config.store_user_activity_timestamps = store_user_activity_timestamps;
 
         auto* chat = new Pubnub::Chat(Pubnub::Chat::init(publish, subscribe, user_id, config));
         return chat;
