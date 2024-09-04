@@ -248,7 +248,7 @@ AccessManager Chat::access_manager() const
 
 void Chat::store_user_activity_timestamp() const
 {
-    this->user_service->store_user_activity_timestamp(this->user_service->get_current_user().user_id());
+    this->user_service->store_user_activity_timestamp();
 }
 
 #ifdef PN_CHAT_C_ABI

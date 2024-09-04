@@ -12,7 +12,7 @@ class IntervalTask
         ~IntervalTask() {
             running.store(false);
             thread.join();
-        }
+        };
 
     private:
         std::atomic_bool running = true;

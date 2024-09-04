@@ -42,12 +42,13 @@ class UserService : public std::enable_shared_from_this<UserService>
         void store_user_activity_timestamp() const;
 
     private:
-        void run_save_timestamp_interval() const;
+        void run_save_timestamp_interval(UserEntity user_entity) const;
+        void save_timestamp_function(UserEntity user_entity) const;
 
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
         int store_user_active_interval;
-        std::optional<IntervalTask> lastSavedActivityInterval;
+        mutable std::optional<IntervalTask> lastSavedActivityInterval;
 
         friend class ::MembershipService;
 

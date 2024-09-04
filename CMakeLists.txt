@@ -82,7 +82,8 @@ set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/callbacks_repository.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/interval_task.cpp)
 
 set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/chat_entity.cpp 

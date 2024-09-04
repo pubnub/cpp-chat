@@ -1,6 +1,7 @@
 #include "user_service.hpp"
 #include "application/dao/user_dao.hpp"
 #include "chat_service.hpp"
+#include "domain/timetoken.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -286,22 +287,55 @@ bool UserService::active(const UserDAO& user_data) const {
 }
 
 Pubnub::Option<Pubnub::String> UserService::last_active_timestamp(const UserDAO& user_data) const {
-    return user_data.to_entity().last_active_timestamp;
+    return user_data.to_entity().get_last_active_timestamp();
 }
 
 void UserService::store_user_activity_timestamp() const {
     if (this->lastSavedActivityInterval.has_value()) {
-        //this->lastSavedActivityInterval.reset();
+        this->lastSavedActivityInterval.reset();
     }
 
     const auto user = this->get_current_user();
+    auto user_data = user.data->to_entity();
 
-    if (user.last_active_timestamp().has_value()) {
-        this->run_save_timestamp_interval();
+    if (!user.last_active_timestamp().has_value()) {
+        this->run_save_timestamp_interval(user_data);
         return;
     }
 
-    const auto current_time = std::chrono::system_clock::now();
-    const auto elapsed_time_since_last_check = current_time - user.data->get_entity().last_active_timestamp.value();
-    
+    const auto current_time = Timetoken::now_numeric();
+    const auto elapsed_time_since_last_check = current_time - Timetoken::to_long(user.last_active_timestamp().value());
+
+    if (elapsed_time_since_last_check >= this->store_user_active_interval) {
+        this->run_save_timestamp_interval(user_data);
+        return;
+    }
+
+    const auto remaining_time = this->store_user_active_interval - elapsed_time_since_last_check;
+
+    // TODO: this is very buggy solution as it will always override the custom data of the user...
+    Timer().start(remaining_time, [this, user_data] {
+        this->run_save_timestamp_interval(user_data);
+    });
+}
+
+void UserService::run_save_timestamp_interval(UserEntity user_entity) const {
+    this->save_timestamp_function(user_entity);
+
+    this->lastSavedActivityInterval.emplace(
+        [this, user_entity] {
+            this->save_timestamp_function(user_entity);
+        },
+        this->store_user_active_interval
+    );
+}
+
+void UserService::save_timestamp_function(UserEntity user_entity) const {
+        auto pubnub_handle = this->pubnub->lock();
+
+        user_entity.set_last_active_timestamp(Timetoken::now());
+
+        auto user_id = pubnub_handle->get_user_id();
+        // TODO: set this metadata
+        pubnub_handle->set_user_metadata(user_id, user_entity.get_user_metadata_json_string(user_id));
 }

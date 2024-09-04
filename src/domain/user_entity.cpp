@@ -1,5 +1,7 @@
 #include "user_entity.hpp"
 #include "domain/json.hpp"
+#include "domain/timetoken.hpp"
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -36,11 +38,28 @@ Pubnub::String UserEntity::get_user_metadata_json_string(Pubnub::String user_id)
 
 bool UserEntity::is_active(int activity_interval) const
 {
-    auto now = std::chrono::system_clock::now();
-    auto epoch = now.time_since_epoch();
-    long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch).count();
+    auto nanoseconds = Timetoken::now_numeric();
 
-    return last_active_timestamp.has_value() && nanoseconds - std::stol(last_active_timestamp.value())  <= activity_interval;
+    Json custom_json = Json::parse(this->custom_data_json);
+    auto last_active_timestamp = custom_json.get_string("lastActiveTimestamp");
+
+    const auto milis_to_nanos = 1000000;
+
+    // TODO: activity_interval is used also in interval task so there might be some "offline" times because of the drift
+    return last_active_timestamp.has_value() && nanoseconds - std::stol(last_active_timestamp.value())  <= activity_interval * milis_to_nanos;
+}
+
+void UserEntity::set_last_active_timestamp(Pubnub::String timestamp)
+{
+    Json custom_json = Json::parse(custom_data_json);
+    custom_json.insert_or_update("lastActiveTimestamp", timestamp);
+    custom_data_json = custom_json.dump();
+}
+
+std::optional<Pubnub::String> UserEntity::get_last_active_timestamp() const
+{
+    Json custom_json = Json::parse(custom_data_json);
+    return custom_json.get_string("lastActiveTimestamp");
 }
 
 UserEntity UserEntity::from_json(Json user_json) {

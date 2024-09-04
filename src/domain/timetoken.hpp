@@ -6,8 +6,13 @@
 namespace Timetoken {
     using Timetoken = Pubnub::String;
 
+    Timetoken now();
+    long now_numeric();
+
     Timetoken increase_by(const Timetoken& timetoken, int value);
     Timetoken increase_by_one(const Timetoken& timetoken);
+
+    long to_long(const Timetoken& timetoken);
 }
 
 #endif // PN_CHAT_TIMETOKEN_HPP
