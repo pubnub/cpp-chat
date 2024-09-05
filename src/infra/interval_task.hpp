@@ -17,6 +17,7 @@ class IntervalTask
     private:
         std::atomic_bool running = true;
         std::thread thread;
+        int elapsed_time = 0;
 };
 
 #endif // PN_CHAT_INTERVAL_TASK_HPP
