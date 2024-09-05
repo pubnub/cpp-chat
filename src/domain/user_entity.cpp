@@ -46,7 +46,7 @@ bool UserEntity::is_active(int activity_interval) const
     const long long milis_to_nanos = 1000000;
 
     // TODO: activity_interval is used also in interval task so there might be some "offline" times because of the drift
-    return last_active_timestamp.has_value() && nanoseconds - std::stol(last_active_timestamp.value())  <= activity_interval * milis_to_nanos;
+    return last_active_timestamp.has_value() && nanoseconds - Timetoken::to_long(last_active_timestamp.value())  <= activity_interval * milis_to_nanos;
 }
 
 void UserEntity::set_last_active_timestamp(Pubnub::String timestamp)
