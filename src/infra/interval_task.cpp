@@ -4,6 +4,8 @@
 
 IntervalTask::IntervalTask(std::function<void()> task, int interval_ms) {
     this->thread = std::thread([this, task, interval_ms] {
+        task();
+
         while(this->running.load())
         {
             if (this->elapsed_time >= interval_ms) {
