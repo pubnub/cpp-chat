@@ -1,4 +1,6 @@
 #include "channel.hpp"
+#include "callback_stop.hpp"
+#include "chat.hpp"
 #include "message.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "application/channel_service.hpp"
@@ -6,6 +8,7 @@
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
 #include "application/membership_service.hpp"
+#include "event.hpp"
 #include <algorithm>
 
 #ifdef PN_CHAT_C_ABI
@@ -266,4 +269,20 @@ void Pubnub::Channel::emit_user_mention(const Pubnub::String &user_id, const Pub
 Pubnub::Vector<Pubnub::Membership> Pubnub::Channel::get_user_suggestions(Pubnub::String text, int limit) const
 {
     return Pubnub::Vector<Membership>(std::move(this->channel_service->get_user_suggestions_for_channel(channel_id(), *this->data, text, limit)));
+}
+
+Pubnub::EventsHistoryWrapper Pubnub::Channel::get_messsage_reports_history(const Pubnub::String &start_timetoken, const Pubnub::String &end_timetoken, int count) const
+{
+    auto return_tuple = this->channel_service->get_message_reports_history(channel_id(), start_timetoken, end_timetoken, count);
+    return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
+}
+
+Pubnub::CallbackStop Pubnub::Channel::stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const
+{
+    // TODO: it seems to be bug
+    auto new_callback = [=](const Event& event)
+    {
+        event_callback(event);
+    };
+    return CallbackStop(this->channel_service->stream_message_reports(channel_id(), new_callback));
 }

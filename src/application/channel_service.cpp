@@ -1,4 +1,7 @@
 #include "channel_service.hpp"
+#include "event.hpp"
+#include "callback_stop.hpp"
+#include "enums.hpp"
 #include "thread_channel.hpp"
 #include "thread_message.hpp"
 #include "application/dao/channel_dao.hpp"
@@ -18,6 +21,7 @@
 #include "nlohmann/json.hpp"
 #include "application/callback_service.hpp"
 #include "option.hpp"
+#include <functional>
 #ifdef PN_CHAT_C_ABI
 #include <pubnub_helper.h>
 #include "domain/parsers.hpp"
@@ -963,6 +967,26 @@ Pubnub::Channel ChannelService::update_channel_with_base(const Pubnub::Channel& 
 
     return create_channel_object(
             {channel.channel_id(), ChannelEntity::from_base_and_updated_channel(base_entity, channel_entity)});
+}
+
+std::tuple<std::vector<Pubnub::Event>, bool> ChannelService::get_message_reports_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const {
+    if (auto chat_service = this->chat_service.lock()) {
+        const auto channel = INTERNAL_MODERATION_PREFIX + channel_id;
+
+        return chat_service->get_events_history(channel, start_timetoken, end_timetoken, count);
+    } else {
+        throw std::runtime_error("Chat service is not available to get message reports history");
+    }
+}
+
+std::function<void()> ChannelService::stream_message_reports(const Pubnub::String& channel_id, std::function<void(Pubnub::Event)> message_report_callback) const {
+    if (auto chat_service = this->chat_service.lock()) {
+        const auto channel = INTERNAL_MODERATION_PREFIX + channel_id;
+
+        return chat_service->listen_for_events(channel, Pubnub::PCET_REPORT, message_report_callback);
+    } else {
+        throw std::runtime_error("Chat service is not available to stream message reports");
+    }
 }
 
 #ifdef PN_CHAT_C_ABI

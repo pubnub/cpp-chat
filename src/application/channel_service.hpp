@@ -1,9 +1,11 @@
 #ifndef PN_CHAT_CHANNEL_SERVICE_HPP
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
+#include "callback_stop.hpp"
 #include "channel.hpp"
 #include "domain/channel_entity.hpp"
 #include "enums.hpp"
+#include "event.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
 #include "page.hpp"
@@ -110,6 +112,12 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Channel create_presentation_object(Pubnub::String channel_id, ChannelDAO channel_data);
 
         Pubnub::Channel update_channel_with_base(const Pubnub::Channel& channel, const Pubnub::Channel& base_channel) const;
+
+        std::tuple<std::vector<Pubnub::Event>, bool> get_message_reports_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
+#ifndef PN_CHAT_C_ABI
+        std::function<void()> stream_message_reports(const Pubnub::String& channel_id, std::function<void(const Pubnub::Event)> event_callback) const;
+#endif
+
 
     private:
         ThreadSafePtr<PubNub> pubnub;
