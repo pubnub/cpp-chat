@@ -45,7 +45,7 @@ endif()
 
 # TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
 set(PUBNUB_SDK_VERSION_SUFFIX "/CA-SDKC++/${PROJECT_VERSION}")
-# TODO: switch back to master branch
+
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
@@ -83,7 +83,8 @@ set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/serialization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/interval_task.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/interval_task.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/rate_limiter.cpp)
 
 set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/chat_entity.cpp 

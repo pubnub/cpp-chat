@@ -6,6 +6,7 @@
 #include "domain/channel_entity.hpp"
 #include "enums.hpp"
 #include "event.hpp"
+#include "infra/rate_limiter.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
 #include "page.hpp"
@@ -63,7 +64,7 @@ struct SendTextParamsInternal
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
-        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
+        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, ExponentialRateLimiter&& rate_limiter);
 
         Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
@@ -122,6 +123,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
+        ExponentialRateLimiter rate_limiter;
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
 

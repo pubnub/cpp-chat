@@ -31,6 +31,8 @@ class Mutex {
 public:
 template<typename... Args>
     Mutex(Args&&... args): value(std::forward<Args>(args)...) {};
+    Mutex(T&& value): value(std::move(value)) {};
+    Mutex(Mutex&& mutex): value(std::move(mutex.value)) {};
     ~Mutex() = default;
 
     MutexGuard<T> lock() {

@@ -2,6 +2,7 @@
 #include "event.hpp"
 #include "callback_stop.hpp"
 #include "enums.hpp"
+#include "infra/rate_limiter.hpp"
 #include "thread_channel.hpp"
 #include "thread_message.hpp"
 #include "application/dao/channel_dao.hpp"
@@ -30,9 +31,10 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service):
+ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, ExponentialRateLimiter&& rate_limiter):
     pubnub(pubnub),
-    chat_service(chat_service)
+    chat_service(chat_service),
+    rate_limiter(std::move(rate_limiter))
 {}
 
 Channel ChannelService::create_public_conversation(const String& channel_id, const ChannelDAO& data) const {

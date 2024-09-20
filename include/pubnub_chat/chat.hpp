@@ -38,12 +38,21 @@ class CallbackService;
 #endif
 
 namespace Pubnub {
+    struct ChannelRateLimits {
+        int direct_conversation = 0;
+        int group_conversation = 0;
+        int public_conversation = 0;
+        int unknown_conversation = 0;
+    };
+
     struct ChatConfig {
         Pubnub::String auth_key = "";
         int typing_timeout = 5000;
         int typing_timeout_difference = 1000;
         int store_user_activity_interval = 600000;
         bool store_user_activity_timestamps = false;
+        float rate_limit_factor = 2.0;
+        ChannelRateLimits rate_limit_per_channel;
     };
 
     struct CreatedChannelWrapper
