@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHANNEL_SERVICE_HPP
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
+#include "application/dao/channel_dao.hpp"
 #include "callback_stop.hpp"
 #include "channel.hpp"
 #include "domain/channel_entity.hpp"
@@ -83,7 +84,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;
 #endif
-        void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
+        void send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         std::function<void()> get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
@@ -123,7 +124,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
-        ExponentialRateLimiter rate_limiter;
+        mutable ExponentialRateLimiter rate_limiter;
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
 

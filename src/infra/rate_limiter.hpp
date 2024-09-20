@@ -9,8 +9,8 @@
 #include <map>
 
 struct RateLimiterElement {
-    std::function<void*()> task;
-    std::function<void(void*)> callback;
+    std::function<Pubnub::String()> task;
+    std::function<void(Pubnub::String)> callback;
     std::function<void(std::exception&)> error_callback;
     int penalty;
 };
@@ -25,7 +25,7 @@ class ExponentialRateLimiter {
     public:
         ExponentialRateLimiter(float exponential_factor);
 
-        void run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<void*()> task, std::function<void(void*)> callback, std::function<void(std::exception&)> error_callback);
+        void run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<Pubnub::String()> task, std::function<void(Pubnub::String)> callback, std::function<void(std::exception&)> error_callback);
     private:
         void process_queue(const Pubnub::String& id);
 

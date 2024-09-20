@@ -6,7 +6,7 @@
 ExponentialRateLimiter::ExponentialRateLimiter(float exponential_factor)
     : exponential_factor(exponential_factor) {}
 
-void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<void*()> task, std::function<void(void*)> callback, std::function<void(std::exception&)> error_callback) {
+void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<Pubnub::String()> task, std::function<void(Pubnub::String)> callback, std::function<void(std::exception&)> error_callback) {
     if (base_interval_ms == 0) {
         try {
             auto result = task();
@@ -22,9 +22,11 @@ void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int bas
 
     if (limiter == this->limiters.end()) {
         limiter = this->limiters.insert({id, std::move(Mutex(std::move(RateLimiterRoot{.base_interval_ms = base_interval_ms})))}).first;
-        auto limiter_root = limiter->second.lock();
+        {
+            auto limiter_root = limiter->second.lock();
 
-        limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
+            limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
+        }
 
         this->process_queue(id);
     } else {

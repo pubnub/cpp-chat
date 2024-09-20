@@ -336,12 +336,45 @@ std::vector<pubnub_v2_message> ChannelService::leave(const String& channel_id) c
 #endif // PN_CHAT_C_ABI
 }
 
-void ChannelService::send_text(const Pubnub::String& channel_id, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
+void ChannelService::send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
 {
     if(!text_params.quoted_message.timetoken.empty() && text_params.quoted_message.channel_id != channel_id)
     {
         throw std::invalid_argument("You cannot quote messages from other channels");
     }
+
+    const auto channel_type = dao.get_entity().type;
+    const auto base_intervals = this->chat_service.lock()->chat_config.rate_limit_per_channel;
+
+    const auto base_interval_ms = channel_type == Pubnub::String("public") 
+        ? base_intervals.public_conversation : channel_type == Pubnub::String("direct") 
+        ? base_intervals.direct_conversation : channel_type == Pubnub::String("group") 
+        ? base_intervals.group_conversation : base_intervals.unknown_conversation;
+
+    this->rate_limiter.run_within_limits(
+        channel_id,
+        base_interval_ms,
+        [this, channel_id, message, text_params]() {
+            return this->pubnub
+                ->lock()
+                ->publish(
+                        channel_id,
+                        chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT),
+                        this->send_text_meta_from_params(text_params),
+                        text_params.store_in_history,
+                        text_params.send_by_post
+                );
+        },
+        [this, text_params, message, channel_id](Pubnub::String mention_timetoken) {
+            if(text_params.mentioned_users.size() > 0)
+            {
+                for(auto it = text_params.mentioned_users.begin(); it != text_params.mentioned_users.end(); it++) {
+                    this->emit_user_mention(channel_id, it->second.id, mention_timetoken, message);
+                }
+            }
+        },
+        [](std::exception& e) { throw e; }
+    );
     
     String mention_timetoken = [this, channel_id, message, text_params](){
         auto pubnub_handle = this->pubnub->lock();
