@@ -375,19 +375,6 @@ void ChannelService::send_text(const Pubnub::String& channel_id, const ChannelDA
         },
         [](std::exception& e) { throw e; }
     );
-    
-    String mention_timetoken = [this, channel_id, message, text_params](){
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->publish(channel_id, chat_message_to_publish_string(message, pubnub_chat_message_type::PCMT_TEXT), this->send_text_meta_from_params(text_params), text_params.store_in_history, text_params.send_by_post);
-    }();
-
-    if(text_params.mentioned_users.size() > 0)
-    {
-        for(auto it = text_params.mentioned_users.begin(); it != text_params.mentioned_users.end(); it++)
-        {
-            this->emit_user_mention(channel_id, it->second.id, mention_timetoken, message);
-        }
-    }
 }
 
 

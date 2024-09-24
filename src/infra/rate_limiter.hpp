@@ -2,11 +2,14 @@
 #define PN_CHAT_RATE_LIMITER_HPP
 
 #include "infra/sync.hpp"
+#include "infra/timer.hpp"
 #include "string.hpp"
 #include <deque>
 #include <exception>
 #include <functional>
+#include <list>
 #include <map>
+#include <vector>
 
 struct RateLimiterElement {
     std::function<Pubnub::String()> task;
@@ -31,6 +34,7 @@ class ExponentialRateLimiter {
 
         float exponential_factor;
         std::map<Pubnub::String, Mutex<RateLimiterRoot>, Pubnub::StringComparer> limiters;
+        std::list<Timer> timers;
 };
 
 #endif // PN_CHAT_RATE_LIMITER_HPP
