@@ -35,9 +35,7 @@ pubnub(pubnub)
 {}
 
 void ChatService::init_services(const ChatConfig& config) {
-    ExponentialRateLimiter rate_limiter(config.rate_limit_factor);
-
-    channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this(), std::move(rate_limiter));
+    channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this(), config.rate_limit_factor);
     user_service = std::make_shared<UserService>(pubnub, weak_from_this(), config.store_user_activity_interval);
     message_service = std::make_shared<MessageService>(pubnub, weak_from_this());
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());

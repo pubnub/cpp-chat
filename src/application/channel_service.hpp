@@ -65,7 +65,7 @@ struct SendTextParamsInternal
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
-        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, ExponentialRateLimiter&& rate_limiter);
+        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, float exponential_factor);
 
         Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;

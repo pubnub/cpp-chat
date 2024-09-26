@@ -4,11 +4,13 @@
 #include "infra/sync.hpp"
 #include "infra/timer.hpp"
 #include "string.hpp"
+#include <atomic>
 #include <deque>
 #include <exception>
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <vector>
 
 struct RateLimiterElement {
@@ -27,6 +29,7 @@ struct RateLimiterRoot {
 class ExponentialRateLimiter {
     public:
         ExponentialRateLimiter(float exponential_factor);
+        ~ExponentialRateLimiter();
 
         void run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<Pubnub::String()> task, std::function<void(Pubnub::String)> callback, std::function<void(std::exception&)> error_callback);
     private:
@@ -34,7 +37,9 @@ class ExponentialRateLimiter {
 
         float exponential_factor;
         std::map<Pubnub::String, Mutex<RateLimiterRoot>, Pubnub::StringComparer> limiters;
-        std::list<Timer> timers;
+        std::unique_ptr<Mutex<std::list<Timer>>> timers;
+        std::thread timer_collector;
+        std::atomic_bool should_stop = false;
 };
 
 #endif // PN_CHAT_RATE_LIMITER_HPP

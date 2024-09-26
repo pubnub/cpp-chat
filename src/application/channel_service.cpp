@@ -31,10 +31,10 @@
 using namespace Pubnub;
 using json = nlohmann::json;
 
-ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, ExponentialRateLimiter&& rate_limiter):
+ChannelService::ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, float exponential_factor) :
     pubnub(pubnub),
     chat_service(chat_service),
-    rate_limiter(std::move(rate_limiter))
+    rate_limiter(ExponentialRateLimiter(exponential_factor))
 {}
 
 Channel ChannelService::create_public_conversation(const String& channel_id, const ChannelDAO& data) const {

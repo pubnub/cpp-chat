@@ -5,6 +5,9 @@
 Timer::~Timer()
 {
     this->stop();
+    if (this->timer_thread.joinable()) {
+        this->timer_thread.join();
+    }
 }
 
 Timer::Timer(int duration_ms, std::function<void()> callback) 
@@ -31,9 +34,6 @@ Timer& Timer::operator=(Timer&& other)
 void Timer::stop()
 {
     is_running.store(false);
-    if (this->timer_thread.joinable()) {
-        this->timer_thread.join();
-    }
 }
 
 void Timer::async_start(int duration_ms, std::function<void()> callback) 
@@ -42,8 +42,8 @@ void Timer::async_start(int duration_ms, std::function<void()> callback)
     {
         if (this->elapsed_time >= duration_ms) {
             this->elapsed_time = 0;
-            is_running.store(false);
             callback();
+            this->stop();
             return;
         }
 
