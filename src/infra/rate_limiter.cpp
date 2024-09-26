@@ -48,37 +48,44 @@ void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int bas
         return;
     }
 
-    auto limiter = this->limiters.find(id);
+    bool should_start_new_process = false;
+    {
+        auto limiter_guard = this->limiters.lock();
+        auto limiter = limiter_guard->find(id);
 
-    if (limiter == this->limiters.end()) {
-        limiter = this->limiters.insert({id, std::move(Mutex(std::move(RateLimiterRoot{.base_interval_ms = base_interval_ms})))}).first;
-        {
+        should_start_new_process = limiter == limiter_guard->end();
+        if (should_start_new_process) {
+            limiter = limiter_guard->insert({id, std::move(Mutex(std::move(RateLimiterRoot{{}, 0, base_interval_ms})))}).first;
             auto limiter_root = limiter->second.lock();
 
             limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
+
+        } else {
+            auto limiter_root = limiter->second.lock();
+
+            limiter_root->current_penalty += 1;
+
+            limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
         }
+    }
 
+    if (should_start_new_process) {
         this->process_queue(id);
-    } else {
-        auto limiter_root = limiter->second.lock();
-
-        limiter_root->current_penalty += 1;
-
-        limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
     }
 }
 
 void ExponentialRateLimiter::process_queue(const Pubnub::String& id) {
-    auto limiter = this->limiters.find(id);
+    auto limiter_guard = this->limiters.lock();
+    auto limiter = limiter_guard->find(id);
 
-    if (limiter == this->limiters.end()) {
+    if (limiter == limiter_guard->end()) {
         return;
     }
 
     auto limiter_root = limiter->second.lock();
 
     if (limiter_root->queue.empty()) {
-        this->limiters.erase(id);
+        limiter_guard->erase(id);
  
         return;
     }
