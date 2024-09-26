@@ -4,7 +4,6 @@
 #include "string.hpp"
 #include <algorithm>
 #include <chrono>
-#include <iostream>
 
 #define COLLECTOR_INTERVAL_MS 1000
 
@@ -18,7 +17,6 @@ ExponentialRateLimiter::ExponentialRateLimiter(float exponential_factor) :
 
                     {
                         auto timers_lock = this->timers->lock();
-                        std::cout << "Collecting timers :" << timers_lock->size() << std::endl;
                         if (timers_lock->empty()) {
                             continue;
                         }
