@@ -5,35 +5,17 @@
 #include <algorithm>
 #include <chrono>
 
-#define COLLECTOR_INTERVAL_MS 1000
+#define THREADS_MAX_SPEEL_MS 1000
 
 ExponentialRateLimiter::ExponentialRateLimiter(float exponential_factor) :
     exponential_factor(exponential_factor),
-    timers(std::make_unique<Mutex<std::list<Timer>>>()) {
-        this->timer_collector = std::thread(
-                [this] {
-                while (!this->should_stop.load()) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(COLLECTOR_INTERVAL_MS));
-
-                    {
-                        auto timers_lock = this->timers->lock();
-                        if (timers_lock->empty()) {
-                            continue;
-                        }
-
-                        timers_lock->remove_if([](Timer& timer) {
-                            return !timer.is_active();
-                        });
-                    }
-                }
-            }
-        );
+    processor(this->processor_thread()){
 }
 
 ExponentialRateLimiter::~ExponentialRateLimiter() {
     this->should_stop.store(true);
-    if (this->timer_collector.joinable()) {
-        this->timer_collector.join();
+    if (this->processor.joinable()) {
+        this->processor.join();
     }
 }
 
@@ -48,49 +30,57 @@ void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int bas
         return;
     }
 
-    bool should_start_new_process = false;
-    {
-        auto limiter_guard = this->limiters.lock();
-        auto limiter = limiter_guard->find(id);
-
-        should_start_new_process = limiter == limiter_guard->end();
-        if (should_start_new_process) {
-            limiter = limiter_guard->insert({id, std::move(Mutex(std::move(RateLimiterRoot{{}, 0, base_interval_ms})))}).first;
-            auto limiter_root = limiter->second.lock();
-
-            limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
-
-        } else {
-            auto limiter_root = limiter->second.lock();
-
-            limiter_root->current_penalty += 1;
-
-            limiter_root->queue.push_back({task, callback, error_callback, limiter_root->current_penalty});
-        }
-    }
-
-    if (should_start_new_process) {
-        this->process_queue(id);
-    }
-}
-
-void ExponentialRateLimiter::process_queue(const Pubnub::String& id) {
     auto limiter_guard = this->limiters.lock();
     auto limiter = limiter_guard->find(id);
 
     if (limiter == limiter_guard->end()) {
+        limiter = limiter_guard->insert({id, RateLimiterRoot{{}, 0, base_interval_ms, 0, 0, false}}).first;
+    } else {
+        limiter->second.current_penalty += 1;
+    }
+
+    auto& current = limiter->second;
+    current.queue.push_back({task, callback, error_callback, current.current_penalty});
+}
+
+int ExponentialRateLimiter::process_queue(int slept_ms) {
+    auto limiter_guard = this->limiters.lock();
+    auto to_sleep = THREADS_MAX_SPEEL_MS;
+
+    for (auto& [id, limiter] : *limiter_guard) {
+        limiter.elapsed_ms += slept_ms;
+
+        if (limiter.next_interval_ms > limiter.elapsed_ms) {
+            to_sleep = std::min(to_sleep, limiter.next_interval_ms - limiter.elapsed_ms);
+            continue;
+        }
+
+        this->process_limiter(id, limiter);
+
+        limiter.next_interval_ms = limiter.base_interval_ms * std::pow(this->exponential_factor, limiter.current_penalty);
+        limiter.elapsed_ms = 0;
+
+        to_sleep = std::min(to_sleep, limiter.next_interval_ms);
+    }
+
+    for (auto iter = limiter_guard->begin(); iter != limiter_guard->end();) {
+        if (iter->second.finished) {
+            iter = limiter_guard->erase(iter);
+        } else {
+            iter++;
+        }
+    }
+
+    return to_sleep;
+}
+
+void ExponentialRateLimiter::process_limiter(const Pubnub::String& id, RateLimiterRoot& limiter_root) {
+    if (limiter_root.queue.empty()) {
+        limiter_root.finished = true;
         return;
     }
 
-    auto limiter_root = limiter->second.lock();
-
-    if (limiter_root->queue.empty()) {
-        limiter_guard->erase(id);
- 
-        return;
-    }
- 
-    auto element = limiter_root->queue.front();
+    auto element = limiter_root.queue.front();
 
     try {
         element.callback(element.task());
@@ -98,13 +88,25 @@ void ExponentialRateLimiter::process_queue(const Pubnub::String& id) {
         element.error_callback(e);
     }
 
-    limiter_root->queue.pop_front();
+    limiter_root.queue.pop_front();
+}
 
-    this->timers->lock()->emplace_back(
-            limiter_root->base_interval_ms * std::pow(this->exponential_factor, limiter_root->current_penalty),
-            [this, id] {
-                this->process_queue(id);
+std::thread ExponentialRateLimiter::processor_thread() {
+    return std::thread([this] {
+            auto slept = 0;
+            auto to_sleep = 0;
+
+            while (!this->should_stop.load()) {
+                if (slept >= to_sleep) {
+                    to_sleep = this->process_queue(slept);
+                } else {
+                    to_sleep -= slept;
+                }
+
+                slept = std::min(to_sleep, THREADS_MAX_SPEEL_MS);
+                std::this_thread::sleep_for(
+                        std::chrono::milliseconds(slept));
             }
-        );
+    });
 }
 

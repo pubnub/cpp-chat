@@ -24,6 +24,9 @@ struct RateLimiterRoot {
     std::deque<RateLimiterElement> queue;
     int current_penalty;
     int base_interval_ms;
+    int next_interval_ms;
+    int elapsed_ms;
+    bool finished;
 };
 
 class ExponentialRateLimiter {
@@ -33,12 +36,14 @@ class ExponentialRateLimiter {
 
         void run_within_limits(const Pubnub::String& id, int base_interval_ms, std::function<Pubnub::String()> task, std::function<void(Pubnub::String)> callback, std::function<void(std::exception&)> error_callback);
     private:
-        void process_queue(const Pubnub::String& id);
+        int process_queue(int slept_ms);
+        void process_limiter(const Pubnub::String& id, RateLimiterRoot& limiter_root);
+        std::thread processor_thread();
+        std::thread garbage_collector_thread();
 
         float exponential_factor;
-        Mutex<std::map<Pubnub::String, Mutex<RateLimiterRoot>, Pubnub::StringComparer>> limiters;
-        std::unique_ptr<Mutex<std::list<Timer>>> timers;
-        std::thread timer_collector;
+        Mutex<std::map<Pubnub::String, RateLimiterRoot, Pubnub::StringComparer>> limiters;
+        std::thread processor;
         std::atomic_bool should_stop = false;
 };
 
