@@ -51,7 +51,7 @@ namespace Pubnub {
         int typing_timeout_difference = 1000;
         int store_user_activity_interval = 600000;
         bool store_user_activity_timestamps = false;
-        float rate_limit_factor = 2.0;
+        float rate_limit_factor = 1.2;
         ChannelRateLimits rate_limit_per_channel;
     };
 
