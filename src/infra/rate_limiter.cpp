@@ -42,8 +42,6 @@ void ExponentialRateLimiter::run_within_limits(const Pubnub::String& id, int bas
 
             this->processor = this->processor_thread();
         }
-    } else {
-        limiter->second.current_penalty += 1;
     }
 
     auto& current = limiter->second;
@@ -64,6 +62,7 @@ int ExponentialRateLimiter::process_queue(int slept_ms) {
 
         this->process_limiter(id, limiter);
 
+        limiter.current_penalty++;
         limiter.next_interval_ms = limiter.base_interval_ms * std::pow(this->exponential_factor, limiter.current_penalty);
         limiter.elapsed_ms = 0;
 
