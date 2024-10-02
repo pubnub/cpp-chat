@@ -38,12 +38,12 @@ class ExponentialRateLimiter {
     private:
         int process_queue(int slept_ms);
         void process_limiter(const Pubnub::String& id, RateLimiterRoot& limiter_root);
-        std::thread processor_thread();
+        std::unique_ptr<std::thread> processor_thread();
         std::thread garbage_collector_thread();
 
         float exponential_factor;
         Mutex<std::map<Pubnub::String, RateLimiterRoot, Pubnub::StringComparer>> limiters;
-        std::thread processor;
+        std::unique_ptr<std::thread> processor;
         std::atomic_bool should_stop = false;
 };
 
