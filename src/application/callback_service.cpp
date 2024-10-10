@@ -19,7 +19,7 @@ CallbackService::CallbackService(
         milliseconds wait_interval) :
     pubnub(pubnub),
     thread_run_flag(true),
-    chat_service(entity_bundle.chat_service),
+    chat_service(entity_bundle.chat_service.lock()),
     message_service(entity_bundle.message_service),
     channel_service(entity_bundle.channel_service),
     user_service(entity_bundle.user_service),

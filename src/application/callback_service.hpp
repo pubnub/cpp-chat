@@ -78,7 +78,7 @@ class CallbackService {
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChannelService> channel_service;
         std::weak_ptr<const UserService> user_service;
-        std::weak_ptr<const ChatService> chat_service;
+        std::shared_ptr<const ChatService> chat_service;
         std::weak_ptr<const MessageService> message_service;
         std::weak_ptr<const MembershipService> membership_service;
         std::weak_ptr<const PresenceService> presence_service;

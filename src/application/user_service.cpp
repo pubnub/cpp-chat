@@ -313,8 +313,7 @@ void UserService::store_user_activity_timestamp() const {
 
     const auto remaining_time = this->store_user_active_interval - elapsed_time_since_last_check;
 
-    // TODO: this is very buggy solution as it will always override the custom data of the user...
-    Timer().start(remaining_time, [this, user_data] {
+    this->save_timestamp_timer = Timer(remaining_time, [this, user_data] {
         this->run_save_timestamp_interval(user_data);
     });
 }

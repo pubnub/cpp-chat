@@ -517,7 +517,7 @@ namespace Pubnub {
         *  // c_str is valid 
         *  // string is invalid and should not be used anymore
         */
-       PN_CHAT_EXPORT const char* into_c_str();
+       PN_CHAT_EXPORT char* into_c_str();
 
        /**
         * Allocates the memory for the string.

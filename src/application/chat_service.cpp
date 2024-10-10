@@ -14,6 +14,7 @@
 #include "domain/timetoken.hpp"
 #include "enums.hpp"
 #include "infra/pubnub.hpp"
+#include "infra/rate_limiter.hpp"
 #include "mentions.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
@@ -34,7 +35,7 @@ pubnub(pubnub)
 {}
 
 void ChatService::init_services(const ChatConfig& config) {
-    channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this());
+    channel_service = std::make_shared<ChannelService>(pubnub, weak_from_this(), config.rate_limit_factor);
     user_service = std::make_shared<UserService>(pubnub, weak_from_this(), config.store_user_activity_interval);
     message_service = std::make_shared<MessageService>(pubnub, weak_from_this());
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());

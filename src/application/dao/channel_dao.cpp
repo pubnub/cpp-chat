@@ -33,8 +33,7 @@ const ChannelEntity& ChannelDAO::get_entity() const {
 void ChannelDAO::start_typing(int miliseconds) const  {
     this->typing.lock()->start();
 
-    *this->typing_timer.lock() = Timer();
-    this->typing_timer.lock()->start(miliseconds, [this]() {
+    *this->typing_timer.lock() = Timer(miliseconds, [this]() {
         this->typing.lock()->stop();
     });
 }
@@ -46,8 +45,7 @@ void ChannelDAO::stop_typing() const {
 
 void ChannelDAO::start_typing_indicator(const Pubnub::String& user_id, int miliseconds, std::function<void(const std::vector<Pubnub::String>&)> on_timeout) const {
     auto indicators_timers = this->indicators_timers.lock();
-    (*indicators_timers)[user_id] = Timer();
-    (*indicators_timers)[user_id].start(5000, [this, user_id, on_timeout]() {
+    (*indicators_timers)[user_id] = Timer(5000, [this, user_id, on_timeout]() {
         this->remove_typing_indicator(user_id);
         on_timeout(this->typing.lock()->get_typing_indicators());
     });

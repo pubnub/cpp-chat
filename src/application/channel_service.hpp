@@ -1,11 +1,13 @@
 #ifndef PN_CHAT_CHANNEL_SERVICE_HPP
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
+#include "application/dao/channel_dao.hpp"
 #include "callback_stop.hpp"
 #include "channel.hpp"
 #include "domain/channel_entity.hpp"
 #include "enums.hpp"
 #include "event.hpp"
+#include "infra/rate_limiter.hpp"
 #include "string.hpp"
 #include "infra/sync.hpp"
 #include "page.hpp"
@@ -63,7 +65,7 @@ struct SendTextParamsInternal
 class ChannelService : public std::enable_shared_from_this<ChannelService>
 {
     public:
-        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service);
+        ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, float exponential_factor);
 
         Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
@@ -82,7 +84,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;
 #endif
-        void send_text(const Pubnub::String& channel_id, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
+        void send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         std::function<void()> get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
@@ -122,6 +124,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
     private:
         ThreadSafePtr<PubNub> pubnub;
         std::weak_ptr<const ChatService> chat_service;
+        mutable ExponentialRateLimiter rate_limiter;
         
         ChannelEntity create_domain_from_presentation_data(Pubnub::String channel_id, Pubnub::ChatChannelData& presentation_data);
 

@@ -48,6 +48,10 @@ Chat::Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_ke
 
 Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig &config)
 {
+    if (config.store_user_activity_interval < 60000) {
+        throw std::invalid_argument("store_user_activity_interval must be at least 60000ms");
+    }
+
     Chat chat(publish_key, subscribe_key, user_id, config);
     try
     {

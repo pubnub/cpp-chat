@@ -43,13 +43,13 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::function<void()> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
 #endif
 
-        std::shared_ptr<const ChannelService> channel_service;
         std::shared_ptr<const UserService> user_service;
         std::shared_ptr<const MessageService> message_service;
         std::shared_ptr<const MembershipService> membership_service;
         std::shared_ptr<const PresenceService> presence_service;
         std::shared_ptr<const RestrictionsService> restrictions_service;
         std::shared_ptr<const AccessManagerService> access_manager_service;
+        std::shared_ptr<const ChannelService> channel_service;
         Pubnub::ChatConfig chat_config;
 
         std::shared_ptr<CallbackService> callback_service;
