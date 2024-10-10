@@ -7,6 +7,7 @@
 #include <memory>
 
 #define THREADS_MAX_SPEEL_MS 1000
+#define NO_SLEEP_REQUIRED -1
 
 ExponentialRateLimiter::ExponentialRateLimiter(float exponential_factor) :
     exponential_factor(exponential_factor) {}
@@ -77,9 +78,8 @@ int ExponentialRateLimiter::process_queue(int slept_ms) {
         }
     }
 
-    // TODO; find a better way
     if (limiter_guard->empty()) {
-        to_sleep = -1;
+        return NO_SLEEP_REQUIRED;
     }
 
     return to_sleep;
@@ -108,7 +108,7 @@ std::unique_ptr<std::thread> ExponentialRateLimiter::processor_thread() {
             auto to_sleep = 0;
 
             while (!this->should_stop.load()) {
-                if (to_sleep == -1) {
+                if (NO_SLEEP_REQUIRED == to_sleep) {
                     break;
                 }
 
