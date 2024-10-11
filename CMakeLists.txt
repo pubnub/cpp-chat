@@ -172,8 +172,12 @@ if(${RUN_TESTS})
 
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cgreen/include)
 
-    add_library(pubnub-test-string SHARED test/string_unit.cpp)
-    target_link_libraries(pubnub-test-string PUBLIC pubnub-chat ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/src/libcgreen.dylib)
+    set(UNIT_TESTS_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/string_unit.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/json_unit.cpp)
 
-    add_test(NAME pubnub-test-string COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/libpubnub-test-string.dylib)
+    add_library(pubnub-unit-tests SHARED ${UNIT_TESTS_SOURCES})
+    target_link_libraries(pubnub-unit-tests PRIVATE pubnub-chat ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/src/libcgreen.dylib)
+
+    add_test(NAME unit-tests COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/libpubnub-unit-tests.dylib)
 endif()
