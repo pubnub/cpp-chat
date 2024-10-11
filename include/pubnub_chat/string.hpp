@@ -266,7 +266,7 @@ namespace Pubnub {
         * It is used to clear the content of the string and set the length of the string to zero
         * without freeing the memory. It is useful when the memory is needed to be reused.
         *
-        * To completely free the memory, the String should be destroyed or `erase` method should be used.
+        * To completely free the memory, the String should be destroyed.
         *
         * @see erase
         */
@@ -276,7 +276,6 @@ namespace Pubnub {
         * Erases the character(s) at the specified position.
         *
         * This method will not reallocate the memory.
-        * The memory will be freed only if the length of the string is zero.
         *
         * @see capacity 
         *
