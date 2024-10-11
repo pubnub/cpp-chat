@@ -2,6 +2,7 @@
 #define PN_CHAT_USER_SERVICE_HPP
 
 #include "infra/interval_task.hpp"
+#include "infra/timer.hpp"
 #include "user.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
@@ -49,6 +50,7 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::weak_ptr<const ChatService> chat_service;
         int store_user_active_interval;
         mutable std::optional<IntervalTask> lastSavedActivityInterval;
+        mutable Timer save_timestamp_timer;
 
         friend class ::MembershipService;
 

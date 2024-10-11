@@ -348,7 +348,7 @@ char& String::back() {
     return this->string[this->len - 1];
 }
 
-const char* String::into_c_str() {
+char* String::into_c_str() {
     auto result = this->string;
     this->string = nullptr;
     this->len = 0;
