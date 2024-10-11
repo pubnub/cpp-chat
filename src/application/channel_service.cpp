@@ -1001,6 +1001,7 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChannelService::get_message_reports
     }
 }
 
+#ifndef PN_CHAT_C_ABI
 std::function<void()> ChannelService::stream_message_reports(const Pubnub::String& channel_id, std::function<void(Pubnub::Event)> message_report_callback) const {
     if (auto chat_service = this->chat_service.lock()) {
         const auto channel = INTERNAL_MODERATION_PREFIX + channel_id;
@@ -1010,6 +1011,7 @@ std::function<void()> ChannelService::stream_message_reports(const Pubnub::Strin
         throw std::runtime_error("Chat service is not available to stream message reports");
     }
 }
+#endif
 
 #ifdef PN_CHAT_C_ABI
 void ChannelService::stream_updates_on(const std::vector<Pubnub::String>& channel_ids) const

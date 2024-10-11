@@ -19,16 +19,29 @@ Pubnub::Chat* pn_chat_new(
         int typing_timeout,
         int typing_timeout_difference,
         int store_user_activity_interval,
-        bool store_user_activity_timestamps
+        bool store_user_activity_timestamps,
+        float rate_limit_factor,
+        int direct_conversation_rate_limit,
+        int group_conversation_rate_limit,
+        int public_conversation_rate_limit,
+        int unknown_conversation_rate_limit
     ) {
 
     try {
+        auto rate_limits_per_channel = Pubnub::ChannelRateLimits();
+        rate_limits_per_channel.direct_conversation = direct_conversation_rate_limit;
+        rate_limits_per_channel.group_conversation = group_conversation_rate_limit;
+        rate_limits_per_channel.public_conversation = public_conversation_rate_limit;
+        rate_limits_per_channel.unknown_conversation = unknown_conversation_rate_limit;
+        
         Pubnub::ChatConfig config; 
             config.auth_key = auth_key;
             config.typing_timeout = typing_timeout;
             config.typing_timeout_difference = typing_timeout_difference;
             config.store_user_activity_interval = store_user_activity_interval;
             config.store_user_activity_timestamps = store_user_activity_timestamps;
+            config.rate_limit_factor = rate_limit_factor;
+            config.rate_limit_per_channel = rate_limits_per_channel;
 
         auto* chat = new Pubnub::Chat(Pubnub::Chat::init(publish, subscribe, user_id, config));
         return chat;

@@ -16,7 +16,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Chat* pn_chat_new(
         int typing_timeout,
         int typing_timeout_difference,
         int store_user_activity_interval,
-        bool store_user_activity_timestamps);
+        bool store_user_activity_timestamps,
+        float rate_limit_factor,
+        int direct_conversation_rate_limit,
+        int group_conversation_rate_limit,
+        int public_conversation_rate_limit,
+        int unknown_conversation_rate_limit);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_chat_delete(Pubnub::Chat* chat);
 
