@@ -277,6 +277,7 @@ Pubnub::EventsHistoryWrapper Pubnub::Channel::get_messsage_reports_history(const
     return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
 }
 
+#ifndef PN_CHAT_C_ABI
 Pubnub::CallbackStop Pubnub::Channel::stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const
 {
     // TODO: it seems to be bug
@@ -286,3 +287,4 @@ Pubnub::CallbackStop Pubnub::Channel::stream_message_reports(std::function<void(
     };
     return CallbackStop(this->channel_service->stream_message_reports(channel_id(), new_callback));
 }
+#endif
