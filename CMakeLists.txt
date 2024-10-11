@@ -159,16 +159,21 @@ add_executable(pubnub-chat-example example/main.cpp)
 
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
+set(RUN_TESTS ON)
+
 if(${RUN_TESTS})
     message(STATUS "Running tests")
-
-    find_package(cgreen REQUIRED)
     enable_testing()
 
-    include_directories(${CGREEN_INCLUDE_DIRS})
+    # TODO: use installed runner instead (at least for MacOS there is an issue with RPATH)
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cgreen)
+        message(FATAL_ERROR "CGreen not found! Clone the repository and build it inside the root of the project!")
+    endif()
 
-    add_library(pubnub-test-string SHARED test/string_unit.c)
-    target_link_libraries(pubnub-test-string PRIVATE pubnub-chat ${CGREEN_LIBRARIES})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cgreen/include)
 
-    add_test(NAME pubnub-test-string COMMAND ${CGREEN_EXECUTABLE} pubnub-test-string)
+    add_library(pubnub-test-string SHARED test/string_unit.cpp)
+    target_link_libraries(pubnub-test-string PUBLIC pubnub-chat ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/src/libcgreen.dylib)
+
+    add_test(NAME pubnub-test-string COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/libpubnub-test-string.dylib)
 endif()

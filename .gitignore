@@ -7,4 +7,5 @@ justfile
 compile_commands.json
 Wrappers/unreal-chat/PubnubChatSDK/Binaries*
 Wrappers/unreal-chat/PubnubChatSDK/Intermediate*
+cgreen/
 
