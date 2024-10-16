@@ -4,11 +4,11 @@
 
 using namespace cgreen;
 
-Describe(StringTests);
-BeforeEach(StringTests) {/* no setup needed */}
-AfterEach(StringTests) {/* no cleanup needed */}
+Describe(Strings);
+BeforeEach(Strings) {/* no setup needed */}
+AfterEach(Strings) {/* no cleanup needed */}
 
-Ensure(StringTests, keeps_proper_value) {
+Ensure(Strings, should_keeps_proper_value) {
     Pubnub::String ctor("test");
     Pubnub::String assign = "test";
 
@@ -16,7 +16,7 @@ Ensure(StringTests, keeps_proper_value) {
     assert_string_equal(assign.c_str(), "test");
 }
 
-Ensure(StringTests, concatenate) {
+Ensure(Strings, should_concatenate) {
     Pubnub::String str1("test");
     Pubnub::String str2("concatenate");
     Pubnub::String str3("test");
@@ -28,7 +28,7 @@ Ensure(StringTests, concatenate) {
     assert_string_equal(str3.c_str(), "testconcatenate");
 }
 
-Ensure(StringTests, compare) {
+Ensure(Strings, should_compare) {
     Pubnub::String str1("test");
     Pubnub::String str2("test");
 
@@ -37,26 +37,26 @@ Ensure(StringTests, compare) {
     assert_string_equal(str1.c_str(), str2.c_str());
 }
 
-Ensure(StringTests, std_string) {
+Ensure(Strings, should_work_with_std_string) {
     Pubnub::String sut("test");
     std::string std= sut.to_std_string();
 
     assert_string_equal(std.c_str(), "test");
 }
 
-Ensure(StringTests, lenght) {
+Ensure(Strings, should_know_its_lenght) {
     Pubnub::String sut("test");
 
     assert_equal(sut.length(), 4);
 }
 
-Ensure(StringTests, capacity) {
+Ensure(Strings, should_know_its_capacity) {
     Pubnub::String sut("test");
 
     assert_equal(sut.capacity(), 4);
 }
 
-Ensure(StringTests, clear) {
+Ensure(Strings, shouls_clear_itself) {
     Pubnub::String sut("test");
 
     sut.clear();
@@ -66,7 +66,7 @@ Ensure(StringTests, clear) {
     assert_equal(sut.capacity(), 4);
 }
 
-Ensure(StringTests, erase) {
+Ensure(Strings, should_erase) {
     Pubnub::String sut("test");
 
     sut.erase(0, 1);
@@ -76,7 +76,7 @@ Ensure(StringTests, erase) {
     assert_equal(sut.capacity(), 4);
 }
 
-Ensure(StringTests, insert) {
+Ensure(Strings, should_insert) {
     Pubnub::String sut("test");
 
     sut.insert(1, 'i');
@@ -84,7 +84,7 @@ Ensure(StringTests, insert) {
     assert_string_equal(sut.c_str(), "tiest");
 }
 
-Ensure(StringTests, reserve) {
+Ensure(Strings, should_reserve) {
     Pubnub::String sut;
 
     sut.reserve(10);
@@ -92,7 +92,7 @@ Ensure(StringTests, reserve) {
     assert_equal(sut.capacity(), 10);
 }
 
-Ensure(StringTests, shrink) {
+Ensure(Strings, should_shrink) {
     Pubnub::String sut;
 
     sut.reserve(10);
@@ -104,14 +104,14 @@ Ensure(StringTests, shrink) {
     assert_equal(sut.capacity(), 4);
 }
 
-Ensure(StringTests, find) {
+Ensure(Strings, should_find) {
     Pubnub::String sut("test");
 
     assert_equal(sut.find("es"), 1);
     assert_equal(sut.find("shouldn't find me"), Pubnub::String::npos);
 }
 
-Ensure(StringTests, replace) {
+Ensure(Strings, should_replace) {
     Pubnub::String sut("Hello, world!");
 
     sut.replace(7, 5, "Universe");
@@ -119,7 +119,7 @@ Ensure(StringTests, replace) {
     assert_string_equal(sut.c_str(), "Hello, Universe!");
 }
 
-Ensure(StringTests, substring) {
+Ensure(Strings, should_substring) {
     Pubnub::String sut("Hello, world!");
 
     Pubnub::String world = sut.substring(7, 5);
@@ -130,7 +130,7 @@ Ensure(StringTests, substring) {
     assert_string_equal(empty.c_str(), nullptr);
 }
 
-Ensure(StringTests, iterators) {
+Ensure(Strings, should_work_with_iterators) {
     Pubnub::String sut("Hello, world!");
 
     int count_of_chars = 0;
