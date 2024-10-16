@@ -159,8 +159,6 @@ add_executable(pubnub-chat-example example/main.cpp)
 
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
-set(RUN_TESTS ON)
-
 if(${RUN_TESTS})
     message(STATUS "Running tests")
     enable_testing()
@@ -179,6 +177,6 @@ if(${RUN_TESTS})
         add_test(NAME ${name} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/lib${name}.dylib)
     endfunction()
 
-    test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/string_unit.cpp)
-    test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/json_unit.cpp)
+    test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/string_unit.cpp)
+    test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)
 endif()
