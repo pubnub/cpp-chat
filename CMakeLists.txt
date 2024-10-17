@@ -163,6 +163,8 @@ if(${RUN_TESTS})
     message(STATUS "Running tests")
     enable_testing()
 
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test)
+
     # TODO: use installed runner instead (at least for MacOS there is an issue with RPATH)
     if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cgreen)
         message(FATAL_ERROR "CGreen not found! Clone the repository and build it inside the root of the project!")
@@ -179,4 +181,5 @@ if(${RUN_TESTS})
 
     test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/string_unit.cpp)
     test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)
+    test_suite(typing-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/typing_unit.cpp)
 endif()

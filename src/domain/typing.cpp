@@ -1,5 +1,7 @@
 #include "typing.hpp"
 #include "domain/json.hpp"
+#include "string.hpp"
+#include <iostream>
 #include <optional>
 
 void Typing::start() {
@@ -20,7 +22,10 @@ void Typing::add_typing_indicator(const Pubnub::String& user_id) {
 
 void Typing::remove_typing_indicator(const Pubnub::String& user_id) {
     this->typing_indicators.erase(
-            std::remove(this->typing_indicators.begin(), this->typing_indicators.end(), user_id),
+            std::remove_if(
+                this->typing_indicators.begin(),
+                this->typing_indicators.end(),
+                [&user_id](const auto other) {return user_id == other;}),
             this->typing_indicators.end()
     );
 }
@@ -30,7 +35,11 @@ const std::vector<Pubnub::String>& Typing::get_typing_indicators() const {
 }
 
 bool Typing::contains_typing_indicator(const Pubnub::String& user_id) const {
-    return std::find(this->typing_indicators.begin(), this->typing_indicators.end(), user_id) != this->typing_indicators.end();
+    return std::find_if(
+            this->typing_indicators.begin(),
+            this->typing_indicators.end(),
+            [&user_id](const auto other) {return user_id == other;}
+        ) != this->typing_indicators.end();
 }
 
 Pubnub::String Typing::payload(const Pubnub::String& user_id, bool is_typing) {
