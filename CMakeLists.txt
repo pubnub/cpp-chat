@@ -97,7 +97,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -183,4 +184,6 @@ if(${RUN_TESTS})
     test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)
     test_suite(typing-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/typing_unit.cpp)
     test_suite(presence-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/presence_unit.cpp)
+    test_suite(timetoken-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/timetoken_unit.cpp)
+    test_suite(restrictions-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/restrictions_unit.cpp)
 endif()
