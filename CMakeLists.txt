@@ -21,6 +21,8 @@ option(DEBUG "Enable debugging" OFF)
 if(${DEBUG})
     message(STATUS "Enabling debugging")
     set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 option(ENABLE_C_ABI "Enable C ABI" OFF)
