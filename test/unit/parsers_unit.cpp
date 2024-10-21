@@ -1,6 +1,7 @@
 #include "domain/parsers.hpp"
 #include "cgreen/cgreen.h"
 #include "cgreen/unit.h"
+#include "enums.hpp"
 #include "pubnub_helper.h"
 #include "test_helpers.hpp"
 
@@ -107,7 +108,7 @@ Ensure(Parser, should_validate_if_json_contains_presence) {
     assert_false(not_presence);
 }
 
-Ensure(Parser, should_parse_json_to_message) {
+Ensure(Parser, should_parse_pn_message_to_message) {
     pubnub_v2_message pn_message;
     pn_message.tt = {const_cast<char*>("12345678901234567"), 17};
     pn_message.payload = {const_cast<char*>("{\"text\":\"Hello\", \"type\":\"text\"}"), 31};
@@ -125,4 +126,26 @@ Ensure(Parser, should_parse_json_to_message) {
     assert_string_equal(entity.channel_id.c_str(), "channel");
     assert_string_equal(entity.user_id.c_str(), "publisher");
     assert_string_equal(entity.meta.c_str(), "{\"metadata\":\"data\"}");
+}
+
+Ensure(Parser, should_parse_pn_message_to_message_update) {
+    pubnub_v2_message pn_message;
+    pn_message.tt = {const_cast<char*>("12345678901234567"), 17};
+    pn_message.payload = {const_cast<char*>("{\"source\":\"actions\", \"data\":{\"type\":\"edited\", \"value\":\"NEW TEXT\", \"uuid\":\"publisher\", \"actionTimetoken\":\"99999999999999999\",\"messageTimetoken\":\"12345678901234567\"}}"), 164};
+    pn_message.channel = {const_cast<char*>("channel"), 7};
+    pn_message.publisher = {const_cast<char*>("publisher"), 9};
+    pn_message.metadata = {const_cast<char*>("{\"metadata\":\"data\"}"), 19};
+
+    auto message = Parsers::PubnubJson::to_message_update(pn_message);
+    auto timetoken = message.first;
+    auto entity = message.second;
+
+    assert_string_equal(timetoken.c_str(), "12345678901234567");
+    assert_string_equal(entity.current_text().c_str(), "NEW TEXT");
+    assert_string_equal(entity.channel_id.c_str(), "channel");
+    assert_string_equal(entity.user_id.c_str(), "publisher");
+    assert_string_equal(entity.meta.c_str(), "{\"metadata\":\"data\"}");
+    assert_string_equal(entity.message_actions[0].timetoken.c_str(), "99999999999999999");
+    assert_string_equal(entity.message_actions[0].user_id.c_str(), "publisher");
+    assert_that(entity.message_actions[0].type, is_equal_to(Pubnub::pubnub_message_action_type::PMAT_Edited));
 }
