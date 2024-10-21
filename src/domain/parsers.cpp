@@ -193,6 +193,24 @@ Pubnub::String Parsers::PubnubJson::membership_custom_field(Pubnub::String messa
 }
 
 bool Parsers::PubnubJson::contains_parent_message(Pubnub::String message_json_string) {
-    auto message_json = Json::parse(message_json_string)["data"];
+    if (message_json_string.empty())
+    {
+        return false;
+    }
+
+    auto parsed = Json::parse(message_json_string);
+
+    if (parsed.is_null() || !parsed.contains("data"))
+    {
+        return false;
+    }
+
+    auto message_json = parsed["data"];
+
+    if (message_json.is_null())
+    {
+        return false;
+    }
+
     return message_json.contains("parentMessage");
 }

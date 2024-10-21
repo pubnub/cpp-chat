@@ -149,3 +149,122 @@ Ensure(Parser, should_parse_pn_message_to_message_update) {
     assert_string_equal(entity.message_actions[0].user_id.c_str(), "publisher");
     assert_that(entity.message_actions[0].type, is_equal_to(Pubnub::pubnub_message_action_type::PMAT_Edited));
 }
+
+Ensure(Parser, should_parse_pn_message_to_channel) {
+    pubnub_v2_message pn_message;
+    pn_message.tt = {const_cast<char*>("12345678901234567"), 17};
+    pn_message.payload = {const_cast<char*>("{\"data\": {\"id\":\"channel\",\"name\":\"name\",\"description\":\"description\",\"custom\":{\"custom\":\"data\"},\"updated\":\"updated\",\"status\":\"status\",\"type\":\"type\"}}"), 163};
+    pn_message.channel = {const_cast<char*>("channel"), 6};
+    pn_message.publisher = {const_cast<char*>("publisher"), 9};
+    pn_message.metadata = {const_cast<char*>("{\"metadata\":\"data\"}"), 19};
+
+    auto channel = Parsers::PubnubJson::to_channel(pn_message);
+
+    auto channel_id = channel.first;
+    auto entity = channel.second;
+
+    assert_string_equal(channel_id.c_str(), "channel");
+    assert_string_equal(entity.channel_name.c_str(), "name");
+    assert_string_equal(entity.description.c_str(), "description");
+    assert_string_equal(entity.custom_data_json.c_str(), "{\"custom\":\"data\"}");
+    assert_string_equal(entity.updated.c_str(), "updated");
+    assert_string_equal(entity.status.c_str(), "status");
+    assert_string_equal(entity.type.c_str(), "type");
+}
+
+Ensure(Parser, should_parse_pn_message_to_user) {
+    pubnub_v2_message pn_message;
+    pn_message.tt = {const_cast<char*>("12345678901234567"), 17};
+    pn_message.payload = {const_cast<char*>("{\"data\": {\"id\":\"user\",\"name\":\"name\",\"externalId\":\"id\",\"profileUrl\":\"profile\",\"email\":\"email\",\"custom\":{\"custom\":\"data\"},\"status\":\"status\",\"type\":\"type\"}}"), 163};
+    pn_message.channel = {const_cast<char*>("channel"), 6};
+    pn_message.publisher = {const_cast<char*>("publisher"), 9};
+    pn_message.metadata = {const_cast<char*>("{\"metadata\":\"data\"}"), 19};
+
+    auto user = Parsers::PubnubJson::to_user(pn_message);
+
+    auto user_id = user.first;
+    auto entity = user.second;
+
+    assert_string_equal(user_id.c_str(), "user");
+    assert_string_equal(entity.user_name.c_str(), "name");
+    assert_string_equal(entity.external_id.c_str(), "id");
+    assert_string_equal(entity.profile_url.c_str(), "profile");
+    assert_string_equal(entity.email.c_str(), "email");
+    assert_string_equal(entity.custom_data_json.c_str(), "{\"custom\":\"data\"}");
+    assert_string_equal(entity.status.c_str(), "status");
+    assert_string_equal(entity.type.c_str(), "type");
+}
+
+Ensure(Parser, should_parse_membership_from_string) {
+    auto membership = Parsers::PubnubJson::membership_from_string("{\"data\":{\"custom\":{\"custom\":\"data\"}}}");
+
+    assert_string_equal(membership.custom_field.c_str(), "{\"custom\":\"data\"}");
+}
+
+Ensure(Parser, should_parse_payload_from_pn_message) {
+    pubnub_v2_message pn_message;
+    pn_message.payload = {const_cast<char*>("{\"text\":\"Hello\", \"type\":\"text\"}"), 31};
+
+    auto payload = Parsers::PubnubJson::to_string(pn_message);
+
+    assert_string_equal(payload.c_str(), "{\"text\":\"Hello\", \"type\":\"text\"}");
+}
+
+Ensure(Parser, should_parse_pn_message_to_event) {
+    pubnub_v2_message pn_message;
+    pn_message.tt = {const_cast<char*>("12345678901234567"), 17};
+    pn_message.payload = {const_cast<char*>("{\"type\":\"mention\"}"), 18};
+    pn_message.channel = {const_cast<char*>("channel"), 7};
+    pn_message.publisher = {const_cast<char*>("publisher"), 9};
+    pn_message.metadata = {const_cast<char*>("{\"metadata\":\"data\"}"), 19};
+
+    auto event = Parsers::PubnubJson::to_event(pn_message);
+
+    assert_string_equal(event.timetoken.c_str(), "12345678901234567");
+    assert_that(event.type, is_equal_to(Pubnub::pubnub_chat_event_type::PCET_MENTION));
+    assert_string_equal(event.channel_id.c_str(), "channel");
+    assert_string_equal(event.user_id.c_str(), "publisher");
+    assert_string_equal(event.payload.c_str(), "{\"type\":\"mention\"}");
+}
+
+Ensure(Parser, should_parse_pn_message_to_events_type) {
+    pubnub_v2_message pn_message;
+    pn_message.payload = {const_cast<char*>("{\"type\":\"mention\"}"), 18};
+
+    auto event_type = Parsers::PubnubJson::event_type("{\"type\":\"mention\"}");
+
+    assert_string_equal(event_type.c_str(), "mention");
+}
+
+Ensure(Parser, should_parse_message_update_timetoken) {
+    auto timetoken = Parsers::PubnubJson::message_update_timetoken("{\"data\":{\"messageTimetoken\":\"12345678901234567\"}}");
+
+    assert_string_equal(timetoken.c_str(), "12345678901234567");
+}
+
+Ensure(Parser, should_parse_membership_channel) {
+    auto channel_id = Parsers::PubnubJson::membership_channel("{\"data\":{\"channel\":{\"id\":\"channel\"}}}");
+
+    assert_string_equal(channel_id.c_str(), "channel");
+}
+
+Ensure(Parser, should_parse_membership_user) {
+    auto user_id = Parsers::PubnubJson::membership_user("{\"data\":{\"uuid\":{\"id\":\"user\"}}}");
+
+    assert_string_equal(user_id.c_str(), "user");
+}
+
+Ensure(Parser, should_parse_membership_custom_field) {
+    auto custom_field = Parsers::PubnubJson::membership_custom_field("{\"custom\":\"data\"}");
+
+    assert_string_equal(custom_field.c_str(), "data");
+}
+
+Ensure(Parser, should_validate_if_json_contains_parent_message) {
+    auto parent_message = Parsers::PubnubJson::contains_parent_message("{\"data\":{\"parentMessage\":\"12345678901234567\"}}");
+    auto not_parent_message = Parsers::PubnubJson::contains_parent_message("{\"text\":\"Hello\", \"type\":\"text\"}");
+
+    assert_true(parent_message);
+    assert_false(not_parent_message);
+}
+
