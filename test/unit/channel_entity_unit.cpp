@@ -2,7 +2,6 @@
 #include "cgreen/cgreen.h"
 #include "cgreen/unit.h"
 #include "test_helpers.hpp"
-#include <iostream>
 
 using namespace cgreen;
 

@@ -140,6 +140,10 @@ const char* String::c_str() const {
     return this->string;
 }
 
+char* String::c_str() {
+    return this->string;
+}
+
 std::string String::to_std_string() const {
     return std::string(this->string);
 }
