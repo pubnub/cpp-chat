@@ -40,8 +40,18 @@ bool UserEntity::is_active(int activity_interval) const
 {
     auto nanoseconds = Timetoken::now_numeric();
 
+    if(custom_data_json.empty())
+    {
+        return false;
+    }
+
     Json custom_json = Json::parse(this->custom_data_json);
     auto last_active_timestamp = custom_json.get_string("lastActiveTimestamp");
+
+    if(!last_active_timestamp.has_value())
+    {
+        return false;
+    }
 
     const long long milis_to_nanos = 1000000;
 
@@ -51,6 +61,11 @@ bool UserEntity::is_active(int activity_interval) const
 
 void UserEntity::set_last_active_timestamp(Pubnub::String timestamp)
 {
+    if(custom_data_json.empty())
+    {
+        custom_data_json = "{}";
+    }
+
     Json custom_json = Json::parse(custom_data_json);
     custom_json.insert_or_update("lastActiveTimestamp", timestamp);
     custom_data_json = custom_json.dump();
@@ -58,6 +73,11 @@ void UserEntity::set_last_active_timestamp(Pubnub::String timestamp)
 
 std::optional<Pubnub::String> UserEntity::get_last_active_timestamp() const
 {
+    if(custom_data_json.empty())
+    {
+        return std::nullopt;
+    }
+
     Json custom_json = Json::parse(custom_data_json);
     return custom_json.get_string("lastActiveTimestamp");
 }

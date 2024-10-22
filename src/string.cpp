@@ -140,6 +140,10 @@ const char* String::c_str() const {
     return this->string;
 }
 
+char* String::c_str() {
+    return this->string;
+}
+
 std::string String::to_std_string() const {
     return std::string(this->string);
 }
@@ -240,7 +244,6 @@ std::size_t String::find(const char* string, std::size_t pos) const {
     return String::npos;
 }
 
-// TODO: this function shouldn't be used until tested @KGronek!
 void String::replace(std::size_t pos, std::size_t count, const char* string) {
     if (pos >= this->len) {
         return;
@@ -286,18 +289,14 @@ String String::substring(std::size_t pos, std::size_t count) const {
         new_len = this->len - pos;
     }
 
-    // TODO: no additional allocation should be done!
-    auto new_string = new char[new_len + 1];
-    for (auto i = 0; i < new_len; i++) {
-        new_string[i] = this->string[pos + i];
+    String new_string;
+    new_string.reserve(new_len);
+
+    for (auto i = pos; i < new_len + pos; i++) {
+        new_string.begin()[i - pos] = this->string[i];
     }
-    new_string[new_len] = '\0';
 
-    auto result(new_string);
-
-    delete[] new_string;
-
-    return result;
+    return new_string;
 }
 
 void String::grow_if_needed(std::size_t new_len) {

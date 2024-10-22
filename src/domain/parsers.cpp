@@ -126,8 +126,8 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
             {Pubnub::MessageAction{
             Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
                 json_field_from_pn_block(pn_message.payload, "data", "value"),
-                json_field_from_pn_block(pn_message.payload, "data", "uuid"),
-                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken")
+                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
+                json_field_from_pn_block(pn_message.payload, "data", "uuid")
             }}
         }
     );
@@ -193,6 +193,24 @@ Pubnub::String Parsers::PubnubJson::membership_custom_field(Pubnub::String messa
 }
 
 bool Parsers::PubnubJson::contains_parent_message(Pubnub::String message_json_string) {
-    auto message_json = Json::parse(message_json_string)["data"];
+    if (message_json_string.empty())
+    {
+        return false;
+    }
+
+    auto parsed = Json::parse(message_json_string);
+
+    if (parsed.is_null() || !parsed.contains("data"))
+    {
+        return false;
+    }
+
+    auto message_json = parsed["data"];
+
+    if (message_json.is_null())
+    {
+        return false;
+    }
+
     return message_json.contains("parentMessage");
 }
