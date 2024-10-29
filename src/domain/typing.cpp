@@ -1,7 +1,6 @@
 #include "typing.hpp"
 #include "domain/json.hpp"
 #include "string.hpp"
-#include <iostream>
 #include <optional>
 
 void Typing::start() {
