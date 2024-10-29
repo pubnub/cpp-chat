@@ -23,9 +23,7 @@ class Json {
         Json(Pubnub::String json);
         Json(nlohmann::json json);
         static Json parse(Pubnub::String json);
-        static Json array();
         static Json object();
-        void push_back(Json&& val);
 
         Json operator[](Pubnub::String key) const;
         Json operator[](int index) const;
@@ -33,7 +31,7 @@ class Json {
         operator Pubnub::String() const;
         
         bool contains(Pubnub::String key) const;
-        bool is_null() const;
+        bool is_null() const noexcept;
         Pubnub::String dump() const;
         std::optional<Pubnub::String> get_string(Pubnub::String key) const;
         std::optional<bool> get_bool(Pubnub::String key) const;

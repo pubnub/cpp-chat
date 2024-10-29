@@ -99,7 +99,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/presence.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -163,14 +164,32 @@ target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
 if(${RUN_TESTS})
     message(STATUS "Running tests")
-
-    find_package(cgreen REQUIRED)
     enable_testing()
 
-    include_directories(${CGREEN_INCLUDE_DIRS})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test)
 
-    add_library(pubnub-test-string SHARED test/string_unit.c)
-    target_link_libraries(pubnub-test-string PRIVATE pubnub-chat ${CGREEN_LIBRARIES})
+    # TODO: use installed runner instead (at least for MacOS there is an issue with RPATH)
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cgreen)
+        message(FATAL_ERROR "CGreen not found! Clone the repository and build it inside the root of the project!")
+    endif()
 
-    add_test(NAME pubnub-test-string COMMAND ${CGREEN_EXECUTABLE} pubnub-test-string)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cgreen/include)
+
+    function(test_suite name source)
+        add_library(${name} SHARED ${source})
+        target_link_libraries(${name} PRIVATE pubnub-chat ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/src/libcgreen.dylib)
+
+        add_test(NAME ${name} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/lib${name}.dylib)
+    endfunction()
+
+    test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/string_unit.cpp)
+    test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)
+    test_suite(typing-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/typing_unit.cpp)
+    test_suite(presence-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/presence_unit.cpp)
+    test_suite(timetoken-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/timetoken_unit.cpp)
+    test_suite(restrictions-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/restrictions_unit.cpp)
+    test_suite(user-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/user_entity_unit.cpp)
+    test_suite(channel-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/channel_entity_unit.cpp)
+    test_suite(prarsers-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/parsers_unit.cpp)
+    test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
 endif()

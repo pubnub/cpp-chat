@@ -12,16 +12,8 @@ Json Json::parse(Pubnub::String json) {
     return Json(json);
 }
 
-Json Json::array() {
-    return Json(nlohmann::json::array());
-}
-
 Json Json::object() {
     return Json(nlohmann::json::object());
-}
-
-void Json::push_back(Json&& val){
-    this->json.push_back(val.json);
 }
 
 Json Json::operator[](Pubnub::String key) const {
@@ -46,7 +38,7 @@ bool Json::contains(Pubnub::String key) const {
     return this->json.contains(key);
 }
 
-bool Json::is_null() const {
+bool Json::is_null() const noexcept {
     return this->json.is_null();
 }
 
