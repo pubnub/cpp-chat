@@ -46,7 +46,9 @@ if(WIN32 OR WIN64 OR MSVC)
 endif()
 
 # TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
-set(PUBNUB_SDK_VERSION_SUFFIX "/CA-SDKC++/${PROJECT_VERSION}")
+#set(PUBNUB_SDK_VERSION_SUFFIX "\\\"/CA-SDKC++/${PROJECT_VERSION}\\\"")
+#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DPUBNUB_SDK_VERSION_SUFFIX=\\\"/CA-UNREAL/x.x.x\\\")
+
 
 FetchContent_Declare(
   pubnub
@@ -58,6 +60,8 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(pubnub)
+
+target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/x.x.x\")
 
 FetchContent_Declare(
   json
@@ -100,7 +104,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -112,10 +117,12 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/access_manager_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/draft_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_draft_dao.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
@@ -192,4 +199,8 @@ if(${RUN_TESTS})
     test_suite(channel-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/channel_entity_unit.cpp)
     test_suite(prarsers-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/parsers_unit.cpp)
     test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
+    test_suite(message-draft-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/message_draft_entity_unit.cpp)
+    
+    #TODO: e/e
+    #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
 endif()
