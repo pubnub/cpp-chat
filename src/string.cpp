@@ -1,5 +1,4 @@
 #include "string.hpp"
-#include <iostream>
 #include <string>
 
 using namespace Pubnub;
@@ -256,13 +255,10 @@ void String::replace(std::size_t pos, std::size_t count, const char* string) {
     if (string_len > count) {
         for(auto i = new_len; i >= pos + string_len; i--) {
             this->string[i] = this->string[i - string_len + count];
-            this->string[i - string_len + count] = '~';
-            std::cout << "~~~" << this->string << std::endl;
         }
 
         for (auto i = 0; i < string_len; i++) {
             this->string[pos + i] = string[i];
-            std::cout << "~~~" << this->string << std::endl;
         }
     } else {
         for (auto i = 0; i < string_len; i++) {

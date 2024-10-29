@@ -48,8 +48,8 @@ namespace Pubnub
 
     PN_CHAT_EXPORT struct SuggestedMention {
         std::size_t offset;
-        Pubnub::String replaceFrom;
-        Pubnub::String replaceTo;
+        Pubnub::String replace_from;
+        Pubnub::String replace_to;
         Pubnub::MentionTarget target;
     };
 
