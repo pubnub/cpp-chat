@@ -19,3 +19,14 @@ MessageDraftEntity MessageDraftEntity::insert_text(std::size_t position, const P
     
     return MessageDraftEntity{new_value, new_mentions};
 }
+
+MessageDraftEntity MessageDraftEntity::remove_text(std::size_t position, std::size_t length) const {
+    auto new_value = this->value;
+    auto new_mentions = this->mentions;
+
+    // TODO: new_mentions
+
+    new_value.erase(position, length);
+
+    return MessageDraftEntity{new_value, new_mentions};
+}

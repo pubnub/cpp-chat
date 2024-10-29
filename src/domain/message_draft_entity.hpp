@@ -22,6 +22,7 @@ struct MessageDraftEntity {
     std::vector<MessageDraftMentionEntity> mentions = {};
 
     MessageDraftEntity insert_text(std::size_t position, const Pubnub::String& text_to_insert) const; 
+    MessageDraftEntity remove_text(std::size_t position, std::size_t length) const;
 };
 
 #endif // PN_CHAT_MESSAGE_DRAFT_ENTITY_HPP

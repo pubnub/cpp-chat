@@ -25,3 +25,12 @@ Ensure(MessageDraftEntities, should_append_plain_text) {
 
     assert_string_equal(result.value.c_str(), "Hello World");
 }
+
+Ensure(MessageDraftEntities, should_remove_plain_text) {
+    MessageDraftEntity sut;
+
+    auto result = sut.insert_text(0, "Hello World")
+        .remove_text(5, 6);
+
+    assert_string_equal(result.value.c_str(), "Hello");
+}
