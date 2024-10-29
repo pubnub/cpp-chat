@@ -10,6 +10,11 @@ MessageDraftEntity MessageDraftEntity::insert_text(std::size_t position, const P
 
     // TODO: mentions
 
+    if (new_value.empty()) {
+        new_value = text;
+        return MessageDraftEntity{new_value, new_mentions};
+    }
+
     new_value.replace(position, 0, text);
     
     return MessageDraftEntity{new_value, new_mentions};
