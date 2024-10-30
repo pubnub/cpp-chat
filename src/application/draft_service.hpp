@@ -9,8 +9,8 @@ class DraftService {
         DraftService() = default;
         ~DraftService() = default;
 
-        MessageDraftDAO insert_text_to_message(const MessageDraftDAO& base, std::size_t position, const Pubnub::String& text_to_insert); 
-        MessageDraftDAO remove_text_from_message(const MessageDraftDAO& base, std::size_t position, std::size_t length);
+        void insert_text_to_message(MessageDraftDAO& base, std::size_t position, const Pubnub::String& text_to_insert); 
+        void remove_text_from_message(MessageDraftDAO& base, std::size_t position, std::size_t length);
 };
 
 #endif // PN_CHAT_DRAFT_SERVICE_HPP

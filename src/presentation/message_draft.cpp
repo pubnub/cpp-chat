@@ -11,17 +11,13 @@ value(std::make_unique<MessageDraftDAO>()),
 draft_service(std::make_unique<DraftService>()) {}
 
 void MessageDraft::insert_text(std::size_t position, const Pubnub::String& text) {
-    this->value.reset(new MessageDraftDAO(
-                this->draft_service->insert_text_to_message(*this->value, position, text)));
-    channel.start_typing();
-    this->fire_message_elements_changed();
+    this->channel.start_typing();
+    this->draft_service->insert_text_to_message(*this->value, position, text);
 }
 
 void MessageDraft::remove_text(std::size_t position, std::size_t length) {
-    this->value.reset(new MessageDraftDAO(
-                this->draft_service->remove_text_from_message(*this->value, position, length)));
     this->channel.start_typing();
-    this->fire_message_elements_changed();
+    this->draft_service->remove_text_from_message(*this->value, position, length);
 }
 
 void MessageDraft::send(SendTextParams send_params) {
@@ -29,6 +25,3 @@ void MessageDraft::send(SendTextParams send_params) {
     this->channel.send_text(this->value->get_entity().value, send_params);
 }
 
-void MessageDraft::fire_message_elements_changed() {
-    // TODO: implement
-}

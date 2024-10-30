@@ -67,7 +67,6 @@ namespace Pubnub
 
         private:
             MessageDraft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& draft_config);
-            void fire_message_elements_changed();
 
             Pubnub::Channel channel;
             MessageDraftConfig draft_config;
