@@ -15,6 +15,7 @@ class MessageDraftDAO {
         MessageDraftEntity get_entity() const;
         void update_entity(const MessageDraftEntity& entity);
 
+        // TODO: Callback stop?
         void add_callback(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> callback);
         void add_callback(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> callback);
 

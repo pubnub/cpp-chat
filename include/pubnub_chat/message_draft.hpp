@@ -62,6 +62,10 @@ namespace Pubnub
 
             void insert_text(std::size_t position, const Pubnub::String& text);
             void remove_text(std::size_t position, std::size_t length);
+            void insert_suggested_mention(const SuggestedMention& suggested_mention, const Pubnub::String& text);
+            void add_mention(std::size_t position, std::size_t length, const Pubnub::MentionTarget& target);
+            void remove_mention(std::size_t position);
+            void update(const Pubnub::String& text);
             void send(SendTextParams send_params = SendTextParams());
 
 

@@ -7,3 +7,5 @@ void DraftService::insert_text_to_message(MessageDraftDAO& dao, std::size_t posi
 void DraftService::remove_text_from_message(MessageDraftDAO& dao, std::size_t position, std::size_t length) {
     dao.update_entity(dao.get_entity().remove_text(position, length));
 }
+
+
