@@ -172,3 +172,39 @@ Ensure(MessageDraftEntities, should_validate_suggested_mention) {
     assert_that(sut.validate_suggested_mention({6, "@user2", "@some_uuid", {"user2", MessageDraftMentionTargetEntity::Type::USER}}), is_false);
 }
 
+Ensure(MessageDraftEntities, should_properly_update_text) {
+    MessageDraftEntity sut;
+    sut.value = "Hello @user1 and @user2, I hope you are doing well. I wanted to tell you that I am going to be in town next week. Let's meet for a coffee! hello @user0 !";
+
+    auto result = sut.update("Hello my good friend @user1 and my darling @user3, I wanted to inform you that I am going to be in town next week. Let's meet for a good coffee! @user0 hello!");
+
+    assert_string_equal(result.value.c_str(), "Hello my good friend @user1 and my darling @user3, I wanted to inform you that I am going to be in town next week. Let's meet for a good coffee! @user0 hello!");
+}
+
+Ensure(MessageDraftEntities, should_suggest_mentions) {
+    MessageDraftEntity sut;
+    sut.value = "@Hello @user1 @user2 on #channel1 !";
+    sut.mentions = {
+        {14, 6, {"user2", MessageDraftMentionTargetEntity::Type::USER}},
+    };
+
+    auto result = sut.suggest_raw_mentions();
+
+    assert_that(result.size(), is_equal_to(3));
+
+    assert_string_equal(result[0].target.target.c_str(), "@Hello");
+    assert_that(result[0].start, is_equal_to(0));
+    assert_that(result[0].length, is_equal_to(6));
+    assert_that(result[0].target.type, is_equal_to(MessageDraftMentionTargetEntity::Type::USER));
+
+    assert_string_equal(result[1].target.target.c_str(), "@user1");
+    assert_that(result[1].start, is_equal_to(7));
+    assert_that(result[1].length, is_equal_to(6));
+    assert_that(result[1].target.type, is_equal_to(MessageDraftMentionTargetEntity::Type::USER));
+
+    assert_string_equal(result[2].target.target.c_str(), "#channel1");
+    assert_that(result[2].start, is_equal_to(24));
+    assert_that(result[2].length, is_equal_to(9));
+    assert_that(result[2].target.type, is_equal_to(MessageDraftMentionTargetEntity::Type::CHANNEL));
+}
+

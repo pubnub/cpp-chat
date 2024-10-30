@@ -53,8 +53,7 @@ namespace Pubnub
         Pubnub::MentionTarget target;
     };
 
-    PN_CHAT_EXPORT class MessageDraft
-    {
+    PN_CHAT_EXPORT class MessageDraft {
         public:
             PN_CHAT_EXPORT enum class UserSuggestionsSource {
                 CHANNELS,

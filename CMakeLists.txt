@@ -74,12 +74,26 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(json)
 
+FetchContent_Declare(
+    diff-match-patch
+    GIT_REPOSITORY https://github.com/leutloff/diff-match-patch-cpp-stl
+    GIT_TAG ba3bbe3cdba5d461e241b756a50085c3602a3b5a
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS ON 
+    SYSTEM 
+)
+
+#TODO no need to build tests
+FetchContent_MakeAvailable(diff-match-patch)
+
 include_directories(${pubnub_SOURCE_DIR}/posix)
 include_directories(${pubnub_SOURCE_DIR}/core)
 include_directories(${pubnub_SOURCE_DIR})
 
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
+
+include_directories(${diff-match-patch_SOURCE_DIR})
 
 include_directories(${CURRENT_SOURCE_DIR}/include)
 
@@ -188,6 +202,8 @@ if(${RUN_TESTS})
 
         add_test(NAME ${name} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/lib${name}.dylib)
     endfunction()
+
+    add_test(NAME diff-match-patch-test COMMAND ${diff-match-patch_SOURCE_DIR}/../diffmatchpatch-build/diff_match_patch_test_string)
 
     test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/string_unit.cpp)
     test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)

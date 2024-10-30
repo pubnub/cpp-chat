@@ -3,6 +3,11 @@
 
 #include "string.hpp"
 
+enum MessageDraftMentionSuggestionScope {
+    CHANNEL,
+    GLOBAL
+};
+
 struct MessageDraftMentionTargetEntity {
     enum class Type {
         USER,
@@ -12,6 +17,10 @@ struct MessageDraftMentionTargetEntity {
 
     Pubnub::String target;
     Type type;
+
+    static MessageDraftMentionTargetEntity user(const Pubnub::String& user_id);
+    static MessageDraftMentionTargetEntity channel(const Pubnub::String& channel);
+    static MessageDraftMentionTargetEntity url(const Pubnub::String& url);
 };
 
 struct MessageDraftMentionEntity {
@@ -40,7 +49,11 @@ struct MessageDraftEntity {
     MessageDraftEntity add_mention(std::size_t start, std::size_t length, const MessageDraftMentionTargetEntity& target) const;
     MessageDraftEntity remove_mention(std::size_t start) const;
 
+    MessageDraftEntity update(const Pubnub::String& text) const;
+
     MessageDraftEntity insert_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention, const Pubnub::String& text) const;
+
+    std::vector<MessageDraftMentionEntity> suggest_raw_mentions() const;
 
     bool validate_mentions() const;
     bool validate_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention) const;

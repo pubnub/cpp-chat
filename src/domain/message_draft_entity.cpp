@@ -1,5 +1,24 @@
 #include "message_draft_entity.hpp"
 #include <algorithm>
+#include <iostream>
+#include <regex>
+#include "diff_match_patch.h"
+
+// TODO: this regex
+static std::regex user_mention_regex(R"""(((?=\s?)@[a-zA-Z0-9_]+))""");
+static std::regex channel_reference_regex(R"""(((?=\s?)#[a-zA-Z0-9_]+))""");
+
+MessageDraftMentionTargetEntity MessageDraftMentionTargetEntity::user(const Pubnub::String& user_id) {
+    return MessageDraftMentionTargetEntity{user_id, MessageDraftMentionTargetEntity::Type::USER};
+}
+
+MessageDraftMentionTargetEntity MessageDraftMentionTargetEntity::channel(const Pubnub::String& channel) {
+    return MessageDraftMentionTargetEntity{channel, MessageDraftMentionTargetEntity::Type::CHANNEL};
+}
+
+MessageDraftMentionTargetEntity MessageDraftMentionTargetEntity::url(const Pubnub::String& url) {
+    return MessageDraftMentionTargetEntity{url, MessageDraftMentionTargetEntity::Type::URL};
+}
 
 std::size_t MessageDraftMentionEntity::end_exclusive() const {
     return this->start + this->length;
@@ -102,6 +121,37 @@ MessageDraftEntity MessageDraftEntity::remove_mention(std::size_t start) const {
     return MessageDraftEntity{this->value, new_mentions};
 }
 
+
+MessageDraftEntity MessageDraftEntity::update(const Pubnub::String& text) const {
+    diff_match_patch<std::string> matcher;
+
+    auto diffs = matcher.diff_main(this->value, text);
+    matcher.diff_cleanupSemantic(diffs);
+    
+    size_t consumed = 0;
+
+    auto result = MessageDraftEntity{this->value, std::vector(this->mentions)};
+
+    std::for_each(diffs.begin(), diffs.end(), [&result, &consumed](const auto& action) {
+            switch(action.operation) {
+                case diff_match_patch<std::string>::Operation::DELETE:
+                    result = result.remove_text(consumed, action.text.length());
+                    break;
+
+                case diff_match_patch<std::string>::Operation::INSERT:
+                    result = result.insert_text(consumed, action.text);
+                    consumed += action.text.length();
+                    break;
+
+                case diff_match_patch<std::string>::Operation::EQUAL:
+                    consumed += action.text.length();
+                    break;
+            }
+    });
+
+    return result;
+}
+
 MessageDraftEntity MessageDraftEntity::insert_suggested_mention(
         const MessageDraftSuggestedMentionEntity& suggested_mention,
         const Pubnub::String& text)
@@ -109,6 +159,64 @@ const {
     return this->remove_text(suggested_mention.position, suggested_mention.replace_from.length())
         .insert_text(suggested_mention.position, text)
         .add_mention(suggested_mention.position, text.length(), suggested_mention.target);
+}
+
+std::vector<MessageDraftMentionEntity> MessageDraftEntity::suggest_raw_mentions() const {
+    auto std_value = this->value.to_std_string();
+
+    std::regex_token_iterator<std::string::iterator> regex_end;
+    std::regex_token_iterator<std::string::iterator> all_user_mentions(
+        std_value.begin(),
+        std_value.end(),
+        user_mention_regex
+    );
+
+    std::regex_token_iterator<std::string::iterator> all_channel_mentions(
+        std_value.begin(),
+        std_value.end(),
+        channel_reference_regex
+    );
+
+    std::vector<MessageDraftMentionEntity> user_mentions;
+    for (auto it = all_user_mentions; it != regex_end; it++) {
+        if (std::find_if(
+            this->mentions.begin(),
+            this->mentions.end(),
+            [it, &std_value](const auto& mention) {
+                return mention.start == it->first - std_value.begin();
+            }
+        ) == this->mentions.end()) {
+            user_mentions.push_back(MessageDraftMentionEntity{
+                static_cast<size_t>(it->first - std_value.begin()), 
+                it->str().length(),
+                MessageDraftMentionTargetEntity::user(it->str())
+            });
+        }
+    }
+
+    std::vector<MessageDraftMentionEntity> channel_mentions;
+    for (auto it = all_channel_mentions; it != regex_end; it++) {
+        if (std::find_if(
+            this->mentions.begin(),
+            this->mentions.end(),
+            [it, &std_value](const auto& mention) {
+                return mention.start == it->first - std_value.begin();
+            }
+        ) == this->mentions.end()) {
+            channel_mentions.push_back(MessageDraftMentionEntity{
+                static_cast<size_t>(it->first - std_value.begin()),
+                it->str().length(),
+                MessageDraftMentionTargetEntity::channel(it->str())
+            });
+        }
+    }
+
+    std::vector<MessageDraftMentionEntity> all_mentions;
+    all_mentions.reserve(user_mentions.size() + channel_mentions.size());
+    all_mentions.insert(all_mentions.end(), user_mentions.begin(), user_mentions.end());
+    all_mentions.insert(all_mentions.end(), channel_mentions.begin(), channel_mentions.end());
+
+    return all_mentions;
 }
 
 bool MessageDraftEntity::validate_mentions() const {
