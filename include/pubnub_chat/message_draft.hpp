@@ -22,16 +22,24 @@ namespace Pubnub
 
     PN_CHAT_EXPORT class MentionTarget {
         public:
+            enum class Type {
+                USER,
+                CHANNEL, 
+                URL
+            };
+
             static MentionTarget user(const Pubnub::String& user_id);
             static MentionTarget channel(const Pubnub::String& channel);
             static MentionTarget url(const Pubnub::String& url);
+
+            Pubnub::String get_target() const;
+            Type get_type() const;
         
         private:
-            MentionTarget(const Pubnub::String& target, const Pubnub::String& type);
+            MentionTarget(const Pubnub::String& target, const Type type);
 
             Pubnub::String target;
-            //TODO: type enum?
-            Pubnub::String type;
+            Type type;
     };
 
     PN_CHAT_EXPORT class MessageElement {
@@ -70,7 +78,12 @@ namespace Pubnub
 
 
         private:
-            MessageDraft(const Pubnub::Channel& channel, const Pubnub::MessageDraftConfig& draft_config);
+            MessageDraft(
+                    const Pubnub::Channel& channel,
+                    const Pubnub::MessageDraftConfig& draft_config,
+                    std::shared_ptr<const ChannelService> channel_service,
+                    std::shared_ptr<const UserService> user_service);
+            void trigger_typing_indicator();
 
             Pubnub::Channel channel;
             MessageDraftConfig draft_config;

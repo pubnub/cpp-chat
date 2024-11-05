@@ -28,7 +28,7 @@ bool MessageDraftDAO::should_search_for_suggestions() const {
     return !this->on_message_change_callbacks_with_suggestions.empty();
 }
 
-void MessageDraftDAO::fire_message_elements_changed(
+void MessageDraftDAO::call_callbacks(
         Pubnub::Vector<Pubnub::MessageElement> elements,
         Pubnub::Vector<Pubnub::SuggestedMention> mentions
 ) {

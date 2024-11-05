@@ -21,7 +21,7 @@ class MessageDraftDAO {
 
         bool should_search_for_suggestions() const;
 
-        void fire_message_elements_changed(Pubnub::Vector<Pubnub::MessageElement> elements, Pubnub::Vector<Pubnub::SuggestedMention> mentions);
+        void call_callbacks(Pubnub::Vector<Pubnub::MessageElement> elements, Pubnub::Vector<Pubnub::SuggestedMention> mentions);
     private:
         MessageDraftEntity entity;
 
