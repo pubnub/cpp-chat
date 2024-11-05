@@ -8,6 +8,7 @@
 #include "domain/message_draft_entity.hpp"
 #include "message_draft.hpp"
 #include "string.hpp"
+#include "user.hpp"
 #include <memory>
 
 class DraftService {
@@ -24,6 +25,9 @@ class DraftService {
         void update_message(MessageDraftDAO& dao, const Pubnub::String& text) const;
     private:
         void fire_message_elements_changed(MessageDraftDAO& dao) const;
+        std::vector<Pubnub::SuggestedMention> resolve_suggestions(const MessageDraftMentionEntity& suggestion) const;
+        std::vector<Pubnub::User> get_users_suggestions(const Pubnub::String& query) const;
+        std::vector<Pubnub::Channel> get_channels_suggestions(const Pubnub::String& query) const;
         static MessageDraftSuggestedMentionEntity convert_suggested_mention_to_domain(const Pubnub::SuggestedMention& suggested_mention);
         static MessageDraftMentionTargetEntity convert_mention_target_to_domain(const Pubnub::MentionTarget& target);
 

@@ -1,6 +1,8 @@
 #include "draft_service.hpp"
 #include "application/chat_service.hpp"
 #include "domain/message_draft_entity.hpp"
+#include "message_draft.hpp"
+#include "vector.hpp"
 #include <memory>
 
 DraftService::DraftService(std::shared_ptr<const UserService> user_service, std::shared_ptr<const ChannelService> channel_service) :
@@ -50,17 +52,15 @@ void DraftService::fire_message_elements_changed(MessageDraftDAO& dao) const {
     if (dao.should_search_for_suggestions()) {
         auto raw_mentions = entity.suggest_raw_mentions();
 
-        if (!raw_mentions.empty()) {
-            for (const auto& raw_mention : raw_mentions) {
-                auto suggestions = this->user_service
-                    ->get_users_suggestions(raw_mention.target.target);
-            }
+        for (const auto& raw_mention : raw_mentions) {
+            Pubnub::Vector<Pubnub::SuggestedMention> suggestions = this->resolve_suggestions(raw_mention);
+
+            dao.call_callbacks({}, suggestions);
         }
 
-
+        return;
     }
 
-    // TODO: elements and mentions
     dao.call_callbacks({}, {});
 }
 
