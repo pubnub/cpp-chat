@@ -1,13 +1,14 @@
 #include "application/channel_service.hpp"
 #include "application/dao/message_draft_dao.hpp"
 #include "application/draft_service.hpp"
+#include "option.hpp"
 #include "message_draft.hpp"
 
 using namespace Pubnub;
 
 MentionTarget::MentionTarget(const Pubnub::String& target, const Pubnub::MentionTarget::Type target_type) :
-target(target),
-type(target_type) {}
+    target(target),
+    type(target_type) {}
 
 MentionTarget MentionTarget::user(const Pubnub::String& user_id) {
     return MentionTarget(user_id, MentionTarget::Type::USER);
@@ -27,6 +28,18 @@ Pubnub::MentionTarget::Type MentionTarget::get_type() const {
 
 Pubnub::String MentionTarget::get_target() const {
     return this->target;
+}
+
+MessageElement::MessageElement(const Pubnub::String& text, const Pubnub::Option<MentionTarget>& target) :
+    text(text),
+    target(target) {}
+
+MessageElement MessageElement::plain_text(const Pubnub::String& text) {
+    return MessageElement(text, Pubnub::Option<MentionTarget>::none());
+}
+
+MessageElement MessageElement::link(const Pubnub::String& text, const MentionTarget& target) {
+    return MessageElement(text, target);
 }
 
 MessageDraft::MessageDraft(
@@ -77,4 +90,19 @@ void MessageDraft::trigger_typing_indicator() {
         this->channel.start_typing();
     }
 }
+
+void MessageDraft::add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
+    this->value->add_callback(listener);
+}
+
+void MessageDraft::add_message_elements_listener(
+        std::function<void(
+            Pubnub::Vector<Pubnub::MessageElement>,
+            Pubnub::Vector<Pubnub::SuggestedMention>
+        )> listener
+) {
+    this->value->add_callback(listener);
+}
+
+
 

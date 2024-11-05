@@ -195,7 +195,8 @@ void MessageService::forward_message(const Message& message, const String& chann
 
 MessageDraft MessageService::create_message_draft(const Channel& channel, const MessageDraftConfig& message_draft_config) const
 {
-    return MessageDraft(channel, message_draft_config);
+    // Shouldn't fail as it can be run only if the Channel is valid
+    return MessageDraft(channel, message_draft_config, chat_service.lock()->channel_service, chat_service.lock()->user_service);
 }
 
 

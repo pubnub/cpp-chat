@@ -295,6 +295,8 @@ String String::substring(std::size_t pos, std::size_t count) const {
         new_string.begin()[i - pos] = this->string[i];
     }
 
+    new_string.len = new_len;
+
     return new_string;
 }
 

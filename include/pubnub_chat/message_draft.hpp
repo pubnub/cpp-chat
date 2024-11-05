@@ -48,10 +48,10 @@ namespace Pubnub
             static MessageElement link(const Pubnub::String& text, const Pubnub::MentionTarget& target);
 
         private:
-            MessageElement(const Pubnub::String& text, const Pubnub::MentionTarget& target);
+            MessageElement(const Pubnub::String& text, const Pubnub::Option<Pubnub::MentionTarget>& target);
 
             Pubnub::String text;
-            Pubnub::MentionTarget target;
+            Pubnub::Option<Pubnub::MentionTarget> target;
     };
 
     PN_CHAT_EXPORT struct SuggestedMention {
@@ -76,6 +76,8 @@ namespace Pubnub
             void update(const Pubnub::String& text);
             void send(SendTextParams send_params = SendTextParams());
 
+            void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
+            void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
 
         private:
             MessageDraft(

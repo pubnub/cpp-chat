@@ -2,6 +2,7 @@
 #define PN_CHAT_MESSAGE_DRAFT_ENTITY_HPP
 
 #include "string.hpp"
+#include <optional>
 
 enum MessageDraftMentionSuggestionScope {
     CHANNEL,
@@ -39,6 +40,14 @@ struct MessageDraftSuggestedMentionEntity {
     MessageDraftMentionTargetEntity target;
 };
 
+struct MessageDraftMessageElementEntity {
+    Pubnub::String text;
+    std::optional<MessageDraftMentionTargetEntity> target;
+
+    static MessageDraftMessageElementEntity plain_text(const Pubnub::String& text);
+    static MessageDraftMessageElementEntity link(const Pubnub::String& text, const MessageDraftMentionTargetEntity& target);
+};
+
 struct MessageDraftEntity {
     Pubnub::String value = "";
     std::vector<MessageDraftMentionEntity> mentions = {};
@@ -54,6 +63,8 @@ struct MessageDraftEntity {
     MessageDraftEntity insert_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention, const Pubnub::String& text) const;
 
     std::vector<MessageDraftMentionEntity> suggest_raw_mentions() const;
+    
+    std::vector<MessageDraftMessageElementEntity> get_message_elements() const;
 
     bool validate_mentions() const;
     bool validate_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention) const;

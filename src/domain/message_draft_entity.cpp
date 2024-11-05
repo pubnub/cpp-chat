@@ -1,6 +1,5 @@
 #include "message_draft_entity.hpp"
 #include <algorithm>
-#include <iostream>
 #include <regex>
 #include "diff_match_patch.h"
 
@@ -22,6 +21,14 @@ MessageDraftMentionTargetEntity MessageDraftMentionTargetEntity::url(const Pubnu
 
 std::size_t MessageDraftMentionEntity::end_exclusive() const {
     return this->start + this->length;
+}
+
+MessageDraftMessageElementEntity MessageDraftMessageElementEntity::plain_text(const Pubnub::String& text) {
+    return {text, {}};
+}
+
+MessageDraftMessageElementEntity MessageDraftMessageElementEntity::link(const Pubnub::String& text, const MessageDraftMentionTargetEntity& target) {
+    return {text, {target}};
 }
 
 MessageDraftEntity MessageDraftEntity::insert_text(std::size_t position, const Pubnub::String& text) const {
@@ -217,6 +224,32 @@ std::vector<MessageDraftMentionEntity> MessageDraftEntity::suggest_raw_mentions(
     all_mentions.insert(all_mentions.end(), channel_mentions.begin(), channel_mentions.end());
 
     return all_mentions;
+}
+
+std::vector<MessageDraftMessageElementEntity> MessageDraftEntity::get_message_elements() const {
+    std::vector<MessageDraftMessageElementEntity> elements;
+    std::size_t last_position = 0;
+
+    for (const auto& mention : this->mentions) {
+        auto plain_text = this->value.substring(last_position, mention.start - last_position);
+        if (!plain_text.empty()) {
+            elements.push_back(MessageDraftMessageElementEntity::plain_text(plain_text));
+        }
+
+        elements.push_back(MessageDraftMessageElementEntity::link(
+            this->value.substring(mention.start, mention.length),
+            mention.target
+        ));
+
+        last_position = mention.end_exclusive();
+    }
+
+    auto remaining_text = this->value.substring(last_position, this->value.length());
+    if (!remaining_text.empty()) {
+        elements.push_back(MessageDraftMessageElementEntity::plain_text(remaining_text));
+    }
+
+    return elements;
 }
 
 bool MessageDraftEntity::validate_mentions() const {
