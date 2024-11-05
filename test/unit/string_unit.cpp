@@ -159,7 +159,9 @@ Ensure(Strings, should_substring) {
 
 
     assert_string_equal(world.c_str(), "world");
+    assert_that(world.length(), is_equal_to(5));
     assert_string_equal(empty.c_str(), nullptr);
+    assert_that(empty.length(), is_equal_to(0));
 }
 
 Ensure(Strings, should_work_with_iterators) {

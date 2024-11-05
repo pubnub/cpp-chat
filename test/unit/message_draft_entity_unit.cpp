@@ -208,3 +208,37 @@ Ensure(MessageDraftEntities, should_suggest_mentions) {
     assert_that(result[2].target.type, is_equal_to(MessageDraftMentionTargetEntity::Type::CHANNEL));
 }
 
+Ensure(MessageDraftEntities, should_return_message_elements) {
+    MessageDraftEntity sut;
+    sut.value = "Hello @user1 @user2 on #channel !";
+    sut.mentions = {
+        {6, 6, {"user1", MessageDraftMentionTargetEntity::Type::USER}},
+        {13, 6, {"user2", MessageDraftMentionTargetEntity::Type::USER}},
+        {23, 8, {"channel", MessageDraftMentionTargetEntity::Type::CHANNEL}}
+    };
+
+    auto result = sut.get_message_elements();
+
+    assert_that(result.size(), is_equal_to(7));
+    assert_string_equal(result[0].text.c_str(), "Hello ");
+    assert_that(result[0].target.has_value(), is_false);
+    assert_string_equal(result[1].text.c_str(), "@user1");
+    assert_that(result[1].target.has_value(), is_true);
+    assert_that(result[1].target.value().type, is_equal_to(MessageDraftMentionTargetEntity::Type::USER));
+    assert_string_equal(result[1].target.value().target.c_str(), "user1");
+    assert_string_equal(result[2].text.c_str(), " ");
+    assert_that(result[2].target.has_value(), is_false);
+    assert_string_equal(result[3].text.c_str(), "@user2");
+    assert_that(result[3].target.has_value(), is_true);
+    assert_that(result[3].target.value().type, is_equal_to(MessageDraftMentionTargetEntity::Type::USER));
+    assert_string_equal(result[3].target.value().target.c_str(), "user2");
+    assert_string_equal(result[4].text.c_str(), " on ");
+    assert_that(result[4].target.has_value(), is_false);
+    assert_string_equal(result[5].text.c_str(), "#channel");
+    assert_that(result[5].target.has_value(), is_true);
+    assert_that(result[5].target.value().type, is_equal_to(MessageDraftMentionTargetEntity::Type::CHANNEL));
+    assert_string_equal(result[5].target.value().target.c_str(), "channel");
+    assert_string_equal(result[6].text.c_str(), " !");
+    assert_that(result[6].target.has_value(), is_false);
+}
+
