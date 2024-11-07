@@ -83,8 +83,8 @@ void MessageDraft::update(const Pubnub::String& text) {
 }
 
 void MessageDraft::send(SendTextParams send_params) {
-    // TODO: now only sending text
-    this->channel.send_text(this->value->get_entity().value, send_params);
+    auto sending_data = this->draft_service->prepare_sending_data(*this->value, send_params);
+    this->channel.send_text(sending_data.second, sending_data.first);
 }
 
 void MessageDraft::trigger_typing_indicator() {

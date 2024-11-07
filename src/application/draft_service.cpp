@@ -2,7 +2,10 @@
 #include "application/chat_service.hpp"
 #include "domain/message_draft_entity.hpp"
 #include "message_draft.hpp"
+#include "message_elements.hpp"
+#include "send_text_params.hpp"
 #include "vector.hpp"
+#include <algorithm>
 #include <memory>
 
 #define PN_MIN_MENTION_LENGTH 3
@@ -46,6 +49,36 @@ void DraftService::remove_mention_from_message(MessageDraftDAO& dao, std::size_t
 void DraftService::update_message(MessageDraftDAO& dao, const Pubnub::String& text) const {
     dao.update_entity(dao.get_entity().update(text));
     this->fire_message_elements_changed(dao);
+}
+
+std::pair<Pubnub::SendTextParams, Pubnub::String> DraftService::prepare_sending_data(
+        const MessageDraftDAO& dao,
+        const Pubnub::SendTextParams& params
+) const {
+    auto entity = dao.get_entity();
+
+    size_t current_mention = 0;
+    std::map<int, Pubnub::MentionedUser> mentioned_users;
+    
+    for (const auto& mention : entity.mentions) {
+        if (mention.target.type == MessageDraftMentionTargetEntity::Type::USER) {
+            mentioned_users[current_mention] = DraftService::convert_mentioned_user_to_presentation(entity, mention);
+            current_mention++;
+        }
+    }
+    
+    Pubnub::SendTextParams send_params = {
+        params.store_in_history,
+        params.send_by_post,
+        params.meta,
+        mentioned_users,
+        // TODO: reviewers do you know if we should add here channel mentions or links?
+        params.referenced_channels,
+        params.text_links,
+        params.quoted_message
+    };
+
+    return {send_params, entity.render()};
 }
 
 void DraftService::fire_message_elements_changed(MessageDraftDAO& dao) const {
@@ -168,4 +201,11 @@ Pubnub::MessageElement DraftService::convert_message_element_to_presentation(con
     return element.target.has_value()
         ? Pubnub::MessageElement::link(element.text, Pubnub::MentionTarget::url(element.target.value().target))
         : Pubnub::MessageElement::plain_text(element.text);
+}
+
+Pubnub::MentionedUser DraftService::convert_mentioned_user_to_presentation(const MessageDraftEntity& entity, const MessageDraftMentionEntity& user) {
+    return Pubnub::MentionedUser{
+        user.target.target,
+        "",
+    };
 }
