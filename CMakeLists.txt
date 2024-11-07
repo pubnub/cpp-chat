@@ -32,6 +32,8 @@ endif()
 
 option(RUN_TESTS "Run tests" OFF)
 
+option(COMPILE_EXAMPLES "Compile examples" OFF)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/pubnub_chat)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
@@ -180,8 +182,12 @@ add_library(pubnub-chat SHARED ${SOURCES})
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
 add_executable(pubnub-chat-example example/main.cpp)
-
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
+
+if(${COMPILE_EXAMPLES})
+    add_executable(pubnub-message-draft-example example/message_draft.cpp)
+    target_link_libraries(pubnub-message-draft-example PRIVATE pubnub-chat)
+endif()
 
 if(${RUN_TESTS})
     message(STATUS "Running tests")

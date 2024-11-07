@@ -1,12 +1,16 @@
 #include "message_draft_entity.hpp"
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <regex>
 #include "diff_match_patch.h"
 
 // TODO: this regex
 static std::regex user_mention_regex(R"""(((?=\s?)@[a-zA-Z0-9_]+))""");
 static std::regex channel_reference_regex(R"""(((?=\s?)#[a-zA-Z0-9_]+))""");
+
+static Pubnub::String schema_user = "pn-user://";
+static Pubnub::String schema_channel = "pn-channel://";
 
 MessageDraftMentionTargetEntity MessageDraftMentionTargetEntity::user(const Pubnub::String& user_id) {
     return MessageDraftMentionTargetEntity{user_id, MessageDraftMentionTargetEntity::Type::USER};
@@ -259,6 +263,48 @@ std::vector<MessageDraftMessageElementEntity> MessageDraftEntity::get_message_el
     }
 
     return elements;
+}
+
+static Pubnub::String escape_link_text(const Pubnub::String& text) {
+    auto result = text;
+    result.replace_all("\\", "\\\\");
+    result.replace_all("]", "\\]");
+
+    return result;
+}
+
+static Pubnub::String escape_link_url(const Pubnub::String& url) {
+    auto result = url;
+    result.replace_all("\\", "\\\\");
+    result.replace_all(")", "\\)");
+
+    return result;
+}
+
+Pubnub::String MessageDraftEntity::render() const {
+    auto elements = this->get_message_elements();
+
+    return std::accumulate(
+        elements.begin(),
+        elements.end(),
+        Pubnub::String(""),
+        [](const Pubnub::String& acc, const MessageDraftMessageElementEntity& element) {
+            if (!element.target.has_value()) {
+                return acc + element.text;
+            }
+
+            auto target = element.target.value();
+            
+            switch (target.type) {
+                case MessageDraftMentionTargetEntity::Type::USER:
+                    return acc + "[" + escape_link_text(element.text) + "](" + schema_user + escape_link_url(target.target) + ")";
+                case MessageDraftMentionTargetEntity::Type::CHANNEL:
+                    return acc + "[" + escape_link_text(element.text) + "](" + schema_channel + escape_link_url(target.target) + ")";
+                case MessageDraftMentionTargetEntity::Type::URL:
+                    return acc + "[" + escape_link_text(element.text) + "](" + escape_link_url(target.target) + ")";
+            }
+        }
+    );
 }
 
 bool MessageDraftEntity::validate_mentions() const {

@@ -278,6 +278,25 @@ void String::replace(std::size_t pos, std::size_t count, const String& string) {
     this->replace(pos, count, string.string);
 }
 
+void String::replace_all(const char* string, const char* replacement) {
+    auto string_len = strlen(string);
+    auto replacement_len = strlen(replacement);
+
+    auto pos = this->find(string);
+    while (pos != String::npos) {
+        this->replace(pos, string_len, replacement);
+        pos = this->find(string, pos + replacement_len);
+    }
+}
+
+void String::replace_all(const std::string& string, const std::string& replacement) {
+    this->replace_all(string.c_str(), replacement.c_str());
+}
+
+void String::replace_all(const String& string, const String& replacement) {
+    this->replace_all(string.string, replacement.string);
+}
+
 String String::substring(std::size_t pos, std::size_t count) const {
     if (pos >= this->len) {
         return String();

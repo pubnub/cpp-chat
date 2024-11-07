@@ -242,3 +242,17 @@ Ensure(MessageDraftEntities, should_return_message_elements) {
     assert_that(result[6].target.has_value(), is_false);
 }
 
+Ensure(MessageDraftEntities, should_render_message) {
+    MessageDraftEntity sut;
+    sut.value = "Hello @user1 @user2 on #channel !";
+    sut.mentions = {
+        {6, 6, {"user1", MessageDraftMentionTargetEntity::Type::USER}},
+        {13, 6, {"user2", MessageDraftMentionTargetEntity::Type::USER}},
+        {23, 8, {"channel", MessageDraftMentionTargetEntity::Type::CHANNEL}}
+    };
+
+    auto result = sut.render();
+
+    assert_string_equal(result.c_str(), "Hello [@user1](pn-user://user1) [@user2](pn-user://user2) on [#channel](pn-channel://channel) !");
+}
+

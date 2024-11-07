@@ -66,6 +66,8 @@ struct MessageDraftEntity {
     
     std::vector<MessageDraftMessageElementEntity> get_message_elements() const;
 
+    Pubnub::String render() const;
+
     bool validate_mentions() const;
     bool validate_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention) const;
 };

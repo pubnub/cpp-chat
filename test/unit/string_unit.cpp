@@ -184,5 +184,12 @@ Ensure(Strings, should_work_with_iterators) {
     assert_string_equal(sut.c_str(), "aaaaaaaaaaaaa");
 }
 
+Ensure(Strings, should_replace_all_occurrences) {
+    Pubnub::String sut("aaa, aaa, bbb, aaa, ccc, aaa");
+
+    sut.replace_all("aaa", "ddd");
+
+    assert_string_equal(sut.c_str(), "ddd, ddd, bbb, ddd, ccc, ddd");
+}
 
 
