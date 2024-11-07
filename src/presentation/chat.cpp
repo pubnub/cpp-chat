@@ -20,7 +20,6 @@ extern "C" {
 #endif
 }
 
-
 #include <iostream>
 
 using namespace Pubnub;

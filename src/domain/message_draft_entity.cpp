@@ -1,5 +1,6 @@
 #include "message_draft_entity.hpp"
 #include <algorithm>
+#include <iostream>
 #include <regex>
 #include "diff_match_patch.h"
 
@@ -81,7 +82,7 @@ MessageDraftEntity MessageDraftEntity::remove_text(std::size_t position, std::si
         new_mentions.end(),
         [position, length](auto& mention) {
             if (position < mention.start) {
-                mention.start = std::min(length, mention.start - length);
+                mention.start -= std::min(length, mention.start - position);
             }
         }
     );
@@ -222,6 +223,14 @@ std::vector<MessageDraftMentionEntity> MessageDraftEntity::suggest_raw_mentions(
     all_mentions.reserve(user_mentions.size() + channel_mentions.size());
     all_mentions.insert(all_mentions.end(), user_mentions.begin(), user_mentions.end());
     all_mentions.insert(all_mentions.end(), channel_mentions.begin(), channel_mentions.end());
+
+    std::sort(
+        all_mentions.begin(),
+        all_mentions.end(),
+        [](const auto& a, const auto& b) {
+            return a.start < b.start;
+        }
+    );
 
     return all_mentions;
 }

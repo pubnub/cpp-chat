@@ -13,7 +13,6 @@
 #include "chat_helpers.hpp"
 #include "dao/message_dao.hpp"
 #include "callback_service.hpp"
-
 #include <string>
 #include <sstream>
 

@@ -52,6 +52,8 @@ draft_config(draft_config),
 value(std::make_unique<MessageDraftDAO>()),
 draft_service(std::make_unique<DraftService>(user_service, channel_service)) {}
 
+MessageDraft::~MessageDraft() = default;
+
 void MessageDraft::insert_text(std::size_t position, const Pubnub::String& text) {
     this->trigger_typing_indicator();
     this->draft_service->insert_text_to_message(*this->value, position, text);
@@ -86,7 +88,7 @@ void MessageDraft::send(SendTextParams send_params) {
 }
 
 void MessageDraft::trigger_typing_indicator() {
-    if (this->draft_config.is_typing_indicator_triggered) {
+    if (this->draft_config.is_typing_indicator_triggered && this->channel.channel_data().type != Pubnub::String("public")) {
         this->channel.start_typing();
     }
 }

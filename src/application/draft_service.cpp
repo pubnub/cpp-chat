@@ -78,8 +78,7 @@ std::vector<Pubnub::SuggestedMention> DraftService::resolve_suggestions(const Me
             return {};
         }
 
-        auto suggested_users = this->get_users_suggestions(suggestion.target.target.substring(1, suggestion.target.target.length() - 1));
-
+        auto suggested_users = this->get_users_suggestions(suggestion.target.target);
         std::vector<Pubnub::SuggestedMention> suggestions;
 
         for (const auto& suggested_user : suggested_users) {
@@ -97,7 +96,7 @@ std::vector<Pubnub::SuggestedMention> DraftService::resolve_suggestions(const Me
             return {};
         }
 
-        auto suggested_channels = this->get_channels_suggestions(suggestion.target.target.substring(1, suggestion.target.target.length() - 1));
+        auto suggested_channels = this->get_channels_suggestions(suggestion.target.target);
 
         std::vector<Pubnub::SuggestedMention> suggestions;
 
@@ -105,7 +104,7 @@ std::vector<Pubnub::SuggestedMention> DraftService::resolve_suggestions(const Me
             suggestions.push_back(Pubnub::SuggestedMention{
                 suggestion.start,
                 suggestion.target.target,
-                suggested_channel.channel_id(),
+                suggested_channel.channel_data().channel_name.empty()? suggested_channel.channel_id() : suggested_channel.channel_data().channel_name,
                 Pubnub::MentionTarget::channel(suggested_channel.channel_id())
             });
         }
@@ -131,8 +130,8 @@ std::vector<Pubnub::Channel> DraftService::get_channels_suggestions(const Pubnub
 
 std::vector<Pubnub::MessageElement> DraftService::get_message_elements(const MessageDraftEntity& entity) const {
     auto elements = entity.get_message_elements();
+    
     std::vector<Pubnub::MessageElement> message_elements;
-
     std::transform(
         elements.begin(),
         elements.end(),

@@ -42,16 +42,15 @@ namespace Pubnub
             Type type;
     };
 
-    PN_CHAT_EXPORT class MessageElement {
+    PN_CHAT_EXPORT struct MessageElement {
         public:
             static MessageElement plain_text(const Pubnub::String& text);
             static MessageElement link(const Pubnub::String& text, const Pubnub::MentionTarget& target);
 
-        private:
-            MessageElement(const Pubnub::String& text, const Pubnub::Option<Pubnub::MentionTarget>& target);
-
             Pubnub::String text;
             Pubnub::Option<Pubnub::MentionTarget> target;
+        private:
+            MessageElement(const Pubnub::String& text, const Pubnub::Option<Pubnub::MentionTarget>& target);
     };
 
     PN_CHAT_EXPORT struct SuggestedMention {
@@ -67,6 +66,7 @@ namespace Pubnub
                 CHANNELS,
                 GLOBAL
             };
+            ~MessageDraft();
 
             void insert_text(std::size_t position, const Pubnub::String& text);
             void remove_text(std::size_t position, std::size_t length);
