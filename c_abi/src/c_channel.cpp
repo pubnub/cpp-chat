@@ -720,25 +720,25 @@ PnCResult pn_channel_get_users_restrictions(Pubnub::Channel* channel, const char
     return PN_C_OK;
 }
 
+Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
+    int user_suggestion_source, 
+    bool is_typing_indicator_triggered, 
+    int user_limit,
+    int channel_limit)
+{
+    try {
+        Pubnub::MessageDraftConfig config;
+        config.user_suggestion_source = user_suggestion_source == PN_MESSAGE_DRAFT_USER_SUGGESTION_SOURCE_CHANNEL ?
+            Pubnub::MessageDraftConfig::MessageDraftSuggestionSource::Channel : Pubnub::MessageDraftConfig::MessageDraftSuggestionSource::Global;
+        config.is_typing_indicator_triggered = is_typing_indicator_triggered;
+        config.user_limit = user_limit;
+        config.channel_limit = channel_limit;
+        
+        return new Pubnub::MessageDraft(channel->create_message_draft(config));
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
 
-//Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel, 
-//    char* user_suggestion_source, 
-//    bool is_typing_indicator_triggered, 
-//    int user_limit,
-//    int channel_limit)
-//{
-//    try {
-//        Pubnub::MessageDraftConfig config;
-//        config.user_suggestion_source = user_suggestion_source;
-//        config.is_typing_indicator_triggered = is_typing_indicator_triggered;
-//        config.user_limit = user_limit;
-//        config.channel_limit = channel_limit;
-//        
-//        return new Pubnub::MessageDraft(channel->create_message_draft(config));
-//    }
-//    catch (std::exception& e) {
-//        pn_c_set_error_message(e.what());
-//
-//        return PN_C_ERROR_PTR;
-//    }
-//}
+        return PN_C_ERROR_PTR;
+    }
+}
