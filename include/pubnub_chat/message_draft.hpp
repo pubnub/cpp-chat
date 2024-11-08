@@ -76,8 +76,13 @@ namespace Pubnub
             void update(const Pubnub::String& text);
             void send(SendTextParams send_params = SendTextParams());
 
+#ifndef PN_CHAT_C_ABI
             void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
             void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
+#else 
+            std::vector<Pubnub::MessageElement> consume_message_elements();
+            std::vector<Pubnub::SuggestedMention> consume_suggested_mentions();
+#endif
 
         private:
             MessageDraft(

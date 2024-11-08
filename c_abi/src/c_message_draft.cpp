@@ -3,6 +3,7 @@
 #include "domain/json.hpp"
 #include "message_draft.hpp"
 #include <exception>
+#include <vector>
 
 void pn_message_draft_delete(Pubnub::MessageDraft* message_draft) {
     delete message_draft;
@@ -81,6 +82,63 @@ void pn_message_draft_send(Pubnub::MessageDraft* message_draft, const Pubnub::Se
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
     }
+}
+
+void pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft, char *data) {
+    try {
+        auto message_elements = message_draft->consume_message_elements();
+
+        std::vector<nlohmann::json> elements_json;
+        for (const auto& element : message_elements) {
+            auto element_json = nlohmann::json {
+                {"text", element.text},
+                {"target", element.target.has_value() 
+                    ? nlohmann::json {
+                        {"type", element.target.value().get_type() == Pubnub::MentionTarget::Type::USER 
+                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
+                            : element.target.value().get_type() == Pubnub::MentionTarget::Type::CHANNEL 
+                                ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
+                                : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
+                        },
+                        {"target", element.target.value().get_target()}
+                    }
+                    : nullptr
+                }
+            };
+            elements_json.push_back(element_json);
+        }
+
+        auto suggested_mentions = message_draft->consume_suggested_mentions();
+
+        std::vector<nlohmann::json> mentions_json;
+        for (const auto& mention : suggested_mentions) {
+            auto mention_json = nlohmann::json {
+                {"offset", mention.offset},
+                {"replace_from", mention.replace_from},
+                {"replace_to", mention.replace_to},
+                {"target", nlohmann::json {
+                    {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER 
+                        ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
+                        : mention.target.get_type() == Pubnub::MentionTarget::Type::CHANNEL 
+                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
+                            : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
+                    },
+                    {"target", mention.target.get_target()}
+                }}
+            };
+            mentions_json.push_back(mention_json);
+        }
+
+        auto data_json = nlohmann::json {
+            {"message_elements", elements_json},
+            {"suggested_mentions", mentions_json}
+        };
+
+        strcpy(data, data_json.dump().c_str());
+    } catch (const std::exception& e) {
+        pn_c_set_error_message(e.what());
+    }
+
 }
 
 

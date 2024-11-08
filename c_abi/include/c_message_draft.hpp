@@ -26,4 +26,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_draft_update(Pubnub::MessageDraft*
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_draft_send(Pubnub::MessageDraft* message_draft, const Pubnub::SendTextParams* send_params);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_message_draft_consume_callback_data(Pubnub::MessageDraft* message_draft, char* buffer);
+
 #endif // PN_CHAT_C_MESSAGE_DRAFT_H

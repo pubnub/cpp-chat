@@ -93,6 +93,7 @@ void MessageDraft::trigger_typing_indicator() {
     }
 }
 
+#ifndef PN_CHAT_C_ABI
 void MessageDraft::add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
     this->value->add_callback(listener);
 }
@@ -106,5 +107,12 @@ void MessageDraft::add_message_elements_listener(
     this->value->add_callback(listener);
 }
 
+#else
+std::vector<Pubnub::MessageElement> MessageDraft::consume_message_elements() {
+    return this->value->consume_message_elements();
+}
 
-
+std::vector<Pubnub::SuggestedMention> MessageDraft::consume_suggested_mentions() {
+    return this->value->consume_suggested_mentions();
+}
+#endif
