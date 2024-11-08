@@ -141,4 +141,7 @@ void pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft,
 
 }
 
+void pn_message_draft_set_search_for_suggestions(Pubnub::MessageDraft *message_draft, bool search_for_suggestions) {
+    message_draft->set_search_for_suggestions(search_for_suggestions);
+}
 

@@ -82,6 +82,7 @@ namespace Pubnub
 #else 
             std::vector<Pubnub::MessageElement> consume_message_elements();
             std::vector<Pubnub::SuggestedMention> consume_suggested_mentions();
+            void set_search_for_suggestions(bool search_for_suggestions);
 #endif
 
         private:

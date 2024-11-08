@@ -115,4 +115,8 @@ std::vector<Pubnub::MessageElement> MessageDraft::consume_message_elements() {
 std::vector<Pubnub::SuggestedMention> MessageDraft::consume_suggested_mentions() {
     return this->value->consume_suggested_mentions();
 }
+
+void MessageDraft::set_search_for_suggestions(bool search_for_suggestions) {
+    this->value->set_search_for_suggestions(search_for_suggestions);
+}
 #endif
