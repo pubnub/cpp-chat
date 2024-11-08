@@ -24,19 +24,36 @@ void pn_message_draft_remove_text(Pubnub::MessageDraft* message_draft, size_t po
     }
 }
 
+static Pubnub::MentionTarget deserialize_mention_target(const char* target_json) {
+    auto parsed_target = Json::parse(target_json);
+    auto target_type = parsed_target.get_int("type").value();
+    auto target_value = parsed_target.get_string("target").value();
+
+    return target_type == PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
+        ? Pubnub::MentionTarget::user(target_value) 
+        : target_type == PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
+            ? Pubnub::MentionTarget::channel(target_value) 
+            : Pubnub::MentionTarget::url(target_value);
+}
+
+void pn_message_draft_insert_suggested_mention(Pubnub::MessageDraft *message_draft, std::size_t offset, const char *replace_from, const char *replace_to, const char *target_json, const char* text) {
+    try {
+        auto mention = Pubnub::SuggestedMention {
+            offset,
+            replace_from,
+            replace_to,
+            deserialize_mention_target(target_json)
+        };
+        message_draft->insert_suggested_mention(mention, text);
+    } catch (const std::exception& e) {
+        pn_c_set_error_message(e.what());
+    }
+
+}
+
 void pn_message_draft_add_mention(Pubnub::MessageDraft* message_draft, size_t start, size_t length, const char* target) {
     try {
-        auto parsed_target = Json::parse(target);
-        auto target_type = parsed_target.get_int("type").value();
-        auto target_value = parsed_target.get_string("target").value();
-
-        auto mention_target = target_type == PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
-            ? Pubnub::MentionTarget::user(target_value) 
-            : target_type == PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
-                ? Pubnub::MentionTarget::channel(target_value) 
-                : Pubnub::MentionTarget::url(target_value);
-
-        message_draft->add_mention(start, length, mention_target);
+        message_draft->add_mention(start, length, deserialize_mention_target(target));
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
     }
