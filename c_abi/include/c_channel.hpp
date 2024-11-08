@@ -138,11 +138,12 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text_dirty(
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_users_restrictions(Pubnub::Channel* channel, const char* sort, int limit, const char* next, const char* prev, char* result);
 
+#define PN_MESSAGE_DRAFT_SUGGESTION_SOURCE int
 #define PN_MESSAGE_DRAFT_USER_SUGGESTION_SOURCE_CHANNEL 0
 #define PN_MESSAGE_DRAFT_USER_SUGGESTION_SOURCE_GLOBAL 1
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
-    int user_suggestion_source,
+    PN_MESSAGE_DRAFT_SUGGESTION_SOURCE user_suggestion_source,
     bool is_typing_indicator_triggered,
     int user_limit,
     int channel_limit);
