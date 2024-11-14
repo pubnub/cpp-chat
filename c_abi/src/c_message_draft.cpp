@@ -9,20 +9,28 @@ void pn_message_draft_delete(Pubnub::MessageDraft* message_draft) {
     delete message_draft;
 }
 
-void pn_message_draft_insert_text(Pubnub::MessageDraft* message_draft, size_t position, const char* text) {
+PnCResult pn_message_draft_insert_text(Pubnub::MessageDraft* message_draft, size_t position, const char* text) {
     try {
         message_draft->insert_text(position, text);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
-void pn_message_draft_remove_text(Pubnub::MessageDraft* message_draft, size_t position, size_t length) {
+PnCResult pn_message_draft_remove_text(Pubnub::MessageDraft* message_draft, size_t position, size_t length) {
     try {
         message_draft->remove_text(position, length);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
 static Pubnub::MentionTarget deserialize_mention_target(const char* target_json) {
@@ -37,7 +45,7 @@ static Pubnub::MentionTarget deserialize_mention_target(const char* target_json)
             : Pubnub::MentionTarget::url(target_value);
 }
 
-void pn_message_draft_insert_suggested_mention(Pubnub::MessageDraft *message_draft, std::size_t offset, const char *replace_from, const char *replace_to, const char *target_json, const char* text) {
+PnCResult pn_message_draft_insert_suggested_mention(Pubnub::MessageDraft *message_draft, std::size_t offset, const char *replace_from, const char *replace_to, const char *target_json, const char* text) {
     try {
         auto mention = Pubnub::SuggestedMention {
             offset,
@@ -48,43 +56,125 @@ void pn_message_draft_insert_suggested_mention(Pubnub::MessageDraft *message_dra
         message_draft->insert_suggested_mention(mention, text);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
 
+    return PN_C_OK;
 }
 
-void pn_message_draft_add_mention(Pubnub::MessageDraft* message_draft, size_t start, size_t length, const char* target) {
+PnCResult pn_message_draft_add_mention(Pubnub::MessageDraft* message_draft, size_t start, size_t length, const char* target) {
     try {
         message_draft->add_mention(start, length, deserialize_mention_target(target));
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+        
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
-void pn_message_draft_remove_mention(Pubnub::MessageDraft* message_draft, size_t start) {
+PnCResult pn_message_draft_remove_mention(Pubnub::MessageDraft* message_draft, size_t start) {
     try {
         message_draft->remove_mention(start);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
-void pn_message_draft_update(Pubnub::MessageDraft* message_draft, const char* text) {
+PnCResult pn_message_draft_update(Pubnub::MessageDraft* message_draft, const char* text) {
     try {
         message_draft->update(text);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
-void pn_message_draft_send(Pubnub::MessageDraft* message_draft, const Pubnub::SendTextParams* send_params) {
+PnCResult pn_message_draft_send(Pubnub::MessageDraft* message_draft, 
+        const char* message,
+        bool store_in_history,
+        bool send_by_post,
+        const char* meta,
+        int mentioned_users_length,
+        int* mentioned_users_indexes,
+        Pubnub::User** mentioned_users,
+        int referenced_channels_length,
+        int* referenced_channels_indexes,
+        Pubnub::Channel** referenced_channels,
+        const char* text_links_json,
+        Pubnub::Message* quoted_message) {
     try {
-        message_draft->send(*send_params);
+        Pubnub::SendTextParams params;
+        //The easy ones
+        params.store_in_history = store_in_history;
+        params.send_by_post = send_by_post;
+        params.meta = meta;
+
+        //Mentioned users
+        std::map<int, Pubnub::MentionedUser> mentioned_users_map;
+        for (int i = 0; i < mentioned_users_length; i++)
+        {
+            auto user = *mentioned_users[i];
+            auto mentioned_user = Pubnub::MentionedUser();
+            mentioned_user.id = user.user_id();
+            mentioned_user.name = user.user_data().user_name;
+            mentioned_users_map.emplace(std::make_pair(mentioned_users_indexes[i], mentioned_user));
+        }
+        params.mentioned_users = mentioned_users_map;
+
+        //Referenced channels
+        std::map<int, Pubnub::ReferencedChannel> referenced_channels_map;
+        for (int i = 0; i < referenced_channels_length; i++)
+        {
+            auto channel = *referenced_channels[i];
+            auto referenced_channel = Pubnub::ReferencedChannel();
+            referenced_channel.id = channel.channel_id();
+            referenced_channel.name = channel.channel_data().channel_name;
+            referenced_channels_map.emplace(std::make_pair(referenced_channels_indexes[i], referenced_channel));
+        }
+        params.referenced_channels = referenced_channels_map;
+
+        //Text links
+        auto parsed_links_json = nlohmann::json::parse(text_links_json);
+        Pubnub::Vector<Pubnub::TextLink> links;
+        for (auto link_json : parsed_links_json) {
+            Pubnub::TextLink link;
+            link.start_index = link_json["StartIndex"];
+            link.end_index = link_json["EndIndex"];
+            link.link = link_json["Link"];
+            links.push_back(link);
+        }
+        params.text_links = links;
+
+        //Quoted message
+        if (quoted_message == nullptr)
+        {
+            params.quoted_message = Pubnub::Option<Pubnub::Message>::none();
+        }
+        else {
+            params.quoted_message = Pubnub::Option<Pubnub::Message>(*quoted_message);
+        }
+
+        message_draft->send(params);
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
-void pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft, char *data) {
+PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft, char *data) {
     try {
         auto message_elements = message_draft->consume_message_elements();
 
@@ -137,8 +227,11 @@ void pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft,
         strcpy(data, data_json.dump().c_str());
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
     }
 
+    return PN_C_OK;
 }
 
 void pn_message_draft_set_search_for_suggestions(Pubnub::MessageDraft *message_draft, bool search_for_suggestions) {
