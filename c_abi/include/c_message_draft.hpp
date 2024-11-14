@@ -19,7 +19,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_insert_suggested_mentio
 #define PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 1
 #define PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL 2
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_add_mention(Pubnub::MessageDraft* message_draft, std::size_t start, std::size_t length, const char* mention_json, const char* text);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_add_mention(Pubnub::MessageDraft* message_draft, std::size_t start, std::size_t length, const char* target);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_remove_mention(Pubnub::MessageDraft* message_draft, std::size_t start);
 
@@ -27,7 +27,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_update(Pubnub::MessageD
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_draft_send(
         Pubnub::MessageDraft* message_draft, 
-        const char* message,
         bool store_in_history,
         bool send_by_post,
         const char* meta,

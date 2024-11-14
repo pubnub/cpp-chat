@@ -99,8 +99,8 @@ PnCResult pn_message_draft_update(Pubnub::MessageDraft* message_draft, const cha
     return PN_C_OK;
 }
 
+//TODO: move the creation of SendTextParams to a util, repeated in c_channel
 PnCResult pn_message_draft_send(Pubnub::MessageDraft* message_draft, 
-        const char* message,
         bool store_in_history,
         bool send_by_post,
         const char* meta,
