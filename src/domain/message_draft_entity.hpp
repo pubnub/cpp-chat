@@ -3,6 +3,7 @@
 
 #include "string.hpp"
 #include <optional>
+#include <vector>
 
 enum MessageDraftMentionSuggestionScope {
     CHANNEL,
