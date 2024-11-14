@@ -32,7 +32,7 @@ namespace Pubnub
             static MentionTarget channel(const Pubnub::String& channel);
             static MentionTarget url(const Pubnub::String& url);
 
-            Pubnub::String get_target() const;
+            PN_CHAT_EXPORT Pubnub::String get_target() const;
             Type get_type() const;
         
         private:
@@ -66,19 +66,19 @@ namespace Pubnub
                 CHANNELS,
                 GLOBAL
             };
-            ~MessageDraft();
+            PN_CHAT_EXPORT ~MessageDraft();
 
-            void insert_text(std::size_t position, const Pubnub::String& text);
-            void remove_text(std::size_t position, std::size_t length);
-            void insert_suggested_mention(const SuggestedMention& suggested_mention, const Pubnub::String& text);
-            void add_mention(std::size_t position, std::size_t length, const Pubnub::MentionTarget& target);
-            void remove_mention(std::size_t position);
-            void update(const Pubnub::String& text);
-            void send(SendTextParams send_params = SendTextParams());
+            PN_CHAT_EXPORT void insert_text(std::size_t position, const Pubnub::String& text);
+            PN_CHAT_EXPORT void remove_text(std::size_t position, std::size_t length);
+            PN_CHAT_EXPORT void insert_suggested_mention(const SuggestedMention& suggested_mention, const Pubnub::String& text);
+            PN_CHAT_EXPORT void add_mention(std::size_t position, std::size_t length, const Pubnub::MentionTarget& target);
+            PN_CHAT_EXPORT void remove_mention(std::size_t position);
+            PN_CHAT_EXPORT void update(const Pubnub::String& text);
+            PN_CHAT_EXPORT void send(SendTextParams send_params = SendTextParams());
 
 #ifndef PN_CHAT_C_ABI
-            void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
-            void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
+            PN_CHAT_EXPORT void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
+            PN_CHAT_EXPORT void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
 #else 
             std::vector<Pubnub::MessageElement> consume_message_elements();
             std::vector<Pubnub::SuggestedMention> consume_suggested_mentions();
