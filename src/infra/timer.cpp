@@ -26,7 +26,6 @@ Timer& Timer::operator=(Timer&& other)
 
     this->is_running = other.is_running.load();
     this->elapsed_time = other.elapsed_time;
-    this->timer_thread = std::move(other.timer_thread);
 
     return *this;
 }
