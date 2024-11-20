@@ -28,12 +28,12 @@ namespace Pubnub
                 URL
             };
 
-            static MentionTarget user(const Pubnub::String& user_id);
-            static MentionTarget channel(const Pubnub::String& channel);
-            static MentionTarget url(const Pubnub::String& url);
+            PN_CHAT_EXPORT static MentionTarget user(const Pubnub::String& user_id);
+            PN_CHAT_EXPORT static MentionTarget channel(const Pubnub::String& channel);
+            PN_CHAT_EXPORT static MentionTarget url(const Pubnub::String& url);
 
             PN_CHAT_EXPORT Pubnub::String get_target() const;
-            Type get_type() const;
+            PN_CHAT_EXPORT Type get_type() const;
         
         private:
             MentionTarget(const Pubnub::String& target, const Type type);
@@ -44,8 +44,8 @@ namespace Pubnub
 
     PN_CHAT_EXPORT struct MessageElement {
         public:
-            static MessageElement plain_text(const Pubnub::String& text);
-            static MessageElement link(const Pubnub::String& text, const Pubnub::MentionTarget& target);
+            PN_CHAT_EXPORT static MessageElement plain_text(const Pubnub::String& text);
+            PN_CHAT_EXPORT static MessageElement link(const Pubnub::String& text, const Pubnub::MentionTarget& target);
 
             Pubnub::String text;
             Pubnub::Option<Pubnub::MentionTarget> target;
