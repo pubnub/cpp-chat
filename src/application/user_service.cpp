@@ -32,7 +32,6 @@ User UserService::get_current_user() const
 
 User UserService::create_user(const String& user_id, const UserDAO& user_data) const
 {
-    ;
     if(user_id.empty())
     {
         throw std::invalid_argument("Failed to create user, user_id is empty");

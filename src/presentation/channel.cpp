@@ -8,6 +8,7 @@
 #include "application/restrictions_service.hpp"
 #include "application/message_service.hpp"
 #include "application/membership_service.hpp"
+#include "message_draft.hpp"
 #include "event.hpp"
 #include <algorithm>
 
@@ -275,6 +276,11 @@ Pubnub::EventsHistoryWrapper Pubnub::Channel::get_messsage_reports_history(const
 {
     auto return_tuple = this->channel_service->get_message_reports_history(channel_id(), start_timetoken, end_timetoken, count);
     return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
+}
+
+Pubnub::MessageDraft Pubnub::Channel::create_message_draft(Pubnub::MessageDraftConfig message_draft_config) const
+{
+    return this->message_service->create_message_draft(*this, message_draft_config);
 }
 
 #ifndef PN_CHAT_C_ABI

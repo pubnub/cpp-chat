@@ -119,6 +119,38 @@ Ensure(Strings, should_replace) {
     assert_string_equal(sut.c_str(), "Hello, Universe!");
 }
 
+Ensure(Strings, should_replace_end_of_string) {
+    Pubnub::String sut("Hello, world!");
+
+    sut.replace(7, 6, "Universe?");
+
+    assert_string_equal(sut.c_str(), "Hello, Universe?");
+}
+
+Ensure(Strings, should_replace_append_data_with_zero_count) {
+    Pubnub::String sut("Hello,");
+
+    sut.replace(6, 0, " world!");
+
+    assert_string_equal(sut.c_str(), "Hello, world!");
+}
+
+Ensure(Strings, should_replace_insert_data_with_zero_count) {
+    Pubnub::String sut("Hello,!");
+
+    sut.replace(6, 0, " world");
+
+    assert_string_equal(sut.c_str(), "Hello, world!");
+}
+
+Ensure(Strings, should_replace_properly_when_data_is_huge) {
+    Pubnub::String sut("1234><5678");
+
+    sut.replace(5, 0, "abc");
+
+    assert_string_equal(sut.c_str(), "1234>abc<5678");
+}
+
 Ensure(Strings, should_substring) {
     Pubnub::String sut("Hello, world!");
 
@@ -127,7 +159,9 @@ Ensure(Strings, should_substring) {
 
 
     assert_string_equal(world.c_str(), "world");
+    assert_that(world.length(), is_equal_to(5));
     assert_string_equal(empty.c_str(), nullptr);
+    assert_that(empty.length(), is_equal_to(0));
 }
 
 Ensure(Strings, should_work_with_iterators) {
@@ -150,5 +184,12 @@ Ensure(Strings, should_work_with_iterators) {
     assert_string_equal(sut.c_str(), "aaaaaaaaaaaaa");
 }
 
+Ensure(Strings, should_replace_all_occurrences) {
+    Pubnub::String sut("aaa, aaa, bbb, aaa, ccc, aaa");
+
+    sut.replace_all("aaa", "ddd");
+
+    assert_string_equal(sut.c_str(), "ddd, ddd, bbb, ddd, ccc, ddd");
+}
 
 

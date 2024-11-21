@@ -32,6 +32,8 @@ endif()
 
 option(RUN_TESTS "Run tests" OFF)
 
+option(COMPILE_EXAMPLES "Compile examples" OFF)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/pubnub_chat)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
@@ -46,7 +48,9 @@ if(WIN32 OR WIN64 OR MSVC)
 endif()
 
 # TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
-set(PUBNUB_SDK_VERSION_SUFFIX "/CA-SDKC++/${PROJECT_VERSION}")
+#set(PUBNUB_SDK_VERSION_SUFFIX "\\\"/CA-SDKC++/${PROJECT_VERSION}\\\"")
+#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DPUBNUB_SDK_VERSION_SUFFIX=\\\"/CA-UNREAL/x.x.x\\\")
+
 
 FetchContent_Declare(
   pubnub
@@ -59,6 +63,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
+target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/x.x.x\")
+
 FetchContent_Declare(
   json
   GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -70,12 +76,26 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(json)
 
+FetchContent_Declare(
+    diff-match-patch
+    GIT_REPOSITORY https://github.com/leutloff/diff-match-patch-cpp-stl
+    GIT_TAG ba3bbe3cdba5d461e241b756a50085c3602a3b5a
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS ON 
+    SYSTEM 
+)
+
+#TODO no need to build tests
+FetchContent_MakeAvailable(diff-match-patch)
+
 include_directories(${pubnub_SOURCE_DIR}/posix)
 include_directories(${pubnub_SOURCE_DIR}/core)
 include_directories(${pubnub_SOURCE_DIR})
 
 include_directories(${json_SOURCE_DIR})
 include_directories(${json_SOURCE_DIR}/include)
+
+include_directories(${diff-match-patch_SOURCE_DIR})
 
 include_directories(${CURRENT_SOURCE_DIR}/include)
 
@@ -100,7 +120,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/access_manager_logic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -112,10 +133,12 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/membership_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/callback_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/access_manager_service.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/draft_service.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/channel_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_draft_dao.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
@@ -159,8 +182,12 @@ add_library(pubnub-chat SHARED ${SOURCES})
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
 add_executable(pubnub-chat-example example/main.cpp)
-
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
+
+if(${COMPILE_EXAMPLES})
+    add_executable(pubnub-message-draft-example example/message_draft.cpp)
+    target_link_libraries(pubnub-message-draft-example PRIVATE pubnub-chat)
+endif()
 
 if(${RUN_TESTS})
     message(STATUS "Running tests")
@@ -182,6 +209,8 @@ if(${RUN_TESTS})
         add_test(NAME ${name} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/cgreen/build/tools/cgreen-runner ${CMAKE_CURRENT_SOURCE_DIR}/build/lib${name}.dylib)
     endfunction()
 
+    add_test(NAME diff-match-patch-test COMMAND ${diff-match-patch_SOURCE_DIR}/../diffmatchpatch-build/diff_match_patch_test_string)
+
     test_suite(string-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/string_unit.cpp)
     test_suite(json-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/json_unit.cpp)
     test_suite(typing-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/typing_unit.cpp)
@@ -192,4 +221,8 @@ if(${RUN_TESTS})
     test_suite(channel-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/channel_entity_unit.cpp)
     test_suite(prarsers-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/parsers_unit.cpp)
     test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
+    test_suite(message-draft-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/message_draft_entity_unit.cpp)
+    
+    #TODO: e/e
+    #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
 endif()

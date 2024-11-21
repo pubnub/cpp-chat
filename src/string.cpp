@@ -1,5 +1,4 @@
 #include "string.hpp"
-#include <iostream>
 #include <string>
 
 using namespace Pubnub;
@@ -245,7 +244,7 @@ std::size_t String::find(const char* string, std::size_t pos) const {
 }
 
 void String::replace(std::size_t pos, std::size_t count, const char* string) {
-    if (pos >= this->len) {
+    if (pos > this->len) {
         return;
     }
 
@@ -254,8 +253,8 @@ void String::replace(std::size_t pos, std::size_t count, const char* string) {
     this->grow_if_needed(new_len);
 
     if (string_len > count) {
-        for (auto i = pos + count; i < this->len; i++) {
-            this->string[i + string_len - count] = this->string[i];
+        for(auto i = new_len; i >= pos + string_len; i--) {
+            this->string[i] = this->string[i - string_len + count];
         }
 
         for (auto i = 0; i < string_len; i++) {
@@ -279,6 +278,25 @@ void String::replace(std::size_t pos, std::size_t count, const String& string) {
     this->replace(pos, count, string.string);
 }
 
+void String::replace_all(const char* string, const char* replacement) {
+    auto string_len = strlen(string);
+    auto replacement_len = strlen(replacement);
+
+    auto pos = this->find(string);
+    while (pos != String::npos) {
+        this->replace(pos, string_len, replacement);
+        pos = this->find(string, pos + replacement_len);
+    }
+}
+
+void String::replace_all(const std::string& string, const std::string& replacement) {
+    this->replace_all(string.c_str(), replacement.c_str());
+}
+
+void String::replace_all(const String& string, const String& replacement) {
+    this->replace_all(string.string, replacement.string);
+}
+
 String String::substring(std::size_t pos, std::size_t count) const {
     if (pos >= this->len) {
         return String();
@@ -295,6 +313,8 @@ String String::substring(std::size_t pos, std::size_t count) const {
     for (auto i = pos; i < new_len + pos; i++) {
         new_string.begin()[i - pos] = this->string[i];
     }
+
+    new_string.len = new_len;
 
     return new_string;
 }

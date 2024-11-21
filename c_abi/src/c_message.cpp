@@ -117,12 +117,10 @@ const char* jsonize_reactions(std::vector<Pubnub::MessageAction> reactions) {
 
     Pubnub::String result = "[";
     for (auto reaction : reactions) {
-        //result += "\"";
         nlohmann::json json;
         message_action_to_json(json, reaction);
         result += json.dump().c_str();
         result += ",";
-        //result += "\,";
     }
 
     result.erase(result.length() - 1);
