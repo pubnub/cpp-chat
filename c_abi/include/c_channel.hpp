@@ -2,6 +2,7 @@
 #define PN_CHAT_C_CHANNEL_H
 
 #include "chat.hpp"
+#include "message_draft.hpp"
 #include "channel.hpp"
 #include "helpers/export.hpp"
 #include "helpers/extern.hpp"
@@ -143,7 +144,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_get_users_restrictions(Pubnub
 #define PN_MESSAGE_DRAFT_USER_SUGGESTION_SOURCE_GLOBAL 1
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* channel,
-    PN_MESSAGE_DRAFT_SUGGESTION_SOURCE user_suggestion_source,
+    int user_suggestion_source,
     bool is_typing_indicator_triggered,
     int user_limit,
     int channel_limit);

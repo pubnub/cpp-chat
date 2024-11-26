@@ -181,7 +181,7 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
         std::vector<nlohmann::json> elements_json;
         for (const auto& element : message_elements) {
             auto element_json = nlohmann::json {
-                {"text", element.text},
+                {"text", element.text.c_str()},
                 {"target", element.target.has_value() 
                     ? nlohmann::json {
                         {"type", element.target.value().get_type() == Pubnub::MentionTarget::Type::USER 
@@ -204,8 +204,8 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
         for (const auto& mention : suggested_mentions) {
             auto mention_json = nlohmann::json {
                 {"offset", mention.offset},
-                {"replace_from", mention.replace_from},
-                {"replace_to", mention.replace_to},
+                {"replaceFrom", mention.replace_from.c_str()},
+                {"replaceTo", mention.replace_to.c_str()},
                 {"target", nlohmann::json {
                     {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER 
                         ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
@@ -220,8 +220,8 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
         }
 
         auto data_json = nlohmann::json {
-            {"message_elements", elements_json},
-            {"suggested_mentions", mentions_json}
+            {"messageElements", elements_json},
+            {"suggestedMentions", mentions_json}
         };
 
         strcpy(data, data_json.dump().c_str());
