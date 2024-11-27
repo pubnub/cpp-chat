@@ -318,6 +318,11 @@ bool MessageDraftEntity::validate_mentions() const {
 }
 
 bool MessageDraftEntity::validate_suggested_mention(const MessageDraftSuggestedMentionEntity& suggested_mention) const {
-    return this->value.substring(suggested_mention.position, suggested_mention.replace_from.length())
-        == suggested_mention.replace_from;
+    auto substring = this->value.substring(suggested_mention.position, suggested_mention.replace_from.length());
+
+    if (nullptr == substring.c_str()) {
+        return false;
+    }
+
+    return substring == suggested_mention.replace_from;
 }

@@ -177,17 +177,16 @@ PnCResult pn_message_draft_send(Pubnub::MessageDraft* message_draft,
 PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_draft, char *data) {
     try {
         auto message_elements = message_draft->consume_message_elements();
-
         std::vector<nlohmann::json> elements_json;
         for (const auto& element : message_elements) {
             auto element_json = nlohmann::json {
-                {"text", element.text.c_str()},
-                {"target", element.target.has_value() 
+                {"text", element.text.c_str() != nullptr ? element.text.c_str() : ""},
+                {"target", element.target.has_value()
                     ? nlohmann::json {
-                        {"type", element.target.value().get_type() == Pubnub::MentionTarget::Type::USER 
-                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
-                            : element.target.value().get_type() == Pubnub::MentionTarget::Type::CHANNEL 
-                                ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
+                        {"type", element.target.value().get_type() == Pubnub::MentionTarget::Type::USER
+                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER
+                            : element.target.value().get_type() == Pubnub::MentionTarget::Type::CHANNEL
+                                ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL
                                 : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
                         },
                         {"target", element.target.value().get_target()}
@@ -197,20 +196,18 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
             };
             elements_json.push_back(element_json);
         }
-
         auto suggested_mentions = message_draft->consume_suggested_mentions();
-
         std::vector<nlohmann::json> mentions_json;
         for (const auto& mention : suggested_mentions) {
             auto mention_json = nlohmann::json {
                 {"offset", mention.offset},
-                {"replaceFrom", mention.replace_from.c_str()},
-                {"replaceTo", mention.replace_to.c_str()},
+                {"replaceFrom", mention.replace_from.c_str() ? mention.replace_from.c_str() : ""},
+                {"replaceTo", mention.replace_to.c_str() ? mention.replace_to.c_str() : ""},
                 {"target", nlohmann::json {
-                    {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER 
-                        ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER 
-                        : mention.target.get_type() == Pubnub::MentionTarget::Type::CHANNEL 
-                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL 
+                    {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER
+                        ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER
+                        : mention.target.get_type() == Pubnub::MentionTarget::Type::CHANNEL
+                            ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL
                             : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
                     },
                     {"target", mention.target.get_target()}
@@ -218,22 +215,17 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
             };
             mentions_json.push_back(mention_json);
         }
-
         auto data_json = nlohmann::json {
             {"messageElements", elements_json},
             {"suggestedMentions", mentions_json}
         };
-
         strcpy(data, data_json.dump().c_str());
     } catch (const std::exception& e) {
         pn_c_set_error_message(e.what());
-
         return PN_C_ERROR;
     }
-
     return PN_C_OK;
 }
-
 void pn_message_draft_set_search_for_suggestions(Pubnub::MessageDraft *message_draft, bool search_for_suggestions) {
     message_draft->set_search_for_suggestions(search_for_suggestions);
 }
