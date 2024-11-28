@@ -181,7 +181,7 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
         for (const auto& element : message_elements) {
             auto element_json = nlohmann::json {
                 {"text", element.text.c_str() != nullptr ? element.text.c_str() : ""},
-                {"target", element.target.has_value()
+                {"mentionTarget", element.target.has_value()
                     ? nlohmann::json {
                         {"type", element.target.value().get_type() == Pubnub::MentionTarget::Type::USER
                             ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER
@@ -189,7 +189,7 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
                                 ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL
                                 : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
                         },
-                        {"target", element.target.value().get_target()}
+                        {"target", element.target.value().get_target().c_str() ? element.target.value().get_target().c_str() : ""}
                     }
                     : nullptr
                 }
@@ -203,14 +203,14 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
                 {"offset", mention.offset},
                 {"replaceFrom", mention.replace_from.c_str() ? mention.replace_from.c_str() : ""},
                 {"replaceTo", mention.replace_to.c_str() ? mention.replace_to.c_str() : ""},
-                {"target", nlohmann::json {
+                {"mentionTarget", nlohmann::json {
                     {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER
                         ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER
                         : mention.target.get_type() == Pubnub::MentionTarget::Type::CHANNEL
                             ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_CHANNEL
                             : PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_URL
                     },
-                    {"target", mention.target.get_target()}
+                    {"target", mention.target.get_target().c_str() ? mention.target.get_target().c_str() : ""}
                 }}
             };
             mentions_json.push_back(mention_json);
