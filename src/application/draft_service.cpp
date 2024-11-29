@@ -72,9 +72,6 @@ std::pair<Pubnub::SendTextParams, Pubnub::String> DraftService::prepare_sending_
         params.send_by_post,
         params.meta,
         mentioned_users,
-        // TODO: reviewers do you know if we should add here channel mentions or links?
-        params.referenced_channels,
-        params.text_links,
         params.quoted_message
     };
 

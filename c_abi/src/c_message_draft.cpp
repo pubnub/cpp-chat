@@ -107,10 +107,6 @@ PnCResult pn_message_draft_send(Pubnub::MessageDraft* message_draft,
         int mentioned_users_length,
         int* mentioned_users_indexes,
         Pubnub::User** mentioned_users,
-        int referenced_channels_length,
-        int* referenced_channels_indexes,
-        Pubnub::Channel** referenced_channels,
-        const char* text_links_json,
         Pubnub::Message* quoted_message) {
     try {
         Pubnub::SendTextParams params;
@@ -130,30 +126,6 @@ PnCResult pn_message_draft_send(Pubnub::MessageDraft* message_draft,
             mentioned_users_map.emplace(std::make_pair(mentioned_users_indexes[i], mentioned_user));
         }
         params.mentioned_users = mentioned_users_map;
-
-        //Referenced channels
-        std::map<int, Pubnub::ReferencedChannel> referenced_channels_map;
-        for (int i = 0; i < referenced_channels_length; i++)
-        {
-            auto channel = *referenced_channels[i];
-            auto referenced_channel = Pubnub::ReferencedChannel();
-            referenced_channel.id = channel.channel_id();
-            referenced_channel.name = channel.channel_data().channel_name;
-            referenced_channels_map.emplace(std::make_pair(referenced_channels_indexes[i], referenced_channel));
-        }
-        params.referenced_channels = referenced_channels_map;
-
-        //Text links
-        auto parsed_links_json = nlohmann::json::parse(text_links_json);
-        Pubnub::Vector<Pubnub::TextLink> links;
-        for (auto link_json : parsed_links_json) {
-            Pubnub::TextLink link;
-            link.start_index = link_json["StartIndex"];
-            link.end_index = link_json["EndIndex"];
-            link.link = link_json["Link"];
-            links.push_back(link);
-        }
-        params.text_links = links;
 
         //Quoted message
         if (quoted_message == nullptr)

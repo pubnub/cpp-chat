@@ -130,10 +130,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_send_text_dirty(
     int mentioned_users_length,
     int* mentioned_users_indexes,
     Pubnub::User** mentioned_users,
-    int referenced_channels_length,
-    int* referenced_channels_indexes,
-    Pubnub::Channel** referenced_channels,
-    const char* text_links_json,
     Pubnub::Message* quoted_message);
 
 
