@@ -94,11 +94,11 @@ void MessageDraft::trigger_typing_indicator() {
 }
 
 #ifndef PN_CHAT_C_ABI
-void MessageDraft::add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
+void MessageDraft::add_change_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
     this->value->add_callback(listener);
 }
 
-void MessageDraft::add_message_elements_listener(
+void MessageDraft::add_change_listener(
         std::function<void(
             Pubnub::Vector<Pubnub::MessageElement>,
             Pubnub::Vector<Pubnub::SuggestedMention>

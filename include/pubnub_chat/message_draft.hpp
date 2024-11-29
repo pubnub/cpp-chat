@@ -77,8 +77,8 @@ namespace Pubnub
             PN_CHAT_EXPORT void send(SendTextParams send_params = SendTextParams());
 
 #ifndef PN_CHAT_C_ABI
-            PN_CHAT_EXPORT void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
-            PN_CHAT_EXPORT void add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
+            PN_CHAT_EXPORT void add_change_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener);
+            PN_CHAT_EXPORT void add_change_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>, Pubnub::Vector<Pubnub::SuggestedMention>)> listener);
 #else 
             std::vector<Pubnub::MessageElement> consume_message_elements();
             std::vector<Pubnub::SuggestedMention> consume_suggested_mentions();
