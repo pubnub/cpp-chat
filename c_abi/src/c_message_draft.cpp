@@ -203,7 +203,7 @@ PnCResult pn_message_draft_consume_callback_data(Pubnub::MessageDraft *message_d
                 {"offset", mention.offset},
                 {"replaceFrom", mention.replace_from.c_str() ? mention.replace_from.c_str() : ""},
                 {"replaceTo", mention.replace_to.c_str() ? mention.replace_to.c_str() : ""},
-                {"mentionTarget", nlohmann::json {
+                {"target", nlohmann::json {
                     {"type", mention.target.get_type() == Pubnub::MentionTarget::Type::USER
                         ? PN_MESSAGE_DRAFT_MENTION_TARGET_TYPE_USER
                         : mention.target.get_type() == Pubnub::MentionTarget::Type::CHANNEL
