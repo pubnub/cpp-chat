@@ -28,6 +28,8 @@ namespace Pubnub
                 URL
             };
 
+            PN_CHAT_EXPORT MentionTarget() = default;
+
             PN_CHAT_EXPORT static MentionTarget user(const Pubnub::String& user_id);
             PN_CHAT_EXPORT static MentionTarget channel(const Pubnub::String& channel);
             PN_CHAT_EXPORT static MentionTarget url(const Pubnub::String& url);
@@ -53,7 +55,7 @@ namespace Pubnub
             MessageElement(const Pubnub::String& text, const Pubnub::Option<Pubnub::MentionTarget>& target);
     };
 
-    PN_CHAT_EXPORT struct SuggestedMention {
+    struct SuggestedMention {
         std::size_t offset;
         Pubnub::String replace_from;
         Pubnub::String replace_to;
@@ -67,6 +69,8 @@ namespace Pubnub
                 GLOBAL
             };
             PN_CHAT_EXPORT ~MessageDraft();
+            PN_CHAT_EXPORT MessageDraft(const MessageDraft& other);
+            PN_CHAT_EXPORT MessageDraft& operator=(const MessageDraft& other);
 
             PN_CHAT_EXPORT void insert_text(std::size_t position, const Pubnub::String& text);
             PN_CHAT_EXPORT void remove_text(std::size_t position, std::size_t length);
@@ -96,7 +100,7 @@ namespace Pubnub
             Pubnub::Channel channel;
             MessageDraftConfig draft_config;
             std::unique_ptr<MessageDraftDAO> value;
-            std::unique_ptr<DraftService> draft_service;
+            std::shared_ptr<DraftService> draft_service;
 
             friend ::MessageService;
     };
