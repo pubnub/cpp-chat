@@ -34,7 +34,7 @@ int main() {
 
     channel.send_text("This message is abusing the rules, please take a look at it");
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
     std::cout << "End of main" << std::endl;
 }
 

@@ -195,6 +195,7 @@ if(${COMPILE_EXAMPLES})
     example(forward_message)
     example(report_user)
     example(thread_channel)
+    example(message_reactions)
 endif()
 
 if(${RUN_TESTS})
