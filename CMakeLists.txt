@@ -181,12 +181,20 @@ add_library(pubnub-chat SHARED ${SOURCES})
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
+# TODO: kept for debugging purposes - should be deleted before release
 add_executable(pubnub-chat-example example/main.cpp)
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
 if(${COMPILE_EXAMPLES})
-    add_executable(pubnub-message-draft-example example/message_draft.cpp)
-    target_link_libraries(pubnub-message-draft-example PRIVATE pubnub-chat)
+    function(example name)
+        add_executable(pubnub_${name} example/${name}.cpp)
+        target_link_libraries(pubnub_${name} PRIVATE pubnub-chat)
+    endfunction()
+
+    example(message_draft)
+    example(forward_message)
+    example(report_user)
+    example(thread_channel)
 endif()
 
 if(${RUN_TESTS})
