@@ -20,7 +20,7 @@ Ensure(Quote, should_remove_quotes_from_quoted_string) {
     assert_string_equal(Quotes::remove("\"message\"").c_str(), "message");
 }
 
-Ensure(Quote, should_not_remove_quotes_from_string) {
+Ensure(Quote, should_not_remove_quotes_from_string_where_there_are_no_quotes) {
     assert_string_equal(Quotes::remove("message").c_str(), "message");
 }
 
