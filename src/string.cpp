@@ -156,6 +156,10 @@ std::size_t String::capacity() const {
 }
 
 bool String::empty() const {
+    if (this->string == nullptr) {
+        return true;
+    }
+
     return this->len == 0;
 }
 
@@ -421,6 +425,10 @@ String operator+(const String& lhs, const String& rhs) {
 }
 
 bool operator==(const String& lhs, const String& rhs) {
+    if(lhs.c_str() == nullptr || rhs.c_str() == nullptr) {
+        return false;
+    }
+
     return strcmp(lhs.c_str(), rhs.c_str()) == 0;
 }
 

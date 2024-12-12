@@ -112,6 +112,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
 {
+    auto reaction_id_from_json = json_field_from_pn_block(pn_message.payload, "data", "uuid");
     return std::make_pair(
         json_field_from_pn_block(pn_message.payload, "data", "messageTimetoken"),
         MessageEntity{
@@ -127,7 +128,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
             Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
                 json_field_from_pn_block(pn_message.payload, "data", "value"),
                 json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
-                json_field_from_pn_block(pn_message.payload, "data", "uuid")
+                reaction_id_from_json.empty() ? string_from_pn_block(pn_message.publisher) : reaction_id_from_json                
             }}
         }
     );

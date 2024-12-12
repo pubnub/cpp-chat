@@ -121,7 +121,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/quotes.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -231,6 +232,7 @@ if(${RUN_TESTS})
     test_suite(prarsers-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/parsers_unit.cpp)
     test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
     test_suite(message-draft-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/message_draft_entity_unit.cpp)
+    test_suite(quotes-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/quotes_unit.cpp)
     
     #TODO: e/e
     #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
