@@ -397,7 +397,7 @@ void ChannelService::start_typing(const String& channel_id, ChannelDAO& channel_
 
     channel_data.start_typing(chat_service_shared->chat_config.typing_timeout - chat_service_shared->chat_config.typing_timeout_difference);
 
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, true));
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(true));
 }
 
 void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_data) const {
@@ -418,7 +418,7 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
     }();
     auto chat_service_shared = chat_service.lock();
 
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, false));
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(false));
 }
 
 std::function<void()> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
@@ -426,13 +426,13 @@ std::function<void()> ChannelService::get_typing(const String& channel_id, Chann
     auto typing_timeout = chat_service_shared->chat_config.typing_timeout;
     std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
     {
-        auto maybe_typing = Typing::typing_user_from_event(event);
+        auto maybe_typing = Typing::typing_value_from_event(event);
         if(!maybe_typing.has_value()) {
             throw std::runtime_error("Can't get typing from payload");
         }
 
-        auto user_id = maybe_typing.value().first;
-        auto typing_value = maybe_typing.value().second;
+        auto user_id = event.user_id;
+        auto typing_value = maybe_typing.value();
        
         //stop typing
         if(!typing_value && channel_data.contains_typing_indicator(user_id)) {

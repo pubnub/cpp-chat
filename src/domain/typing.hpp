@@ -27,9 +27,8 @@ class Typing {
 
         bool contains_typing_indicator(const Pubnub::String& user_id) const;
 
-        static Pubnub::String payload(const Pubnub::String& user_id, bool is_typing);
-        static std::optional<std::pair<UserId, bool>> typing_user_from_payload(const Json& payload);
-        static std::optional<std::pair<UserId, bool>> typing_user_from_event(const Pubnub::Event& event);
+        static Pubnub::String payload(bool is_typing);
+        static std::optional<bool> typing_value_from_event(const Pubnub::Event& event);
     private:
         bool sent = false;
         std::vector<Pubnub::String> typing_indicators;
