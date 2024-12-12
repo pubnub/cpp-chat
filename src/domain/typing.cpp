@@ -41,23 +41,38 @@ bool Typing::contains_typing_indicator(const Pubnub::String& user_id) const {
         ) != this->typing_indicators.end();
 }
 
-Pubnub::String Typing::payload(bool is_typing) {
+Pubnub::String Typing::payload(const Pubnub::String& user_id, bool is_typing) {
     Pubnub::String typing = is_typing ? "true" : "false";
 
-    return "{\"value\": " + typing + "}";
+    return "{\"value\": " + typing +", \"userId\": \"" + user_id + "\"}";
 }
 
-std::optional<bool> Typing::typing_value_from_event(const Pubnub::Event& event)
+std::optional<std::pair<Typing::UserId, bool>> Typing::typing_user_from_payload(const Json& payload) {
+    if(!payload.contains("userId")) {
+        return std::nullopt;
+    }
+
+    if(!payload.contains("value")) {
+        return std::nullopt;
+    }
+
+    return std::make_pair(payload.get_string("userId").value(), payload.get_bool("value").value());
+}
+
+std::optional<std::pair<Typing::UserId, bool>> Typing::typing_user_from_event(const Pubnub::Event& event)
 {
     if(event.payload.empty())
     {
         return std::nullopt;
     }
     Json payload = Json::parse(event.payload);
+    if(!payload.contains("userId")) {
+        return std::nullopt;
+    }
 
     if(!payload.contains("value")) {
         return std::nullopt;
     }
 
-    return payload.get_bool("value").value();
+    return std::make_pair(payload.get_string("userId").value(), payload.get_bool("value").value());
 }
