@@ -113,6 +113,18 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
 {
     auto reaction_id_from_json = json_field_from_pn_block(pn_message.payload, "data", "uuid");
+    std::vector<Pubnub::MessageAction> message_actions;
+
+    // Message update contains always the last action if it was the update
+    if (json_field_from_pn_block(pn_message.payload, "event") != Pubnub::String("removed")) {
+        message_actions.push_back(Pubnub::MessageAction{
+                Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
+                json_field_from_pn_block(pn_message.payload, "data", "value"),
+                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
+                reaction_id_from_json.empty() ? string_from_pn_block(pn_message.publisher) : reaction_id_from_json                
+           });
+    }
+
     return std::make_pair(
         json_field_from_pn_block(pn_message.payload, "data", "messageTimetoken"),
         MessageEntity{
@@ -123,13 +135,8 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
             string_from_pn_block(pn_message.channel),
             string_from_pn_block(pn_message.publisher),
             string_from_pn_block(pn_message.metadata),
-            // Message update contains always the last action if it was the update
-            {Pubnub::MessageAction{
-            Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
-                json_field_from_pn_block(pn_message.payload, "data", "value"),
-                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
-                reaction_id_from_json.empty() ? string_from_pn_block(pn_message.publisher) : reaction_id_from_json                
-            }}
+            message_actions
+            
         }
     );
 }
