@@ -197,6 +197,7 @@ if(${COMPILE_EXAMPLES})
     example(report_user)
     example(thread_channel)
     example(message_reactions)
+    example(delete_message)
 endif()
 
 if(${RUN_TESTS})
