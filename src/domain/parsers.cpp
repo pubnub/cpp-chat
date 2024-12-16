@@ -118,6 +118,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
         MessageEntity{
             // TODO: leak of presentation
             Pubnub::pubnub_chat_message_type::PCMT_TEXT,
+            // TODO: message should only care about message actions - consider leaving empty string
             json_field_from_pn_block(pn_message.payload, "data", "value"),
             string_from_pn_block(pn_message.channel),
             string_from_pn_block(pn_message.publisher),

@@ -34,7 +34,7 @@ int main() {
     });
 
     // Send message
-    channel.send_text("Chuje muje dzikie weze");
+    channel.send_text("Message to delete for some reasons");
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
     std::cout << "End of main" << std::endl;
