@@ -21,10 +21,12 @@ int main() {
             auto deleted = message.delete_message();
 
             std::cout << "Deleted: " << deleted.text() << std::endl;
+            std::cout << "Is `deleted` deleted: " << deleted.deleted() << std::endl;
 
             auto restored = deleted.restore();
 
             std::cout << "Restored: " << restored.text() << std::endl;
+            std::cout << "Is `restored` deleted: " << restored.deleted() << std::endl;
 
             auto is_deleted_from_pubnub_infra = restored.delete_message_hard();
 
