@@ -311,18 +311,6 @@ MessageEntity MessageEntity::from_base_and_updated_message(MessageEntity base_me
     new_entity.user_id = updated_message.user_id.empty() ? base_message.user_id : updated_message.user_id;
     new_entity.meta = updated_message.meta.empty() ? base_message.meta : updated_message.meta;
 
-    std::cout << "base message actions: " << base_message.message_actions.size() << std::endl;
-    for (auto reactions : base_message.message_actions) {
-        std::cout << "Reaction: `" << reactions.value << "` by user: " << reactions.user_id << std::endl;
-        std::cout << "Timetoken: " << reactions.timetoken << std::endl;
-    }
-
-    std::cout << "updated message actions: " << updated_message.message_actions.size() << std::endl;
-    for(auto reactions : updated_message.message_actions) {
-        std::cout << "Reaction: `" << reactions.value << "` by user: " << reactions.user_id << std::endl;
-        std::cout << "Timetoken: " << reactions.timetoken << std::endl;
-    }
-
     new_entity.message_actions.insert(new_entity.message_actions.end(), base_message.message_actions.begin(), base_message.message_actions.end());
     new_entity.message_actions.insert(new_entity.message_actions.end(), updated_message.message_actions.begin(), updated_message.message_actions.end());
 
@@ -339,11 +327,6 @@ MessageEntity MessageEntity::from_base_and_updated_message(MessageEntity base_me
                     new_entity.message_actions.begin(),
                     new_entity.message_actions.end(),
                     [](const Pubnub::MessageAction& a, const Pubnub::MessageAction& b) {
-                        std::cout << "is unique:" << (a.timetoken == b.timetoken && a.type == b.type && a.user_id == b.user_id && a.value == b.value) << std::endl;
-                        std::cout << "timetokens: " << a.timetoken << " " << b.timetoken << " -> " << (a.timetoken == b.timetoken) << std::endl;
-                        std::cout << "types: " << a.type << " " << b.type << " -> " << (a.type == b.type) << std::endl;
-                        std::cout << "user_ids: " << a.user_id << " " << b.user_id << " -> " << (a.user_id == b.user_id) << std::endl;
-                        std::cout << "values: " << a.value << " " << b.value << " -> " << (a.value == b.value) << std::endl;
                         return a.timetoken == b.timetoken && a.type == b.type && a.user_id == b.user_id && a.value == b.value;
                     }
                 ),
