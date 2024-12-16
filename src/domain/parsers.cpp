@@ -112,6 +112,7 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
 {
+    auto reaction_id_from_json = json_field_from_pn_block(pn_message.payload, "data", "uuid");
     return std::make_pair(
         json_field_from_pn_block(pn_message.payload, "data", "messageTimetoken"),
         MessageEntity{
@@ -121,13 +122,12 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
             string_from_pn_block(pn_message.channel),
             string_from_pn_block(pn_message.publisher),
             string_from_pn_block(pn_message.metadata),
-            // TODO: I'm 100% sure that we're losing some data here
-            //       There is need to get the whole array of actions
+            // Message update contains always the last action if it was the update
             {Pubnub::MessageAction{
             Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
                 json_field_from_pn_block(pn_message.payload, "data", "value"),
                 json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
-                json_field_from_pn_block(pn_message.payload, "data", "uuid")
+                reaction_id_from_json.empty() ? string_from_pn_block(pn_message.publisher) : reaction_id_from_json                
             }}
         }
     );

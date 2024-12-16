@@ -1,6 +1,7 @@
 #include "message_service.hpp"
 #include "chat_service.hpp"
 #include "domain/message_entity.hpp"
+#include "domain/quotes.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -153,13 +154,13 @@ std::vector<MessageAction> MessageService::get_message_reactions(const MessageDA
 Message MessageService::toggle_reaction(const Pubnub::String& timetoken, const MessageDAO& message, const String& reaction) const {
     auto current_reactions = this->get_message_reactions(message);
     auto pubnub_handle = pubnub->lock();
-    String current_user_id = pubnub_handle->get_user_id();
+    String current_user_id = pubnub_handle->get_user_id(); 
     pubnub_message_action_type action_type = pubnub_message_action_type::PMAT_Reaction;
 
     auto message_data = message.get_entity();
     auto timetoken_to_remove = message_data.get_user_reaction_timetoken(current_user_id, reaction);
 
-    if (timetoken_to_remove.has_value()) {
+    if (timetoken_to_remove.has_value()) { 
         pubnub_handle->remove_message_action(message_data.channel_id, timetoken, timetoken_to_remove.value());
         auto new_entity = message_data.remove_user_reaction(timetoken_to_remove.value());
 
@@ -168,7 +169,7 @@ Message MessageService::toggle_reaction(const Pubnub::String& timetoken, const M
 
     String action_timetoken = pubnub_handle->add_message_action(
             message_data.channel_id, timetoken, message_action_type_to_string(action_type), reaction);
-    auto new_entity = message_data.add_user_reaction(current_user_id, reaction, action_timetoken);
+    auto new_entity = message_data.add_user_reaction(current_user_id, reaction, Quotes::remove(action_timetoken));
 
     return this->create_message_object(std::make_pair(timetoken, new_entity));
 }

@@ -1,6 +1,7 @@
 #include "message_dao.hpp"
 #include "message_action.hpp"
 #include "domain/message_entity.hpp"
+#include "vector.hpp"
 
 MessageDAO::MessageDAO(const MessageEntity& message_entity) :
     message_entity(std::move(message_entity))
@@ -18,7 +19,9 @@ Pubnub::ChatMessageData MessageDAO::to_message_data() const {
     message_data.channel_id = this->message_entity.channel_id;
     message_data.user_id = this->message_entity.user_id;
     message_data.meta = this->message_entity.meta;
-    message_data.message_actions = std::move(this->message_entity.message_actions);
+
+    std::vector<Pubnub::MessageAction> message_actions(this->message_entity.message_actions);
+    message_data.message_actions = std::move(message_actions);
 
     return message_data;
 }
