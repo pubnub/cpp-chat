@@ -66,7 +66,7 @@ Pubnub::Message MessageService::delete_message(const MessageDAO& message, const 
         return pubnub_handle->add_message_action(entity.channel_id, timetoken, message_action_type_to_string(deleted_action_type), deleted_value);
     }();
 
-    auto new_message_entity = entity.delete_message(deleted_value, action_timetoken);
+    auto new_message_entity = entity.delete_message(Quotes::remove(deleted_value), Quotes::remove(action_timetoken));
 
     return this->create_message_object(std::make_pair(timetoken, new_message_entity));
 }
