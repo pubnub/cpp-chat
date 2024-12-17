@@ -1,15 +1,33 @@
 #include "c_thread_message.hpp"
 #include "c_errors.hpp"
+#include "message.hpp"
+#include "thread_message.hpp"
 
 void pn_thread_message_dispose(Pubnub::ThreadMessage* thread_message){
     delete thread_message;
+}
+
+Pubnub::ThreadMessage* pn_thread_message_consume_and_upgrade(
+        Pubnub::Message* message,
+        const char* parent_channel_id) {
+    try {
+        auto* thread_message = new Pubnub::ThreadMessage(*message, parent_channel_id);
+        free(message);
+
+        return thread_message;
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 Pubnub::ThreadMessage* pn_thread_message_edit_text(
     Pubnub::ThreadMessage* message,
     const char* text) {
     try {
-        //return new Pubnub::ThreadMessage(message->);
+        return new Pubnub::ThreadMessage(message->edit_text(text), message->parent_channel_id());
     }
     catch (std::exception& e) {
         pn_c_set_error_message(e.what());

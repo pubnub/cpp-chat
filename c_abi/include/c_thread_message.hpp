@@ -9,6 +9,10 @@
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_thread_message_dispose(Pubnub::ThreadMessage* thread_message);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::ThreadMessage* pn_thread_message_consume_and_upgrade(
+        Pubnub::Message* message,
+        const char* parent_channel_id);
+
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_message_get_timetoken(Pubnub::ThreadMessage* thread_message, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_thread_message_unpin_from_parent_channel(Pubnub::ThreadMessage* thread_message);
