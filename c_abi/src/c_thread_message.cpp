@@ -23,19 +23,6 @@ Pubnub::ThreadMessage* pn_thread_message_consume_and_upgrade(
     }
 }
 
-Pubnub::ThreadMessage* pn_thread_message_edit_text(
-    Pubnub::ThreadMessage* message,
-    const char* text) {
-    try {
-        return new Pubnub::ThreadMessage(message->edit_text(text), message->parent_channel_id());
-    }
-    catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
-
-        return PN_C_ERROR_PTR;
-    }
-}
-
 PnCResult pn_thread_message_get_timetoken(Pubnub::ThreadMessage* thread_message, char* result) {
     try {
         strcpy(result, thread_message->timetoken());
