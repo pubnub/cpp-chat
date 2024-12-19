@@ -221,6 +221,33 @@ std::function<void()> MessageService::stream_updates(Pubnub::Message calling_mes
 
 }
 
+
+std::function<void()> MessageService::stream_updates(Pubnub::ThreadMessage calling_message, std::function<void(const Pubnub::ThreadMessage)> message_callback) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat = this->chat_service.lock();
+
+    std::vector<String> messages_ids;
+    std::function<void(ThreadMessage)> final_message_callback = [=](ThreadMessage message){
+        auto updated_message = this->update_message_with_base(message, calling_message);
+        
+        message_callback(ThreadMessage(updated_message, calling_message.parent_channel_id()));
+    };
+    
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
+    chat->callback_service->broadcast_messages(messages);
+    chat->callback_service->register_thread_message_update_callback(calling_message.timetoken(), final_message_callback);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=](){
+        chat->callback_service->remove_message_update_callback(calling_message.timetoken());
+    };
+
+    return stop_streaming;
+
+}
+
 std::function<void()> MessageService::stream_updates_on(Pubnub::Message calling_message, const std::vector<Pubnub::Message>& messages, std::function<void(std::vector<Pubnub::Message>)> message_callback) const
 {
     if(messages.empty())
