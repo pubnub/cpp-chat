@@ -839,7 +839,7 @@ void ChannelService::remove_thread_channel(const Pubnub::Message &message) const
 
 Pubnub::ThreadChannel ChannelService::pin_message_to_thread_channel(const Pubnub::ThreadMessage &message, const Pubnub::ThreadChannel& thread_channel) const
 {
-    auto new_channel = this->pin_message_to_channel(message, thread_channel.channel_id(), *thread_channel.data);
+    auto new_channel = this->pin_message_to_channel(message.to_message(), thread_channel.channel_id(), *thread_channel.data);
     return create_thread_channel_object({thread_channel.channel_id(), new_channel.data->get_entity()}, thread_channel.parent_message());
 }
 

@@ -2,7 +2,7 @@
 #define PN_CHAT_MESSAGE_DAO_HPP
 
 #include "domain/message_entity.hpp"
-#include "message.hpp"
+#include "chat_message_data.hpp"
 
 class MessageDAO {
     public:

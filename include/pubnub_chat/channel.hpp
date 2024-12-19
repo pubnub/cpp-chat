@@ -6,7 +6,6 @@
 #include "helpers/export.hpp"
 #include "restrictions.hpp"
 #include "message_elements.hpp"
-#include "message.hpp"
 #include "enums.hpp"
 #include "vector.hpp"
 #include "callback_stop.hpp"

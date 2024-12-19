@@ -2,12 +2,11 @@
 #define PN_CHAT_THREAD_CHANNEL_HPP
 
 #include "pubnub_chat/channel.hpp"
-#include "pubnub_chat/message.hpp"
-
 
 namespace Pubnub 
 {
     class ThreadMessage;
+    class Message;
 
     class ThreadChannel : public Channel
     {

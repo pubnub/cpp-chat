@@ -143,16 +143,6 @@ namespace Pubnub {
     }
 
     template<typename MessageType>
-    ThreadChannel BaseMessage<MessageType>::create_thread() const {
-        return this->channel_service->create_thread_channel(*this);
-    }
-
-    template<typename MessageType>
-    ThreadChannel BaseMessage<MessageType>::get_thread() const {
-        return this->channel_service->get_thread_channel(*this);
-    }
-
-    template<typename MessageType>
     bool BaseMessage<MessageType>::has_thread() const {
         return this->channel_service->has_thread_channel(*this);
     }

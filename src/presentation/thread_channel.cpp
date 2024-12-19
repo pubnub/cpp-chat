@@ -82,7 +82,7 @@ Pubnub::ThreadChannel Pubnub::ThreadChannel::unpin_message_from_thread() const
 Pubnub::Channel Pubnub::ThreadChannel::pin_message_to_parent_channel(const Pubnub::ThreadMessage &message) const
 {
     auto parent_channel = this->channel_service->get_channel(parent_channel_id_internal);
-    return parent_channel.pin_message(message);
+    return parent_channel.pin_message(message.to_message());
 }
 
 Pubnub::Channel Pubnub::ThreadChannel::unpin_message_from_parent_channel() const

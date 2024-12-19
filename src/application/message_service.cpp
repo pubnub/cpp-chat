@@ -303,7 +303,7 @@ std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage ca
             {
                 auto updated_message = this->update_thread_message_with_base(stream_message, message);
 
-                updated_messages.push_back(Pubnub::ThreadMessage(updated_message, stream_message.parent_channel_id()));
+                updated_messages.push_back(updated_message);
             }
             else
             {
