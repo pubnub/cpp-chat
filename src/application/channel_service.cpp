@@ -464,6 +464,10 @@ std::function<void()> ChannelService::get_typing(const String& channel_id, Chann
 }
 
 Message ChannelService::get_pinned_message(const String& channel_id, const ChannelDAO& channel_data) const {
+    if (channel_data.get_entity().custom_data_json.empty()) {
+        throw std::invalid_argument("there is no any pinned message");
+    }
+
     Json custom_data_json = Json::parse(channel_data.get_entity().custom_data_json);
     if(!custom_data_json.contains("pinnedMessageTimetoken") || custom_data_json["pinnedMessageTimetoken"].is_null())
     {
