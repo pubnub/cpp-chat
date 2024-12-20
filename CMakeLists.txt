@@ -187,6 +187,9 @@ target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 if(${COMPILE_EXAMPLES})
     add_executable(pubnub-message-draft-example example/message_draft.cpp)
     target_link_libraries(pubnub-message-draft-example PRIVATE pubnub-chat)
+    add_executable(pubnub-restrictions-example example/restrictions.cpp)
+    target_link_libraries(pubnub-restrictions-example PRIVATE pubnub-chat)
+
 endif()
 
 if(${RUN_TESTS})
