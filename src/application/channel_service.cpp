@@ -397,7 +397,7 @@ void ChannelService::start_typing(const String& channel_id, ChannelDAO& channel_
 
     channel_data.start_typing(chat_service_shared->chat_config.typing_timeout - chat_service_shared->chat_config.typing_timeout_difference);
 
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, true));
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(true));
 }
 
 void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_data) const {
@@ -418,7 +418,7 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
     }();
     auto chat_service_shared = chat_service.lock();
 
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(user_id, false));
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(false));
 }
 
 std::function<void()> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
@@ -426,13 +426,13 @@ std::function<void()> ChannelService::get_typing(const String& channel_id, Chann
     auto typing_timeout = chat_service_shared->chat_config.typing_timeout;
     std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
     {
-        auto maybe_typing = Typing::typing_user_from_event(event);
+        auto maybe_typing = Typing::typing_value_from_event(event);
         if(!maybe_typing.has_value()) {
             throw std::runtime_error("Can't get typing from payload");
         }
 
-        auto user_id = maybe_typing.value().first;
-        auto typing_value = maybe_typing.value().second;
+        auto user_id = event.user_id;
+        auto typing_value = maybe_typing.value();
        
         //stop typing
         if(!typing_value && channel_data.contains_typing_indicator(user_id)) {
@@ -464,6 +464,10 @@ std::function<void()> ChannelService::get_typing(const String& channel_id, Chann
 }
 
 Message ChannelService::get_pinned_message(const String& channel_id, const ChannelDAO& channel_data) const {
+    if (channel_data.get_entity().custom_data_json.empty()) {
+        throw std::invalid_argument("there is no any pinned message");
+    }
+
     Json custom_data_json = Json::parse(channel_data.get_entity().custom_data_json);
     if(!custom_data_json.contains("pinnedMessageTimetoken") || custom_data_json["pinnedMessageTimetoken"].is_null())
     {
@@ -922,45 +926,6 @@ String ChannelService::send_text_meta_from_params(const SendTextParamsInternal& 
         }
 
         message_json["mentionedUsers"] = mentioned_users_json;
-        any_data_added = true;
-    }
-
-    //referenced channels
-    if(text_params.referenced_channels.size() > 0)
-    {
-        json referenced_channels_json;
-        auto referenced_channels = text_params.referenced_channels;
-
-        for(auto it = referenced_channels.begin(); it != referenced_channels.end(); it++)
-        {
-            json referenced_channel_json;
-            referenced_channel_json["id"] = String(it->second.id).c_str();
-            referenced_channel_json["name"] = String(it->second.name).c_str();
-            String key = std::to_string(it->first);
-            referenced_channels_json[key] = referenced_channel_json;
-        }
-
-        message_json["referencedChannels"] = referenced_channels_json;
-        any_data_added = true;
-    }
-
-    //text links
-    if(text_params.text_links.size() > 0)
-    {
-        json text_links_json = json::array();
-        auto text_links = text_params.text_links;
-
-        for(auto text_link : text_links)
-        {
-            json text_link_json;
-            text_link_json["start_index"] = text_link.start_index;
-            text_link_json["end_index"] = text_link.end_index;
-            text_link_json["link"] = text_link.link.c_str();
-
-            text_links_json.push_back(text_link_json);
-        }
-
-        message_json["textLinks"] = text_links_json;
         any_data_added = true;
     }
 

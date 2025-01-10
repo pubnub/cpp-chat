@@ -48,8 +48,6 @@ struct SendTextParamsInternal
     meta(params.meta)
     {
         mentioned_users = params.mentioned_users.into_std_map();
-        referenced_channels = params.referenced_channels.into_std_map();
-        text_links = params.text_links.into_std_vector();
         if(params.quoted_message.has_value())
         {
             Pubnub::Message message = params.quoted_message.value();

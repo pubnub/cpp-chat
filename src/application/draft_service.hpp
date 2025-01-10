@@ -42,6 +42,7 @@ class DraftService {
         static MessageDraftMentionTargetEntity convert_mention_target_to_domain(const Pubnub::MentionTarget& target);
         static Pubnub::MessageElement convert_message_element_to_presentation(const MessageDraftMessageElementEntity& element);
         static Pubnub::MentionedUser convert_mentioned_user_to_presentation(const MessageDraftEntity& entity, const MessageDraftMentionEntity& user);
+        static Pubnub::MentionTarget convert_mention_target_to_presentation(const MessageDraftMentionTargetEntity& target);
 
         std::shared_ptr<const ChannelService> channel_service;
         std::shared_ptr<const UserService> user_service;

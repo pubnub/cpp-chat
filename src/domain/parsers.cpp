@@ -112,23 +112,31 @@ std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to
 
 std::pair<Parsers::PubnubJson::Timetoken, MessageEntity> Parsers::PubnubJson::to_message_update(pubnub_v2_message pn_message)
 {
+    auto reaction_id_from_json = json_field_from_pn_block(pn_message.payload, "data", "uuid");
+    std::vector<Pubnub::MessageAction> message_actions;
+
+    // Message update contains always the last action if it was the update
+    if (json_field_from_pn_block(pn_message.payload, "event") != Pubnub::String("removed")) {
+        message_actions.push_back(Pubnub::MessageAction{
+                Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
+                json_field_from_pn_block(pn_message.payload, "data", "value"),
+                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
+                reaction_id_from_json.empty() ? string_from_pn_block(pn_message.publisher) : reaction_id_from_json                
+           });
+    }
+
     return std::make_pair(
         json_field_from_pn_block(pn_message.payload, "data", "messageTimetoken"),
         MessageEntity{
             // TODO: leak of presentation
             Pubnub::pubnub_chat_message_type::PCMT_TEXT,
+            // TODO: message should only care about message actions - consider leaving empty string
             json_field_from_pn_block(pn_message.payload, "data", "value"),
             string_from_pn_block(pn_message.channel),
             string_from_pn_block(pn_message.publisher),
             string_from_pn_block(pn_message.metadata),
-            // TODO: I'm 100% sure that we're losing some data here
-            //       There is need to get the whole array of actions
-            {Pubnub::MessageAction{
-            Pubnub::message_action_type_from_string(json_field_from_pn_block(pn_message.payload, "data", "type")),
-                json_field_from_pn_block(pn_message.payload, "data", "value"),
-                json_field_from_pn_block(pn_message.payload, "data", "actionTimetoken"),
-                json_field_from_pn_block(pn_message.payload, "data", "uuid")
-            }}
+            message_actions
+            
         }
     );
 }

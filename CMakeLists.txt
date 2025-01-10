@@ -47,11 +47,6 @@ if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
 endif()
 
-# TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
-#set(PUBNUB_SDK_VERSION_SUFFIX "\\\"/CA-SDKC++/${PROJECT_VERSION}\\\"")
-#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DPUBNUB_SDK_VERSION_SUFFIX=\\\"/CA-UNREAL/x.x.x\\\")
-
-
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
@@ -63,7 +58,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
-target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/x.x.x\")
+
+# TODO: this flag is okay until we release the Cpp-Chat as an independent library
+if(${ENABLE_C_ABI})
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.1.3\")
+else()
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.3\")
+endif()
 
 FetchContent_Declare(
   json
@@ -121,7 +122,8 @@ set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/typing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/timetoken.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/restrictions.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/message_draft_entity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/quotes.cpp)
 
 set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/chat_service.cpp
@@ -181,12 +183,22 @@ add_library(pubnub-chat SHARED ${SOURCES})
 
 target_link_libraries(pubnub-chat PRIVATE pubnub)
 
+# TODO: kept for debugging purposes - should be deleted before release
 add_executable(pubnub-chat-example example/main.cpp)
 target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
 
 if(${COMPILE_EXAMPLES})
-    add_executable(pubnub-message-draft-example example/message_draft.cpp)
-    target_link_libraries(pubnub-message-draft-example PRIVATE pubnub-chat)
+    function(example name)
+        add_executable(pubnub_${name} example/${name}.cpp)
+        target_link_libraries(pubnub_${name} PRIVATE pubnub-chat)
+    endfunction()
+
+    example(message_draft)
+    example(forward_message)
+    example(report_user)
+    example(thread_channel)
+    example(message_reactions)
+    example(delete_message)
 endif()
 
 if(${RUN_TESTS})
@@ -222,6 +234,7 @@ if(${RUN_TESTS})
     test_suite(prarsers-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/parsers_unit.cpp)
     test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
     test_suite(message-draft-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/message_draft_entity_unit.cpp)
+    test_suite(quotes-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/quotes_unit.cpp)
     
     #TODO: e/e
     #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)

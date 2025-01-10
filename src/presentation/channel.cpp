@@ -139,8 +139,6 @@ void Pubnub::Channel::send_text(const Pubnub::String &message, SendTextParams te
     this->channel_service->send_text(channel_id_internal, *this->data, message, SendTextParamsInternal(text_params));
     //Necessary to clean text_params vectors and maps until we find correct way to free Pubnub::Vector data
     text_params.mentioned_users.into_std_map();
-    text_params.referenced_channels.into_std_map();
-    text_params.text_links.into_std_vector();
 }
 
 Pubnub::Vector<String> Channel::who_is_present() const {

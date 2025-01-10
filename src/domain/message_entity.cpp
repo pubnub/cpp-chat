@@ -306,10 +306,32 @@ MessageEntity MessageEntity::from_base_and_updated_message(MessageEntity base_me
 {
     MessageEntity new_entity;
     new_entity.type = base_message.type;
-    new_entity.text = updated_message.text.empty() ? base_message.text : updated_message.text;
-    new_entity.channel_id = updated_message.channel_id.empty() ? base_message.channel_id : updated_message.channel_id;
-    new_entity.user_id = updated_message.user_id.empty() ? base_message.user_id : updated_message.user_id;
-    new_entity.meta = updated_message.meta.empty() ? base_message.meta : updated_message.meta;
-    new_entity.message_actions = updated_message.message_actions.size() != 0 ? updated_message.message_actions : base_message.message_actions;
+    new_entity.text = base_message.text;
+    new_entity.channel_id = base_message.channel_id;
+    new_entity.user_id = base_message.user_id;
+    new_entity.meta = base_message.meta;
+
+    new_entity.message_actions.insert(new_entity.message_actions.end(), base_message.message_actions.begin(), base_message.message_actions.end());
+    new_entity.message_actions.insert(new_entity.message_actions.end(), updated_message.message_actions.begin(), updated_message.message_actions.end());
+
+    std::sort(
+            new_entity.message_actions.begin(),
+            new_entity.message_actions.end(),
+            [](const Pubnub::MessageAction& a, const Pubnub::MessageAction& b) {
+                return a.timetoken < b.timetoken;
+            }
+    );
+
+    new_entity.message_actions
+        .erase(std::unique(
+                    new_entity.message_actions.begin(),
+                    new_entity.message_actions.end(),
+                    [](const Pubnub::MessageAction& a, const Pubnub::MessageAction& b) {
+                        return a.timetoken == b.timetoken && a.type == b.type && a.user_id == b.user_id && a.value == b.value;
+                    }
+                ),
+            new_entity.message_actions.end()
+        );
+
     return new_entity;
 }

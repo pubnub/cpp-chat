@@ -1,4 +1,5 @@
 #include "thread_channel.hpp"
+#include "application/chat_service.hpp"
 #include "thread_message.hpp"
 #include "application/channel_service.hpp"
 #include "application/dao/channel_dao.hpp"
@@ -42,6 +43,12 @@ ThreadChannel& ThreadChannel::operator =(const ThreadChannel& other)
 
     return *this;
 }
+
+ThreadChannel::ThreadChannel() :
+    Channel(),
+    parent_channel_id_internal(),
+    parent_message_internal(Message())
+{};
 
 ThreadChannel::~ThreadChannel() = default;
 
