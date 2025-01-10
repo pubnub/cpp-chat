@@ -63,7 +63,7 @@ FetchContent_MakeAvailable(pubnub)
 if(${ENABLE_C_ABI})
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.1.3\")
 else()
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.4\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.3\")
 endif()
 
 FetchContent_Declare(
