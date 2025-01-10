@@ -47,15 +47,6 @@ if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
 endif()
 
-# TODO: pnsdk should be different for each SDK (C++, EU, Unity, etc.)
-#set(PUBNUB_SDK_VERSION_SUFFIX "\\\"/CA-SDKC++/${PROJECT_VERSION}\\\"")
-# TODO: Remove this from here or lines 71-75.
-if(${ENABLE_C_ABI})
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DPUBNUB_SDK_VERSION_SUFFIX=\\\"/CA-UNITY/0.1.3\\\")
-else()
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DPUBNUB_SDK_VERSION_SUFFIX=\\\"/CA-UNREAL/0.2.4\\\")
-endif()
-
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
