@@ -2,12 +2,14 @@
 #define PN_CHAT_CALLBACK_SERVICE_HPP
 
 #include "application/bundles.hpp"
+#include "application/chat_service.hpp"
 #include "application/presence_service.hpp"
 #include "infra/callbacks_repository.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/sync.hpp"
 #include <chrono>
+#include <memory>
 #include <thread>
 #include <atomic>
 
@@ -69,6 +71,8 @@ class CallbackService {
         void remove_membership_callback(Pubnub::String channel_id);
 
         void broadcast_messages(std::vector<pubnub_v2_message> messages);
+
+        static pubnub_subscribe_message_callback_t to_pubnub_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback);
     private:
         void resolve_callbacks();
         void resolve_timers(milliseconds wait_interval);

@@ -1,11 +1,10 @@
 #include "infra/pubnub.hpp"
+
+#include "application/subscription.hpp"
 #include "infra/serialization.hpp"
 #include "chat.hpp"
-//#include "message.hpp"
-//#include "channel.hpp"
-//#include "user.hpp"
-//#include "membership.hpp"
 #include "nlohmann/json.hpp"
+#include <ostream>
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -24,6 +23,9 @@ extern "C" {
 #include <pubnub_actions_api.h>
 #include <pubnub_advanced_history.h>
 #include <pubnub_grant_token_api.h>
+#include <pubnub_ntf_enforcement.h>
+#include <pubnub_entities.h>
+#include <pubnub_subscribe_event_listener.h>
 }
 
 using json = nlohmann::json;
@@ -36,6 +38,9 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     main_context(pubnub_alloc(), pubnub_free),
     long_poll_context(pubnub_alloc(), pubnub_free)
 {
+    pubnub_enforce_api(this->main_context.get(), PNA_SYNC);
+    pubnub_enforce_api(this->long_poll_context.get(), PNA_CALLBACK);
+
     pubnub_init(this->main_context.get(), this->publish_key.c_str(), this->subscribe_key.c_str());
     pubnub_init(this->long_poll_context.get(), this->publish_key.c_str(), this->subscribe_key.c_str());
 
@@ -78,13 +83,28 @@ Pubnub::String PubNub::signal(const Pubnub::String channel, const Pubnub::String
     return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
+Subscription PubNub::subscribe(const Pubnub::String& channel_id) {
+    pubnub_channel_t* channel = pubnub_channel_alloc(
+        this->long_poll_context.get(),
+        channel_id
+    );
+
+    pubnub_subscription_t* subscription =
+        pubnub_subscription_alloc((pubnub_entity_t*)channel, NULL);
+    pubnub_entity_free((void**)&channel);
+
+    return Subscription(subscription);
+}
+
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
+    return {};
     return this->subscribe_to_multiple_channels_and_get_messages({channel});
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_messages(const std::vector<Pubnub::String> channels)
 {
+    return {};
     bool new_channels = false;
 
     for (const auto& channel : channels) {
@@ -114,6 +134,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_me
 // TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel)
 {
+    return {};
     std::vector<pubnub_v2_message> pubnub_messages = this->subscribe_to_channel_and_get_messages(channel);
 
     std::vector<Pubnub::String> messages;
@@ -127,6 +148,7 @@ std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_str
 
 std::vector<pubnub_v2_message> PubNub::fetch_messages()
 {
+    return {};
     if (!this->is_subscribed) {
         return {};
     }
@@ -177,6 +199,7 @@ std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
 
 std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
 {
+    return {};
     if (this->subscribed_channels.empty() || !this->is_subscribed) {
         return {};
     }
@@ -665,6 +688,7 @@ bool PubNub::is_subscribed_to_channel(const Pubnub::String channel)
 
 void PubNub::cancel_previous_subscription()
 {
+    return;
     auto cancel_result = pubnub_cancel(this->long_poll_context.get());
     if (PN_CANCEL_FINISHED != cancel_result) {
         auto await_result = pubnub_await(this->long_poll_context.get());
@@ -694,6 +718,7 @@ void PubNub::cancel_previous_subscription()
 
 void PubNub::call_subscribe()
 {
+    return;
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
     if (PNR_OK != result && PNR_STARTED != result) {
         throw std::runtime_error(
@@ -705,6 +730,7 @@ void PubNub::call_subscribe()
 
 void PubNub::call_handshake()
 {
+    return;
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
 
     if (PNR_OK != result) {

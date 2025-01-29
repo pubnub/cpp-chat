@@ -2,6 +2,7 @@
 #define PN_CHAT_CHANNEL_SERVICE_HPP
 
 #include "application/dao/channel_dao.hpp"
+#include "application/subscription.hpp"
 #include "callback_stop.hpp"
 #include "channel.hpp"
 #include "domain/channel_entity.hpp"
@@ -77,7 +78,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
 #ifndef PN_CHAT_C_ABI
-        void connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
+        Subscription connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
         void join(const Pubnub::Channel& channel, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
         void disconnect(const Pubnub::String& channel_id) const;
         void leave(const Pubnub::String& channel_id) const;

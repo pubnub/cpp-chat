@@ -1,4 +1,6 @@
 #include "channel_service.hpp"
+#include <pubnub_subscribe_event_listener_types.h>
+#include "application/subscription.hpp"
 #include "event.hpp"
 #include "callback_stop.hpp"
 #include "enums.hpp"
@@ -23,6 +25,7 @@
 #include "application/callback_service.hpp"
 #include "option.hpp"
 #include <functional>
+#include <memory>
 #ifdef PN_CHAT_C_ABI
 #include <pubnub_helper.h>
 #include "domain/parsers.hpp"
@@ -243,28 +246,36 @@ Channel ChannelService::unpin_message_from_channel(const String& channel_id, con
     return this->update_channel(channel_id, channel_data.to_entity().unpin_message());
 }
 
-#ifndef PN_CHAT_C_ABI
-void ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
-#else
-std::vector<pubnub_v2_message> ChannelService::connect(const String& channel_id) const {
-#endif // PN_CHAT_C_ABI
-    auto messages = [this, channel_id] {
-        auto pubnub_handle = this->pubnub->lock();
+//#ifndef PN_CHAT_C_ABI
+//void ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
+//#else
+//std::vector<pubnub_v2_message> ChannelService::connect(const String& channel_id) const {
+//#endif // PN_CHAT_C_ABI
+//    auto messages = [this, channel_id] {
+//        auto pubnub_handle = this->pubnub->lock();
+//
+//        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
+//    }();
+//
+//#ifndef PN_CHAT_C_ABI
+//    if (auto chat = this->chat_service.lock()) {
+//        // First broadcast messages because they're not related to the new callback
+//        chat->callback_service->broadcast_messages(messages);
+//        chat->callback_service->register_message_callback(channel_id, message_callback);
+//    } else {
+//        throw std::runtime_error("Chat service is not available to connect to channel");
+//    }
+//#else
+//    return messages;
+//#endif // PN_CHAT_C_ABI
+//}
 
-        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    }();
+Subscription ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
+    auto subscription = this->pubnub->lock()->subscribe(channel_id);
 
-#ifndef PN_CHAT_C_ABI
-    if (auto chat = this->chat_service.lock()) {
-        // First broadcast messages because they're not related to the new callback
-        chat->callback_service->broadcast_messages(messages);
-        chat->callback_service->register_message_callback(channel_id, message_callback);
-    } else {
-        throw std::runtime_error("Chat service is not available to connect to channel");
-    }
-#else
-    return messages;
-#endif // PN_CHAT_C_ABI
+    subscription.add_message_listener(CallbackService::to_pubnub_message_callback(this->chat_service, message_callback));
+
+    return subscription;
 }
 
 #ifndef PN_CHAT_C_ABI

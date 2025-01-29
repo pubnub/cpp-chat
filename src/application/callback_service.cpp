@@ -1,5 +1,6 @@
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
+#include "application/chat_service.hpp"
 #include "const_values.hpp"
 #include "enums.hpp"
 #include "infra/serialization.hpp"
@@ -27,12 +28,12 @@ CallbackService::CallbackService(
     presence_service(presence_service)
 {
     this->callback_thread = std::thread([this, wait_interval]() {
-        while (this->thread_run_flag.load()) {
-            this->resolve_callbacks();
-            this->resolve_timers(wait_interval);
-            // TODO: should we sleep in tests?
-            std::this_thread::sleep_for(wait_interval);
-        }
+//        while (this->thread_run_flag.load()) {
+//            this->resolve_callbacks();
+//            this->resolve_timers(wait_interval);
+//            // TODO: should we sleep in tests?
+//            std::this_thread::sleep_for(wait_interval);
+//        }
     });
 }
 
@@ -296,4 +297,48 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
     }
 }
 
+// Code below is inspired by this post and adjusted to our needs:
+// https://stackoverflow.com/a/73177293/11933889
+template <class Lambda, class... Args> static auto make_c_callable(Lambda l) {
+    static Lambda callback = std::move(l);
+    return +[](Args... args) { return callback(args...); };
+}
 
+template <class Lambda>
+struct CConverter : public CConverter<decltype(&Lambda::operator())> {};
+
+template <class CCoreCallback, class... Args>
+struct CConverter<void(CCoreCallback::*)(Args...) const> {
+  template <class Lambda> static auto to_c_function(Lambda l) {
+    return make_c_callable<Lambda, Args...>(std::move(l));
+  }
+};
+
+template <class CCoreCallback, class... Args>
+struct CConverter<void(CCoreCallback::*)(Args...)> {
+  template <class Lambda> static auto to_c_function(Lambda l) {
+    return make_c_callable<Lambda, Args...>(std::move(l));
+  }
+};
+
+template <class Lambda> auto to_c_core_callback(Lambda lambda) { return CConverter<Lambda>::to_c_function(std::move(lambda)); }
+
+static void notify_error(const Pubnub::String& error_message) {
+    // Basically, we cannot throw exceptions in C callbacks, so we just print the error message 
+    // and let the program continue because we cannot do anything else.
+    // TODO: Logger
+    std::cout << "Callback error: " << error_message << std::endl;
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_pubnub_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback) {
+    return to_c_core_callback([chat_service, message_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_message(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto parsed_message = Parsers::PubnubJson::to_message(message);
+                if (auto service = chat_service.lock()) {
+                    message_callback(service->message_service->create_message_object(parsed_message));
+                } else {
+                    notify_error("Chat service is not available to call message callback");
+                }
+                }
+            });
+}
