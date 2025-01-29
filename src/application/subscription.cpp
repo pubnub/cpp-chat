@@ -18,7 +18,8 @@ Subscription::Subscription(pubnub_subscription_t* subscription) :
     subscription(subscription, free_subscription) {}
 
 void Subscription::close() {
-    free_subscription(subscription.get());
+    pubnub_subscription_t* raw_ptr = this->subscription.get();
+    pubnub_unsubscribe_with_subscription(&raw_ptr);
 }
 
 void Subscription::add_message_listener(pubnub_subscribe_message_callback_t callback) {

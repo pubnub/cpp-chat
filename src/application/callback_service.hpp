@@ -72,7 +72,7 @@ class CallbackService {
 
         void broadcast_messages(std::vector<pubnub_v2_message> messages);
 
-        static pubnub_subscribe_message_callback_t to_pubnub_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback);
+        static pubnub_subscribe_message_callback_t to_c_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback);
     private:
         void resolve_callbacks();
         void resolve_timers(milliseconds wait_interval);

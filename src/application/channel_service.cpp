@@ -246,34 +246,10 @@ Channel ChannelService::unpin_message_from_channel(const String& channel_id, con
     return this->update_channel(channel_id, channel_data.to_entity().unpin_message());
 }
 
-//#ifndef PN_CHAT_C_ABI
-//void ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
-//#else
-//std::vector<pubnub_v2_message> ChannelService::connect(const String& channel_id) const {
-//#endif // PN_CHAT_C_ABI
-//    auto messages = [this, channel_id] {
-//        auto pubnub_handle = this->pubnub->lock();
-//
-//        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-//    }();
-//
-//#ifndef PN_CHAT_C_ABI
-//    if (auto chat = this->chat_service.lock()) {
-//        // First broadcast messages because they're not related to the new callback
-//        chat->callback_service->broadcast_messages(messages);
-//        chat->callback_service->register_message_callback(channel_id, message_callback);
-//    } else {
-//        throw std::runtime_error("Chat service is not available to connect to channel");
-//    }
-//#else
-//    return messages;
-//#endif // PN_CHAT_C_ABI
-//}
-
-Subscription ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
+std::shared_ptr<Subscription> ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
     auto subscription = this->pubnub->lock()->subscribe(channel_id);
 
-    subscription.add_message_listener(CallbackService::to_pubnub_message_callback(this->chat_service, message_callback));
+    subscription->add_message_listener(CallbackService::to_c_message_callback(this->chat_service, message_callback));
 
     return subscription;
 }
@@ -298,11 +274,7 @@ std::vector<pubnub_v2_message> ChannelService::disconnect(const String& channel_
 #endif // PN_CHAT_C_ABI
 }
 
-#ifndef PN_CHAT_C_ABI
-void ChannelService::join(const Channel& channel, std::function<void(Message)> message_callback, const String& additional_params) const {
-#else
-std::vector<pubnub_v2_message> ChannelService::join(const Channel& channel, const String& additional_params) const {
-#endif // PN_CHAT_C_ABI
+std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, std::function<void(Message)> message_callback, const String& additional_params) const {
     String set_object_string = create_set_memberships_object(channel.channel_id(), additional_params);
 
     auto memberships_response = [this, set_object_string] {
@@ -320,18 +292,10 @@ std::vector<pubnub_v2_message> ChannelService::join(const Channel& channel, cons
 
     auto new_membership = membership.set_last_read_message_timetoken(Pubnub::get_now_timetoken());
 
-#ifndef PN_CHAT_C_ABI
-    this->connect(channel.channel_id(), message_callback);
-#else
-    return this->connect(channel.channel_id());
-#endif // PN_CHAT_C_ABI
+    return this->connect(channel.channel_id(), message_callback);
 }
     
-#ifndef PN_CHAT_C_ABI
 void ChannelService::leave(const String& channel_id) const {
-#else
-std::vector<pubnub_v2_message> ChannelService::leave(const String& channel_id) const {
-#endif // PN_CHAT_C_ABI
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
     {
@@ -340,11 +304,7 @@ std::vector<pubnub_v2_message> ChannelService::leave(const String& channel_id) c
         pubnub_handle->remove_memberships(user_id, remove_object_string);
     }
 
-#ifndef PN_CHAT_C_ABI
 	this->disconnect(channel_id);
-#else
-    return this->disconnect(channel_id);
-#endif // PN_CHAT_C_ABI
 }
 
 void ChannelService::send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String &message, const SendTextParamsInternal& text_params) const

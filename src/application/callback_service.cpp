@@ -330,7 +330,7 @@ static void notify_error(const Pubnub::String& error_message) {
     std::cout << "Callback error: " << error_message << std::endl;
 }
 
-pubnub_subscribe_message_callback_t CallbackService::to_pubnub_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback) {
+pubnub_subscribe_message_callback_t CallbackService::to_c_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback) {
     return to_c_core_callback([chat_service, message_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
             if (Parsers::PubnubJson::is_message(Pubnub::String(message.payload.ptr, message.payload.size))) {
                 auto parsed_message = Parsers::PubnubJson::to_message(message);

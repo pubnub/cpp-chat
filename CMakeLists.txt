@@ -158,6 +158,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/access_manager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/callback_handle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )

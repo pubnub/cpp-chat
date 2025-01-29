@@ -1,5 +1,6 @@
 #include "channel.hpp"
 #include "application/subscription.hpp"
+#include "callback_handle.hpp"
 #include "callback_stop.hpp"
 #include "chat.hpp"
 #include "message.hpp"
@@ -93,8 +94,8 @@ Channel Channel::update(const ChatChannelData& in_additional_channel_data) const
 }
 
 #ifndef PN_CHAT_C_ABI
-Subscription Channel::connect(std::function<void(Message)> message_callback) const {
-    return this->channel_service->connect(channel_id_internal, message_callback);
+CallbackHandle Channel::connect(std::function<void(Message)> message_callback) const {
+    return CallbackHandle(this->channel_service->connect(channel_id_internal, message_callback));
 }
 
 void Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {

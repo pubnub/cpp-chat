@@ -4,6 +4,7 @@
 #include "infra/serialization.hpp"
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
+#include <memory>
 #include <ostream>
 #include <thread>
 #include <vector>
@@ -83,7 +84,10 @@ Pubnub::String PubNub::signal(const Pubnub::String channel, const Pubnub::String
     return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
-Subscription PubNub::subscribe(const Pubnub::String& channel_id) {
+// TODO: I learn a lot about how to hide the implementation details in CPP libraries
+// and probably we should resign from the forward declarations and start using 
+// private namespaces
+std::shared_ptr<Subscription> PubNub::subscribe(const Pubnub::String& channel_id) {
     pubnub_channel_t* channel = pubnub_channel_alloc(
         this->long_poll_context.get(),
         channel_id
@@ -93,7 +97,7 @@ Subscription PubNub::subscribe(const Pubnub::String& channel_id) {
         pubnub_subscription_alloc((pubnub_entity_t*)channel, NULL);
     pubnub_entity_free((void**)&channel);
 
-    return Subscription(subscription);
+    return std::make_shared<Subscription>(subscription);
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)

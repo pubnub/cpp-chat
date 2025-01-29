@@ -13,8 +13,8 @@ int main() {
     // Create basic public conversation
     auto channel = chat.create_public_conversation("base_channel", Pubnub::ChatChannelData{});
 
-    auto x = channel.connect([](Pubnub::Message message) {
-        std::cout << "Received message: " << message.text() << std::endl << std::endl;
+    channel.connect([](Pubnub::Message message) {
+        std::cout << "Received message: " << message.text() << std::endl;
     });
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
@@ -24,7 +24,6 @@ int main() {
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
     std::cout << "End of main" << std::endl;
-    x.close();
 
     return 0;
 }

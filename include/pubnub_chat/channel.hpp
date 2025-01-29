@@ -2,6 +2,7 @@
 #define PN_CHAT_CHANNEL_HPP
 
 #include "application/subscription.hpp"
+#include "callback_handle.hpp"
 #include "event.hpp"
 #include "string.hpp"
 #include "helpers/export.hpp"
@@ -80,7 +81,7 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::Channel update(const ChatChannelData& in_additional_channel_data) const;
 #ifndef PN_CHAT_C_ABI
-            PN_CHAT_EXPORT Subscription connect(std::function<void(Message)> message_callback) const;
+            PN_CHAT_EXPORT Pubnub::CallbackHandle connect(std::function<void(Message)> message_callback) const;
             PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, const Pubnub::String& additional_params = "") const;
             PN_CHAT_EXPORT void disconnect() const;
             PN_CHAT_EXPORT void leave() const;
