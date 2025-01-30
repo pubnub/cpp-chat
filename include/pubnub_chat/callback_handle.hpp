@@ -3,18 +3,18 @@
 
 #include <memory>
 
-class Subscription;
+class Subscribable;
 
 namespace Pubnub {
     class CallbackHandle {
         public: 
-            CallbackHandle(std::shared_ptr<Subscription> subscription);
+            CallbackHandle(std::shared_ptr<Subscribable> subscription);
             ~CallbackHandle() = default;
 
             void close();
 
         private:
-            std::shared_ptr<Subscription> subscription;
+            std::shared_ptr<Subscribable> subscription;
     };
 }
 

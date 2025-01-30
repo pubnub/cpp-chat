@@ -8,8 +8,10 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include "message.hpp"
+#include <algorithm>
 #include <cstring>
 #include <pubnub_helper.h>
+#include <pubnub_subscribe_event_listener_types.h>
 
 using json = nlohmann::json;
 
@@ -341,4 +343,52 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_message_callback(std::
                 }
                 }
             });
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_channel_update_callback(Pubnub::Channel base_channel, std::shared_ptr<const ChannelService> channel_service, std::function<void (Pubnub::Channel)> channel_update_callback) {
+    return to_c_core_callback([base_channel, channel_service, channel_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_channel_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto channel = channel_service->create_channel_object(Parsers::PubnubJson::to_channel(message));
+                auto updated = channel_service->update_channel_with_base(channel, base_channel);
+                channel_update_callback(updated);
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_channels_updates_callback(const std::vector<Pubnub::Channel>& channels, std::shared_ptr<const ChannelService> channel_service, std::function<void(std::vector<Pubnub::Channel>)> channel_update_callback) {
+    return to_c_core_callback([channels, channel_service, channel_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_channel_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto channel = channel_service->create_channel_object(Parsers::PubnubJson::to_channel(message));
+
+                auto stream_channel = std::find_if(channels.begin(), channels.end(), [&channel](const Pubnub::Channel& base_channel) {
+                        return base_channel.channel_id() == channel.channel_id();
+                });
+
+                ChannelEntity stream_channel_entity = ChannelDAO(stream_channel->channel_data()).to_entity();
+                ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
+                auto pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(stream_channel_entity, channel_entity));
+                auto updated_channel = channel_service->create_channel_object(pair);
+
+                std::vector<Pubnub::Channel> updated_channels;
+
+                std::copy_if(channels.begin(), channels.end(), std::back_inserter(updated_channels), [&channel](const Pubnub::Channel& base_channel) {
+                        return base_channel.channel_id() != channel.channel_id();
+                });
+
+                updated_channels.push_back(updated_channel);
+
+                channel_update_callback(updated_channels);
+            }
+        });
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_user_update_callback(Pubnub::User user_base, std::shared_ptr<const UserService> user_service, std::function<void (Pubnub::User)> user_update_callback) {
+    return to_c_core_callback([user_base, user_service, user_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_user_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto user = user_service->create_user_object(Parsers::PubnubJson::to_user(message));
+                auto updated = user_service->update_user_with_base(user, user_base);
+                user_update_callback(updated);
+            }
+        });
 }

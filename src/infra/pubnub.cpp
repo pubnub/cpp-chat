@@ -4,6 +4,8 @@
 #include "infra/serialization.hpp"
 #include "chat.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <thread>
@@ -84,9 +86,6 @@ Pubnub::String PubNub::signal(const Pubnub::String channel, const Pubnub::String
     return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
-// TODO: I learn a lot about how to hide the implementation details in CPP libraries
-// and probably we should resign from the forward declarations and start using 
-// private namespaces
 std::shared_ptr<Subscription> PubNub::subscribe(const Pubnub::String& channel_id) {
     pubnub_channel_t* channel = pubnub_channel_alloc(
         this->long_poll_context.get(),
@@ -98,6 +97,32 @@ std::shared_ptr<Subscription> PubNub::subscribe(const Pubnub::String& channel_id
     pubnub_entity_free((void**)&channel);
 
     return std::make_shared<Subscription>(subscription);
+}
+
+std::shared_ptr<SubscriptionSet> PubNub::subscribe_multiple(const std::vector<Pubnub::String>& channels_ids) {
+    const auto amount_of_channels = channels_ids.size();
+
+    std::vector<pubnub_entity_t*> channels;
+
+    std::transform(
+            channels_ids.begin(),
+            channels_ids.end(),
+            std::back_inserter(channels),
+            [this](const Pubnub::String& id){
+                return (pubnub_entity_t*)pubnub_channel_alloc(this->long_poll_context.get(), id.c_str());
+            });
+
+    pubnub_subscription_set_t* set =
+        pubnub_subscription_set_alloc_with_entities(channels.data(), amount_of_channels, NULL);
+
+    std::for_each(
+            channels.begin(),
+            channels.end(),
+            [](pubnub_entity_t* channel){
+                pubnub_entity_free((void**)&channel);
+            });
+
+    return std::make_shared<SubscriptionSet>(set);
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)

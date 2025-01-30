@@ -1,9 +1,12 @@
 #ifndef PN_CHAT_CALLBACK_SERVICE_HPP
 #define PN_CHAT_CALLBACK_SERVICE_HPP
 
+#include <pubnub_subscribe_event_listener_types.h>
 #include "application/bundles.hpp"
+#include "application/channel_service.hpp"
 #include "application/chat_service.hpp"
 #include "application/presence_service.hpp"
+#include "channel.hpp"
 #include "infra/callbacks_repository.hpp"
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
@@ -73,6 +76,9 @@ class CallbackService {
         void broadcast_messages(std::vector<pubnub_v2_message> messages);
 
         static pubnub_subscribe_message_callback_t to_c_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback);
+        static pubnub_subscribe_message_callback_t to_c_channel_update_callback(Pubnub::Channel channel, std::shared_ptr<const ChannelService> chat_service, std::function<void(Pubnub::Channel)> channel_update_callback);
+        static pubnub_subscribe_message_callback_t to_c_channels_updates_callback(const std::vector<Pubnub::Channel>& channels, std::shared_ptr<const ChannelService> chat_service, std::function<void(std::vector<Pubnub::Channel>)> channel_update_callback);
+        static pubnub_subscribe_message_callback_t to_c_user_update_callback(Pubnub::User user_base, std::shared_ptr<const UserService> user_service, std::function<void (Pubnub::User)> user_update_callback);
     private:
         void resolve_callbacks();
         void resolve_timers(milliseconds wait_interval);

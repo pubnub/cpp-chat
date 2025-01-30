@@ -2,7 +2,7 @@
 #include <memory>
 #include "application/subscription.hpp"
 
-Pubnub::CallbackHandle::CallbackHandle(std::shared_ptr<Subscription> subscription) :
+Pubnub::CallbackHandle::CallbackHandle(std::shared_ptr<Subscribable> subscription) :
     subscription(subscription) {}
 
 void Pubnub::CallbackHandle::close() {

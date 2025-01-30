@@ -109,8 +109,8 @@ namespace Pubnub
             PN_CHAT_EXPORT virtual void emit_user_mention(const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text) const;
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> get_user_suggestions(Pubnub::String text, int limit = 10) const;
 
-            PN_CHAT_EXPORT CallbackStop stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
-            PN_CHAT_EXPORT CallbackStop stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback);
+            PN_CHAT_EXPORT Pubnub::CallbackHandle stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
+            PN_CHAT_EXPORT Pubnub::CallbackHandle stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback);
             PN_CHAT_EXPORT CallbackStop stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
             PN_CHAT_EXPORT CallbackStop stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 

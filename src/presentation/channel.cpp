@@ -217,18 +217,19 @@ Message Channel::get_pinned_message() const {
     return this->channel_service->get_pinned_message(this->channel_id_internal, *this->data);
 }
 
-CallbackStop Channel::stream_updates(std::function<void(const Channel&)> channel_callback) const {
-    return CallbackStop(this->channel_service->stream_updates(*this, channel_callback));
+CallbackHandle Channel::stream_updates(std::function<void(const Channel&)> channel_callback) const {
+    return CallbackHandle(this->channel_service->stream_updates(*this, channel_callback));
 }
 
-CallbackStop Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback) {
+CallbackHandle Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback) {
     auto channels_std = channels.into_std_vector();
 
-    auto new_callback = [=](std::vector<Pubnub::Channel> vec)
+    auto new_callback = [channel_callback] (std::vector<Pubnub::Channel> vec)
     {
         channel_callback(std::move(vec));
     };
-    return CallbackStop(this->channel_service->stream_updates_on(*this, channels_std, new_callback));
+
+    return CallbackHandle(this->channel_service->stream_updates_on(*this, channels_std, new_callback));
 }
 
 CallbackStop Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
@@ -236,6 +237,7 @@ CallbackStop Channel::stream_presence(std::function<void(Pubnub::Vector<String>)
     {
         presence_callback(Pubnub::Vector<String>(std::move(vec)));
     };
+
     return CallbackStop(this->presence_service->stream_presence(channel_id(), new_callback));
 }
 

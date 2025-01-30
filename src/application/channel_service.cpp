@@ -24,6 +24,7 @@
 #include "nlohmann/json.hpp"
 #include "application/callback_service.hpp"
 #include "option.hpp"
+#include <algorithm>
 #include <functional>
 #include <memory>
 #ifdef PN_CHAT_C_ABI
@@ -519,91 +520,41 @@ std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel
     return std::get<0>(members_tuple);
 }
 
-std::function<void()> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const
+std::shared_ptr<Subscription> ChannelService::stream_updates(Pubnub::Channel calling_channel, std::function<void(Channel)> channel_callback) const
 {
     auto pubnub_handle = this->pubnub->lock();
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> channels_ids;
-    std::function<void(Channel)> final_channel_callback = [=](Channel channel){
-        auto updated_channel = this->update_channel_with_base(channel, calling_channel);
-       
-        channel_callback(updated_channel);
-    };
-    
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_channel.channel_id()});
-    chat->callback_service->broadcast_messages(messages);
+    auto subscription = pubnub_handle->subscribe(calling_channel.channel_id());
 
-    chat->callback_service->register_channel_callback(calling_channel.channel_id(), final_channel_callback);
+    subscription->add_channel_update_listener(
+            CallbackService::to_c_channel_update_callback(calling_channel, shared_from_this(), channel_callback));
 
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_channel_callback(calling_channel.channel_id());
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
-std::function<void()> ChannelService::stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Channel>)> channel_callback) const
+std::shared_ptr<SubscriptionSet> ChannelService::stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Channel>)> channel_callback) const
 {
     if(channels.empty())
     {
         throw std::invalid_argument("Cannot stream channel updates on an empty list");
     }
-    
-    auto pubnub_handle = this->pubnub->lock();
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> channels_ids;
+    std::vector<Pubnub::String> channels_ids;
 
-   // calling_channel_entity.stream_updates_channels = channels;
+    std::transform(
+            channels.begin(),
+            channels.end(),
+            std::back_inserter(channels_ids),
+            [](const Pubnub::Channel& channel) {
+                return channel.channel_id();
+            });
 
-    std::function<void(Channel)> single_channel_callback = [=](Channel channel){
-        
-        std::vector<Pubnub::Channel> updated_channels; 
+    auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
-        for(int i = 0; i < channels.size(); i++)
-        {
-            //Find channel that was updated and replace it in Entity stream channels
-            auto stream_channel = channels[i];
+    subscription->add_channel_update_listener(
+            CallbackService::to_c_channels_updates_callback(channels, shared_from_this(), channel_callback));
 
-            if(stream_channel.channel_id() == channel.channel_id())
-            {
-                ChannelEntity stream_channel_entity = ChannelDAO(stream_channel.channel_data()).to_entity();
-                ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
-                std::pair<String, ChannelEntity> pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(stream_channel_entity, channel_entity));
-                auto updated_channel = create_channel_object(pair);
-                updated_channels.push_back(updated_channel);
-            }
-            else
-            {
-                updated_channels.push_back(channels[i]);
-            }
-        }
-        //calling_channel_entity.stream_updates_channels = updated_channels;
-        channel_callback(updated_channels);
-
-    };
-    
-    for(auto channel : channels)
-    {
-        channels_ids.push_back(channel.channel_id());
-        chat->callback_service->register_channel_callback(channel.channel_id(), single_channel_callback);
-    }
-    
-
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channels_ids);
-    chat->callback_service->broadcast_messages(messages);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=, &channels_ids](){
-        for(auto id : channels_ids)
-        {
-            chat->callback_service->remove_channel_callback(id);
-        }
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
 
