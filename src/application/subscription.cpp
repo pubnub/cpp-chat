@@ -48,6 +48,10 @@ void Subscription::add_presence_listener(pubnub_subscribe_message_callback_t cal
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "presence");
 }
 
+void Subscription::add_membership_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "membership update");
+}
+
 static Pubnub::String error_message(
     const Pubnub::String& message,
     const Pubnub::String& kind,
@@ -106,6 +110,10 @@ void SubscriptionSet::close() {
 
 void SubscriptionSet::add_channel_update_listener(pubnub_subscribe_message_callback_t callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channels updates");
+}
+
+void SubscriptionSet::add_membership_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "memberships updates");
 }
 
 void SubscriptionSet::add_callback(

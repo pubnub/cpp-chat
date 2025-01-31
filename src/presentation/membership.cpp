@@ -1,4 +1,5 @@
 #include "membership.hpp"
+#include "callback_handle.hpp"
 #include "message.hpp"
 #include "application/membership_service.hpp"
 #include "application/dao/membership_dao.hpp"
@@ -62,18 +63,18 @@ int Membership::get_unread_messages_count() const {
     return this->membership_service->get_unread_messages_count_one_channel(*this);
 }
 
-CallbackStop Membership::stream_updates(std::function<void(const Membership&)> membership_callback) const {
-    return CallbackStop(this->membership_service->stream_updates(*this, membership_callback));
+CallbackHandle Membership::stream_updates(std::function<void(const Membership&)> membership_callback) const {
+    return CallbackHandle(this->membership_service->stream_updates(*this, membership_callback));
 }
 
-CallbackStop Membership::stream_updates_on(Pubnub::Vector<Membership> memberships, std::function<void(Pubnub::Vector<Pubnub::Membership>)> membership_callback) const {
+CallbackHandle Membership::stream_updates_on(Pubnub::Vector<Membership> memberships, std::function<void(Pubnub::Vector<Pubnub::Membership>)> membership_callback) const {
     auto memberships_std = memberships.into_std_vector();
 
     auto new_callback = [=](std::vector<Pubnub::Membership> vec)
     {
         membership_callback(std::move(vec));
     };
-    return CallbackStop(this->membership_service->stream_updates_on(*this, memberships_std, new_callback));
+    return CallbackHandle(this->membership_service->stream_updates_on(*this, memberships_std, new_callback));
 }
 
 #ifdef PN_CHAT_C_ABI 

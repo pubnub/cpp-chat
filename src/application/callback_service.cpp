@@ -1,6 +1,7 @@
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
 #include "application/chat_service.hpp"
+#include "application/dao/membership_dao.hpp"
 #include "const_values.hpp"
 #include "enums.hpp"
 #include "infra/serialization.hpp"
@@ -414,6 +415,80 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_presence_callback(Pubn
 
                 if (normal_channel_name == channel_id) {
                     presence_callback(presence_service->who_is_present(channel_id));
+                }
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_membership_update_callback(Pubnub::Membership membership_base, std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Membership)> membership_callback) {
+    return to_c_core_callback([membership_base, chat_service, membership_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_membership_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto membership_channel = Parsers::PubnubJson::membership_channel(Pubnub::String(message.payload.ptr, message.payload.size));
+                auto membership_user = Parsers::PubnubJson::membership_user(Pubnub::String(message.payload.ptr, message.payload.size));
+
+                const auto channel_id = membership_base.channel.channel_id();
+                const auto user_id = membership_base.user.user_id();
+
+                if (membership_channel == channel_id && membership_user == user_id) {
+                    auto custom_field = Parsers::PubnubJson::membership_from_string(Pubnub::String(message.payload.ptr, message.payload.size));
+                    auto chat = chat_service.lock();
+                    if (!chat) {
+                        notify_error("Chat service is not available to call membership callback");
+                        return;
+                    }
+
+                    Pubnub::Membership membership_obj = chat->membership_service->create_membership_object(
+                            chat->user_service->get_user(user_id),
+                            chat->channel_service->get_channel(channel_id),
+                            custom_field
+                    );
+                    chat->membership_service->update_membership_with_base(membership_obj, membership_base);
+
+                    membership_callback(membership_obj);
+                }
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_memberships_updates_callback(const std::vector<Pubnub::Membership>& memberships, std::weak_ptr<const ChatService> chat_service, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) {
+    return to_c_core_callback([memberships, chat_service, membership_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            auto chat = chat_service.lock();
+            if (!chat) {
+                notify_error("Chat service is not available to call membership callback");
+                return;
+            }
+
+            if (Parsers::PubnubJson::is_membership_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto membership_channel = Parsers::PubnubJson::membership_channel(Pubnub::String(message.payload.ptr, message.payload.size));
+                auto membership_user = Parsers::PubnubJson::membership_user(Pubnub::String(message.payload.ptr, message.payload.size));
+
+                auto stream_membership = std::find_if(memberships.begin(), memberships.end(), [&membership_channel, &membership_user](const Pubnub::Membership& base_membership) {
+                        return base_membership.channel.channel_id() == membership_channel && base_membership.user.user_id() == membership_user;
+                });
+
+                if (stream_membership != memberships.end()) {
+                    auto custom_field = Parsers::PubnubJson::membership_from_string(Pubnub::String(message.payload.ptr, message.payload.size));
+                    auto membership_obj = chat->membership_service->create_membership_object(
+                            chat->user_service->get_user(membership_user),
+                            chat->channel_service->get_channel(membership_channel),
+                            custom_field
+                    );
+
+                    MembershipEntity stream_membership_entity = MembershipDAO(stream_membership->custom_data()).to_entity();
+                    MembershipEntity membership_entity = MembershipDAO(membership_obj.custom_data()).to_entity();
+                    auto updated_membership = chat->membership_service->create_membership_object(stream_membership->user, stream_membership->channel, MembershipEntity::from_base_and_updated_membership(stream_membership_entity, membership_entity));
+
+                    std::vector<Pubnub::Membership> updated_memberships;
+
+                    std::copy_if(memberships.begin(), memberships.end(), std::back_inserter(updated_memberships), [&membership_channel, &membership_user](const Pubnub::Membership& base_membership) {
+                            return base_membership.channel.channel_id() != membership_channel || base_membership.user.user_id() != membership_user;
+                    });
+
+                    updated_memberships.push_back(updated_membership);
+
+                    membership_callback(updated_memberships);
                 }
             }
         });

@@ -11,6 +11,7 @@
 #include "infra/entity_repository.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/sync.hpp"
+#include "membership.hpp"
 #include <chrono>
 #include <memory>
 #include <thread>
@@ -81,6 +82,8 @@ class CallbackService {
         static pubnub_subscribe_message_callback_t to_c_user_update_callback(Pubnub::User user_base, std::shared_ptr<const UserService> user_service, std::function<void (Pubnub::User)> user_update_callback);
         static pubnub_subscribe_message_callback_t to_c_event_callback(Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::Event)> event_callback);
         static pubnub_subscribe_message_callback_t to_c_presence_callback(Pubnub::String channel_id, std::shared_ptr<const PresenceService> presence_service, std::function<void(std::vector<Pubnub::String>)> presence_callback);
+        static pubnub_subscribe_message_callback_t to_c_membership_update_callback(Pubnub::Membership membership, std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Membership)> membership_callback);
+        static pubnub_subscribe_message_callback_t to_c_memberships_updates_callback(const std::vector<Pubnub::Membership>& memberships, std::weak_ptr<const ChatService> chat_service, std::function<void(std::vector<Pubnub::Membership>)> membership_callback);
     private:
         void resolve_callbacks();
         void resolve_timers(milliseconds wait_interval);
