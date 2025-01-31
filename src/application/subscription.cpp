@@ -40,6 +40,14 @@ void Subscription::add_user_update_listener(pubnub_subscribe_message_callback_t 
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "user update");
 }
 
+void Subscription::add_event_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "event");
+}
+
+void Subscription::add_presence_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "presence");
+}
+
 static Pubnub::String error_message(
     const Pubnub::String& message,
     const Pubnub::String& kind,

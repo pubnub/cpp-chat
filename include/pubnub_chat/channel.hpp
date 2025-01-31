@@ -101,7 +101,7 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::Vector<Pubnub::Membership> invite_multiple(Pubnub::Vector<Pubnub::User> users) const;
             PN_CHAT_EXPORT void start_typing() const;
             PN_CHAT_EXPORT void stop_typing() const;
-            PN_CHAT_EXPORT CallbackStop get_typing(std::function<void(Pubnub::Vector<Pubnub::String>)> typing_callback) const;
+            PN_CHAT_EXPORT CallbackHandle get_typing(std::function<void(Pubnub::Vector<Pubnub::String>)> typing_callback) const;
             PN_CHAT_EXPORT Pubnub::Channel pin_message(const Pubnub::Message& message) const;
             PN_CHAT_EXPORT Pubnub::Channel unpin_message() const;
             PN_CHAT_EXPORT Pubnub::Message get_pinned_message() const;
@@ -111,12 +111,12 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::CallbackHandle stream_updates(std::function<void(const Pubnub::Channel&)> channel_callback) const;
             PN_CHAT_EXPORT Pubnub::CallbackHandle stream_updates_on(Pubnub::Vector<Pubnub::Channel> channels, std::function<void(Pubnub::Vector<Pubnub::Channel>)> channel_callback);
-            PN_CHAT_EXPORT CallbackStop stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
-            PN_CHAT_EXPORT CallbackStop stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
+            PN_CHAT_EXPORT CallbackHandle stream_presence(std::function<void(Pubnub::Vector<Pubnub::String>)> presence_callback) const;
+            PN_CHAT_EXPORT CallbackHandle stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
             PN_CHAT_EXPORT Pubnub::EventsHistoryWrapper get_messsage_reports_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count = 100) const;
 #ifndef PN_CHAT_C_ABI
-            PN_CHAT_EXPORT CallbackStop stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const;
+            PN_CHAT_EXPORT CallbackHandle stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const;
 #endif
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig()) const;

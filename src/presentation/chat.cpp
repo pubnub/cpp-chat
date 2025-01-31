@@ -8,6 +8,7 @@
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
+#include "callback_handle.hpp"
 #include "enums.hpp"
 #include "mentions.hpp"
 #include <algorithm>
@@ -172,8 +173,8 @@ EventsHistoryWrapper Pubnub::Chat::get_events_history(const Pubnub::String &chan
 }
 
 #ifndef PN_CHAT_C_ABI
-CallbackStop Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
-    return CallbackStop(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
+CallbackHandle Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
+    return CallbackHandle(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
 }
 #else
 std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {

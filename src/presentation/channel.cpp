@@ -197,12 +197,12 @@ void Channel::stop_typing() const {
     this->channel_service->stop_typing(this->channel_id_internal, *this->data);
 }
 
-CallbackStop Channel::get_typing(std::function<void(Pubnub::Vector<String>)> typing_callback) const {
+CallbackHandle Channel::get_typing(std::function<void(Pubnub::Vector<String>)> typing_callback) const {
     auto new_callback = [=](std::vector<String> vec)
     {
         typing_callback(Pubnub::Vector<String>(std::move(vec)));
     };
-    return CallbackStop(this->channel_service->get_typing(this->channel_id_internal, *this->data, new_callback));
+    return CallbackHandle(this->channel_service->get_typing(this->channel_id_internal, *this->data, new_callback));
 }
 
 Channel Channel::pin_message(const Message& message) const {
@@ -232,16 +232,16 @@ CallbackHandle Channel::stream_updates_on(Pubnub::Vector<Channel> channels, std:
     return CallbackHandle(this->channel_service->stream_updates_on(*this, channels_std, new_callback));
 }
 
-CallbackStop Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
+CallbackHandle Channel::stream_presence(std::function<void(Pubnub::Vector<String>)> presence_callback) const {
     auto new_callback = [=](std::vector<String> vec)
     {
         presence_callback(Pubnub::Vector<String>(std::move(vec)));
     };
 
-    return CallbackStop(this->presence_service->stream_presence(channel_id(), new_callback));
+    return CallbackHandle(this->presence_service->stream_presence(channel_id(), new_callback));
 }
 
-CallbackStop Pubnub::Channel::stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+CallbackHandle Pubnub::Channel::stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
 {
     auto new_callback = [=](std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer> std_map)
     {
@@ -256,7 +256,7 @@ CallbackStop Pubnub::Channel::stream_read_receipts(std::function<void(Pubnub::Ma
         read_receipts_callback(final_map);
     };
 
-    return CallbackStop(this->channel_service->stream_read_receipts(channel_id(), *this->data, new_callback));
+    return CallbackHandle(this->channel_service->stream_read_receipts(channel_id(), *this->data, new_callback));
 
 }
 
@@ -286,13 +286,13 @@ Pubnub::MessageDraft Pubnub::Channel::create_message_draft(Pubnub::MessageDraftC
 }
 
 #ifndef PN_CHAT_C_ABI
-Pubnub::CallbackStop Pubnub::Channel::stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const
+Pubnub::CallbackHandle Pubnub::Channel::stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const
 {
     // TODO: it seems to be bug
     auto new_callback = [=](const Event& event)
     {
         event_callback(event);
     };
-    return CallbackStop(this->channel_service->stream_message_reports(channel_id(), new_callback));
+    return CallbackHandle(this->channel_service->stream_message_reports(channel_id(), new_callback));
 }
 #endif

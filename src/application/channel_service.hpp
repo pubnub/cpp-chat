@@ -86,7 +86,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         void send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
-        std::function<void()> get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
+        std::shared_ptr<Subscription> get_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<Pubnub::String>&)> typing_callback) const;
         Pubnub::Message get_pinned_message(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         void emit_user_mention(const Pubnub::String &channel_id, const Pubnub::String& user_id, const Pubnub::String& timetoken, const Pubnub::String& text, const Pubnub::String &parent_channel_id = "") const;
         std::vector<Pubnub::Channel> get_channel_suggestions(Pubnub::String text, int limit = 10) const;
@@ -95,7 +95,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
         std::shared_ptr<Subscription> stream_updates(Pubnub::Channel calling_channel, std::function<void(Pubnub::Channel)> channel_callback) const;
         std::shared_ptr<SubscriptionSet> stream_updates_on(Pubnub::Channel calling_channel, const std::vector<Pubnub::Channel>& channels, std::function<void(std::vector<Pubnub::Channel>)> channel_callback) const;
-        std::function<void()> stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
+        std::shared_ptr<Subscription> stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
        
         /* THREADS */
         Pubnub::String get_thread_id(const Pubnub::Message& message) const;
@@ -116,7 +116,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
 
         std::tuple<std::vector<Pubnub::Event>, bool> get_message_reports_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
 #ifndef PN_CHAT_C_ABI
-        std::function<void()> stream_message_reports(const Pubnub::String& channel_id, std::function<void(const Pubnub::Event)> event_callback) const;
+        std::shared_ptr<Subscription> stream_message_reports(const Pubnub::String& channel_id, std::function<void(const Pubnub::Event)> event_callback) const;
 #endif
 
 

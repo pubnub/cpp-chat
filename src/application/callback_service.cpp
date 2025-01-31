@@ -392,3 +392,29 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_user_update_callback(P
             }
         });
 }
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_event_callback(Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::Event)> event_callback) {
+    return to_c_core_callback([chat_event_type, event_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_event(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto parsed_event = Parsers::PubnubJson::to_event(message);
+                if (parsed_event.type == chat_event_type) {
+                    event_callback(parsed_event);
+                }
+            }
+        });
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_presence_callback(Pubnub::String channel_id, std::shared_ptr<const PresenceService> presence_service, std::function<void(std::vector<Pubnub::String>)> presence_callback) {
+    return to_c_core_callback([channel_id, presence_service, presence_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_presence(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                Pubnub::String normal_channel_name = Pubnub::String(message.channel.ptr, message.channel.size);
+                auto pnpres_length = strlen("-pnpres");
+                normal_channel_name.erase(message.channel.size - pnpres_length, pnpres_length);
+
+                if (normal_channel_name == channel_id) {
+                    presence_callback(presence_service->who_is_present(channel_id));
+                }
+            }
+        });
+}

@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_PRESENCE_SERVICE_HPP
 #define PN_CHAT_PRESENCE_SERVICE_HPP
 
+#include "application/subscription.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
 #include <memory>
@@ -28,11 +29,7 @@ class PresenceService : public std::enable_shared_from_this<PresenceService>
         std::weak_ptr<const ChatService> chat_service;
 
     public:
-#ifndef PN_CHAT_C_ABI
-        std::function<void()> stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const;
-#else
-        std::function<void()>  stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const;
-#endif
+        std::shared_ptr<Subscription> stream_presence(const Pubnub::String& channel_id, std::function<void(const std::vector<Pubnub::String>&)> presence_callback) const;
 
 };
 

@@ -19,6 +19,7 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include <pubnub_helper.h>
+#include <memory>
 #include "mentions.hpp"
 
 #ifdef PN_CHAT_C_ABI
@@ -217,25 +218,17 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
 }
 
 #ifndef PN_CHAT_C_ABI
-std::function<void()> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
+std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
     }
 
-    auto messages = [this, channel_id] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    }();
+    auto subscription = this->pubnub->lock()->subscribe(channel_id);
 
-    // First broadcast messages because they're not related to the new callback
-    this->callback_service->broadcast_messages(messages);
-    this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
+    subscription->add_event_listener(CallbackService::to_c_event_callback(chat_event_type, event_callback));
 
-    std::function<void()> stop_callback = [=](){
-        this->callback_service->remove_event_callback(channel_id, chat_event_type);
-    };
-    return stop_callback;
+    return subscription;
 }
 
 #else

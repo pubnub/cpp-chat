@@ -393,7 +393,7 @@ void ChannelService::stop_typing(const String& channel_id, ChannelDAO& channel_d
     chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_TYPING, channel_id, Typing::payload(false));
 }
 
-std::function<void()> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
+std::shared_ptr<Subscription> ChannelService::get_typing(const String& channel_id, ChannelDAO& channel_data, std::function<void(const std::vector<String>&)> typing_callback) const {
     auto chat_service_shared = chat_service.lock();
     auto typing_timeout = chat_service_shared->chat_config.typing_timeout;
     std::function<void(Event)> internal_typing_callback = [&channel_data, typing_callback, typing_timeout] (Event event)
@@ -558,7 +558,7 @@ std::shared_ptr<SubscriptionSet> ChannelService::stream_updates_on(Pubnub::Chann
 }
 
 
-std::function<void()> ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
+std::shared_ptr<Subscription> ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const
 {
     if(channel_data.get_entity().type == String("public"))
     {
@@ -889,7 +889,7 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChannelService::get_message_reports
 }
 
 #ifndef PN_CHAT_C_ABI
-std::function<void()> ChannelService::stream_message_reports(const Pubnub::String& channel_id, std::function<void(Pubnub::Event)> message_report_callback) const {
+std::shared_ptr<Subscription> ChannelService::stream_message_reports(const Pubnub::String& channel_id, std::function<void(Pubnub::Event)> message_report_callback) const {
     if (auto chat_service = this->chat_service.lock()) {
         const auto channel = INTERNAL_MODERATION_PREFIX + channel_id;
 

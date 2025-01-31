@@ -24,6 +24,8 @@ class Subscription : public Subscribable {
         void add_message_listener(pubnub_subscribe_message_callback_t callback);
         void add_channel_update_listener(pubnub_subscribe_message_callback_t callback);
         void add_user_update_listener(pubnub_subscribe_message_callback_t callback);
+        void add_event_listener(pubnub_subscribe_message_callback_t callback);
+        void add_presence_listener(pubnub_subscribe_message_callback_t callback);
 
     private:
         std::unique_ptr<pubnub_subscription_t, void (*)(pubnub_subscription_t*)> subscription;
