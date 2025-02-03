@@ -1,5 +1,6 @@
 #include "user_service.hpp"
 #include "application/dao/user_dao.hpp"
+#include "application/subscription.hpp"
 #include "chat_service.hpp"
 #include "domain/timetoken.hpp"
 #include "infra/pubnub.hpp"
@@ -147,90 +148,39 @@ void UserService::delete_user(const String& user_id) const {
     pubnub_handle->remove_user_metadata(user_id);
 }
 
-std::function<void()> UserService::stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const
+std::shared_ptr<Subscription> UserService::stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const
 {
+    auto subscription = this->pubnub->lock()->subscribe(calling_user.user_id());
 
-    auto pubnub_handle = this->pubnub->lock();
+    subscription->add_user_update_listener(
+            CallbackService::to_c_user_update_callback(calling_user, this->shared_from_this(), user_callback));
 
-    auto chat = this->chat_service.lock();
-
-    std::vector<String> users_ids;
-    std::function<void(User)> final_user_callback = [=](User user){
-        auto updated_user = this->update_user_with_base(user, calling_user);
-       
-        user_callback(updated_user);
-    };
-    
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_user.user_id()});
-    chat->callback_service->broadcast_messages(messages);
-    chat->callback_service->register_user_callback(calling_user.user_id(), final_user_callback);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_user_callback(calling_user.user_id());
-    };
-
-    return stop_streaming;
-
+    return subscription;
 }
 
-std::function<void()> UserService::stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const
+std::shared_ptr<SubscriptionSet> UserService::stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const
 {
     if(users.empty())
     {
         throw std::invalid_argument("Cannot stream user updates on an empty list");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
+    std::vector<Pubnub::String> users_ids;
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> users_ids;
+    std::transform(
+            users.begin(),
+            users.end(),
+            std::back_inserter(users_ids),
+            [](const Pubnub::User& channel) {
+                return channel.user_id();
+            });
 
-    std::function<void(User)> single_user_callback = [=](User user){
-        
-        std::vector<Pubnub::User> updated_users; 
+    auto subscription = this->pubnub->lock()->subscribe_multiple(users_ids);
 
-        for(int i = 0; i < users.size(); i++)
-        {
-            //Find user that was updated and replace it in Entity stream users
-            auto stream_user = users[i];
+    subscription->add_channel_update_listener(
+            CallbackService::to_c_users_updates_callback(users, shared_from_this(), user_callback));
 
-            if(stream_user.user_id() == user.user_id())
-            {
-                UserEntity stream_user_entity = UserDAO(stream_user.user_data()).to_entity();
-                UserEntity user_entity = UserDAO(user.user_data()).to_entity();
-                std::pair<String, UserEntity> pair = std::make_pair(user.user_id(), UserEntity::from_base_and_updated_user(stream_user_entity, user_entity));
-                auto updated_user = create_user_object(pair);
-                updated_users.push_back(updated_user);
-            }
-            else
-            {
-                updated_users.push_back(users[i]);
-            }
-        }
-        user_callback(updated_users);
-
-    };
-    
-    for(auto user : users)
-    {
-        users_ids.push_back(user.user_id());
-        chat->callback_service->register_user_callback(user.user_id(), single_user_callback);
-    }
-    
-
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(users_ids);
-    chat->callback_service->broadcast_messages(messages);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=, &users_ids](){
-        for(auto id : users_ids)
-        {
-            chat->callback_service->remove_user_callback(id);
-        }
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
 std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text, int limit) const

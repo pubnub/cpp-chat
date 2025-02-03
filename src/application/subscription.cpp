@@ -52,6 +52,14 @@ void Subscription::add_membership_update_listener(pubnub_subscribe_message_callb
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "membership update");
 }
 
+void Subscription::add_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
+}
+
+void Subscription::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
+}
+
 static Pubnub::String error_message(
     const Pubnub::String& message,
     const Pubnub::String& kind,
@@ -114,6 +122,18 @@ void SubscriptionSet::add_channel_update_listener(pubnub_subscribe_message_callb
 
 void SubscriptionSet::add_membership_update_listener(pubnub_subscribe_message_callback_t callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "memberships updates");
+}
+
+void SubscriptionSet::add_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
+}
+
+void SubscriptionSet::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
+}
+
+void SubscriptionSet::add_user_update_listener(pubnub_subscribe_message_callback_t callback) {
+    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "users updates");
 }
 
 void SubscriptionSet::add_callback(

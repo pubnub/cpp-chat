@@ -104,18 +104,18 @@ MembershipsResponseWrapper User::get_memberships(const Pubnub::String &filter, c
     return MembershipsResponseWrapper({Pubnub::Vector<Membership>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple), std::get<2>(return_tuple), std::get<3>(return_tuple)});
 }
 
-CallbackStop User::stream_updates(std::function<void(const User&)> user_callback) const {
-    return CallbackStop(this->user_service->stream_updates(*this, user_callback));
+CallbackHandle User::stream_updates(std::function<void(const User&)> user_callback) const {
+    return CallbackHandle(this->user_service->stream_updates(*this, user_callback));
 }
 
-CallbackStop User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const {
+CallbackHandle User::stream_updates_on(Pubnub::Vector<Pubnub::User> users, std::function<void(Pubnub::Vector<Pubnub::User>)> user_callback) const {
     auto users_std = users.into_std_vector();
 
     auto new_callback = [=](std::vector<Pubnub::User> vec)
     {
         user_callback(std::move(vec));
     };
-    return CallbackStop(this->user_service->stream_updates_on(*this, users_std, new_callback));
+    return CallbackHandle(this->user_service->stream_updates_on(*this, users_std, new_callback));
 }
 
 bool User::active() const {

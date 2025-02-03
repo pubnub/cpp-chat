@@ -373,6 +373,7 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_channels_updates_callb
 
                 std::vector<Pubnub::Channel> updated_channels;
 
+                // TODO: is the order important?
                 std::copy_if(channels.begin(), channels.end(), std::back_inserter(updated_channels), [&channel](const Pubnub::Channel& base_channel) {
                         return base_channel.channel_id() != channel.channel_id();
                 });
@@ -390,6 +391,32 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_user_update_callback(P
                 auto user = user_service->create_user_object(Parsers::PubnubJson::to_user(message));
                 auto updated = user_service->update_user_with_base(user, user_base);
                 user_update_callback(updated);
+            }
+        });
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_users_updates_callback(const std::vector<Pubnub::User>& users, std::shared_ptr<const UserService> user_service, std::function<void(std::vector<Pubnub::User>)> user_update_callback) {
+    return to_c_core_callback([users, user_service, user_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_user_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto user = user_service->create_user_object(Parsers::PubnubJson::to_user(message));
+
+                auto stream_user = std::find_if(users.begin(), users.end(), [&user](const Pubnub::User& base_user) {
+                        return base_user.user_id() == user.user_id();
+                });
+
+                UserEntity stream_user_entity = UserDAO(stream_user->user_data()).to_entity();
+                UserEntity user_entity = UserDAO(user.user_data()).to_entity();
+                auto updated_user = user_service->create_user_object({stream_user->user_id(), UserEntity::from_base_and_updated_user(stream_user_entity, user_entity)});
+
+                std::vector<Pubnub::User> updated_users;
+
+                std::copy_if(users.begin(), users.end(), std::back_inserter(updated_users), [&user](const Pubnub::User& base_user) {
+                        return base_user.user_id() != user.user_id();
+                });
+
+                updated_users.push_back(updated_user);
+
+                user_update_callback(updated_users);
             }
         });
 }
@@ -489,6 +516,89 @@ pubnub_subscribe_message_callback_t CallbackService::to_c_memberships_updates_ca
                     updated_memberships.push_back(updated_membership);
 
                     membership_callback(updated_memberships);
+                }
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_message_update_callback(Pubnub::Message base_message, std::shared_ptr<const MessageService> message_service, std::function<void(Pubnub::Message)> message_update_callback) {
+    return to_c_core_callback([base_message, message_service, message_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(message.payload.ptr, message.payload.size));
+                if (message_timetoken == base_message.timetoken()) {
+                    auto parsed_message = message_service->create_message_object(Parsers::PubnubJson::to_message_update(message));
+                    auto updated_message = message_service->update_message_with_base(parsed_message, base_message);
+
+                    message_update_callback(updated_message);
+                }
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_thread_message_update_callback(Pubnub::ThreadMessage base_message, std::shared_ptr<const MessageService> message_service, std::function<void(Pubnub::ThreadMessage)> message_update_callback) {
+    return to_c_core_callback([base_message, message_service, message_update_callback](const pubnub_t* pb, struct pubnub_v2_message message) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(message.payload.ptr, message.payload.size));
+                if (message_timetoken == base_message.timetoken()) {
+                    auto parsed_message = message_service->create_message_object(Parsers::PubnubJson::to_message_update(message));
+                    auto updated_message = message_service->update_message_with_base(parsed_message, base_message);
+
+                    message_update_callback(Pubnub::ThreadMessage(updated_message, base_message.parent_channel_id()));
+                }
+            }
+        });
+}
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_messages_updates_callback(const std::vector<Pubnub::Message>& messages, std::shared_ptr<const MessageService> message_service, std::function<void(std::vector<Pubnub::Message>)> message_update_callback) {
+    return to_c_core_callback([messages, message_service, message_update_callback](const pubnub_t* pb, struct pubnub_v2_message pn_message) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size))) {
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size));
+                auto message = std::find_if(messages.begin(), messages.end(), [&message_timetoken](const Pubnub::Message& base_message) {
+                        return base_message.timetoken() == message_timetoken;
+                });
+
+                if (message != messages.end()) {
+                    auto parsed_message = message_service->create_message_object(Parsers::PubnubJson::to_message_update(pn_message));
+                    auto updated_message = message_service->update_message_with_base(parsed_message, *message);
+
+                    std::vector<Pubnub::Message> updated_messages;
+
+                    std::copy_if(messages.begin(), messages.end(), std::back_inserter(updated_messages), [&message_timetoken](const Pubnub::Message& base_message) {
+                            return base_message.timetoken() != message_timetoken;
+                    });
+
+                    updated_messages.push_back(updated_message);
+
+                    message_update_callback(updated_messages);
+                }
+            }
+        });
+}
+
+
+pubnub_subscribe_message_callback_t CallbackService::to_c_thread_messages_updates_callback(const std::vector<Pubnub::ThreadMessage>& messages, std::shared_ptr<const MessageService> message_service, std::function<void(std::vector<Pubnub::ThreadMessage>)> message_update_callback) {
+    return to_c_core_callback([messages, message_service, message_update_callback](const pubnub_t* pb, struct pubnub_v2_message pn_message) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size))) {
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size));
+                auto message = std::find_if(messages.begin(), messages.end(), [&message_timetoken](const Pubnub::ThreadMessage& base_message) {
+                        return base_message.timetoken() == message_timetoken;
+                });
+
+                if (message != messages.end()) {
+                    auto parsed_message = message_service->create_message_object(Parsers::PubnubJson::to_message_update(pn_message));
+                    auto updated_message = message_service->update_message_with_base(parsed_message, *message);
+
+                    std::vector<Pubnub::ThreadMessage> updated_messages;
+
+                    std::copy_if(messages.begin(), messages.end(), std::back_inserter(updated_messages), [&message_timetoken](const Pubnub::ThreadMessage& base_message) {
+                            return base_message.timetoken() != message_timetoken;
+                    });
+
+                    updated_messages.push_back(Pubnub::ThreadMessage(updated_message, message->parent_channel_id()));
+
+                    message_update_callback(updated_messages);
                 }
             }
         });

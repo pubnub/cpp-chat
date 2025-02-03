@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_USER_SERVICE_HPP
 #define PN_CHAT_USER_SERVICE_HPP
 
+#include "application/subscription.hpp"
 #include "infra/interval_task.hpp"
 #include "infra/timer.hpp"
 #include "user.hpp"
@@ -30,8 +31,8 @@ class UserService : public std::enable_shared_from_this<UserService>
         std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::User update_user(const Pubnub::String& user_id, const UserDAO& user_data) const;
         void delete_user(const Pubnub::String& user_id) const;
-        std::function<void()> stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const;
-        std::function<void()> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
+        std::shared_ptr<Subscription> stream_updates(Pubnub::User calling_user, std::function<void(const Pubnub::User)> user_callback) const;
+        std::shared_ptr<SubscriptionSet> stream_updates_on(Pubnub::User calling_user, const std::vector<Pubnub::User>& users, std::function<void(std::vector<Pubnub::User>)> user_callback) const;
         std::vector<Pubnub::User> get_users_suggestions(Pubnub::String text, int limit = 10) const;
 
         Pubnub::User create_user_object(std::pair<Pubnub::String, UserDAO> user_data) const;
