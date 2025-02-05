@@ -431,7 +431,7 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
                 channel_id,
                 event_type,
                 [](const Pubnub::Event& event) {
-                    pn_c_append_to_response_buffer("\"event\":");
+                Pubnub::String event_str("\"event\":");
 
                     auto j = nlohmann::json{
                             {"timetoken", event.timetoken},
@@ -441,9 +441,9 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
                             {"payload", event.payload}
                     };
 
-                    pn_c_append_to_response_buffer(j.dump().c_str());
+                    event_str += j.dump().c_str();
 
-                
+                    pn_c_append_to_response_buffer(event_str);
                 });
         auto jsonised = move_message_to_heap(messages);
         strcpy(result_json, jsonised);
