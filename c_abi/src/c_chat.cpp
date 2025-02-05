@@ -1,8 +1,10 @@
 #include "c_chat.hpp"
 #include "c_channel.hpp"
+#include "callback_handle.hpp"
 #include "channel.hpp"
 #include "c_errors.hpp"
 #include "chat.hpp"
+#include "event.hpp"
 #include "string.hpp"
 #include "restrictions.hpp"
 #include "nlohmann/json.hpp"
@@ -420,13 +422,29 @@ PnCResult pn_chat_get_channels(
     return PN_C_OK;
 }
 
-PnCResult pn_chat_listen_for_events(
+Pubnub::CallbackHandle* pn_chat_listen_for_events(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::pubnub_chat_event_type event_type,
-        char* result_json) {
+        Pubnub::pubnub_chat_event_type event_type) {
     try {
-        auto messages = chat->listen_for_events(channel_id, event_type);
+        auto messages = chat->listen_for_events(
+                channel_id,
+                event_type,
+                [](const Pubnub::Event& event) {
+                    pn_c_append_to_response_buffer("\"event\":");
+
+                    auto j = nlohmann::json{
+                            {"timetoken", event.timetoken},
+                            {"type", event.type},
+                            {"channel_id", event.channel_id},
+                            {"user_id", event.user_id},
+                            {"payload", event.payload}
+                    };
+
+                    pn_c_append_to_response_buffer(j.dump().c_str());
+
+                
+                });
         auto jsonised = move_message_to_heap(messages);
         strcpy(result_json, jsonised);
         delete[] jsonised;
@@ -836,4 +854,4 @@ PnCTribool pn_pam_can_i(Pubnub::Chat *chat, Pubnub::AccessManager::Permission pe
 
 
 
-
+cchat.cpp
