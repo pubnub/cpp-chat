@@ -180,6 +180,7 @@ namespace Pubnub {
             std::shared_ptr<const MessageService> message_service;
             std::shared_ptr<const MembershipService> membership_service;
             std::shared_ptr<const ChannelService> channel_service;
+            std::shared_ptr<const CallbackService> callback_service;
 #ifdef PN_CHAT_C_ABI
         public:
             const ChatService* get_chat_service() const;
