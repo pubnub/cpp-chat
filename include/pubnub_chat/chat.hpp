@@ -28,6 +28,7 @@ class RestrictionsService;
 class MessageService;
 class MembershipService;
 class AccessManagerService;
+class CallbackService;
 
 
 #ifdef PN_CHAT_C_ABI
