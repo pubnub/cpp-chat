@@ -2,6 +2,7 @@
 #include "enums.hpp"
 #include "pubnub_chat/message.hpp"
 #include "pubnub_chat/chat.hpp"
+#include "string.hpp"
 #include <chrono>
 #include <thread>
 
@@ -25,6 +26,9 @@ int main() {
 
         message_to_react = message.toggle_reaction("cool!");
     });
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
 
     channel.send_text("Some cool message that people will react!");
 
