@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_MEMBERSHIP_H
 #define PN_CHAT_C_MEMBERSHIP_H
 
+#include "callback_handle.hpp"
 #include "chat.hpp"
 #include "membership.hpp"
 #include "user.hpp"
@@ -44,5 +45,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_membership_get_unread_messages_count(
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Membership* pn_membership_update_with_base(
         Pubnub::Membership* membership,
         Pubnub::Membership* base_membership);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_membership_stream_updates(Pubnub::Membership* membership);
 
 #endif // PN_CHAT_C_MEMBERSHIP_H

@@ -119,3 +119,14 @@ Pubnub::Membership* pn_membership_update_with_base(Pubnub::Membership* membershi
     }
 }
 
+Pubnub::CallbackHandle* pn_membership_stream_updates(Pubnub::Membership* membership) {
+    try {
+        return new Pubnub::CallbackHandle(user->stream_updates([](const Pubnub::Membership& user) {
+                    pn_c_append_pointer_to_response_buffer("membership_update", new Pubnub::Membership(user));
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}

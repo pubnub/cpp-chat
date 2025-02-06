@@ -1,7 +1,9 @@
 #include "c_channel.hpp"
 #include "application/dao/channel_dao.hpp"
+#include "callback_handle.hpp"
 #include "chat.hpp"
 #include "domain/channel_entity.hpp"
+#include "domain/quotes.hpp"
 #include "message.hpp"
 #include "message_draft.hpp"
 #include "c_errors.hpp"
@@ -147,19 +149,16 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 
 
-PnCResult pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
+Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
     try {
-        auto messages = channel->connect();
-        auto heaped = move_message_to_heap2(messages);
-        strcpy(result_messages, heaped);
-        delete[] heaped;
+        return new Pubnub::CallbackHandle(channel->connect([](const Pubnub::Message& user) {
+                    pn_c_append_pointer_to_response_buffer("message", new Pubnub::Message(user));
+        }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages) {
@@ -714,3 +713,108 @@ Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* cha
         return PN_C_ERROR_PTR;
     }
 }
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_updates(Pubnub::Channel* channel) {
+    try {
+        return new Pubnub::CallbackHandle(channel->stream_updates([](const Pubnub::Channel& channel) {
+            pn_c_append_pointer_to_response_buffer("channel_update", new Pubnub::Channel(channel));
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub::Vector<Pubnub::String>& strings) {
+    auto strings_vec = strings.into_std_vector();
+
+    const char* const delim = ",";
+
+    std::ostringstream array_of_string;
+
+    std::copy(strings_vec.begin(), strings_vec.end(), std::ostream_iterator<Pubnub::String>(array_of_string, delim));
+
+    Pubnub::String result("{" + Quotes::add(id) + ": [");
+    result += array_of_string.str();
+    result += "]}";
+
+    return array_of_string.str();
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_get_typing(Pubnub::Channel* channel) {
+    try {
+        return new Pubnub::CallbackHandle(channel->get_typing([](const Pubnub::Vector<Pubnub::String>& users) {
+                    auto users_string = vector_of_string_to_string("typing_users", users);
+
+                    pn_c_append_to_response_buffer(users_string.c_str());
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+    
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence(Pubnub::Channel* channel) {
+    try {
+        return new Pubnub::CallbackHandle(channel->stream_presence([](const Pubnub::Vector<Pubnub::String>& users) {
+                    auto users_string = vector_of_string_to_string("presence_users", users);
+
+                    pn_c_append_to_response_buffer(users_string.c_str());
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_receipts(Pubnub::Channel* channel) {
+    try {
+        return new Pubnub::CallbackHandle(channel->stream_read_receipts([](const Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>& read_receipts) {
+                    Pubnub::String read_receipts("{\"read_receipts\":");
+                    for (auto& [key, value] : read_receipts.into_std_map() {
+                        auto users_string = vector_of_string_to_string(key, value);
+                        read_receipts += users_string;
+                        read_receipts += ",";
+                    }
+
+                    read_receipts.erase(read_receipts.length() - 1);
+                    read_receipts += "}";
+
+                    pn_c_append_to_response_buffer(read_receipts.c_str());
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_reports(Pubnub::Channel* channel) {
+    try {
+        return new Pubnub::CallbackHandle(channel->stream_message_reports([](const Pubnub::Event& event) {
+                Pubnub::String event_str("{\"message_report\":");
+
+                    auto j = nlohmann::json{
+                            {"timetoken", event.timetoken},
+                            {"type", event.type},
+                            {"channel_id", event.channel_id},
+                            {"user_id", event.user_id},
+                            {"payload", event.payload}
+                    };
+
+                    event_str += j.dump().c_str();
+                    event_str += "}";
+
+                    pn_c_append_to_response_buffer(event_str);
+                }
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+

@@ -1,6 +1,7 @@
 #include "c_user.hpp"
 #include "c_errors.hpp"
 #include "channel.hpp"
+#include "domain/quotes.hpp"
 #include "page.hpp"
 #include "restrictions.hpp"
 #include "user.hpp"
@@ -323,6 +324,18 @@ PnCResult pn_user_last_active_timestamp(Pubnub::User* user, char* result) {
 
     return PN_C_OK;
 
+}
+
+Pubnub::CallbackHandle* pn_user_stream_updates(Pubnub::User* user) {
+    try {
+        return new Pubnub::CallbackHandle(user->stream_updates([](const Pubnub::User& user) {
+                    pn_c_append_pointer_to_response_buffer("user_update", new Pubnub::User(user));
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }
 
 
