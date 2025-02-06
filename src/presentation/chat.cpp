@@ -172,15 +172,9 @@ EventsHistoryWrapper Pubnub::Chat::get_events_history(const Pubnub::String &chan
     return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
 }
 
-#ifndef PN_CHAT_C_ABI
 CallbackHandle Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
     return CallbackHandle(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
 }
-#else
-std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
-    return this->chat_service->listen_for_events(channel_id, chat_event_type);
-}
-#endif
 
 void Chat::forward_message(const Message& message, const Channel& channel) const {
     this->message_service->forward_message(message, channel.channel_id());
@@ -259,11 +253,6 @@ void Chat::store_user_activity_timestamp() const
 
 const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
-}
-
-std::vector<pubnub_v2_message> Chat::get_chat_updates() const
-{
-    return this->chat_service->get_chat_updates();
 }
 
 #endif

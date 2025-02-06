@@ -217,7 +217,6 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
     return std::make_tuple(enchanced_events, is_more);
 }
 
-#ifndef PN_CHAT_C_ABI
 std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
     if(channel_id.empty())
     {
@@ -230,31 +229,3 @@ std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::Strin
 
     return subscription;
 }
-
-#else
-
-std::vector<pubnub_v2_message> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
-    if(channel_id.empty())
-    {
-        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
-    }
-
-    auto messages = [this, channel_id] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    }();
-    
-    return messages;
-}
-
-std::vector<pubnub_v2_message> ChatService::get_chat_updates() const
-{
-    auto messages = [this] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->fetch_messages();
-    }();
-
-    return messages;
-};
-
-#endif

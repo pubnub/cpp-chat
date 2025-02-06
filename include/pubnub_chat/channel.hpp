@@ -80,12 +80,10 @@ namespace Pubnub
             PN_CHAT_EXPORT Pubnub::ChatChannelData channel_data() const;
 
             PN_CHAT_EXPORT Pubnub::Channel update(const ChatChannelData& in_additional_channel_data) const;
-#ifndef PN_CHAT_C_ABI
             PN_CHAT_EXPORT Pubnub::CallbackHandle connect(std::function<void(Message)> message_callback) const;
-            PN_CHAT_EXPORT void join(std::function<void(Message)> message_callback, const Pubnub::String& additional_params = "") const;
+            PN_CHAT_EXPORT Pubnub::CallbackHandle join(std::function<void(Message)> message_callback, const Pubnub::String& additional_params = "") const;
             PN_CHAT_EXPORT void disconnect() const;
             PN_CHAT_EXPORT void leave() const;
-#endif
             PN_CHAT_EXPORT void delete_channel() const;
 
             PN_CHAT_EXPORT virtual void send_text(const Pubnub::String& message, SendTextParams text_params = SendTextParams());
@@ -115,9 +113,7 @@ namespace Pubnub
             PN_CHAT_EXPORT CallbackHandle stream_read_receipts(std::function<void(Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>)> read_receipts_callback) const;
 
             PN_CHAT_EXPORT Pubnub::EventsHistoryWrapper get_messsage_reports_history(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count = 100) const;
-#ifndef PN_CHAT_C_ABI
             PN_CHAT_EXPORT CallbackHandle stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const;
-#endif
 
             PN_CHAT_EXPORT Pubnub::MessageDraft create_message_draft(Pubnub::MessageDraftConfig message_draft_config = Pubnub::MessageDraftConfig()) const;
 
@@ -145,10 +141,7 @@ namespace Pubnub
 
 #ifdef PN_CHAT_C_ABI
         public:
-        std::vector<pubnub_v2_message> connect() const;
-        std::vector<pubnub_v2_message> join(const Pubnub::String& additional_params = "") const;
-        std::vector<pubnub_v2_message> disconnect() const;
-        std::vector<pubnub_v2_message> leave() const;
+        // TODO: probably not needed
         Pubnub::Channel update_with_base(const Pubnub::Channel& base_channel) const;
 #endif
     };

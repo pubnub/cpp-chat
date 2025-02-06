@@ -1,5 +1,6 @@
 #include "c_chat.hpp"
 #include "c_channel.hpp"
+#include "c_response.hpp"
 #include "callback_handle.hpp"
 #include "channel.hpp"
 #include "c_errors.hpp"
@@ -279,22 +280,6 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     return c_result;
 }
 
-PnCResult pn_chat_get_updates(Pubnub::Chat *chat, char* messages_json) {
-    try {
-        auto messages = chat->get_chat_updates();
-        auto jsonised = move_message_to_heap(messages);
-        strcpy(messages_json, jsonised);
-        delete[] jsonised;
-    } catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
-
-        return PN_C_ERROR;
-    }
-
-    return PN_C_OK;
-}
-
-
 void pn_clear_string(char* str) {
     if (nullptr == str) {
         return;
@@ -427,7 +412,7 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
         const char* channel_id,
         Pubnub::pubnub_chat_event_type event_type) {
     try {
-        auto messages = chat->listen_for_events(
+        return new Pubnub::CallbackHandle(chat->listen_for_events(
                 channel_id,
                 event_type,
                 [](const Pubnub::Event& event) {
@@ -445,17 +430,12 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
                     event_str += "}";
 
                     pn_c_append_to_response_buffer(event_str);
-                });
-        auto jsonised = move_message_to_heap(messages);
-        strcpy(result_json, jsonised);
-        delete[] jsonised;
+                }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-        
-    return PN_C_OK;
 }
 
 Pubnub::CreatedChannelWrapper* pn_chat_create_direct_conversation_dirty(
@@ -805,6 +785,8 @@ PnCResult pn_chat_get_current_user_mentions(Pubnub::Chat *chat, const char *star
 
         return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
 PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit, char* result) {
@@ -852,7 +834,3 @@ PnCTribool pn_pam_can_i(Pubnub::Chat *chat, Pubnub::AccessManager::Permission pe
     }
 }
 
-
-
-
-cchat.cpp

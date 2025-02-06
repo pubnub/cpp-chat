@@ -1,5 +1,6 @@
 #include "c_user.hpp"
 #include "c_errors.hpp"
+#include "c_response.hpp"
 #include "channel.hpp"
 #include "domain/quotes.hpp"
 #include "page.hpp"

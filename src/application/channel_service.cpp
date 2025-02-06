@@ -255,24 +255,10 @@ std::shared_ptr<Subscription> ChannelService::connect(const String& channel_id, 
     return subscription;
 }
 
-#ifndef PN_CHAT_C_ABI
 void ChannelService::disconnect(const String& channel_id) const {
-#else
-std::vector<pubnub_v2_message> ChannelService::disconnect(const String& channel_id) const {
-#endif // PN_CHAT_C_ABI
+    // TODO: handle close OR it is even needed??? 
       auto pubnub_handle = this->pubnub->lock();
       auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
-
-#ifndef PN_CHAT_C_ABI
-    if (auto chat = this->chat_service.lock()) {
-        chat->callback_service->broadcast_messages(messages);
-        chat->callback_service->remove_message_callback(channel_id);
-    } else {
-        throw std::runtime_error("Chat service is not available to connect to channel");
-    }
-#else
-    return messages;
-#endif // PN_CHAT_C_ABI
 }
 
 std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, std::function<void(Message)> message_callback, const String& additional_params) const {
@@ -424,15 +410,7 @@ std::shared_ptr<Subscription> ChannelService::get_typing(const String& channel_i
         typing_callback(channel_data.get_typing_indicators());
     };
 
-#ifndef PN_CHAT_C_ABI
     return chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING, internal_typing_callback);
-#else
-    auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_TYPING);
-    // TODO: messages are not used in C ABI
-
-    std::function<void()> dummy_return = [](){};
-    return dummy_return;
-#endif
 }
 
 Message ChannelService::get_pinned_message(const String& channel_id, const ChannelDAO& channel_data) const {
@@ -627,13 +605,7 @@ std::shared_ptr<Subscription> ChannelService::stream_read_receipts(const Pubnub:
         read_receipts_callback(generate_receipts(timetoken_per_user_in));
     };
 
-#ifndef PN_CHAT_C_ABI
     return chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT, receipt_event_callback);
-#else
-chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT);
-    std::function<void()> dumy_return = [](){};
-    return dumy_return;
-#endif
 }
 
 String ChannelService::get_thread_id(const Pubnub::Message& message) const
@@ -888,7 +860,6 @@ std::tuple<std::vector<Pubnub::Event>, bool> ChannelService::get_message_reports
     }
 }
 
-#ifndef PN_CHAT_C_ABI
 std::shared_ptr<Subscription> ChannelService::stream_message_reports(const Pubnub::String& channel_id, std::function<void(Pubnub::Event)> message_report_callback) const {
     if (auto chat_service = this->chat_service.lock()) {
         const auto channel = INTERNAL_MODERATION_PREFIX + channel_id;
@@ -898,77 +869,4 @@ std::shared_ptr<Subscription> ChannelService::stream_message_reports(const Pubnu
         throw std::runtime_error("Chat service is not available to stream message reports");
     }
 }
-#endif
 
-#ifdef PN_CHAT_C_ABI
-void ChannelService::stream_updates_on(const std::vector<Pubnub::String>& channel_ids) const
-{
-    //TODO:: C_ABI Way
-    if(channel_ids.empty())
-    {
-        throw std::invalid_argument("Cannot stream channel updates on an empty list");
-    }
-    
-    auto pubnub_handle = this->pubnub->lock();
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channel_ids);
-}
-
-void ChannelService::stream_read_receipts(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const
-{
-    //TODO:: C_ABI Way
-    // if(channel_data.get_entity().type == String("public"))
-    // {
-    //     throw std::runtime_error("Read receipts are not supported in Public chats");
-    // }
-
-    // auto chat_service_shared = chat_service.lock();
-
-    // auto generate_receipts = [=](std::map<String, String, StringComparer> in_timetoken_per_user) -> std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer>
-    // {
-    //     std::map<Pubnub::String, std::vector<Pubnub::String>, Pubnub::StringComparer> receipts;
-
-    //     for(auto it = in_timetoken_per_user.begin(); it != in_timetoken_per_user.end(); it++)
-    //     {
-    //         //If there is no key with such timetoken yet, just add empty array
-    //         if(receipts.find(it->second) == receipts.end())
-    //         {
-    //             receipts[it->second] = {};
-    //         }
-    //         receipts[it->second].push_back(it->first);
-    //     }
-
-    //     return receipts;
-
-    // };
-    // std::map<String, String, StringComparer> timetoken_per_user;
-
-    // auto channel_members = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
-
-    // for(auto membership : channel_members)
-    // {
-    //     String last_read_timetoken = membership.last_read_message_timetoken();
-    //     if(last_read_timetoken.empty())
-    //     {
-    //         continue;
-    //     }
-
-    //     timetoken_per_user[membership.user.user_id()] =  last_read_timetoken;
-        
-    // }
-
-    // read_receipts_callback(generate_receipts(timetoken_per_user));
-
-    // auto receipt_event_callback = [=, &timetoken_per_user](const Pubnub::Event& event){
-
-    //     json payload_json = json::parse(event.payload);
-
-    //     timetoken_per_user[String(payload_json["user_id"])] = String(payload_json["messageTimetoken"]);
-
-    //     read_receipts_callback(generate_receipts(timetoken_per_user));
-    // };
-
-    // auto messages = chat_service_shared->listen_for_events(channel_id, pubnub_chat_event_type::PCET_RECEPIT);
-    // TODO: messages are not used in C ABI 
-}
-
-#endif // PN_CHAT_C_ABI

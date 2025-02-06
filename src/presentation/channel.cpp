@@ -93,13 +93,12 @@ Channel Channel::update(const ChatChannelData& in_additional_channel_data) const
     return this->channel_service->update_channel(channel_id_internal, ChannelDAO(in_additional_channel_data));
 }
 
-#ifndef PN_CHAT_C_ABI
 CallbackHandle Channel::connect(std::function<void(Message)> message_callback) const {
     return CallbackHandle(this->channel_service->connect(channel_id_internal, message_callback));
 }
 
-void Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
-    this->channel_service->join(*this, message_callback, additional_params);
+CallbackHandle Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
+    return CallbackHandle(this->channel_service->join(*this, message_callback, additional_params));
 }
 
 void Channel::disconnect() const {
@@ -109,23 +108,8 @@ void Channel::disconnect() const {
 void Channel::leave() const {
     this->channel_service->leave(channel_id_internal);
 }
-#else 
-std::vector<pubnub_v2_message> Channel::connect() const {
-    return this->channel_service->connect(channel_id_internal);
-}
 
-std::vector<pubnub_v2_message> Channel::join(const Pubnub::String& additional_params) const {
-    return this->channel_service->join(*this, additional_params);
-}
-
-std::vector<pubnub_v2_message> Channel::disconnect() const {
-    return this->channel_service->disconnect(channel_id_internal);
-}
-
-std::vector<pubnub_v2_message> Channel::leave() const {
-    return this->channel_service->leave(channel_id_internal);
-}
-
+#ifdef PN_CHAT_C_ABI
 Channel Channel::update_with_base(const Channel& base_channel) const {
     return this->channel_service->update_channel_with_base(*this, base_channel);
 }
@@ -285,7 +269,6 @@ Pubnub::MessageDraft Pubnub::Channel::create_message_draft(Pubnub::MessageDraftC
     return this->message_service->create_message_draft(*this, message_draft_config);
 }
 
-#ifndef PN_CHAT_C_ABI
 Pubnub::CallbackHandle Pubnub::Channel::stream_message_reports(std::function<void(const Pubnub::Event&)> event_callback) const
 {
     // TODO: it seems to be bug
@@ -295,4 +278,3 @@ Pubnub::CallbackHandle Pubnub::Channel::stream_message_reports(std::function<voi
     };
     return CallbackHandle(this->channel_service->stream_message_reports(channel_id(), new_callback));
 }
-#endif

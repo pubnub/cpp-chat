@@ -54,7 +54,7 @@ namespace Pubnub {
         Pubnub::Vector<T> keys;
         Pubnub::Vector<K> values;
 
-        int size(){
+        int size() const {
             return keys.size();
         }
 

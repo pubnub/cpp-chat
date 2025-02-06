@@ -1,4 +1,5 @@
 #include "c_channel.hpp"
+#include "c_response.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "callback_handle.hpp"
 #include "chat.hpp"
@@ -163,10 +164,7 @@ Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel, char* resul
 
 PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages) {
     try {
-        auto messages = channel->disconnect();
-        auto heaped = move_message_to_heap2(messages);
-        strcpy(result_messages, heaped);
-        delete[] heaped;
+        channel->disconnect();
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -176,26 +174,22 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages)
     return PN_C_OK;
 }
 
-PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages) {
+Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages) {
     try {
-        auto messages = channel->join(additional_params);
-        auto heaped = move_message_to_heap2(messages);
-        strcpy(result_messages, heaped);
-        delete[] heaped;
+        return new Pubnub::CallbackHandle(channel->join([](const Pubnub::Message& user) {
+                    pn_c_append_pointer_to_response_buffer("message", new Pubnub::Message(user));
+        },
+        additional_params));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-
-    return PN_C_OK;
 }
 
 PnCResult pn_channel_leave(Pubnub::Channel* channel, char* result_messages) {
     try {
-        auto messages = channel->leave();
-        auto heaped = move_message_to_heap2(messages);
-        delete[] heaped;
+        channel->leave();
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -727,13 +721,11 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_updates(
 }
 
 static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub::Vector<Pubnub::String>& strings) {
-    auto strings_vec = strings.into_std_vector();
-
     const char* const delim = ",";
 
     std::ostringstream array_of_string;
 
-    std::copy(strings_vec.begin(), strings_vec.end(), std::ostream_iterator<Pubnub::String>(array_of_string, delim));
+    std::copy(strings.begin(), strings.end(), std::ostream_iterator<Pubnub::String>(array_of_string, delim));
 
     Pubnub::String result("{" + Quotes::add(id) + ": [");
     result += array_of_string.str();
@@ -774,17 +766,18 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_receipts(Pubnub::Channel* channel) {
     try {
         return new Pubnub::CallbackHandle(channel->stream_read_receipts([](const Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>& read_receipts) {
-                    Pubnub::String read_receipts("{\"read_receipts\":");
-                    for (auto& [key, value] : read_receipts.into_std_map() {
-                        auto users_string = vector_of_string_to_string(key, value);
-                        read_receipts += users_string;
-                        read_receipts += ",";
+                    Pubnub::String read_receipts_str("{\"read_receipts\":");
+                    // TODO: maybe iterators?
+                    for (auto i = 0; i < read_receipts.size(); i++) {
+                        auto users_string = vector_of_string_to_string(read_receipts.keys[i], read_receipts.values[i]);
+                        read_receipts_str += users_string;
+                        read_receipts_str += ",";
                     }
 
-                    read_receipts.erase(read_receipts.length() - 1);
-                    read_receipts += "}";
+                    read_receipts_str.erase(read_receipts_str.length() - 1);
+                    read_receipts_str += "}";
 
-                    pn_c_append_to_response_buffer(read_receipts.c_str());
+                    pn_c_append_to_response_buffer(read_receipts_str.c_str());
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -810,7 +803,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_
                     event_str += "}";
 
                     pn_c_append_to_response_buffer(event_str);
-                }
+                }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 

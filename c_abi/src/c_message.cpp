@@ -1,5 +1,6 @@
 #include "c_message.hpp"
 #include "c_thread_channel.hpp"
+#include "c_response.hpp"
 #include "c_errors.hpp"
 #include "nlohmann/json.hpp"
 #include "message.hpp"

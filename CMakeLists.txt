@@ -177,7 +177,8 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_membership.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_serialization.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_channel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_message.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_message.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_response.cpp)
 endif()
 
 set(SOURCES
