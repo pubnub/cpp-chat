@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CALLBACK_HANDLE_HPP
 #define PN_CHAT_CALLBACK_HANDLE_HPP
 
+#include "helpers/export.hpp"
 #include <memory>
 
 class Subscribable;
@@ -8,10 +9,10 @@ class Subscribable;
 namespace Pubnub {
     class CallbackHandle {
         public: 
-            CallbackHandle(std::shared_ptr<Subscribable> subscription);
-            ~CallbackHandle() = default;
+            PN_CHAT_EXPORT CallbackHandle(std::shared_ptr<Subscribable> subscription);
+            PN_CHAT_EXPORT ~CallbackHandle() = default;
 
-            void close();
+            PN_CHAT_EXPORT void close();
 
         private:
             std::shared_ptr<Subscribable> subscription;

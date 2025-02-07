@@ -1,7 +1,6 @@
 #ifndef PN_CHAT_CHANNEL_HPP
 #define PN_CHAT_CHANNEL_HPP
 
-#include "application/subscription.hpp"
 #include "callback_handle.hpp"
 #include "event.hpp"
 #include "string.hpp"
