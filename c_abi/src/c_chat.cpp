@@ -412,10 +412,12 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
         const char* channel_id,
         Pubnub::pubnub_chat_event_type event_type) {
     try {
+        auto chat_service = chat->shared_chat_service();
+
         return new Pubnub::CallbackHandle(chat->listen_for_events(
                 channel_id,
                 event_type,
-                [](const Pubnub::Event& event) {
+                [chat_service](const Pubnub::Event& event) {
                 Pubnub::String event_str("{\"event\":");
 
                     auto j = nlohmann::json{
@@ -429,7 +431,7 @@ Pubnub::CallbackHandle* pn_chat_listen_for_events(
                     event_str += j.dump().c_str();
                     event_str += "}";
 
-                    pn_c_append_to_response_buffer(event_str);
+                    pn_c_append_to_response_buffer(chat_service.get(), event_str);
                 }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());

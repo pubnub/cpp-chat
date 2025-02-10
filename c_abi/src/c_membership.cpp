@@ -122,8 +122,9 @@ Pubnub::Membership* pn_membership_update_with_base(Pubnub::Membership* membershi
 
 Pubnub::CallbackHandle* pn_membership_stream_updates(Pubnub::Membership* membership) {
     try {
-        return new Pubnub::CallbackHandle(membership->stream_updates([](const Pubnub::Membership& membership) {
-                    pn_c_append_pointer_to_response_buffer("membership_update", new Pubnub::Membership(membership));
+        auto chat = membership->shared_chat_service();
+        return new Pubnub::CallbackHandle(membership->stream_updates([chat](const Pubnub::Membership& membership) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "membership_update", new Pubnub::Membership(membership));
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());

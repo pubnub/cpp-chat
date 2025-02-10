@@ -57,6 +57,11 @@ class ChatService : public std::enable_shared_from_this<ChatService>
    
     private:
         ThreadSafePtr<PubNub> pubnub;
+
+#ifdef PN_CHAT_C_ABI 
+    public:
+        mutable Mutex<Pubnub::String> response_buffer = "[";
+#endif
 };
 
 #endif // PN_CHAT_CHAT_SERVICE_HPP

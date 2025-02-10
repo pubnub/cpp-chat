@@ -142,6 +142,8 @@ namespace Pubnub
         public:
         // TODO: probably not needed
         Pubnub::Channel update_with_base(const Pubnub::Channel& base_channel) const;
+
+        std::shared_ptr<const ChatService> shared_chat_service() const;
 #endif
     };
 };

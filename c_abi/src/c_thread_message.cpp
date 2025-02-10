@@ -425,8 +425,9 @@ PnCResult pn_thread_message_parent_channel_id(Pubnub::ThreadMessage* thread_mess
 
 Pubnub::CallbackHandle* pn_thread_message_stream_updates(Pubnub::ThreadMessage* message) {
     try {
-        return new Pubnub::CallbackHandle(message->stream_updates([](const Pubnub::ThreadMessage& user) {
-                    pn_c_append_pointer_to_response_buffer("thread_message_update", new Pubnub::ThreadMessage(user));
+        auto chat = message->shared_chat_service();
+        return new Pubnub::CallbackHandle(message->stream_updates([chat](const Pubnub::ThreadMessage& user) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "thread_message_update", new Pubnub::ThreadMessage(user));
             }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());

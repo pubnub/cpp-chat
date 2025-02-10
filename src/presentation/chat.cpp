@@ -255,4 +255,8 @@ const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
 }
 
+std::shared_ptr<const ChatService> Chat::shared_chat_service() const {
+    return chat_service;
+}
+
 #endif

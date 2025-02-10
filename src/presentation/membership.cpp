@@ -81,4 +81,8 @@ CallbackHandle Membership::stream_updates_on(Pubnub::Vector<Membership> membersh
 Pubnub::Membership Membership::update_with_base(const Pubnub::Membership& base_membership) const {
     return this->membership_service->update_membership_with_base(*this, base_membership);
 }
+
+std::shared_ptr<const ChatService> Membership::shared_chat_service() const {
+    return this->chat_service;
+}
 #endif

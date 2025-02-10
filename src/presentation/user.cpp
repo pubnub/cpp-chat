@@ -130,4 +130,8 @@ Pubnub::Option<Pubnub::String> User::last_active_timestamp() const {
 User User::update_with_base(const User& base_user) const {
     return this->user_service->update_user_with_base(*this, base_user);
 }
+
+std::shared_ptr<const ChatService> User::shared_chat_service() const {
+    return this->chat_service;
+}
 #endif

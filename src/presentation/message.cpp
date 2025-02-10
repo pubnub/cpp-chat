@@ -234,4 +234,9 @@ Pubnub::Vector<TextLink> Message::text_links() const
 Pubnub::Message Pubnub::Message::update_with_base(const Pubnub::Message& base_message) const {
     return this->message_service->update_message_with_base(*this, base_message);
 }
+
+
+std::shared_ptr<const ChatService> Message::shared_chat_service() const {
+    return this->chat_service;
+}
 #endif

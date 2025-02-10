@@ -278,3 +278,10 @@ Pubnub::CallbackHandle Pubnub::Channel::stream_message_reports(std::function<voi
     };
     return CallbackHandle(this->channel_service->stream_message_reports(channel_id(), new_callback));
 }
+
+#ifdef PN_CHAT_C_ABI
+std::shared_ptr<const ChatService> Channel::shared_chat_service() const
+{
+    return this->chat_service;
+}
+#endif

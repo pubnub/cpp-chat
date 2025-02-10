@@ -152,8 +152,10 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
     try {
-        return new Pubnub::CallbackHandle(channel->connect([](const Pubnub::Message& user) {
-                    pn_c_append_pointer_to_response_buffer("message", new Pubnub::Message(user));
+        auto chat = channel->shared_chat_service();
+
+        return new Pubnub::CallbackHandle(channel->connect([chat](const Pubnub::Message& user) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "message", new Pubnub::Message(user));
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -176,8 +178,10 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages)
 
 Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages) {
     try {
-        return new Pubnub::CallbackHandle(channel->join([](const Pubnub::Message& user) {
-                    pn_c_append_pointer_to_response_buffer("message", new Pubnub::Message(user));
+        auto chat = channel->shared_chat_service();
+
+        return new Pubnub::CallbackHandle(channel->join([chat](const Pubnub::Message& user) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "message", new Pubnub::Message(user));
         },
         additional_params));
     } catch (std::exception& e) {
@@ -710,8 +714,10 @@ Pubnub::MessageDraft* pn_channel_create_message_draft_dirty(Pubnub::Channel* cha
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_updates(Pubnub::Channel* channel) {
     try {
-        return new Pubnub::CallbackHandle(channel->stream_updates([](const Pubnub::Channel& channel) {
-            pn_c_append_pointer_to_response_buffer("channel_update", new Pubnub::Channel(channel));
+        auto chat = channel->shared_chat_service();
+
+        return new Pubnub::CallbackHandle(channel->stream_updates([chat](const Pubnub::Channel& channel) {
+            pn_c_append_pointer_to_response_buffer(chat.get(), "channel_update", new Pubnub::Channel(channel));
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -734,12 +740,19 @@ static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub
     return array_of_string.str();
 }
 
+// {"typing_users": {"<channel_name>": ["<user1>", "<user2>"]}}
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_get_typing(Pubnub::Channel* channel) {
     try {
-        return new Pubnub::CallbackHandle(channel->get_typing([](const Pubnub::Vector<Pubnub::String>& users) {
-                    auto users_string = vector_of_string_to_string("typing_users", users);
+        auto chat = channel->shared_chat_service();
+        auto channel_name = channel->channel_id();
+        
+        return new Pubnub::CallbackHandle(channel->get_typing([chat, channel_name](const Pubnub::Vector<Pubnub::String>& users) {
+                    Pubnub::String result = "{\"typing_users\":";
+                    auto users_string = vector_of_string_to_string(channel_name, users);
+                    result += users_string;
+                    result += "}";
 
-                    pn_c_append_to_response_buffer(users_string.c_str());
+                    pn_c_append_to_response_buffer(chat.get(), users_string.c_str());
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -749,12 +762,19 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_get_typing(Pubn
     
 }
 
+// {"presence_users" : {"<channel_name>": ["<user1>", "<user2>"]}}
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence(Pubnub::Channel* channel) {
     try {
-        return new Pubnub::CallbackHandle(channel->stream_presence([](const Pubnub::Vector<Pubnub::String>& users) {
-                    auto users_string = vector_of_string_to_string("presence_users", users);
+        auto chat = channel->shared_chat_service();
+        auto channel_name = channel->channel_id();
 
-                    pn_c_append_to_response_buffer(users_string.c_str());
+        return new Pubnub::CallbackHandle(channel->stream_presence([chat, channel_name](const Pubnub::Vector<Pubnub::String>& users) {
+                    Pubnub::String result = "{\"presence_users\":";
+                    auto users_string = vector_of_string_to_string(channel_name, users);
+                    result += users_string;
+                    result += "}";
+
+                    pn_c_append_to_response_buffer(chat.get(), result.c_str());
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -763,21 +783,32 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence
     }
 }
 
+// {"read_receipts": {"channel_id": "<channel_name>", "data" : {"<user1>": ["<timetoken1>", "<timetoken2>"]}}}
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_receipts(Pubnub::Channel* channel) {
     try {
-        return new Pubnub::CallbackHandle(channel->stream_read_receipts([](const Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>& read_receipts) {
-                    Pubnub::String read_receipts_str("{\"read_receipts\":");
+        auto chat = channel->shared_chat_service();
+        auto channel_name = channel->channel_id();
+
+        return new Pubnub::CallbackHandle(channel->stream_read_receipts([chat, channel_name](const Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>& read_receipts) {
+                    Pubnub::String read_receipts_result("{\"read_receipts\":");
+                    Pubnub::String read_receipts_str;
                     // TODO: maybe iterators?
                     for (auto i = 0; i < read_receipts.size(); i++) {
                         auto users_string = vector_of_string_to_string(read_receipts.keys[i], read_receipts.values[i]);
                         read_receipts_str += users_string;
                         read_receipts_str += ",";
                     }
-
                     read_receipts_str.erase(read_receipts_str.length() - 1);
-                    read_receipts_str += "}";
 
-                    pn_c_append_to_response_buffer(read_receipts_str.c_str());
+                    auto j = nlohmann::json{
+                        {"channel_id", channel_name.c_str()},
+                        {"data", read_receipts_str.c_str()},
+                    };
+
+                    read_receipts_result = j.dump().c_str();
+                    read_receipts_result += "}";
+
+                    pn_c_append_to_response_buffer(chat.get(), read_receipts_result.c_str());
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
@@ -788,7 +819,9 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_rec
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_reports(Pubnub::Channel* channel) {
     try {
-        return new Pubnub::CallbackHandle(channel->stream_message_reports([](const Pubnub::Event& event) {
+        auto chat = channel->shared_chat_service();
+
+        return new Pubnub::CallbackHandle(channel->stream_message_reports([chat](const Pubnub::Event& event) {
                 Pubnub::String event_str("{\"message_report\":");
 
                     auto j = nlohmann::json{
@@ -802,7 +835,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_
                     event_str += j.dump().c_str();
                     event_str += "}";
 
-                    pn_c_append_to_response_buffer(event_str);
+                    pn_c_append_to_response_buffer(chat.get(), event_str);
                 }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());

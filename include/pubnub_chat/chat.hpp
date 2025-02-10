@@ -185,6 +185,7 @@ namespace Pubnub {
 #ifdef PN_CHAT_C_ABI
         public:
             const ChatService* get_chat_service() const;
+            std::shared_ptr<const ChatService> shared_chat_service() const;
 #endif
 
     };

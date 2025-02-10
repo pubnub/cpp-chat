@@ -52,6 +52,8 @@ namespace Pubnub
 #ifdef PN_CHAT_C_ABI
         public:
             Pubnub::Membership update_with_base(const Pubnub::Membership& base_membership) const;
+
+            std::shared_ptr<const ChatService> shared_chat_service() const;
 #endif
     };
 }
