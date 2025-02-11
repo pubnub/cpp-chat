@@ -6,7 +6,7 @@
 #include "domain/quotes.hpp"
 #include "pubnub_chat/chat.hpp"
 
-PnCResult pn_c_consume_response_buffer(Pubnub::Chat* chat, char* result);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_c_consume_response_buffer(Pubnub::Chat* chat, char* result);
 
 PnCResult pn_c_append_to_response_buffer(const ChatService* chat, const char* data);
 
