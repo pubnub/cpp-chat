@@ -150,7 +150,7 @@ const char* jsonize_messages3(std::vector<Pubnub::String> messages) {
 
 
 
-Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel, char* result_messages) {
+Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel) {
     try {
         auto chat = channel->shared_chat_service();
 
@@ -164,7 +164,7 @@ Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel, char* resul
     }
 }
 
-PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages) {
+PnCResult pn_channel_disconnect(Pubnub::Channel* channel) {
     try {
         channel->disconnect();
     } catch (std::exception& e) {
@@ -176,7 +176,7 @@ PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages)
     return PN_C_OK;
 }
 
-Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages) {
+Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params) {
     try {
         auto chat = channel->shared_chat_service();
 
@@ -191,7 +191,7 @@ Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* ad
     }
 }
 
-PnCResult pn_channel_leave(Pubnub::Channel* channel, char* result_messages) {
+PnCResult pn_channel_leave(Pubnub::Channel* channel) {
     try {
         channel->leave();
     } catch (std::exception& e) {
