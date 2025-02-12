@@ -11,6 +11,7 @@ extern "C" {
 #include <pubnub_subscribe_event_listener.h>
 #include <pubnub_subscribe_event_listener_types.h>
 }
+#include "enums.hpp"
 #include "string.hpp"
 
 static void free_subscription(pubnub_subscription_t* subscription) {
@@ -21,7 +22,7 @@ static void free_subscription(pubnub_subscription_t* subscription) {
 Subscription::Subscription(pubnub_subscription_t* subscription) :
     subscription(subscription, free_subscription) {}
 
-Subscription::~Subscription() = default; 
+Subscription::~Subscription() = default;
 
 void Subscription::close() {
     pubnub_subscription_t* raw_ptr = this->subscription.get();
@@ -40,8 +41,20 @@ void Subscription::add_user_update_listener(pubnub_subscribe_message_callback_t 
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "user update");
 }
 
-void Subscription::add_event_listener(pubnub_subscribe_message_callback_t callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "event");
+void Subscription::add_event_listener(
+    pubnub_subscribe_message_callback_t callback,
+    Pubnub::pubnub_chat_event_type event_type
+) {
+    switch (Pubnub::event_method_from_event_type(event_type)) {
+        case Pubnub::EventMethod::Publish:
+            this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "event");
+            break;
+        case Pubnub::EventMethod::Signal:
+            this->add_callback(callback, PBSL_LISTENER_ON_SIGNAL, "event");
+            break;
+        default:
+            throw std::runtime_error("Unsupported event type");
+    };
 }
 
 void Subscription::add_presence_listener(pubnub_subscribe_message_callback_t callback) {
@@ -56,7 +69,8 @@ void Subscription::add_message_update_listener(pubnub_subscribe_message_callback
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
 }
 
-void Subscription::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback
+) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
 }
 
@@ -128,7 +142,9 @@ void SubscriptionSet::add_message_update_listener(pubnub_subscribe_message_callb
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
 }
 
-void SubscriptionSet::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+void SubscriptionSet::add_thread_message_update_listener(
+    pubnub_subscribe_message_callback_t callback
+) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
 }
 

@@ -45,7 +45,7 @@ void ChannelDAO::stop_typing() const {
 
 void ChannelDAO::start_typing_indicator(const Pubnub::String& user_id, int miliseconds, std::function<void(const std::vector<Pubnub::String>&)> on_timeout) const {
     auto indicators_timers = this->indicators_timers.lock();
-    (*indicators_timers)[user_id] = Timer(5000, [this, user_id, on_timeout]() {
+    (*indicators_timers)[user_id] = Timer(miliseconds, [this, user_id, on_timeout]() {
         this->remove_typing_indicator(user_id);
         on_timeout(this->typing.lock()->get_typing_indicators());
     });
@@ -55,6 +55,7 @@ void ChannelDAO::start_typing_indicator(const Pubnub::String& user_id, int milis
 
 void ChannelDAO::stop_typing_indicator(const Pubnub::String& user_id) const {
     (*this->indicators_timers.lock())[user_id].stop();
+    this->remove_typing_indicator(user_id);
 }
 
 void ChannelDAO::remove_typing_indicator(const Pubnub::String& user_id) const {
