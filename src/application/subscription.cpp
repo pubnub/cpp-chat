@@ -1,4 +1,5 @@
 #include "subscription.hpp"
+
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
@@ -6,10 +7,10 @@ extern "C" {
 #include <pubnub_api_types.h>
 #include <pubnub_helper.h>
 #include <pubnub_subscribe_event_engine.h>
+#include <pubnub_subscribe_event_engine_internal.h>
+#include <pubnub_subscribe_event_engine_types.h>
 #include <pubnub_subscribe_event_listener.h>
 #include <pubnub_subscribe_event_listener_types.h>
-#include <pubnub_subscribe_event_engine_types.h>
-#include <pubnub_subscribe_event_engine_internal.h>
 }
 #include "enums.hpp"
 #include "string.hpp"
@@ -32,8 +33,7 @@ static Pubnub::String error_message(
     return error;
 }
 
-Subscription::Subscription(pubnub_subscription_t* subscription) :
-    subscription(subscription) {}
+Subscription::Subscription(pubnub_subscription_t* subscription) : subscription(subscription) {}
 
 Subscription::~Subscription() {
     pubnub_subscription_free(&this->subscription);
@@ -156,11 +156,8 @@ void SubscriptionSet::add_callback(
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
 ) {
-    enum pubnub_res result = pubnub_subscribe_add_subscription_set_listener(
-        this->subscription_set,
-        type,
-        callback
-    );
+    enum pubnub_res result =
+        pubnub_subscribe_add_subscription_set_listener(this->subscription_set, type, callback);
 
     if (PNR_OK != result) {
         throw std::runtime_error(

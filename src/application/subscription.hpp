@@ -58,8 +58,7 @@ class SubscriptionSet: public Subscribable {
         void add_user_update_listener(pubnub_subscribe_message_callback_t callback);
 
     private:
-        pubnub_subscription_set_t*
-            subscription_set;
+        pubnub_subscription_set_t* subscription_set;
 
         void add_callback(
             pubnub_subscribe_message_callback_t callback,
