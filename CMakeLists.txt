@@ -213,6 +213,7 @@ if(${COMPILE_EXAMPLES})
     example(thread_channel)
     example(message_reactions)
     example(delete_message)
+    example(typing)
 endif()
 
 if(${RUN_TESTS})

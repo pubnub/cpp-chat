@@ -10,6 +10,8 @@ namespace Pubnub {
     class CallbackHandle {
         public: 
             PN_CHAT_EXPORT CallbackHandle(std::shared_ptr<Subscribable> subscription);
+            PN_CHAT_EXPORT CallbackHandle(CallbackHandle& other);
+            PN_CHAT_EXPORT CallbackHandle(const CallbackHandle& other);
             PN_CHAT_EXPORT ~CallbackHandle() = default;
 
             PN_CHAT_EXPORT void close();
