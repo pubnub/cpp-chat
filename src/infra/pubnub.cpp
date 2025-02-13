@@ -1,4 +1,5 @@
 #include "infra/pubnub.hpp"
+#include <pubnub_subscribe_event_engine.h>
 
 #include "application/subscription.hpp"
 #include "infra/serialization.hpp"
@@ -57,6 +58,10 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
         pubnub_set_auth(this->main_context.get(), this->auth_key.c_str());
         pubnub_set_auth(this->long_poll_context.get(), this->auth_key.c_str());
     }
+}
+
+PubNub::~PubNub() {
+    pubnub_unsubscribe_all(this->long_poll_context.get());
 }
 
 Pubnub::String PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)
