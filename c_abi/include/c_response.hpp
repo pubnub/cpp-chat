@@ -14,8 +14,8 @@ template <typename T>
 PnCResult pn_c_append_pointer_to_response_buffer(const ChatService* chat, Pubnub::String id, T* pointer) {
     auto id_string = Quotes::add(id);
     auto ptr_string = Quotes::add(to_ptr_string(pointer));
-
-    return pn_c_append_to_response_buffer(chat, "{" + id_string + ":" + ptr_string + "}");
+    auto data = "{" + id_string + ":" + ptr_string + "}";
+    return pn_c_append_to_response_buffer(chat, data.c_str());
 }
 
 #endif

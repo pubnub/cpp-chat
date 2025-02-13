@@ -825,17 +825,17 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_
                 Pubnub::String event_str("{\"message_report\":");
 
                     auto j = nlohmann::json{
-                            {"timetoken", event.timetoken},
+                            {"timetoken", event.timetoken.c_str()},
                             {"type", event.type},
-                            {"channel_id", event.channel_id},
-                            {"user_id", event.user_id},
-                            {"payload", event.payload}
+                            {"channelId", event.channel_id.c_str()},
+                            {"userId", event.user_id.c_str()},
+                            {"payload", event.payload.c_str()}
                     };
 
                     event_str += j.dump().c_str();
                     event_str += "}";
 
-                    pn_c_append_to_response_buffer(chat.get(), event_str);
+                    pn_c_append_to_response_buffer(chat.get(), event_str.c_str());
                 }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
