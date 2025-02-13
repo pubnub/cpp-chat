@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 extern "C" {
 #include <pubnub_api_types.h>
 #include <pubnub_helper.h>
@@ -13,6 +14,24 @@ extern "C" {
 }
 #include "enums.hpp"
 #include "string.hpp"
+
+static Pubnub::String error_message(
+    const Pubnub::String& message,
+    const Pubnub::String& kind,
+    enum pubnub_res result
+) {
+    Pubnub::String error;
+    auto result_str = pubnub_res_2_string(result);
+
+    error.reserve(message.length() + kind.length() + std::strlen(result_str));
+
+    error.replace(0, 0, message);
+    error += " : ";
+    error += result_str;
+    error.replace_all("{}", kind.c_str());
+
+    return error;
+}
 
 static void free_subscription(pubnub_subscription_t* subscription) {
     pubnub_subscription_free(&subscription);
@@ -26,7 +45,11 @@ Subscription::~Subscription() = default;
 
 void Subscription::close() {
     pubnub_subscription_t* raw_ptr = this->subscription.get();
-    pubnub_unsubscribe_with_subscription(&raw_ptr);
+    auto result = pubnub_unsubscribe_with_subscription(&raw_ptr);
+    if (PNR_OK != result) {
+        throw std::runtime_error(error_message("{} close failed", "Subscription", result).c_str());
+    }
+    this->subscription.reset(nullptr);
 }
 
 void Subscription::add_message_listener(pubnub_subscribe_message_callback_t callback) {
@@ -74,24 +97,6 @@ void Subscription::add_thread_message_update_listener(pubnub_subscribe_message_c
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
 }
 
-static Pubnub::String error_message(
-    const Pubnub::String& message,
-    const Pubnub::String& kind,
-    enum pubnub_res result
-) {
-    Pubnub::String error;
-    auto result_str = pubnub_res_2_string(result);
-
-    error.reserve(message.length() + kind.length() + std::strlen(result_str));
-
-    error.replace(0, 0, message);
-    error += " : ";
-    error += result_str;
-    error.replace_all("{}", kind.c_str());
-
-    return error;
-}
-
 void Subscription::add_callback(
     pubnub_subscribe_message_callback_t callback,
     pubnub_subscribe_listener_type type,
@@ -127,7 +132,12 @@ SubscriptionSet::~SubscriptionSet() = default;
 
 void SubscriptionSet::close() {
     pubnub_subscription_set_t* raw_ptr = this->subscription_set.get();
-    pubnub_unsubscribe_with_subscription_set(&raw_ptr);
+    auto result = pubnub_unsubscribe_with_subscription_set(&raw_ptr);
+    if (PNR_OK != result) {
+        throw std::runtime_error(error_message("{} close failed", "SubscriptionSet", result).c_str()
+        );
+    }
+    this->subscription_set.reset(nullptr);
 }
 
 void SubscriptionSet::add_channel_update_listener(pubnub_subscribe_message_callback_t callback) {
