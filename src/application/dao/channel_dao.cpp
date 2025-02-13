@@ -85,3 +85,21 @@ ChannelEntity ChannelDAO::entity_from_channel_data(const Pubnub::ChatChannelData
 
     return entity;
 }
+
+void ChannelDAO::add_chat_message_listener(std::shared_ptr<Subscribable> listener) const {
+    this->chat_message_listeners.lock()->push_back(listener);
+}
+
+void ChannelDAO::stop_listening_for_chat_messages() const {
+    auto listeners = this->chat_message_listeners.lock();
+
+    std::for_each(
+        listeners->begin(),
+        listeners->end(),
+        [](std::shared_ptr<Subscribable> listener) {
+            listener->close();
+        }
+    );
+
+    listeners->clear();
+}

@@ -94,19 +94,19 @@ Channel Channel::update(const ChatChannelData& in_additional_channel_data) const
 }
 
 CallbackHandle Channel::connect(std::function<void(Message)> message_callback) const {
-    return CallbackHandle(this->channel_service->connect(channel_id_internal, message_callback));
+    return CallbackHandle(this->channel_service->connect(channel_id_internal, *this->data, message_callback));
 }
 
 CallbackHandle Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
-    return CallbackHandle(this->channel_service->join(*this, message_callback, additional_params));
+    return CallbackHandle(this->channel_service->join(*this, *this->data, message_callback, additional_params));
 }
 
 void Channel::disconnect() const {
-    this->channel_service->disconnect(channel_id_internal);
+    this->channel_service->disconnect(*this->data);
 }
 
 void Channel::leave() const {
-    this->channel_service->leave(channel_id_internal);
+    this->channel_service->leave(channel_id_internal, *this->data);
 }
 
 #ifdef PN_CHAT_C_ABI

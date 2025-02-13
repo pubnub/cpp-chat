@@ -77,10 +77,10 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         std::vector<Pubnub::Message> get_channel_history(const Pubnub::String& channel_id, const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
-        std::shared_ptr<Subscription> connect(const Pubnub::String& channel_id, std::function<void(Pubnub::Message)> message_callback) const;
-        std::shared_ptr<Subscription> join(const Pubnub::Channel& channel, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
-        void disconnect(const Pubnub::String& channel_id) const;
-        void leave(const Pubnub::String& channel_id) const;
+        std::shared_ptr<Subscription> connect(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(Pubnub::Message)> message_callback) const;
+        std::shared_ptr<Subscription> join(const Pubnub::Channel& channel, const ChannelDAO& channel_data, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
+        void disconnect(const ChannelDAO& channel_data) const;
+        void leave(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         void send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
         void start_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;
         void stop_typing(const Pubnub::String& channel_id, ChannelDAO& channel_data) const;

@@ -247,21 +247,21 @@ Channel ChannelService::unpin_message_from_channel(const String& channel_id, con
     return this->update_channel(channel_id, channel_data.to_entity().unpin_message());
 }
 
-std::shared_ptr<Subscription> ChannelService::connect(const String& channel_id, std::function<void(Message)> message_callback) const {
+std::shared_ptr<Subscription> ChannelService::connect(const String& channel_id, const ChannelDAO& channel_data, std::function<void(Message)> message_callback) const {
     auto subscription = this->pubnub->lock()->subscribe(channel_id);
+
+    channel_data.add_chat_message_listener(subscription);
 
     subscription->add_message_listener(CallbackService::to_c_message_callback(this->chat_service, message_callback));
 
     return subscription;
 }
 
-void ChannelService::disconnect(const String& channel_id) const {
-    // TODO: handle close OR it is even needed??? 
-      auto pubnub_handle = this->pubnub->lock();
-      auto messages = pubnub_handle->unsubscribe_from_channel_and_get_messages(channel_id);
+void ChannelService::disconnect(const ChannelDAO& channel_data) const {
+      channel_data.stop_listening_for_chat_messages();
 }
 
-std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, std::function<void(Message)> message_callback, const String& additional_params) const {
+std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, const ChannelDAO& channel_data, std::function<void(Message)> message_callback, const String& additional_params) const {
     String set_object_string = create_set_memberships_object(channel.channel_id(), additional_params);
 
     auto memberships_response = [this, set_object_string] {
@@ -279,10 +279,10 @@ std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, std::
 
     auto new_membership = membership.set_last_read_message_timetoken(Pubnub::get_now_timetoken());
 
-    return this->connect(channel.channel_id(), message_callback);
+    return this->connect(channel.channel_id(), channel_data, message_callback);
 }
     
-void ChannelService::leave(const String& channel_id) const {
+void ChannelService::leave(const String& channel_id, const ChannelDAO& channel_data) const {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
     {
@@ -291,7 +291,7 @@ void ChannelService::leave(const String& channel_id) const {
         pubnub_handle->remove_memberships(user_id, remove_object_string);
     }
 
-	this->disconnect(channel_id);
+	this->disconnect(channel_data);
 }
 
 void ChannelService::send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
