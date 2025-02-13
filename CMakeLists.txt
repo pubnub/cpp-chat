@@ -207,13 +207,19 @@ if(${COMPILE_EXAMPLES})
         target_link_libraries(pubnub_${name} PRIVATE pubnub-chat)
     endfunction()
 
-    example(message_draft)
+    if(NOT ${ENABLE_C_ABI})
+        # It uses different mechanism systems for callbacks
+        # in C++ and C, so it's not possible to run this example
+        example(message_draft)
+    endif()
     example(forward_message)
     example(report_user)
     example(thread_channel)
     example(message_reactions)
     example(delete_message)
     example(typing)
+    example(entity_update)
+    example(hello_world)
 endif()
 
 if(${RUN_TESTS})

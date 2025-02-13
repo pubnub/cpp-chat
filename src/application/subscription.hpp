@@ -36,7 +36,7 @@ class Subscription: public Subscribable {
         void add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback);
 
     private:
-        std::unique_ptr<pubnub_subscription_t, void (*)(pubnub_subscription_t*)> subscription;
+        pubnub_subscription_t* subscription;
 
         void add_callback(
             pubnub_subscribe_message_callback_t callback,
@@ -58,7 +58,7 @@ class SubscriptionSet: public Subscribable {
         void add_user_update_listener(pubnub_subscribe_message_callback_t callback);
 
     private:
-        std::unique_ptr<pubnub_subscription_set_t, void (*)(pubnub_subscription_set_t*)>
+        pubnub_subscription_set_t*
             subscription_set;
 
         void add_callback(
