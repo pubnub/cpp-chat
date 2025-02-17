@@ -755,3 +755,13 @@ Pubnub::String PubNub::parse_token(const Pubnub::String auth_key)
 {
     return pubnub_parse_token(this->main_context.get(), auth_key.c_str());
 }
+
+void PubNub::set_auth_token(const Pubnub::String token) 
+{
+    pubnub_set_auth_token(this->main_context.get(), token.c_str());
+}
+
+int PubNub::set_pubnub_origin(const Pubnub::String origin) 
+{
+    return pubnub_origin_set(this->main_context.get(), origin.c_str());
+}

@@ -31,3 +31,21 @@ bool AccessManagerService::can_i(Pubnub::AccessManager::Permission permission, P
 
     return AccessManagerLogic::can_i(permission, resource_type, json_token, resource_name);
 }
+
+Pubnub::String AccessManagerService::parse_token(const Pubnub::String auth_key) const 
+{
+    auto pubnub_handle = this->pubnub->lock();
+    return pubnub_handle->parse_token(auth_key);
+}
+
+void AccessManagerService::set_auth_token(const Pubnub::String token) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+    pubnub_handle->set_auth_token(token);
+}
+
+int AccessManagerService::set_pubnub_origin(const Pubnub::String origin) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+    return pubnub_handle->set_pubnub_origin(origin);
+}
