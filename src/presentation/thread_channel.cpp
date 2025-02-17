@@ -52,6 +52,16 @@ ThreadChannel::ThreadChannel() :
 
 ThreadChannel::~ThreadChannel() = default;
 
+Pubnub::String Pubnub::ThreadChannel::parent_channel_id() const
+{
+    return parent_channel_id_internal;
+}
+
+Pubnub::Message Pubnub::ThreadChannel::parent_message() const
+{
+    return parent_message_internal;
+}
+
 void ThreadChannel::send_text(const String &message, SendTextParams text_params)
 {
     //If this is new thread, set all server data before sending the first message (this is actually creating the thread, even if the object was created earlier)
