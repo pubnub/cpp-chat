@@ -765,6 +765,7 @@ void PubNub::set_auth_token(const Pubnub::String token)
 
 int PubNub::set_pubnub_origin(const Pubnub::String origin) 
 {
-    return pubnub_origin_set(this->main_context.get(), origin.c_str());
-    return pubnub_origin_set(this->long_poll_context.get(), origin.c_str());
+    custom_origin = origin;
+    return pubnub_origin_set(this->main_context.get(), custom_origin.c_str());
+    return pubnub_origin_set(this->long_poll_context.get(), custom_origin.c_str());
 }

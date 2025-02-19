@@ -84,6 +84,7 @@ private:
     Pubnub::String subscribe_key;
     Pubnub::String user_id;
     Pubnub::String auth_key;
+    Pubnub::String custom_origin;
 
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> main_context;
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
