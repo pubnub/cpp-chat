@@ -39,6 +39,8 @@
 #    define PN_CHAT_NO_DEPRECATED
 #  endif
 #endif
+#else
+#  define PN_CHAT_EXPORT
 #endif
 
 #endif /* PN_CHAT_EXPORT_HPP */
