@@ -13,6 +13,10 @@ class AccessManagerService {
 
         bool can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
 
+        Pubnub::String parse_token(const Pubnub::String auth_key) const;
+        void set_auth_token(const Pubnub::String token) const;
+        int set_pubnub_origin(const Pubnub::String origin) const;
+
     private:
         Pubnub::String auth_key;
         ThreadSafePtr<PubNub> pubnub;

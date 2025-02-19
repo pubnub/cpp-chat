@@ -67,7 +67,9 @@ public:
     std::map<Pubnub::String, int, Pubnub::StringComparer> message_counts(const std::vector<Pubnub::String> channels, const std::vector<Pubnub::String> timestamps);
     bool delete_messages(const Pubnub::String channel, const Pubnub::String start, const Pubnub::String end);
     
-    Pubnub::String parse_token(const Pubnub::String auth_key) ;
+    Pubnub::String parse_token(const Pubnub::String auth_key);
+    void set_auth_token(const Pubnub::String token);
+    int set_pubnub_origin(const Pubnub::String origin);
 
 private:
     void await_and_handle_error(pubnub_res result);
@@ -82,6 +84,7 @@ private:
     Pubnub::String subscribe_key;
     Pubnub::String user_id;
     Pubnub::String auth_key;
+    Pubnub::String custom_origin;
 
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> main_context;
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
