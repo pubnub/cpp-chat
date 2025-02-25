@@ -152,8 +152,9 @@ std::shared_ptr<Subscription> UserService::stream_updates(Pubnub::User calling_u
 {
     auto subscription = this->pubnub->lock()->subscribe(calling_user.user_id());
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_user_update_listener(
-            CallbackService::to_c_user_update_callback(calling_user, this->shared_from_this(), user_callback));
+            callback_service->to_c_user_update_callback(calling_user, this->shared_from_this(), user_callback));
 
     return subscription;
 }
@@ -177,8 +178,9 @@ std::shared_ptr<SubscriptionSet> UserService::stream_updates_on(Pubnub::User cal
 
     auto subscription = this->pubnub->lock()->subscribe_multiple(users_ids);
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_channel_update_listener(
-            CallbackService::to_c_users_updates_callback(users, shared_from_this(), user_callback));
+            callback_service->to_c_users_updates_callback(users, shared_from_this(), user_callback));
 
     return subscription;
 }

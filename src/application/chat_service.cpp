@@ -225,7 +225,7 @@ std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::Strin
 
     auto subscription = this->pubnub->lock()->subscribe(channel_id);
 
-    subscription->add_event_listener(CallbackService::to_c_event_callback(chat_event_type, event_callback), chat_event_type);
+    subscription->add_event_listener(this->callback_service->to_c_event_callback(chat_event_type, event_callback), chat_event_type);
 
     return subscription;
 }

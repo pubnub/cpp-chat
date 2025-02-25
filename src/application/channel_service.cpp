@@ -252,7 +252,8 @@ std::shared_ptr<Subscription> ChannelService::connect(const String& channel_id, 
 
     channel_data.add_chat_message_listener(subscription);
 
-    subscription->add_message_listener(CallbackService::to_c_message_callback(this->chat_service, message_callback));
+    auto chat_service_shared = this->chat_service.lock();
+    subscription->add_message_listener(chat_service_shared->callback_service->to_c_message_callback(this->chat_service, message_callback));
 
     return subscription;
 }
@@ -504,8 +505,9 @@ std::shared_ptr<Subscription> ChannelService::stream_updates(Pubnub::Channel cal
 
     auto subscription = pubnub_handle->subscribe(calling_channel.channel_id());
 
+    auto chat_service_shared = this->chat_service.lock();
     subscription->add_channel_update_listener(
-            CallbackService::to_c_channel_update_callback(calling_channel, shared_from_this(), channel_callback));
+            chat_service_shared->callback_service->to_c_channel_update_callback(calling_channel, shared_from_this(), channel_callback));
 
     return subscription;
 }
@@ -529,8 +531,9 @@ std::shared_ptr<SubscriptionSet> ChannelService::stream_updates_on(Pubnub::Chann
 
     auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
+    auto chat_service_shared = this->chat_service.lock();
     subscription->add_channel_update_listener(
-            CallbackService::to_c_channels_updates_callback(channels, shared_from_this(), channel_callback));
+            chat_service_shared->callback_service->to_c_channels_updates_callback(channels, shared_from_this(), channel_callback));
 
     return subscription;
 }

@@ -90,7 +90,8 @@ std::shared_ptr<Subscription> PresenceService::stream_presence(const Pubnub::Str
     
     auto subscription = this->pubnub->lock()->subscribe(presence_channel);
 
-    subscription->add_presence_listener(CallbackService::to_c_presence_callback(presence_channel, this->shared_from_this(), presence_callback));
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_presence_listener(callback_service->to_c_presence_callback(presence_channel, this->shared_from_this(), presence_callback));
 
     return subscription;
 }

@@ -200,8 +200,9 @@ std::shared_ptr<Subscription> MessageService::stream_updates(Pubnub::Message cal
 {
     auto subscription = this->pubnub->lock()->subscribe(calling_message.message_data().channel_id);
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_message_update_listener(
-            CallbackService::to_c_message_update_callback(calling_message, this->shared_from_this(), message_callback));
+            callback_service->to_c_message_update_callback(calling_message, this->shared_from_this(), message_callback));
 
     return subscription;
 }
@@ -211,8 +212,9 @@ std::shared_ptr<Subscription> MessageService::stream_updates(Pubnub::ThreadMessa
 {
     auto subscription = this->pubnub->lock()->subscribe(calling_message.message_data().channel_id);
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_thread_message_update_listener(
-            CallbackService::to_c_thread_message_update_callback(calling_message, this->shared_from_this(), message_callback));
+            callback_service->to_c_thread_message_update_callback(calling_message, this->shared_from_this(), message_callback));
 
     return subscription;
 }
@@ -236,8 +238,9 @@ std::shared_ptr<SubscriptionSet> MessageService::stream_updates_on(Pubnub::Messa
 
     auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_thread_message_update_listener(
-            CallbackService::to_c_messages_updates_callback(messages, shared_from_this(), message_callback));
+            callback_service->to_c_messages_updates_callback(messages, shared_from_this(), message_callback));
 
     return subscription;
 }
@@ -261,8 +264,9 @@ std::shared_ptr<SubscriptionSet> MessageService::stream_updates_on(Pubnub::Threa
 
     auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
+    auto callback_service = this->chat_service.lock()->callback_service;
     subscription->add_thread_message_update_listener(
-            CallbackService::to_c_thread_messages_updates_callback(messages, shared_from_this(), message_callback));
+            callback_service->to_c_thread_messages_updates_callback(messages, shared_from_this(), message_callback));
 
     return subscription;
 }

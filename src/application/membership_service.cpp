@@ -424,7 +424,8 @@ std::shared_ptr<Subscription> MembershipService::stream_updates(Pubnub::Membersh
 {
     auto subscription = this->pubnub->lock()->subscribe(calling_membership.channel.channel_id());
 
-    subscription->add_membership_update_listener(CallbackService::to_c_membership_update_callback(calling_membership, this->chat_service, membership_callback));
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_membership_update_listener(callback_service->to_c_membership_update_callback(calling_membership, this->chat_service, membership_callback));
 
     return subscription;
 }
@@ -444,7 +445,8 @@ std::shared_ptr<SubscriptionSet> MembershipService::stream_updates_on(Pubnub::Me
     
     auto subscription = this->pubnub->lock()->subscribe_multiple(memberships_ids);
 
-    subscription->add_membership_update_listener(CallbackService::to_c_memberships_updates_callback(memberships, this->chat_service, membership_callback));
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_membership_update_listener(callback_service->to_c_memberships_updates_callback(memberships, this->chat_service, membership_callback));
 
     return subscription;
 }

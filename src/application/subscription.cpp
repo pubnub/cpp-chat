@@ -14,6 +14,7 @@ extern "C" {
 }
 #include "enums.hpp"
 #include "string.hpp"
+#include "callback_service.hpp"
 
 static Pubnub::String error_message(
     const Pubnub::String& message,
@@ -46,20 +47,20 @@ void Subscription::close() {
     }
 }
 
-void Subscription::add_message_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_message_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "message");
 }
 
-void Subscription::add_channel_update_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_channel_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channel update");
 }
 
-void Subscription::add_user_update_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_user_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "user update");
 }
 
 void Subscription::add_event_listener(
-    pubnub_subscribe_message_callback_t callback,
+    CCoreCallbackData callback,
     Pubnub::pubnub_chat_event_type event_type
 ) {
     switch (Pubnub::event_method_from_event_type(event_type)) {
@@ -74,30 +75,32 @@ void Subscription::add_event_listener(
     };
 }
 
-void Subscription::add_presence_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_presence_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "presence");
 }
 
-void Subscription::add_membership_update_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_membership_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "membership update");
 }
 
-void Subscription::add_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+void Subscription::add_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
 }
 
-void Subscription::add_thread_message_update_listener(pubnub_subscribe_message_callback_t callback
+void Subscription::add_thread_message_update_listener(CCoreCallbackData callback
 ) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
 }
 
 void Subscription::add_callback(
-    pubnub_subscribe_message_callback_t callback,
+    CCoreCallbackData callback_data,
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
 ) {
     enum pubnub_res result =
-        pubnub_subscribe_add_subscription_listener(subscription, type, callback);
+        pubnub_subscribe_add_subscription_listener(subscription, type, callback_data.callback, std::any_cast<void*>(callback_data.context));
+
+    this->contextes.push_back(callback_data.context);
 
     if (PNR_OK != result) {
         throw std::runtime_error(
@@ -129,35 +132,37 @@ void SubscriptionSet::close() {
     }
 }
 
-void SubscriptionSet::add_channel_update_listener(pubnub_subscribe_message_callback_t callback) {
+void SubscriptionSet::add_channel_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channels updates");
 }
 
-void SubscriptionSet::add_membership_update_listener(pubnub_subscribe_message_callback_t callback) {
+void SubscriptionSet::add_membership_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "memberships updates");
 }
 
-void SubscriptionSet::add_message_update_listener(pubnub_subscribe_message_callback_t callback) {
+void SubscriptionSet::add_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
 }
 
 void SubscriptionSet::add_thread_message_update_listener(
-    pubnub_subscribe_message_callback_t callback
+    CCoreCallbackData callback
 ) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
 }
 
-void SubscriptionSet::add_user_update_listener(pubnub_subscribe_message_callback_t callback) {
+void SubscriptionSet::add_user_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "users updates");
 }
 
 void SubscriptionSet::add_callback(
-    pubnub_subscribe_message_callback_t callback,
+    CCoreCallbackData callback_data,
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
 ) {
     enum pubnub_res result =
-        pubnub_subscribe_add_subscription_set_listener(this->subscription_set, type, callback);
+        pubnub_subscribe_add_subscription_set_listener(this->subscription_set, type, callback_data.callback, std::any_cast<void*>(callback_data.context));
+
+    this->contextes.push_back(callback_data.context);
 
     if (PNR_OK != result) {
         throw std::runtime_error(
