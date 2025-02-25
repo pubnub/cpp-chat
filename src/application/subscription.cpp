@@ -12,9 +12,9 @@ extern "C" {
 #include <pubnub_subscribe_event_listener.h>
 #include <pubnub_subscribe_event_listener_types.h>
 }
+#include "callback_service.hpp"
 #include "enums.hpp"
 #include "string.hpp"
-#include "callback_service.hpp"
 
 static Pubnub::String error_message(
     const Pubnub::String& message,
@@ -87,8 +87,7 @@ void Subscription::add_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
 }
 
-void Subscription::add_thread_message_update_listener(CCoreCallbackData callback
-) {
+void Subscription::add_thread_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
 }
 
@@ -97,8 +96,12 @@ void Subscription::add_callback(
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
 ) {
-    enum pubnub_res result =
-        pubnub_subscribe_add_subscription_listener(subscription, type, callback_data.callback, std::any_cast<void*>(callback_data.context));
+    enum pubnub_res result = pubnub_subscribe_add_subscription_listener(
+        subscription,
+        type,
+        callback_data.callback,
+        &callback_data.context
+    );
 
     this->contextes.push_back(callback_data.context);
 
@@ -144,9 +147,7 @@ void SubscriptionSet::add_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
 }
 
-void SubscriptionSet::add_thread_message_update_listener(
-    CCoreCallbackData callback
-) {
+void SubscriptionSet::add_thread_message_update_listener(CCoreCallbackData callback) {
     this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
 }
 
@@ -159,8 +160,12 @@ void SubscriptionSet::add_callback(
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
 ) {
-    enum pubnub_res result =
-        pubnub_subscribe_add_subscription_set_listener(this->subscription_set, type, callback_data.callback, std::any_cast<void*>(callback_data.context));
+    enum pubnub_res result = pubnub_subscribe_add_subscription_set_listener(
+        this->subscription_set,
+        type,
+        callback_data.callback,
+        &callback_data.context
+    );
 
     this->contextes.push_back(callback_data.context);
 

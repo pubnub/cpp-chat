@@ -1,14 +1,14 @@
 #ifndef PN_CHAT_SUBSCRIPTION_HPP
 #define PN_CHAT_SUBSCRIPTION_HPP
 
+#include <any>
 #include <functional>
+#include <list>
 #include <memory>
+#include <vector>
 
 #include "enums.hpp"
 #include "string.hpp"
-#include <list>
-#include <any>
-#include <vector>
 
 extern "C" {
 #include <pubnub_subscribe_event_engine.h>

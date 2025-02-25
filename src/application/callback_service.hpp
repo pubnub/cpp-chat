@@ -28,7 +28,7 @@ extern "C" {
 
 struct CCoreCallbackData {
     pubnub_subscribe_message_callback_t callback;
-    std::list<std::any>::reference context;
+    std::any& context;
 };
 
 class CallbackService {
@@ -47,13 +47,6 @@ class CallbackService {
             if (this->callback_thread.joinable()) {
                 this->callback_thread.join();
             }
-
-            std::for_each(this->callback_contexts.begin(), this->callback_contexts.end(), [](std::any context) {
-                if (context.has_value()) {
-                    auto context_ptr = std::any_cast<void*>(context);
-                    delete context_ptr;
-                }
-            });
         };
 
         void register_message_callback(Pubnub::String channel_id, std::function<void(Pubnub::Message)> message_callback);
@@ -110,11 +103,6 @@ class CallbackService {
         void resolve_callbacks();
         void resolve_timers(milliseconds wait_interval);
         void broadcast_callbacks_from_message(pubnub_v2_message message);
-
-        template <typename T>
-        std::list<std::any>::reference add_callback_context(T* context) {
-            return this->callback_contexts.emplace_back(reinterpret_cast<void*>(context));
-        };
 
         CallbacksRepository callbacks;
         ThreadSafePtr<PubNub> pubnub;
