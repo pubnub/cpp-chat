@@ -58,6 +58,19 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
+option(RUN_GOOGLE_TESTS "Run Google Tests" ON)
+
+if(${RUN_GOOGLE_TESTS})
+    message(STATUS "Enabling Google Tests")
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/a6ce08a.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
+
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
@@ -238,4 +251,30 @@ if(${RUN_TESTS})
     
     #TODO: e/e
     #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
+endif()
+
+if(${RUN_GOOGLE_TESTS})
+    enable_testing()
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/e2e)
+
+    add_executable(
+      debug_test
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/debug_test.cc
+    )
+    add_executable(
+      message_draft_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp
+    )
+    target_link_libraries(
+      debug_test
+      GTest::gtest_main
+    )
+    target_link_libraries(
+      message_draft_e2e
+      GTest::gtest_main
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(debug_test)
+    gtest_discover_tests(message_draft_e2e)
 endif()
