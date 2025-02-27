@@ -41,9 +41,7 @@ Chat::Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_ke
     restrictions_service = chat_service->restrictions_service;
     message_service = chat_service->message_service;
     membership_service = chat_service->membership_service;
-#ifndef PN_CHAT_C_ABI
     callback_service = chat_service->callback_service;
-#endif
 }
 
 Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig &config)
