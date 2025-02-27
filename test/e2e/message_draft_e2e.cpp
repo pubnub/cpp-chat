@@ -3,6 +3,8 @@
 #include "message_draft.hpp"
 #include "pubnub_chat/chat.hpp"
 #include <gtest/gtest.h>
+#include "string.hpp"
+#include "helpers/export.hpp"
 
 class MessageDraftTests : public :: testing::Test {
     protected:
@@ -28,9 +30,9 @@ class MessageDraftTests : public :: testing::Test {
         void TearDown() override {
             // Do your cleanup operations here  
         }
-
-    TEST_F(MessageDraft_GoogleTests, TestCreateMessageDraft) {
-        ASSERT_NO_THROW(channel->create_message_draft());
-    }
 };
+
+TEST_F(MessageDraftTests, TestCreateMessageDraft) {
+    ASSERT_NO_THROW(channel->create_message_draft());
+}
 
