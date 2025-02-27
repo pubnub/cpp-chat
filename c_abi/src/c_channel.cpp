@@ -729,15 +729,24 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_updates(
 static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub::Vector<Pubnub::String>& strings) {
     const char* const delim = ",";
 
-    std::ostringstream array_of_string;
-
-    std::copy(strings.begin(), strings.end(), std::ostream_iterator<Pubnub::String>(array_of_string, delim));
-
     Pubnub::String result("{" + Quotes::add(id) + ": [");
-    result += array_of_string.str();
+    if (strings.size() != 0) {
+        std::ostringstream array_of_string;
+    
+        std::copy(
+                strings.begin(),
+                strings.end(),
+                std::ostream_iterator<Pubnub::String>(array_of_string, delim)
+            );
+        Pubnub::String array(array_of_string.str());
+
+        array.erase(array.length() - 1);
+
+        result += array;
+    }
     result += "]}";
 
-    return array_of_string.str();
+    return result;
 }
 
 // {"typing_users": {"<channel_name>": ["<user1>", "<user2>"]}}
@@ -752,7 +761,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_get_typing(Pubn
                     result += users_string;
                     result += "}";
 
-                    pn_c_append_to_response_buffer(chat.get(), users_string.c_str());
+                    pn_c_append_to_response_buffer(chat.get(), result);
         }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
