@@ -11,7 +11,9 @@
 #include "nlohmann/json.hpp"
 #include "membership.hpp"
 #include "restrictions.hpp"
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include "application/channel_service.hpp"
 
@@ -731,18 +733,30 @@ static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub
 
     Pubnub::String result("{" + Quotes::add(id) + ": [");
     if (strings.size() != 0) {
+        std::vector<Pubnub::String> qouted_strings;
+
+        std::transform(
+                strings.begin(),
+                strings.end(),
+                std::back_inserter(qouted_strings),
+                // TODO: Why Can't use function in place instead of lambda?
+                [](Pubnub::String str) {
+                    return Quotes::add(str);
+                }
+            );
+
         std::ostringstream array_of_string;
     
         std::copy(
-                strings.begin(),
-                strings.end(),
+                qouted_strings.begin(),
+                qouted_strings.end(),
                 std::ostream_iterator<Pubnub::String>(array_of_string, delim)
             );
         Pubnub::String array(array_of_string.str());
 
         array.erase(array.length() - 1);
 
-        result += array;
+        result += Quotes::add(array);
     }
     result += "]}";
 
