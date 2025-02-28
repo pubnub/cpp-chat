@@ -756,7 +756,7 @@ static Pubnub::String vector_of_string_to_string(Pubnub::String id, const Pubnub
 
         array.erase(array.length() - 1);
 
-        result += Quotes::add(array);
+        result += array;
     }
     result += "]}";
 
@@ -806,7 +806,7 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence
     }
 }
 
-// {"read_receipts": {"channel_id": "<channel_name>", "data" : {"<user1>": ["<timetoken1>", "<timetoken2>"]}}}
+// {"read_receipts": {"channel_id": "<channel_name>", "data" : [{"<timetoken>": ["<user1>", "<user2>"]}]}}
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_receipts(Pubnub::Channel* channel) {
     try {
         auto chat = channel->shared_chat_service();
@@ -814,21 +814,26 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_rec
 
         return new Pubnub::CallbackHandle(channel->stream_read_receipts([chat, channel_name](const Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer>& read_receipts) {
                     Pubnub::String read_receipts_result("{\"read_receipts\":");
-                    Pubnub::String read_receipts_str;
+                    Pubnub::String read_receipts_str = "[";
                     // TODO: maybe iterators?
-                    for (auto i = 0; i < read_receipts.size(); i++) {
-                        auto users_string = vector_of_string_to_string(read_receipts.keys[i], read_receipts.values[i]);
-                        read_receipts_str += users_string;
-                        read_receipts_str += ",";
+                    if (read_receipts.size() > 0) {
+                        for (auto i = 0; i < read_receipts.size(); i++) {
+                            auto users_string = vector_of_string_to_string(read_receipts.keys[i], read_receipts.values[i]);
+                            read_receipts_str += users_string;
+                            read_receipts_str += ",";
+                        }
+                        read_receipts_str.erase(read_receipts_str.length() - 1);
                     }
-                    read_receipts_str.erase(read_receipts_str.length() - 1);
+                    read_receipts_str += "]";
+
+                    std::cout << read_receipts_str << std::endl;
 
                     auto j = nlohmann::json{
                         {"channel_id", channel_name.c_str()},
-                        {"data", read_receipts_str.c_str()},
+                        {"data", nlohmann::json::parse(read_receipts_str.c_str())},
                     };
 
-                    read_receipts_result = j.dump().c_str();
+                    read_receipts_result += j.dump().c_str();
                     read_receipts_result += "}";
 
                     pn_c_append_to_response_buffer(chat.get(), read_receipts_result.c_str());
