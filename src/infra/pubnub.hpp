@@ -3,6 +3,7 @@
 
 #include "string.hpp"
 #include "enums.hpp"
+#include "domain/json.hpp"
 #include <thread>
 #include <vector>
 #include <map>
@@ -70,6 +71,7 @@ public:
     Pubnub::String parse_token(const Pubnub::String auth_key);
     void set_auth_token(const Pubnub::String token);
     int set_pubnub_origin(const Pubnub::String origin);
+    Pubnub::String grant_token(const Pubnub::String permission_object);
 
 private:
     void await_and_handle_error(pubnub_res result);

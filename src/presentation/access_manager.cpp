@@ -40,3 +40,8 @@ int Pubnub::AccessManager::set_pubnub_origin(const Pubnub::String origin) const
 {
     return this->access_manager_service->set_pubnub_origin(origin);
 }
+
+Pubnub::String Pubnub::AccessManager::grant_token(const Pubnub::String permission_object) const
+{
+    return this->access_manager_service->parse_token(permission_object);
+}

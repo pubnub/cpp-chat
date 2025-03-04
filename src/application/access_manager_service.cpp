@@ -2,6 +2,9 @@
 #include "access_manager.hpp"
 #include "domain/access_manager_logic.hpp"
 #include "domain/json.hpp"
+extern "C" {
+    #include <pubnub_grant_token_api.h>
+}
 
 AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key):
     pubnub(pubnub),
@@ -48,4 +51,215 @@ int AccessManagerService::set_pubnub_origin(const Pubnub::String origin) const
 {
     auto pubnub_handle = this->pubnub->lock();
     return pubnub_handle->set_pubnub_origin(origin);
+}
+
+Pubnub::String AccessManagerService::grant_token(const Pubnub::String permission_object) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+    return pubnub_handle->grant_token(permission_object);
+}
+Pubnub::String AccessManagerService::grant_token_permission_struct_to_string(const Pubnub::GrantTokenPermissionObject permission_object_struct)
+{
+    //Make sure token data is provided in correct form. There must be the same amount of object and permissions or just one permission,
+	//then one permission is used for every object
+	
+	if(permission_object_struct.channels.size() != permission_object_struct.channel_permissions.size() && permission_object_struct.channel_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of channel_permissions and Channels (or only 1 ChannelPermission).");
+		return "";
+	}
+
+	if(permission_object_struct.channel_groups.size() != permission_object_struct.channel_group_permissions.size() && permission_object_struct.channel_group_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of channel_group_permissions and channel_groups (or only 1 channel_group_permissions).");
+		return "";
+	}
+
+	if(permission_object_struct.users.size() != permission_object_struct.user_permissions.size() && permission_object_struct.user_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of user_permissions and users (or only 1 user_permissions).");
+		return "";
+	}
+
+	if(permission_object_struct.channel_patterns.size() != permission_object_struct.channel_pattern_permissions.size() && permission_object_struct.channel_pattern_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of channel_pattern_permissions and ChannelsPatterns (or only 1 channel_pattern_permissions).");
+		return "";
+	}
+
+	if(permission_object_struct.channel_group_patterns.size() != permission_object_struct.channel_group_pattern_permissions.size() && permission_object_struct.channel_group_pattern_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of channel_group_pattern_permissions and channel_groupsPatterns (or only 1 channel_group_pattern_permissions).");
+		return "";
+	}
+
+	if(permission_object_struct.user_patterns.size() != permission_object_struct.user_pattern_permissions.size() && permission_object_struct.user_pattern_permissions.size() != 1)
+	{
+		throw std::runtime_error("Grant Token Structure To JsonString - Provide the same amount of user_pattern_permissions and usersPatterns (or only 1 user_pattern_permissions).");
+		return "";
+	}
+	
+    Json permission_object_json;
+
+	//Create Json objects with channels, groups, users permissions and their patterns
+	TSharedPtr<FJsonObject> ChannelsJsonObject = Addchannel_permissionsToJson(permission_object_struct.Channels, permission_object_struct.channel_permissions);
+	TSharedPtr<FJsonObject> channel_groupsJsonObject = Addchannel_group_permissionsToJson(permission_object_struct.channel_groups, permission_object_struct.channel_group_permissions);
+	TSharedPtr<FJsonObject> usersJsonObject = Adduser_permissionsToJson(permission_object_struct.users, permission_object_struct.user_permissions);
+	TSharedPtr<FJsonObject> channel_patternsJsonObject = Addchannel_permissionsToJson(permission_object_struct.channel_patterns, permission_object_struct.channel_pattern_permissions);
+	TSharedPtr<FJsonObject> channel_group_patternsJsonObject = Addchannel_group_permissionsToJson(permission_object_struct.channel_group_patterns, permission_object_struct.channel_group_pattern_permissions);
+	TSharedPtr<FJsonObject> user_patternsJsonObject = Adduser_permissionsToJson(permission_object_struct.user_patterns, permission_object_struct.user_pattern_permissions);
+
+	//Add resources fields
+	TSharedPtr<FJsonObject> ResourcesJsonObject = MakeShareable(new FJsonObject);
+	if(permission_object_struct.Channels.size() > 0)
+	{
+		ResourcesJsonObject->SetObjectField("channels", ChannelsJsonObject);
+	}
+	if(permission_object_struct.channel_groups.size() > 0)
+	{
+		ResourcesJsonObject->SetObjectField("groups", channel_groupsJsonObject);
+	}
+	if(permission_object_struct.users.size() > 0)
+	{
+		ResourcesJsonObject->SetObjectField("uuids", usersJsonObject);
+	}
+
+	//Add patterns fields
+	TSharedPtr<FJsonObject> PatternsJsonObject = MakeShareable(new FJsonObject);
+	if(permission_object_struct.channel_patterns.size() > 0)
+	{
+		PatternsJsonObject->SetObjectField("channels", channel_patternsJsonObject);
+	}
+	if(permission_object_struct.channel_group_patterns.size() > 0)
+	{
+		PatternsJsonObject->SetObjectField("groups", channel_group_patternsJsonObject);
+	}
+	if(permission_object_struct.user_patterns.size() > 0)
+	{
+		PatternsJsonObject->SetObjectField("uuids", user_patternsJsonObject);
+	}
+
+	TSharedPtr<FJsonObject> permission_object_structJsonObject = MakeShareable(new FJsonObject);
+	permission_object_structJsonObject->SetObjectField("resources", ResourcesJsonObject);
+	permission_object_structJsonObject->SetObjectField("patterns", PatternsJsonObject);
+
+	TSharedPtr<FJsonObject> PermissionsJsonObject = MakeShareable(new FJsonObject);
+	PermissionsJsonObject->SetNumberField("ttl", permission_object_struct.TTLMinutes);
+	PermissionsJsonObject->SetStringField("authorized_uuid", permission_object_struct.AuthorizedUser);
+	PermissionsJsonObject->SetObjectField("permissions", permission_object_structJsonObject);
+
+	//Convert created Json object to string
+	return UPubnubJsonUtilities::JsonObjectToString(PermissionsJsonObject);
+
+    return "";
+}
+
+
+
+Json AccessManagerService::add_channel_permissions_to_json(std::vector<Pubnub::String> channels, std::vector<Pubnub::ChannelPermissions> channel_permissions)
+{
+	Json json_object;
+	bool use_one_permission = channel_permissions.size() == 1;
+
+	TArray<TSharedPtr<FJsonValue>> ObjectValues;
+	
+	for(int i = 0; i < Channels.Num(); i++)
+	{
+		if(Channels[i].IsEmpty())
+		{
+			continue;
+		}
+		
+		//For permissions use the first index if this is the only valid index or corresponding channel index
+		Pubnub::channel_permissions current_permissions;
+		use_one_permission ? current_permissions = channel_permissions[0] : current_permissions = channel_permissions[i];
+
+		//Create bit mask value from all permissions
+		struct pam_permission ChPerm;
+		ChPerm.read = current_permissions.Read;
+		ChPerm.write = current_permissions.Write;
+		ChPerm.del = current_permissions.Delete;
+		ChPerm.get = current_permissions.Get;
+		ChPerm.update = current_permissions.Update;
+		ChPerm.manage = current_permissions.Manage;
+		ChPerm.join = current_permissions.Join;
+		ChPerm.create = false;
+		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+
+		JsonObject->SetNumberField(Channels[i], PermBitMask);
+	}
+	
+	return JsonObject;
+}
+
+Json AccessManagerService::add_channel_group_permissions_to_json(std::vector<Pubnub::String> channel_groups, std::vector<Pubnub::ChannelGroupPermissions> channel_group_permissions);
+{
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+	bool use_one_permission = ChannelGroupPermissions.Num() == 1;
+
+	TArray<TSharedPtr<FJsonValue>> ObjectValues;
+	
+	for(int i = 0; i < ChannelGroups.Num(); i++)
+	{
+		if(ChannelGroups[i].IsEmpty())
+		{
+			continue;
+		}
+		
+		//For permissions use the first index if this is the only valid index or corresponding channel index
+		FPubnubChannelGroupPermissions current_permissions;
+		use_one_permission ? current_permissions = ChannelGroupPermissions[0] : current_permissions = ChannelGroupPermissions[i];
+
+		//Create bit mask value from all permissions
+		struct pam_permission ChPerm;
+		ChPerm.read = current_permissions.Read;
+		ChPerm.manage = current_permissions.Manage;
+		ChPerm.write = false;
+		ChPerm.del = false;
+		ChPerm.get = false;
+		ChPerm.update = false;
+		ChPerm.join = false;
+		ChPerm.create = false;
+		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+
+		JsonObject->SetNumberField(ChannelGroups[i], PermBitMask);
+	}
+	
+	return JsonObject;
+}
+
+Json AccessManagerService::add_user_permissions_to_json(std::vector<Pubnub::String>users, std::vector<Pubnub::UserPermissions> user_permissions);
+{
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+	bool use_one_permission = UserPermissions.Num() == 1;
+
+	TArray<TSharedPtr<FJsonValue>> ObjectValues;
+	
+	for(int i = 0; i < Users.Num(); i++)
+	{
+		if(Users[i].IsEmpty())
+		{
+			continue;
+		}
+		
+		//For permissions use the first index if this is the only valid index or corresponding channel index
+		FPubnubUserPermissions current_permissions;
+		use_one_permission ? current_permissions = UserPermissions[0] : current_permissions = UserPermissions[i];
+
+		//Create bit mask value from all permissions
+		struct pam_permission ChPerm;
+		ChPerm.del = current_permissions.Delete;
+		ChPerm.get = current_permissions.Get;
+		ChPerm.update = current_permissions.Update;
+		ChPerm.read = false;
+		ChPerm.write = false;
+		ChPerm.manage = false;
+		ChPerm.join = false;
+		ChPerm.create = false;
+		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+
+		JsonObject->SetNumberField(Users[i], PermBitMask);
+	}
+
+	return JsonObject;
 }
