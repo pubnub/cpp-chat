@@ -1,5 +1,6 @@
 #include "parsers.hpp"
 #include "domain/channel_entity.hpp"
+#include "application/enum_converters.hpp"
 #include "enums.hpp"
 #include "json.hpp"
 #include "message_action.hpp"

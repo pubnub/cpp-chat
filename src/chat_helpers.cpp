@@ -1,6 +1,7 @@
 #include "chat_helpers.hpp"
 #include "nlohmann/json.hpp"
 #include "domain/json.hpp"
+#include "application/enum_converters.hpp"
 
 #include <chrono>
 #include <iostream>

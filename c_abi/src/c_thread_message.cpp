@@ -1,4 +1,5 @@
 #include "c_thread_message.hpp"
+#include "application/enum_converters.hpp"
 #include "c_errors.hpp"
 #include "message.hpp"
 #include "thread_message.hpp"

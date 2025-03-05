@@ -2,6 +2,7 @@
 #include "const_values.hpp"
 #include "domain/parsers.hpp"
 #include "membership.hpp"
+#include "application/enum_converters.hpp"
 #include "infra/serialization.hpp"
 #include "c_serialization.hpp"
 #include "c_errors.hpp"

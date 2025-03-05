@@ -1,6 +1,6 @@
 #include "message_entity.hpp"
 #include "domain/json.hpp"
-#include "enums.hpp"
+#include "application/enum_converters.hpp"
 #include "message_action.hpp"
 #include <algorithm>
 #include <optional>

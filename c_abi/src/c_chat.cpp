@@ -2,6 +2,7 @@
 #include "c_channel.hpp"
 #include "channel.hpp"
 #include "c_errors.hpp"
+#include "application/enum_converters.hpp"
 #include "chat.hpp"
 #include "string.hpp"
 #include "restrictions.hpp"

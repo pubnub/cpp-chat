@@ -1,7 +1,7 @@
 #include "channel_service.hpp"
 #include "event.hpp"
 #include "callback_stop.hpp"
-#include "enums.hpp"
+#include "enum_converters.hpp"
 #include "infra/rate_limiter.hpp"
 #include "thread_channel.hpp"
 #include "thread_message.hpp"
