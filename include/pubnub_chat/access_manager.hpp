@@ -100,6 +100,7 @@ struct UserPermissions
         PN_CHAT_EXPORT void set_auth_token(const Pubnub::String token) const;
         PN_CHAT_EXPORT int set_pubnub_origin(const Pubnub::String origin) const;
         PN_CHAT_EXPORT Pubnub::String grant_token(Pubnub::String permission_object) const;
+        PN_CHAT_EXPORT Pubnub::String grant_token(Pubnub::GrantTokenPermissionObject permission_object);
 
         private:
         AccessManager(std::shared_ptr<const AccessManagerService> access_manager_service);

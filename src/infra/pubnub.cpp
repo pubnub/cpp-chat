@@ -772,14 +772,14 @@ int PubNub::set_pubnub_origin(const Pubnub::String origin)
 
 Pubnub::String PubNub::grant_token(const Pubnub::String permission_object)
 {
-	auto result =pubnub_grant_token(this->main_context.get(), permission_object.c_str());
+	auto result = pubnub_grant_token(this->main_context.get(), permission_object.c_str());
 
     this->await_and_handle_error(result);
 
 	pubnub_chamebl_t grant_token_resp = pubnub_get_grant_token(this->main_context.get());
 	if(!grant_token_resp.ptr)
 	{
-		return;
+		return "";
 	}
 
     return grant_token_resp.ptr;
