@@ -160,106 +160,101 @@ Json AccessManagerService::add_channel_permissions_to_json(std::vector<Pubnub::S
 {
 	Json json_object;
 	bool use_one_permission = channel_permissions.size() == 1;
-
-	TArray<TSharedPtr<FJsonValue>> ObjectValues;
 	
-	for(int i = 0; i < Channels.Num(); i++)
+	for(int i = 0; i < channels.size(); i++)
 	{
-		if(Channels[i].IsEmpty())
+		if(channels[i].empty())
 		{
 			continue;
 		}
 		
 		//For permissions use the first index if this is the only valid index or corresponding channel index
-		Pubnub::channel_permissions current_permissions;
+		Pubnub::ChannelPermissions current_permissions;
 		use_one_permission ? current_permissions = channel_permissions[0] : current_permissions = channel_permissions[i];
 
 		//Create bit mask value from all permissions
 		struct pam_permission ChPerm;
-		ChPerm.read = current_permissions.Read;
-		ChPerm.write = current_permissions.Write;
-		ChPerm.del = current_permissions.Delete;
-		ChPerm.get = current_permissions.Get;
-		ChPerm.update = current_permissions.Update;
-		ChPerm.manage = current_permissions.Manage;
-		ChPerm.join = current_permissions.Join;
+		ChPerm.read = current_permissions.read;
+		ChPerm.write = current_permissions.write;
+		ChPerm.del = current_permissions.del;
+		ChPerm.get = current_permissions.get;
+		ChPerm.update = current_permissions.update;
+		ChPerm.manage = current_permissions.manage;
+		ChPerm.join = current_permissions.join;
 		ChPerm.create = false;
-		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+		int perm_bit_mask = pubnub_get_grant_bit_mask_value(ChPerm);
 
-		JsonObject->SetNumberField(Channels[i], PermBitMask);
+		json_object.insert_or_update(channels[i], perm_bit_mask);
 	}
 	
-	return JsonObject;
+	return json_object;
 }
 
-Json AccessManagerService::add_channel_group_permissions_to_json(std::vector<Pubnub::String> channel_groups, std::vector<Pubnub::ChannelGroupPermissions> channel_group_permissions);
+Json AccessManagerService::add_channel_group_permissions_to_json(std::vector<Pubnub::String> channel_groups, std::vector<Pubnub::ChannelGroupPermissions> channel_group_permissions)
 {
-	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-	bool use_one_permission = ChannelGroupPermissions.Num() == 1;
-
-	TArray<TSharedPtr<FJsonValue>> ObjectValues;
+	Json json_object;
+	bool use_one_permission = channel_group_permissions.size() == 1;
 	
-	for(int i = 0; i < ChannelGroups.Num(); i++)
+	for(int i = 0; i < channel_groups.size(); i++)
 	{
-		if(ChannelGroups[i].IsEmpty())
+		if(channel_groups[i].empty())
 		{
 			continue;
 		}
 		
 		//For permissions use the first index if this is the only valid index or corresponding channel index
-		FPubnubChannelGroupPermissions current_permissions;
-		use_one_permission ? current_permissions = ChannelGroupPermissions[0] : current_permissions = ChannelGroupPermissions[i];
+		Pubnub::ChannelGroupPermissions current_permissions;
+		use_one_permission ? current_permissions = channel_group_permissions[0] : current_permissions = channel_group_permissions[i];
 
 		//Create bit mask value from all permissions
 		struct pam_permission ChPerm;
-		ChPerm.read = current_permissions.Read;
-		ChPerm.manage = current_permissions.Manage;
+		ChPerm.read = current_permissions.read;
+		ChPerm.manage = current_permissions.manage;
 		ChPerm.write = false;
 		ChPerm.del = false;
 		ChPerm.get = false;
 		ChPerm.update = false;
 		ChPerm.join = false;
 		ChPerm.create = false;
-		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+		int perm_bit_mask = pubnub_get_grant_bit_mask_value(ChPerm);
 
-		JsonObject->SetNumberField(ChannelGroups[i], PermBitMask);
+		json_object.insert_or_update(channel_groups[i], perm_bit_mask);
 	}
 	
-	return JsonObject;
+	return json_object;
 }
 
-Json AccessManagerService::add_user_permissions_to_json(std::vector<Pubnub::String>users, std::vector<Pubnub::UserPermissions> user_permissions);
+Json AccessManagerService::add_user_permissions_to_json(std::vector<Pubnub::String>users, std::vector<Pubnub::UserPermissions> user_permissions)
 {
-	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-	bool use_one_permission = UserPermissions.Num() == 1;
+	Json json_object;
+	bool use_one_permission = user_permissions.size() == 1;
 
-	TArray<TSharedPtr<FJsonValue>> ObjectValues;
 	
-	for(int i = 0; i < Users.Num(); i++)
+	for(int i = 0; i < users.size(); i++)
 	{
-		if(Users[i].IsEmpty())
+		if(users[i].empty())
 		{
 			continue;
 		}
 		
 		//For permissions use the first index if this is the only valid index or corresponding channel index
-		FPubnubUserPermissions current_permissions;
-		use_one_permission ? current_permissions = UserPermissions[0] : current_permissions = UserPermissions[i];
+		Pubnub::UserPermissions current_permissions;
+		use_one_permission ? current_permissions = user_permissions[0] : current_permissions = user_permissions[i];
 
 		//Create bit mask value from all permissions
 		struct pam_permission ChPerm;
-		ChPerm.del = current_permissions.Delete;
-		ChPerm.get = current_permissions.Get;
-		ChPerm.update = current_permissions.Update;
+		ChPerm.del = current_permissions.del;
+		ChPerm.get = current_permissions.get;
+		ChPerm.update = current_permissions.update;
 		ChPerm.read = false;
 		ChPerm.write = false;
 		ChPerm.manage = false;
 		ChPerm.join = false;
 		ChPerm.create = false;
-		int PermBitMask = pubnub_get_grant_bit_mask_value(ChPerm);
+		int perm_bit_mask = pubnub_get_grant_bit_mask_value(ChPerm);
 
-		JsonObject->SetNumberField(Users[i], PermBitMask);
+		json_object.insert_or_update(users[i], perm_bit_mask);
 	}
 
-	return JsonObject;
+	return json_object;
 }
