@@ -55,8 +55,6 @@ namespace Pubnub {
         Pubnub::Vector<T> keys;
         Pubnub::Vector<K> values;
 
-        void validateMap() const;
-
         int size(){
             return keys.size();
         }
