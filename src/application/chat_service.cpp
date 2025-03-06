@@ -1,4 +1,5 @@
 #include "chat_service.hpp"
+#include "enum_converters.hpp"
 #include "application/bundles.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
