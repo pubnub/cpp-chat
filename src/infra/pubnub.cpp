@@ -339,13 +339,16 @@ void PubNub::remove_members(const Pubnub::String channel, const Pubnub::String m
     this->await_and_handle_error(result);
 }
 
-Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include)
+Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include, const Pubnub::String filter)
 {
-    auto result = pubnub_set_members(
-            this->main_context.get(),
-            channel,
-            include,
-            members_object
+    pubnub_members_opts opt = pubnub_members_opts();
+    opt.filter = filter;
+    opt.include = include;
+    auto result = pubnub_set_members_ex(
+        this->main_context.get(),
+        channel,
+        members_object,
+        opt
     );
 
     this->await_and_handle_error(result);
