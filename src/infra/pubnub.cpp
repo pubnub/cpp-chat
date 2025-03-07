@@ -133,10 +133,7 @@ std::vector<pubnub_v2_message> PubNub::fetch_messages()
 
     auto result = pubnub_last_result(this->long_poll_context.get());
     if (PNR_OK != result && PNR_STARTED != result && PNR_TIMEOUT != result) {
-        throw std::runtime_error(
-                std::string("Failed to fetch messages: ")
-                + pubnub_res_2_string(result)
-                );
+        std::cerr << "Failed to fetch messages. Error:  " << pubnub_res_2_string(result) << std::endl;
     }
 
     if (PNR_STARTED == result || PNR_TIMEOUT == result) {
@@ -510,7 +507,8 @@ Pubnub::String PubNub::fetch_history(
 
     if(!fetch_history_response.ptr)
     {
-        throw std::runtime_error("Fetch history response is invalid");
+        std::cerr << "Fetch history response is invalid" << std::endl;
+        return "";
     }
 
     return fetch_history_response.ptr;
@@ -630,14 +628,13 @@ void PubNub::await_and_handle_error(pubnub_res result)
 {
     if (PNR_OK != result && PNR_STARTED != result) {
         auto error = pubnub_last_publish_result(this->main_context.get());
-        ;
-        throw std::runtime_error(pubnub_res_2_string(result));
+        std::cerr << "Error:  " << pubnub_res_2_string(result) << std::endl;
     }
 
     if (PNR_STARTED == result) {
         pubnub_res await_result = pubnub_await(main_context.get());
         if (PNR_OK != await_result) {
-            throw std::runtime_error(pubnub_res_2_string(result));
+            std::cerr << "Error:  " << pubnub_res_2_string(result) << std::endl;
         }
     }
 }
@@ -669,12 +666,7 @@ void PubNub::cancel_previous_subscription()
     if (PN_CANCEL_FINISHED != cancel_result) {
         auto await_result = pubnub_await(this->long_poll_context.get());
         if (PNR_OK != await_result) {
-            throw std::runtime_error(
-                    std::string("Failed to cancel previous subscription: ")
-                    + pubnub_res_2_string(
-                        pubnub_last_result(this->long_poll_context.get())
-                    )
-                );
+            std::cerr << "Failed to cancel previous subscription:  " << pubnub_res_2_string(pubnub_last_result(this->long_poll_context.get())) << std::endl;
         }
     }
 
@@ -682,12 +674,7 @@ void PubNub::cancel_previous_subscription()
     auto result = pubnub_leave(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), NULL);
     if (PNR_OK != result) {
         if (PNR_STARTED == result && PNR_OK != pubnub_await(this->long_poll_context.get())) {
-            throw std::runtime_error(
-                    std::string("Failed to leave previous subscription: ")
-                    + pubnub_res_2_string(
-                        pubnub_last_result(this->long_poll_context.get())
-                    )
-                );
+            std::cerr << "Failed to leave previous subscription:  " << pubnub_res_2_string(pubnub_last_result(this->long_poll_context.get())) << std::endl;
         }
     }
 }
@@ -696,10 +683,7 @@ void PubNub::call_subscribe()
 {
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
     if (PNR_OK != result && PNR_STARTED != result) {
-        throw std::runtime_error(
-                std::string("Failed to subscribe to channel: ")
-                + pubnub_res_2_string(result)
-            );
+        std::cerr << "Failed to subscribe to channel. Error:   " << pubnub_res_2_string(result) << std::endl;
     }
 }
 
@@ -713,10 +697,7 @@ void PubNub::call_handshake()
         }
 
         if (PNR_OK != result) {
-            throw std::runtime_error(
-                    std::string("Failed to subscribe to channel: ")
-                    + pubnub_res_2_string(result)
-                    );
+            std::cerr << "Failed to subscribe to channel. Error:   " << pubnub_res_2_string(result) << std::endl;
 
         }
     }
