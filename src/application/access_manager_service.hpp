@@ -9,7 +9,7 @@
 
 class AccessManagerService {
     public:
-        AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key);
+        AccessManagerService(ThreadSafePtr<PubNub> pubnub);
 
         bool can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
 
@@ -18,7 +18,6 @@ class AccessManagerService {
         int set_pubnub_origin(const Pubnub::String origin) const;
 
     private:
-        Pubnub::String auth_key;
         ThreadSafePtr<PubNub> pubnub;
 };
 
