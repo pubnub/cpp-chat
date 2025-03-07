@@ -46,8 +46,8 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     pubnub_set_non_blocking_io(this->long_poll_context.get());
 
     if (!auth_key.empty()) {
-        pubnub_set_auth(this->main_context.get(), this->auth_key.c_str());
-        pubnub_set_auth(this->long_poll_context.get(), this->auth_key.c_str());
+        pubnub_set_auth_token(this->main_context.get(), this->auth_key.c_str());
+        pubnub_set_auth_token(this->long_poll_context.get(), this->auth_key.c_str());
     }
 }
 
@@ -754,4 +754,23 @@ Pubnub::String PubNub::get_comma_sep_string_from_vector(std::vector<Pubnub::Stri
 Pubnub::String PubNub::parse_token(const Pubnub::String auth_key) 
 {
     return pubnub_parse_token(this->main_context.get(), auth_key.c_str());
+}
+
+Pubnub::String PubNub::get_current_auth_token() 
+{
+    return this->auth_key;
+}
+
+void PubNub::set_auth_token(const Pubnub::String token) 
+{
+    auth_key = token;
+    pubnub_set_auth_token(this->main_context.get(), auth_key.c_str());
+    pubnub_set_auth_token(this->long_poll_context.get(), auth_key.c_str());
+}
+
+int PubNub::set_pubnub_origin(const Pubnub::String origin) 
+{
+    custom_origin = origin;
+    return pubnub_origin_set(this->main_context.get(), custom_origin.c_str());
+    return pubnub_origin_set(this->long_poll_context.get(), custom_origin.c_str());
 }

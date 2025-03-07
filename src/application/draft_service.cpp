@@ -72,9 +72,6 @@ std::pair<Pubnub::SendTextParams, Pubnub::String> DraftService::prepare_sending_
         params.send_by_post,
         params.meta,
         mentioned_users,
-        // TODO: reviewers do you know if we should add here channel mentions or links?
-        params.referenced_channels,
-        params.text_links,
         params.quoted_message
     };
 
@@ -199,8 +196,16 @@ MessageDraftMentionTargetEntity DraftService::convert_mention_target_to_domain(c
 
 Pubnub::MessageElement DraftService::convert_message_element_to_presentation(const MessageDraftMessageElementEntity& element) {
     return element.target.has_value()
-        ? Pubnub::MessageElement::link(element.text, Pubnub::MentionTarget::url(element.target.value().target))
+        ? Pubnub::MessageElement::link(element.text, DraftService::convert_mention_target_to_presentation(element.target.value()))
         : Pubnub::MessageElement::plain_text(element.text);
+}
+
+Pubnub::MentionTarget DraftService::convert_mention_target_to_presentation(const MessageDraftMentionTargetEntity& target) {
+    return target.type == MessageDraftMentionTargetEntity::Type::USER
+        ? Pubnub::MentionTarget::user(target.target)
+        : target.type == MessageDraftMentionTargetEntity::Type::CHANNEL
+            ? Pubnub::MentionTarget::channel(target.target)
+            : Pubnub::MentionTarget::url(target.target);
 }
 
 Pubnub::MentionedUser DraftService::convert_mentioned_user_to_presentation(const MessageDraftEntity& entity, const MessageDraftMentionEntity& user) {

@@ -41,7 +41,7 @@ int main() {
     auto draft = channel.create_message_draft();
 
     // Add listener for every change in the draft 
-    draft.add_message_elements_listener([](const Pubnub::Vector<Pubnub::MessageElement>& elements) {
+    draft.add_change_listener([](const Pubnub::Vector<Pubnub::MessageElement>& elements) {
             std::cout << "--- Message elements changed! ---" << std::endl;
             std::for_each(elements.begin(), elements.end(), [](const Pubnub::MessageElement& element) {
                 std::cout << "- Element -" << std::endl;
@@ -54,7 +54,7 @@ int main() {
 
     // Add listener for every change in the draft with suggestions
     // WARNING: Using this listener might be expensive because it calls Pubnub API to get suggestions
-    draft.add_message_elements_listener(
+    draft.add_change_listener(
             [&draft](const Pubnub::Vector<Pubnub::MessageElement>& elements, const Pubnub::Vector<Pubnub::SuggestedMention>& suggestions) {
             std::cout << "--- Message elements changed, here suggestions:! ---" << std::endl;
             // Same handling as above for elements

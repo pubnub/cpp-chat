@@ -1,7 +1,9 @@
 #include "c_message.hpp"
 #include "c_thread_channel.hpp"
 #include "c_errors.hpp"
+#include "application/enum_converters.hpp"
 #include "nlohmann/json.hpp"
+#include "message.hpp"
 #include "thread_message.hpp"
 
 void pn_message_delete(Pubnub::Message* message) {
@@ -270,17 +272,6 @@ Pubnub::Message* pn_message_update_with_base_message(Pubnub::Message* message, P
     }
 }
 
-Pubnub::ThreadMessage* pn_thread_message_update_with_base_message(Pubnub::ThreadMessage* message, Pubnub::ThreadMessage* base_message) {
-    try {
-        return new Pubnub::ThreadMessage(message->update_with_thread_base(*base_message));
-    }
-    catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
-
-        return PN_C_ERROR_PTR;
-    }
-}
-
 PnCResult pn_message_mentioned_users(Pubnub::Message* message, Pubnub::Chat* chat, char* result) {
     try {
         auto mentioned_users = message->mentioned_users();
@@ -351,6 +342,7 @@ Pubnub::Message* pn_message_quoted_message(Pubnub::Message* message) {
         return PN_C_ERROR_PTR;
     }
 }
+
 PnCResult pn_message_text_links(Pubnub::Message* message, char* result) {
     try {
         auto text_links = message->text_links();
@@ -387,13 +379,4 @@ Pubnub::Message* pn_message_restore(Pubnub::Message* message) {
     }
 }
 
-Pubnub::ThreadMessage* pn_thread_message_edit_text(Pubnub::ThreadMessage* message, const char* text) {
-    try {
-        return new Pubnub::ThreadMessage(message->edit_text(text), message->parent_channel_id());
-    }
-    catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR_PTR;
-    }
-}

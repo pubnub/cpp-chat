@@ -50,9 +50,30 @@ MessageDraft::MessageDraft(
 channel(channel),
 draft_config(draft_config),
 value(std::make_unique<MessageDraftDAO>()),
-draft_service(std::make_unique<DraftService>(user_service, channel_service)) {}
+draft_service(std::make_shared<DraftService>(user_service, channel_service)) {}
 
 MessageDraft::~MessageDraft() = default;
+
+MessageDraft::MessageDraft(const MessageDraft& other) :
+channel(other.channel),
+draft_config(other.draft_config),
+value(std::make_unique<MessageDraftDAO>(other.value->get_entity())),
+draft_service(other.draft_service)
+{}
+
+MessageDraft& MessageDraft::operator =(const MessageDraft& other) {
+    if(this == &other)
+    {
+        return *this;
+    }
+
+    this->channel = other.channel;
+    this->draft_config = other.draft_config;
+    this->value = std::make_unique<MessageDraftDAO>(other.value->get_entity());
+    this->draft_service = other.draft_service;
+
+    return *this;
+}
 
 void MessageDraft::insert_text(std::size_t position, const Pubnub::String& text) {
     this->trigger_typing_indicator();
@@ -94,11 +115,11 @@ void MessageDraft::trigger_typing_indicator() {
 }
 
 #ifndef PN_CHAT_C_ABI
-void MessageDraft::add_message_elements_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
+void MessageDraft::add_change_listener(std::function<void(Pubnub::Vector<Pubnub::MessageElement>)> listener) {
     this->value->add_callback(listener);
 }
 
-void MessageDraft::add_message_elements_listener(
+void MessageDraft::add_change_listener(
         std::function<void(
             Pubnub::Vector<Pubnub::MessageElement>,
             Pubnub::Vector<Pubnub::SuggestedMention>

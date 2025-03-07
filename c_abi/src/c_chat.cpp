@@ -2,6 +2,7 @@
 #include "c_channel.hpp"
 #include "channel.hpp"
 #include "c_errors.hpp"
+#include "application/enum_converters.hpp"
 #include "chat.hpp"
 #include "string.hpp"
 #include "restrictions.hpp"
@@ -833,7 +834,45 @@ PnCTribool pn_pam_can_i(Pubnub::Chat *chat, Pubnub::AccessManager::Permission pe
     }
 }
 
+PnCResult pn_pam_parse_token(Pubnub::Chat* chat, const char* token, char* result) {
+    try {
+        auto parsed = chat->access_manager().parse_token(token);
+        strcpy(result, parsed.c_str());
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
 
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_pam_set_auth_token(Pubnub::Chat* chat, const char* token) {
+    try {
+        chat->access_manager().set_auth_token(token);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
+
+PnCResult pn_pam_set_pubnub_origin(Pubnub::Chat* chat, const char* origin) {
+    try {
+        chat->access_manager().set_pubnub_origin(origin);
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+
+    return PN_C_OK;
+}
 
 
 
