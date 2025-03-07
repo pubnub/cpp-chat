@@ -1,4 +1,5 @@
 #include "chat_service.hpp"
+#include "enum_converters.hpp"
 #include "application/bundles.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
@@ -41,7 +42,7 @@ void ChatService::init_services(const ChatConfig& config) {
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, weak_from_this());
-    access_manager_service = std::make_shared<AccessManagerService>(pubnub, config.auth_key);
+    access_manager_service = std::make_shared<AccessManagerService>(pubnub);
     this->chat_config = config;
 #ifndef PN_CHAT_C_ABI
     auto service_bundle = EntityServicesBundle{

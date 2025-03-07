@@ -1,6 +1,8 @@
 #include "message_service.hpp"
 #include "chat_service.hpp"
+#include "enum_converters.hpp"
 #include "domain/message_entity.hpp"
+#include "domain/quotes.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "nlohmann/json.hpp"
@@ -65,7 +67,7 @@ Pubnub::Message MessageService::delete_message(const MessageDAO& message, const 
         return pubnub_handle->add_message_action(entity.channel_id, timetoken, message_action_type_to_string(deleted_action_type), deleted_value);
     }();
 
-    auto new_message_entity = entity.delete_message(deleted_value, action_timetoken);
+    auto new_message_entity = entity.delete_message(Quotes::remove(deleted_value), Quotes::remove(action_timetoken));
 
     return this->create_message_object(std::make_pair(timetoken, new_message_entity));
 }
@@ -107,13 +109,7 @@ Pubnub::Message MessageService::restore(const MessageDAO& message, const Pubnub:
         {
             if(action.type == PMAT_Deleted)
             {
-                String timetoken_no_quotes = action.timetoken;
-                //If action timetoken has quotes we need to remove them here
-                if(action.timetoken.front() == '\"')
-                {
-                    timetoken_no_quotes.erase(0, 1);
-                    timetoken_no_quotes.erase(timetoken_no_quotes.length() - 1, 1);
-                }
+                String timetoken_no_quotes = Quotes::remove(action.timetoken);
                 pubnub_handle->remove_message_action(entity.channel_id, timetoken, timetoken_no_quotes);
             }
             else
@@ -153,13 +149,13 @@ std::vector<MessageAction> MessageService::get_message_reactions(const MessageDA
 Message MessageService::toggle_reaction(const Pubnub::String& timetoken, const MessageDAO& message, const String& reaction) const {
     auto current_reactions = this->get_message_reactions(message);
     auto pubnub_handle = pubnub->lock();
-    String current_user_id = pubnub_handle->get_user_id();
+    String current_user_id = pubnub_handle->get_user_id(); 
     pubnub_message_action_type action_type = pubnub_message_action_type::PMAT_Reaction;
 
     auto message_data = message.get_entity();
     auto timetoken_to_remove = message_data.get_user_reaction_timetoken(current_user_id, reaction);
 
-    if (timetoken_to_remove.has_value()) {
+    if (timetoken_to_remove.has_value()) { 
         pubnub_handle->remove_message_action(message_data.channel_id, timetoken, timetoken_to_remove.value());
         auto new_entity = message_data.remove_user_reaction(timetoken_to_remove.value());
 
@@ -168,7 +164,7 @@ Message MessageService::toggle_reaction(const Pubnub::String& timetoken, const M
 
     String action_timetoken = pubnub_handle->add_message_action(
             message_data.channel_id, timetoken, message_action_type_to_string(action_type), reaction);
-    auto new_entity = message_data.add_user_reaction(current_user_id, reaction, action_timetoken);
+    auto new_entity = message_data.add_user_reaction(current_user_id, reaction, Quotes::remove(action_timetoken));
 
     return this->create_message_object(std::make_pair(timetoken, new_entity));
 }
@@ -216,6 +212,33 @@ std::function<void()> MessageService::stream_updates(Pubnub::Message calling_mes
     auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
     chat->callback_service->broadcast_messages(messages);
     chat->callback_service->register_message_update_callback(calling_message.timetoken(), final_message_callback);
+
+    //stop streaming callback
+    std::function<void()> stop_streaming = [=](){
+        chat->callback_service->remove_message_update_callback(calling_message.timetoken());
+    };
+
+    return stop_streaming;
+
+}
+
+
+std::function<void()> MessageService::stream_updates(Pubnub::ThreadMessage calling_message, std::function<void(const Pubnub::ThreadMessage)> message_callback) const
+{
+    auto pubnub_handle = this->pubnub->lock();
+
+    auto chat = this->chat_service.lock();
+
+    std::vector<String> messages_ids;
+    std::function<void(ThreadMessage)> final_message_callback = [=](ThreadMessage message){
+        auto updated_message = this->update_message_with_base(message, calling_message);
+        
+        message_callback(ThreadMessage(updated_message, calling_message.parent_channel_id()));
+    };
+    
+    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
+    chat->callback_service->broadcast_messages(messages);
+    chat->callback_service->register_thread_message_update_callback(calling_message.timetoken(), final_message_callback);
 
     //stop streaming callback
     std::function<void()> stop_streaming = [=](){

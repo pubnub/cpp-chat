@@ -53,6 +53,10 @@ Pubnub::Channel Pubnub::ThreadMessage::unpin_from_parent_channel() const
     return parent_channel.unpin_message();
 }
 
+CallbackStop ThreadMessage::stream_updates(std::function<void(const ThreadMessage&)> message_callback) const {
+    return CallbackStop(this->message_service->stream_updates(*this, message_callback));
+}
+
 CallbackStop Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::ThreadMessage> messages, std::function<void(Pubnub::Vector<Pubnub::ThreadMessage>)> callback) const
 {
     auto messages_std = messages.into_std_vector();
