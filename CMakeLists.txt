@@ -258,23 +258,26 @@ if(${RUN_GOOGLE_TESTS})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/e2e)
 
     add_executable(
-      debug_test
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/debug_test.cc
-    )
-    add_executable(
       message_draft_e2e
       ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp
     )
     target_link_libraries(
-      debug_test
-      GTest::gtest_main
-    )
-    target_link_libraries(
       message_draft_e2e
       GTest::gtest_main
     )
+    target_link_libraries(message_draft_e2e pubnub-chat)
+
+    add_executable(
+      channel_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/channel_e2e.cpp
+    )
+    target_link_libraries(
+      channel_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(channel_e2e pubnub-chat)
 
     include(GoogleTest)
-    gtest_discover_tests(debug_test)
     gtest_discover_tests(message_draft_e2e)
+    gtest_discover_tests(channel_e2e)
 endif()
