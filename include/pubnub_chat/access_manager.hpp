@@ -96,6 +96,7 @@ struct UserPermissions
 
         PN_CHAT_EXPORT bool can_i(AccessManager::Permission permission, AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
         
+        PN_CHAT_EXPORT void set_secret_key(const Pubnub::String secret_key) const;
         PN_CHAT_EXPORT Pubnub::String parse_token(const Pubnub::String token) const;
         PN_CHAT_EXPORT void set_auth_token(const Pubnub::String token) const;
         PN_CHAT_EXPORT int set_pubnub_origin(const Pubnub::String origin) const;

@@ -24,6 +24,7 @@ extern "C" {
 #include <pubnub_actions_api.h>
 #include <pubnub_advanced_history.h>
 #include <pubnub_grant_token_api.h>
+#include <pubnub_crypto.h>
 }
 
 using json = nlohmann::json;
@@ -783,4 +784,10 @@ Pubnub::String PubNub::grant_token(const Pubnub::String permission_object)
 	}
 
     return grant_token_resp.ptr;
+}
+
+void PubNub::set_secret_key(const Pubnub::String key) 
+{
+    this->secret_key = key;
+    pubnub_set_secret_key(this->main_context.get(), secret_key.c_str());
 }

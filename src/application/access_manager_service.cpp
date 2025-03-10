@@ -35,6 +35,12 @@ bool AccessManagerService::can_i(Pubnub::AccessManager::Permission permission, P
     return AccessManagerLogic::can_i(permission, resource_type, json_token, resource_name);
 }
 
+void AccessManagerService::set_secret_key(const Pubnub::String key) const
+{
+	auto pubnub_handle = this->pubnub->lock();
+	pubnub_handle->set_secret_key(key);
+}
+
 Pubnub::String AccessManagerService::parse_token(const Pubnub::String auth_key) const 
 {
     auto pubnub_handle = this->pubnub->lock();
@@ -140,13 +146,21 @@ Pubnub::String AccessManagerService::grant_token_permission_struct_to_string(Gra
 	}
 
 	Json permission_object_struct_json_object;
-	permission_object_struct_json_object.insert_or_update("resources", resources_json_object);
-	permission_object_struct_json_object.insert_or_update("patterns", patterns_json_object);
+	if(!resources_json_object.is_null())
+	{
+		permission_object_struct_json_object.insert_or_update("resources", resources_json_object);
+	}
+	if(!patterns_json_object.is_null())
+	{
+		permission_object_struct_json_object.insert_or_update("patterns", patterns_json_object);
+	}
 
 	Json permissions_json_object;
 	permissions_json_object.insert_or_update("ttl", permission_object_struct.ttl_minutes);
 	permissions_json_object.insert_or_update("authorized_uuid", permission_object_struct.authorized_user);
 	permissions_json_object.insert_or_update("permissions", permission_object_struct_json_object);
+
+	std::cout << "Grant token object: " << permissions_json_object.dump() << std::endl;
 
 	//Convert created Json object to string
 	return permissions_json_object.dump();

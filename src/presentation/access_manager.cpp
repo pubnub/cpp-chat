@@ -26,6 +26,11 @@ bool Pubnub::AccessManager::can_i(Pubnub::AccessManager::Permission permission, 
     return this->access_manager_service->can_i(permission, resource_type, resource_name);
 }
 
+void Pubnub::AccessManager::set_secret_key(const Pubnub::String key) const
+{
+	return this->access_manager_service->set_secret_key(key);
+}
+
 Pubnub::String Pubnub::AccessManager::parse_token(const Pubnub::String token) const
 {
     return this->access_manager_service->parse_token(token);
