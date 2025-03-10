@@ -6,19 +6,24 @@ extern "C" {
     #include <pubnub_grant_token_api.h>
 }
 
-AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key):
-    pubnub(pubnub),
-    auth_key(auth_key)
+AccessManagerService::AccessManagerService(ThreadSafePtr<PubNub> pubnub):
+    pubnub(pubnub)
 {}
 
 bool AccessManagerService::can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const {
-    if (this->auth_key.empty()) {
+    
+    Pubnub::String current_token = [this]{
+        auto pubnub_handle = this->pubnub->lock();
+        return pubnub_handle->get_current_auth_token();
+    }();
+
+    if (current_token.empty()) {
         return true;
     }
 
-    auto parsed_token = [this]() {
+    auto parsed_token = [this, current_token]() {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->parse_token(this->auth_key);
+        return pubnub_handle->parse_token(current_token);
     }();
 
     auto json_token = Json::parse(parsed_token);

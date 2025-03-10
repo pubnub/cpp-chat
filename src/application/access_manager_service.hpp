@@ -46,7 +46,7 @@ struct GrantTokenPermissionObjectInternal
 
 class AccessManagerService {
     public:
-        AccessManagerService(ThreadSafePtr<PubNub> pubnub, Pubnub::String auth_key);
+        AccessManagerService(ThreadSafePtr<PubNub> pubnub);
 
         bool can_i(Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const Pubnub::String& resource_name) const; 
 
@@ -62,7 +62,6 @@ class AccessManagerService {
 	    Json add_user_permissions_to_json(std::vector<Pubnub::String>users, std::vector<Pubnub::UserPermissions> user_permissions) const;
 
     private:
-        Pubnub::String auth_key;
         ThreadSafePtr<PubNub> pubnub;
 };
 

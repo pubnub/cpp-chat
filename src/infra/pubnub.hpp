@@ -69,6 +69,7 @@ public:
     bool delete_messages(const Pubnub::String channel, const Pubnub::String start, const Pubnub::String end);
     
     Pubnub::String parse_token(const Pubnub::String auth_key);
+    Pubnub::String get_current_auth_token();
     void set_auth_token(const Pubnub::String token);
     int set_pubnub_origin(const Pubnub::String origin);
     Pubnub::String grant_token(const Pubnub::String permission_object);

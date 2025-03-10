@@ -757,6 +757,11 @@ Pubnub::String PubNub::parse_token(const Pubnub::String auth_key)
     return pubnub_parse_token(this->main_context.get(), auth_key.c_str());
 }
 
+Pubnub::String PubNub::get_current_auth_token() 
+{
+    return this->auth_key;
+}
+
 void PubNub::set_auth_token(const Pubnub::String token) 
 {
     auth_key = token;

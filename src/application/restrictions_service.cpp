@@ -1,11 +1,16 @@
 #include "restrictions_service.hpp"
 #include "application/chat_service.hpp"
+#include "channel.hpp"
+#include "domain/channel_entity.hpp"
 #include "infra/pubnub.hpp"
 #include "infra/entity_repository.hpp"
 #include "const_values.hpp"
 #include "message.hpp"
 #include "chat_helpers.hpp"
 #include "domain/json.hpp"
+#include "application/channel_service.hpp"
+#include "application/user_service.hpp"
+#include "domain/restrictions.hpp"
 
 using namespace Pubnub;
 using json = nlohmann::json;
@@ -31,15 +36,31 @@ void RestrictionsService::set_restrictions(const String& user_id, const String& 
 	//Restrictions are held in new channel with ID: PUBNUB_INTERNAL_MODERATION_{ChannelName}
 	String restrictions_channel = INTERNAL_MODERATION_PREFIX + channel_id;
 
+    try {
+        if (auto chat_service_shared = chat_service.lock())
+        {
+            chat_service_shared->channel_service->create_channel(restrictions_channel, ChannelEntity{});
+        } else {
+            throw std::runtime_error("Chat service is not available");
+        }
+    }
+    catch (const std::invalid_argument& e)
+    {
+        // TODO: better error handling
+        if (String(e.what()).find("already exists") == String::npos) {
+            throw e;
+        }
+        // else ignore - moderation channel already exist
+    }
+
 	//Lift restrictions
 	if(!restrictions.ban && !restrictions.mute)
 	{
-		String remove_member_string = String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}}]");
         {
             auto pubnub_handle = this->pubnub->lock();
-            pubnub_handle->remove_members(restrictions_channel, remove_member_string);
+            pubnub_handle->remove_members(restrictions_channel, Restrictions::remove_member_payload(user_id));
         }
-		String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted\", \"reason\": \"") + restrictions.reason + String("\"}");
+		String event_payload_string = Restrictions::lift_restrictions_payload(restrictions_channel, restrictions.reason);
         chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
 		return;
 	}
