@@ -24,9 +24,7 @@ Pubnub::String get_delete_user_token(Pubnub::AccessManager& token_access_manager
 
 
 int main() {
-    auto publish_key = "pub-c-7236aefc-bc22-43db-bdb3-1c96a57004ab";
-    auto subscribe_key = "sub-c-7e0de38f-77e0-402b-91de-d26acd3be135";
-    auto secret_key = "sec-c-ZDU1ZmZjNzItZTA1NS00MDU5LWE3NmItM2M3ZDNhOWQ2MDRm";
+
 
     //This token is needed to init chat
     auto initial_auth_token = "p0F2AkF0GmfOvB5DdHRsGajAQ3Jlc6VEY2hhbqBDZ3JwoENzcGOgQ3VzcqBEdXVpZKFxcGFtX2NjcF9jaGF0X3VzZXIYaENwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgQ3NpZ1ggUA6E8e1Jps1cPGkW6lpzOKYzc-bjUtlLDyeUdiyv_uw=";
