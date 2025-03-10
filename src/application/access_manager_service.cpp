@@ -165,8 +165,6 @@ Pubnub::String AccessManagerService::grant_token_permission_struct_to_string(Gra
 	permissions_json_object.insert_or_update("authorized_uuid", permission_object_struct.authorized_user);
 	permissions_json_object.insert_or_update("permissions", permission_object_struct_json_object);
 
-	std::cout << "Grant token object: " << permissions_json_object.dump() << std::endl;
-
 	//Convert created Json object to string
 	return permissions_json_object.dump();
 }
