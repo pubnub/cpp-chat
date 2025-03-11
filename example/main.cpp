@@ -21,6 +21,7 @@ Pubnub::String get_update_channel_token(Pubnub::AccessManager& token_access_mana
 Pubnub::String get_delete_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
 Pubnub::String get_update_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
 Pubnub::String get_delete_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
+Pubnub::String get_join_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
 
 
 int main() {
@@ -96,8 +97,8 @@ int main() {
     //GET USERS
     std::cout << "Get Users Test" << std::endl;
 
-    chat_access_manager.set_auth_token(get_get_users_token(token_access_manager, std::vector<Pubnub::String>{create_user_id, invitee_user_id}));
-    auto users_from_get = chat.get_users("id LIKE \"cpp_chat_test\"", "", 2);
+    //This shouldn't require any permissions
+    auto users_from_get = chat.get_users("id LIKE \"cpp_chat_test\"", "", 5);
 
 
 
@@ -162,8 +163,8 @@ int main() {
     //GET CHANNELS
     std::cout << "Get Channels" << std::endl;
 
-    chat_access_manager.set_auth_token(get_get_channels_token(token_access_manager, std::vector<Pubnub::String>{public_channel_id, group_channel_id, direct_channel_id}));
-    auto channels_from_get = chat.get_channels("id LIKE \"cpp_chat_test\"", "", 3);
+    //This shouldn't require any permissions
+    auto channels_from_get = chat.get_channels("id LIKE \"cpp_chat_test\"", "", 5);
 
 
 
@@ -219,6 +220,44 @@ int main() {
     
 
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL JOIN
+    std::cout << "Channel.Join" << std::endl;
+
+    chat_access_manager.set_auth_token(get_join_channel_token(token_access_manager, public_channel_id, user_id));
+    auto join_lambda = [](Pubnub::Message message){};
+    public_channel.join(join_lambda);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+    
+    //THESE FUNCTIONS DON'T REQUIRE PERMISSIONS
+    chat_access_manager.set_auth_token(get_get_user_token(token_access_manager, "blabla"));
+    std::cout << "Get Channel Suggestions" << std::endl;
+    chat.get_channel_suggestions("cpp");
+    std::cout << "Get User Suggestions" << std::endl;
+    chat.get_user_suggestions("cpp");
+    std::cout << "Where Present" << std::endl;
+    chat.where_present(user_id);
+    std::cout << "Is present" << std::endl;
+    chat.is_present(user_id, public_channel_id);
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //GET USER SUGGESTIONS
+    std::cout << "Get User Suggestions" << std::endl;
+
+    //This shouldn't require any permissions
+    chat.get_user_suggestions("cpp");
 
 
 
@@ -444,6 +483,35 @@ Pubnub::String get_delete_user_token(Pubnub::AccessManager& token_access_manager
     permission_object.ttl_minutes = TOKEN_TTL;
     Pubnub::UserPermissions user_permissions;
     user_permissions.del = true;
+    permission_object.users.push_back(user_id);
+    permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_join_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id)
+{
+    //Channel ID: READ, JOIN, WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.read = true;
+    channel_permissions.join = true;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //Channel ID + -pnpres: READ
+    Pubnub::ChannelPermissions pres_channel_permissions;
+    pres_channel_permissions.read = true;
+    permission_object.channels.push_back(channel_id + Pubnub::String("-pnpres"));
+    permission_object.channel_permissions.push_back(pres_channel_permissions);
+
+    //User ID: UPDATE, GET
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.update = true;
+    user_permissions.get = true;
     permission_object.users.push_back(user_id);
     permission_object.user_permissions.push_back(user_permissions);
 
