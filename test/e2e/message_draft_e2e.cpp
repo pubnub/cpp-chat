@@ -19,11 +19,11 @@ class MessageDraftTests : public :: testing::Test {
         void SetUp() override {
             Pubnub::String publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
             if (publish_key.empty()) {
-                publish_key = "pub-c-79c582a2-d7a4-4ee7-9f28-7a6f1b7fa11c";
+                publish_key = "demo-36";
             }
             Pubnub::String subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
             if (subscribe_key.empty()) {
-                subscribe_key = "sub-c-ca0af928-f4f9-474c-b56e-d6be81bf8ed0";
+                subscribe_key = "demo-36";
             }
 
             chat.reset(new Pubnub::Chat(Pubnub::Chat::init(

@@ -277,7 +277,18 @@ if(${RUN_GOOGLE_TESTS})
     )
     target_link_libraries(channel_e2e pubnub-chat)
 
+    add_executable(
+      threads_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/threads_e2e.cpp
+    )
+    target_link_libraries(
+      threads_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(threads_e2e pubnub-chat)
+
     include(GoogleTest)
     gtest_discover_tests(message_draft_e2e)
     gtest_discover_tests(channel_e2e)
+    gtest_discover_tests(threads_e2e)
 endif()

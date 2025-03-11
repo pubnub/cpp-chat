@@ -149,11 +149,6 @@ TEST_F(ChannelTests, TestStopTypingFromTimer) {
 
     auto got_stopped_typing_callback = false;
     channel.get_typing([&](Pubnub::Vector<Pubnub::String> typing_users) {
-        std::cout << "AAAAAAAAAAAAAA" << std::endl;
-        for (size_t i = 0; i < typing_users.size(); i++)
-        {
-            std::cout << typing_users[i] << std::endl;
-        }
         if (typing_users.size() == 0) {
             got_stopped_typing_callback = true;
         }
