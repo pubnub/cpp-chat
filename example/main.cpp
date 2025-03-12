@@ -4,11 +4,13 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <map>
 
 #define TOKEN_TTL 10
 #define TOKEN_AUTH_USER_ID "pam_ccp_chat_user"
 
 Pubnub::String get_init_chat_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
+Pubnub::String get_empty_token(Pubnub::AccessManager& token_access_manager);
 Pubnub::String get_create_pub_conversation_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
 Pubnub::String get_create_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
 Pubnub::String get_get_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
@@ -22,10 +24,19 @@ Pubnub::String get_delete_channel_token(Pubnub::AccessManager& token_access_mana
 Pubnub::String get_update_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
 Pubnub::String get_delete_user_token(Pubnub::AccessManager& token_access_manager, Pubnub::String user_id);
 Pubnub::String get_join_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
+Pubnub::String get_leave_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
+Pubnub::String get_channel_read_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
+Pubnub::String get_channel_write_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
+Pubnub::String get_listen_for_events_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
+Pubnub::String get_send_text_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String mentioned_user_id);
+Pubnub::String get_set_restrictions_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
+Pubnub::String get_invite_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String invitee_id);
 
 
 int main() {
-
+    auto publish_key = "pub-c-7236aefc-bc22-43db-bdb3-1c96a57004ab";
+    auto subscribe_key = "sub-c-7e0de38f-77e0-402b-91de-d26acd3be135";
+    auto secret_key = "sec-c-ZDU1ZmZjNzItZTA1NS00MDU5LWE3NmItM2M3ZDNhOWQ2MDRm";
 
     //This token is needed to init chat
     auto initial_auth_token = "p0F2AkF0GmfOvB5DdHRsGajAQ3Jlc6VEY2hhbqBDZ3JwoENzcGOgQ3VzcqBEdXVpZKFxcGFtX2NjcF9jaGF0X3VzZXIYaENwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgQ3NpZ1ggUA6E8e1Jps1cPGkW6lpzOKYzc-bjUtlLDyeUdiyv_uw=";
@@ -189,8 +200,8 @@ int main() {
     //DELETE CHANNEL
     std::cout << "Delete Channel" << std::endl;
 
-    chat_access_manager.set_auth_token(get_delete_channel_token(token_access_manager, group_channel_id));
-    chat.delete_channel(group_channel_id);
+    chat_access_manager.set_auth_token(get_delete_channel_token(token_access_manager, direct_channel_id));
+    chat.delete_channel(direct_channel_id);
 
 
 
@@ -222,7 +233,7 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-
+/*
 
     //CHANNEL JOIN
     std::cout << "Channel.Join" << std::endl;
@@ -238,7 +249,7 @@ int main() {
 
     
     //THESE FUNCTIONS DON'T REQUIRE PERMISSIONS
-    chat_access_manager.set_auth_token(get_get_user_token(token_access_manager, "blabla"));
+    chat_access_manager.set_auth_token(get_empty_token(token_access_manager));
     std::cout << "Get Channel Suggestions" << std::endl;
     chat.get_channel_suggestions("cpp");
     std::cout << "Get User Suggestions" << std::endl;
@@ -249,16 +260,224 @@ int main() {
     chat.is_present(user_id, public_channel_id);
 
 
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+    //CHANNEL LEAVE
+    std::cout << "Channel.Leave" << std::endl;
+
+    chat_access_manager.set_auth_token(get_leave_channel_token(token_access_manager, public_channel_id, user_id));
+    public_channel.leave();
+
+
+
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
 
 
-    //GET USER SUGGESTIONS
-    std::cout << "Get User Suggestions" << std::endl;
+    //EMIT CHAT EVENT
+    std::cout << "Emit chat event" << std::endl;
 
-    //This shouldn't require any permissions
-    chat.get_user_suggestions("cpp");
+    chat_access_manager.set_auth_token(get_channel_write_token(token_access_manager, public_channel_id));
+    chat.emit_chat_event(Pubnub::pubnub_chat_event_type::PCET_CUSTOM, public_channel_id, "{\"abc\": \"bcd\"}");
 
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //WHO IS PRESENT
+    std::cout << "Who is present" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_read_token(token_access_manager, public_channel_id));
+    chat.who_is_present(public_channel_id);
+    public_channel.who_is_present();
+
+    //GET EVENTS HISTORY
+    std::cout << "Get events history" << std::endl;
+    //the same permissions as who is present
+    chat.get_events_history(public_channel_id, Pubnub::get_now_timetoken(), "16417695239108460", 10);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //LISTEN FOR EVENTS
+    std::cout << "Listen for events" << std::endl;
+    chat_access_manager.set_auth_token(get_listen_for_events_token(token_access_manager, public_channel_id));
+    auto listen_for_events_lambda = [](Pubnub::Event event){};
+    auto stop_listening = chat.listen_for_events(public_channel_id, Pubnub::pubnub_chat_event_type::PCET_CUSTOM, listen_for_events_lambda);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    stop_listening();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL CONNECT
+
+    std::cout << "Channel Connect" << std::endl;
+    chat_access_manager.set_auth_token(get_listen_for_events_token(token_access_manager, group_channel_id));
+    auto connect_lambda = [](Pubnub::Message message){};
+    group_channel.created_channel.connect(connect_lambda);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL DISCONNECT
+
+    std::cout << "Channel Disconnect" << std::endl;
+    //chat_access_manager.set_auth_token(get_empty_token(token_access_manager));
+    group_channel.created_channel.disconnect();
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL SEND TEXT
+
+    std::cout << "Send text" << std::endl;
+
+    Pubnub::String mentioned_user_id = "cpp_chat_test_user_to_mention";
+
+    chat_access_manager.set_auth_token(get_send_text_token(token_access_manager, public_channel_id, mentioned_user_id));
+
+    Pubnub::SendTextParams send_params;
+    std::map<int, Pubnub::MentionedUser> mentioned_users;
+    Pubnub::MentionedUser mentioned_user;
+    mentioned_user.id = mentioned_user_id;
+    mentioned_user.name = "cpp_chat_test_user_to_mention_name";
+    mentioned_users[2] = mentioned_user;
+    Pubnub::Map<int, Pubnub::MentionedUser> pn_mentioned_user(mentioned_users);
+    send_params.mentioned_users = pn_mentioned_user;
+    public_channel.send_text("message from test", send_params);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL GET HISTORY
+    std::cout << "Get history" << std::endl;
+    chat_access_manager.set_auth_token(get_channel_read_token(token_access_manager, public_channel_id));
+
+    auto history_messages = public_channel.get_history(Pubnub::get_now_timetoken(), "16417695239108460");
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //CHANNEL PIN/UNPIN MESSAGE
+    std::cout << "Pin/unpin message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_update_channel_token(token_access_manager, public_channel_id));
+    chat.pin_message_to_channel(history_messages[0], public_channel);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    chat.unpin_message_from_channel(public_channel);
+
+
+    
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //FORWARD MESSAGE
+    std::cout << "Forward message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_write_token(token_access_manager, group_channel_id));
+    chat.forward_message(history_messages[0], group_channel.created_channel);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //GET MESSAGE
+    std::cout << "Channel Get Message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_read_token(token_access_manager, public_channel_id));
+    public_channel.get_message(history_messages[0].timetoken());
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+    //GET MEMBERS
+    std::cout << "Channel Get Members" << std::endl;
+
+    chat_access_manager.set_auth_token(get_get_channel_token(token_access_manager, public_channel_id));
+    public_channel.get_members();
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+*/
+
+
+    //RESTRICTIONS
+    std::cout << "Set restrictions" << std::endl;
+
+    chat_access_manager.set_auth_token(get_set_restrictions_token(token_access_manager, public_channel_id, user_id));
+
+    Pubnub::Restriction ban_restriction;
+    ban_restriction.ban = true;
+    chat.set_restrictions(user_id, public_channel_id, ban_restriction);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    std::cout << "Get user restrictions" << std::endl;
+
+    chat_access_manager.set_auth_token(get_get_user_token(token_access_manager, user_id));
+    public_channel.get_user_restrictions(current_user);
+    
+    std::cout << "Get users restrictions" << std::endl;
+
+    chat_access_manager.set_auth_token(get_get_channel_token(token_access_manager, Pubnub::String("PUBNUB_INTERNAL_MODERATION_") + public_channel_id));
+    public_channel.get_users_restrictions();
+
+    std::cout << "Lift restrictions" << std::endl;
+
+    chat_access_manager.set_auth_token(get_set_restrictions_token(token_access_manager, public_channel_id, user_id));
+    Pubnub::Restriction lift_restriction;
+    ban_restriction.reason = "lift";
+    chat.set_restrictions(user_id, public_channel_id, lift_restriction);
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+    
+    //INVITE
+    std::cout << "Invite not member" << std::endl;
+
+    chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, user_id));
+    group_channel.created_channel.invite(current_user);
+
+    std::cout << "Invite member" << std::endl;
+    chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, invitee_user_id));
+    group_channel.created_channel.invite(invitee_user);
+
+    std::cout << "Invite multiple" << std::endl;
 
 
     std::cout << "End of Tests" << std::endl;
@@ -278,6 +497,19 @@ Pubnub::String get_init_chat_token(Pubnub::AccessManager& token_access_manager, 
     user_permissions.get = true;
     user_permissions.update = true;
     permission_object.users.push_back(user_id);
+    permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_empty_token(Pubnub::AccessManager& token_access_manager)
+{
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.update = true;
+    permission_object.users.push_back("aaaaaaaaaaaaaa");
     permission_object.user_permissions.push_back(user_permissions);
 
     return token_access_manager.grant_token(permission_object);
@@ -339,7 +571,7 @@ Pubnub::String get_get_users_token(Pubnub::AccessManager& token_access_manager, 
 
 Pubnub::String get_create_dir_conversation_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String current_user_id, Pubnub::String invitee_id)
 {
-    //ChannelID: UPDATE, JOIN, WRITE
+    //ChannelID: UPDATE, JOIN, WRITE, GET
     Pubnub::GrantTokenPermissionObject permission_object;
     permission_object.authorized_user = TOKEN_AUTH_USER_ID;
     permission_object.ttl_minutes = TOKEN_TTL;
@@ -347,6 +579,7 @@ Pubnub::String get_create_dir_conversation_token(Pubnub::AccessManager& token_ac
     channel_permissions.update = true;
     channel_permissions.join = true;
     channel_permissions.write = true;
+    channel_permissions.get = true;
     permission_object.channels.push_back(channel_id);
     permission_object.channel_permissions.push_back(channel_permissions);
 
@@ -514,6 +747,174 @@ Pubnub::String get_join_channel_token(Pubnub::AccessManager& token_access_manage
     user_permissions.get = true;
     permission_object.users.push_back(user_id);
     permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_leave_channel_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id)
+{
+    //Channel ID: JOIN, READ
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.join = true;
+    channel_permissions.read = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //Channel ID + -pnpres: READ
+    Pubnub::ChannelPermissions pres_channel_permissions;
+    pres_channel_permissions.read = true;
+    permission_object.channels.push_back(channel_id + Pubnub::String("-pnpres"));
+    permission_object.channel_permissions.push_back(pres_channel_permissions);
+
+    //User ID: UPDATE
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.update = true;
+    permission_object.users.push_back(user_id);
+    permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_channel_read_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id)
+{
+    //Channel ID: READ
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.read = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_channel_write_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id)
+{
+    //Channel ID: WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_listen_for_events_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id)
+{
+    //Channel ID: READ
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.read = true;
+    permission_object.channels.push_back(channel_id);
+    //Channel ID + -pnpres: READ
+    permission_object.channels.push_back(channel_id + Pubnub::String("-pnpres"));
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_send_text_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String mentioned_user_id)
+{
+    //Channel ID: WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(channel_id);
+    //Channel mentioned_user_id: WRITE
+    permission_object.channels.push_back(mentioned_user_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_set_restrictions_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id)
+{
+    //Channel PUBNUB_INTERNAL_MODERATION_{CHANNEL_ID}: MANAGE, UPDATE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.manage = true;
+    channel_permissions.update = true;
+    permission_object.channels.push_back(Pubnub::String("PUBNUB_INTERNAL_MODERATION_") + channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //Channel user_id: WRITE
+    Pubnub::ChannelPermissions user_channel_permissions;
+    user_channel_permissions.write = true;
+    permission_object.channels.push_back(user_id);
+    permission_object.channel_permissions.push_back(user_channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_invite_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String invitee_id)
+{
+    //ChannelID: GET, JOIN, WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.get = true;
+    channel_permissions.join = true;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //User invitee_id: UPDATE
+    Pubnub::UserPermissions invitee_permissions;
+    invitee_permissions.update = true;
+    invitee_permissions.get = true;
+    permission_object.users.push_back(invitee_id);
+
+    permission_object.user_permissions.push_back(invitee_permissions);
+
+    //Channel(Invitee_IDs): WRITE
+    Pubnub::ChannelPermissions channel_invitee_permissions;
+    channel_invitee_permissions.write = true;
+    permission_object.channels.push_back(invitee_id);
+    permission_object.channel_permissions.push_back(channel_invitee_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_invite_multiple_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, std::vector<Pubnub::String> invitees_id)
+{
+    //ChannelID: GET, JOIN, WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.get = true;
+    channel_permissions.join = true;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //User invitee_id: UPDATE
+    Pubnub::UserPermissions invitee_permissions;
+    invitee_permissions.update = true;
+    invitee_permissions.get = true;
+    permission_object.users.push_back(invitee_id);
+
+    permission_object.user_permissions.push_back(invitee_permissions);
+
+    //Channel(Invitee_IDs): WRITE
+    Pubnub::ChannelPermissions channel_invitee_permissions;
+    channel_invitee_permissions.write = true;
+    permission_object.channels.push_back(invitee_id);
+    permission_object.channel_permissions.push_back(channel_invitee_permissions);
 
     return token_access_manager.grant_token(permission_object);
 }
