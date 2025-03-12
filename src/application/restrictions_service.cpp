@@ -53,6 +53,9 @@ void RestrictionsService::set_restrictions(const String& user_id, const String& 
         // else ignore - moderation channel already exist
     }
 
+    //Channel for moderation events is "INTERNAL_MODERATION_PREFIX.{user_id}" (INTERNAL_MODERATION_PREFIX without last _)
+    String moderation_event_channel = INTERNAL_MODERATION_PREFIX.substring(0, INTERNAL_MODERATION_PREFIX.length() - 1) + Pubnub::String(".") + user_id;
+
 	//Lift restrictions
 	if(!restrictions.ban && !restrictions.mute)
 	{
@@ -61,7 +64,8 @@ void RestrictionsService::set_restrictions(const String& user_id, const String& 
             pubnub_handle->remove_members(restrictions_channel, Restrictions::remove_member_payload(user_id));
         }
 		String event_payload_string = Restrictions::lift_restrictions_payload(restrictions_channel, restrictions.reason);
-        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
+    
+        chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, moderation_event_channel, event_payload_string);
 		return;
 	}
 
@@ -73,8 +77,8 @@ void RestrictionsService::set_restrictions(const String& user_id, const String& 
     }
     String restriction_text;
     restrictions.ban ? restriction_text = "banned" : "muted";
-	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"lifted") + restriction_text + String("\", \"reason\": \"") + restrictions.reason + String("\"}");
-    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, user_id, event_payload_string);
+	String event_payload_string = String("{\"channelId\": \"") + restrictions_channel + String("\", \"restriction\": \"") + restriction_text + String("\", \"reason\": \"") + restrictions.reason + String("\"}");
+    chat_service_shared->emit_chat_event(pubnub_chat_event_type::PCET_MODERATION, moderation_event_channel, event_payload_string);
 }
 
 Restriction RestrictionsService::get_user_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
