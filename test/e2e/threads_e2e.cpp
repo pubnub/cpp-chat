@@ -42,11 +42,14 @@ protected:
 
 TEST_F(ThreadsTests, TestGetThreadHistory) {
     auto channel = chat->create_public_conversation("thread_history_test_channel", Pubnub::ChatChannelData{});
-    
     auto correct_amount = false;
     auto correct_text = false;
     channel.join([&](Pubnub::Message message) {
         auto thread = message.create_thread();
+        thread.send_text("init");
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
         thread.join([&](Pubnub::Message message){});
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -55,7 +58,7 @@ TEST_F(ThreadsTests, TestGetThreadHistory) {
         thread.send_text("two");
         thread.send_text("three");
 
-        std::this_thread::sleep_for(std::chrono::seconds(8));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
 
         auto history = thread.get_history("99999999999999999", "00000000000000000", 3);
 
@@ -70,7 +73,7 @@ TEST_F(ThreadsTests, TestGetThreadHistory) {
         });
     std::this_thread::sleep_for(std::chrono::seconds(2));
     channel.send_text("thread_start_message");
-    std::this_thread::sleep_for(std::chrono::seconds(15));
+    std::this_thread::sleep_for(std::chrono::seconds(20));
     ASSERT_TRUE(correct_amount);
     ASSERT_TRUE(correct_text);
 }
@@ -120,7 +123,7 @@ TEST_F(ThreadsTests, TestThreadChannelParentChannelPinning) {
         });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     channel.send_text("thread_start_message");
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(20));
     ASSERT_TRUE(pinned);
     ASSERT_TRUE(unpinned);
 }
@@ -130,28 +133,35 @@ TEST_F(ThreadsTests, TestThreadMessageUpdate) {
 
     auto updated = false;
     channel.join([&](Pubnub::Message message) {
+        std::cout << 1 << std::endl;
         auto thread = message.create_thread();
+        std::cout << 2 << std::endl;
         thread.join([&](Pubnub::Message message) {});
+        std::cout << 3 << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         thread.send_text("thread_init_message");
+        std::cout << 4 << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(4));
 
         auto history = thread.get_thread_history("99999999999999999", "00000000000000000", 1);
         auto thread_message = history[0];
+        std::cout << 5 << std::endl;
 
         thread_message.stream_updates([&](Pubnub::Message updated_message) {
             if (updated_message.text() == Pubnub::String("new_text")) {
                 updated = true;
             }
             });
+        std::cout << 6 << std::endl;
         thread_message.edit_text("new_text");
+        std::cout << 7 << std::endl;
         
         });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     channel.send_text("thread_start_message");
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(20));
     ASSERT_TRUE(updated);
 }

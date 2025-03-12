@@ -287,8 +287,30 @@ if(${RUN_GOOGLE_TESTS})
     )
     target_link_libraries(threads_e2e pubnub-chat)
 
+    add_executable(
+      user_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/user_e2e.cpp
+    )
+    target_link_libraries(
+      user_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(user_e2e pubnub-chat)
+
+    add_executable(
+      message_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_e2e.cpp
+    )
+    target_link_libraries(
+      message_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(message_e2e pubnub-chat)
+
     include(GoogleTest)
     gtest_discover_tests(message_draft_e2e)
     gtest_discover_tests(channel_e2e)
     gtest_discover_tests(threads_e2e)
+    gtest_discover_tests(user_e2e)
+    gtest_discover_tests(message_e2e)
 endif()
