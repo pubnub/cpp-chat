@@ -65,6 +65,19 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
+option(RUN_GOOGLE_TESTS "Run Google Tests" ON)
+
+if(${RUN_GOOGLE_TESTS})
+    message(STATUS "Enabling Google Tests")
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/a6ce08a.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
+
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
@@ -246,4 +259,66 @@ if(${RUN_TESTS})
     
     #TODO: e/e
     #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
+endif()
+
+if(${RUN_GOOGLE_TESTS})
+    enable_testing()
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/e2e)
+
+    add_executable(
+      message_draft_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp
+    )
+    target_link_libraries(
+      message_draft_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(message_draft_e2e pubnub-chat)
+
+    add_executable(
+      channel_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/channel_e2e.cpp
+    )
+    target_link_libraries(
+      channel_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(channel_e2e pubnub-chat)
+
+    add_executable(
+      threads_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/threads_e2e.cpp
+    )
+    target_link_libraries(
+      threads_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(threads_e2e pubnub-chat)
+
+    add_executable(
+      user_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/user_e2e.cpp
+    )
+    target_link_libraries(
+      user_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(user_e2e pubnub-chat)
+
+    add_executable(
+      message_e2e
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_e2e.cpp
+    )
+    target_link_libraries(
+      message_e2e
+      GTest::gtest_main
+    )
+    target_link_libraries(message_e2e pubnub-chat)
+
+    include(GoogleTest)
+    gtest_discover_tests(message_draft_e2e)
+    gtest_discover_tests(channel_e2e)
+    gtest_discover_tests(threads_e2e)
+    gtest_discover_tests(user_e2e)
+    gtest_discover_tests(message_e2e)
 endif()
