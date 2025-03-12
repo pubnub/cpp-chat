@@ -31,12 +31,12 @@ Pubnub::String get_listen_for_events_token(Pubnub::AccessManager& token_access_m
 Pubnub::String get_send_text_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String mentioned_user_id);
 Pubnub::String get_set_restrictions_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
 Pubnub::String get_invite_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String invitee_id);
+Pubnub::String get_invite_multiple_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, std::vector<Pubnub::String> invitee_ids);
+Pubnub::String get_unread_messages_counts_token(Pubnub::AccessManager& token_access_manager, Pubnub::String current_user_id, std::vector<Pubnub::String> channels);
 
 
 int main() {
-    auto publish_key = "pub-c-7236aefc-bc22-43db-bdb3-1c96a57004ab";
-    auto subscribe_key = "sub-c-7e0de38f-77e0-402b-91de-d26acd3be135";
-    auto secret_key = "sec-c-ZDU1ZmZjNzItZTA1NS00MDU5LWE3NmItM2M3ZDNhOWQ2MDRm";
+
 
     //This token is needed to init chat
     auto initial_auth_token = "p0F2AkF0GmfOvB5DdHRsGajAQ3Jlc6VEY2hhbqBDZ3JwoENzcGOgQ3VzcqBEdXVpZKFxcGFtX2NjcF9jaGF0X3VzZXIYaENwYXSlRGNoYW6gQ2dycKBDc3BjoEN1c3KgRHV1aWSgRG1ldGGgQ3NpZ1ggUA6E8e1Jps1cPGkW6lpzOKYzc-bjUtlLDyeUdiyv_uw=";
@@ -85,6 +85,11 @@ int main() {
 
     chat_access_manager.set_auth_token(get_create_user_token(token_access_manager, create_user_id));
     auto created_user = chat.create_user(create_user_id, Pubnub::ChatUserData());
+
+    Pubnub::String another_user_id = Pubnub::String("cpp_chat_test_another_user");
+
+    chat_access_manager.set_auth_token(get_create_user_token(token_access_manager, another_user_id));
+    auto another_user = chat.create_user(another_user_id, Pubnub::ChatUserData());
 
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -470,14 +475,31 @@ int main() {
     //INVITE
     std::cout << "Invite not member" << std::endl;
 
-    chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, user_id));
-    group_channel.created_channel.invite(current_user);
+    chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, another_user_id));
+    group_channel.created_channel.invite(another_user);
 
     std::cout << "Invite member" << std::endl;
     chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, invitee_user_id));
     group_channel.created_channel.invite(invitee_user);
 
     std::cout << "Invite multiple" << std::endl;
+
+    chat_access_manager.set_auth_token(get_invite_multiple_token(token_access_manager, group_channel_id, std::vector<Pubnub::String>{user_id, another_user_id}));
+    group_channel.created_channel.invite_multiple(std::vector<Pubnub::User>{current_user, another_user});
+
+
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+    
+    //GET UNREAD MESSAGES COUNT
+    std::cout << "Get Unread Messages Count" << std::endl;
+
+
+    chat_access_manager.set_auth_token(get_unread_messages_counts_token(token_access_manager, user_id, std::vector<Pubnub::String>{group_channel_id}));
+    chat.get_unread_messages_counts();
+
 
 
     std::cout << "End of Tests" << std::endl;
@@ -889,32 +911,55 @@ Pubnub::String get_invite_token(Pubnub::AccessManager& token_access_manager, Pub
     return token_access_manager.grant_token(permission_object);
 }
 
-Pubnub::String get_invite_multiple_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, std::vector<Pubnub::String> invitees_id)
+Pubnub::String get_invite_multiple_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, std::vector<Pubnub::String> invitee_ids)
 {
-    //ChannelID: GET, JOIN, WRITE
+    //ChannelID: JOIN, WRITE, MANAGE
     Pubnub::GrantTokenPermissionObject permission_object;
     permission_object.authorized_user = TOKEN_AUTH_USER_ID;
     permission_object.ttl_minutes = TOKEN_TTL;
     Pubnub::ChannelPermissions channel_permissions;
-    channel_permissions.get = true;
+    channel_permissions.manage = true;
     channel_permissions.join = true;
     channel_permissions.write = true;
     permission_object.channels.push_back(channel_id);
     permission_object.channel_permissions.push_back(channel_permissions);
 
-    //User invitee_id: UPDATE
+    //Invitees IDs: UPDATE, GET
     Pubnub::UserPermissions invitee_permissions;
     invitee_permissions.update = true;
-    invitee_permissions.get = true;
-    permission_object.users.push_back(invitee_id);
+    //invitee_permissions.get = true;
+
+    for(auto invitee_id : invitee_ids) {permission_object.users.push_back(invitee_id);}
 
     permission_object.user_permissions.push_back(invitee_permissions);
 
-    //Channel(Invitee_IDs): WRITE
+    //Channel(Invitees_IDs): WRITE
     Pubnub::ChannelPermissions channel_invitee_permissions;
     channel_invitee_permissions.write = true;
-    permission_object.channels.push_back(invitee_id);
-    permission_object.channel_permissions.push_back(channel_invitee_permissions);
+    for(auto invitee_id : invitee_ids) {
+        permission_object.channels.push_back(invitee_id);
+        permission_object.channel_permissions.push_back(channel_invitee_permissions);
+        }
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_unread_messages_counts_token(Pubnub::AccessManager& token_access_manager, Pubnub::String current_user_id, std::vector<Pubnub::String> channels)
+{
+    //Channels: READ
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.read = true;
+    for(auto channel : channels) {permission_object.channels.push_back(channel);}
+    permission_object.channel_permissions.push_back(channel_permissions);
+   
+    //Current user: GET
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.get = true;
+    permission_object.users.push_back(current_user_id);
+    permission_object.user_permissions.push_back(user_permissions);
 
     return token_access_manager.grant_token(permission_object);
 }
