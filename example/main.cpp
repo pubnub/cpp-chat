@@ -52,7 +52,7 @@ int main() {
     //INIT CHAT
     std::cout << "Init Test" << std::endl;
 
-    auto user_id = "ccp_chat_user";
+    auto user_id = "cpp_chat_user";
 
     Pubnub::String init_chat_token = get_init_chat_token(token_access_manager, user_id);
     auto init_chat_config = Pubnub::ChatConfig();
@@ -463,7 +463,7 @@ int main() {
 
     chat_access_manager.set_auth_token(get_set_restrictions_token(token_access_manager, public_channel_id, user_id));
     Pubnub::Restriction lift_restriction;
-    ban_restriction.reason = "lift";
+    lift_restriction.reason = "lift";
     chat.set_restrictions(user_id, public_channel_id, lift_restriction);
 
 
@@ -875,7 +875,7 @@ Pubnub::String get_set_restrictions_token(Pubnub::AccessManager& token_access_ma
     //Channel user_id: WRITE
     Pubnub::ChannelPermissions user_channel_permissions;
     user_channel_permissions.write = true;
-    permission_object.channels.push_back(user_id);
+    permission_object.channels.push_back(Pubnub::String("PUBNUB_INTERNAL_MODERATION.") + user_id);
     permission_object.channel_permissions.push_back(user_channel_permissions);
 
     return token_access_manager.grant_token(permission_object);
