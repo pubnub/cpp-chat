@@ -379,16 +379,13 @@ CCoreCallbackData CallbackService::to_c_channels_updates_callback(const std::vec
 
                 std::vector<Pubnub::Channel> updated_channels;
 
-                // TODO: is the order important?
-                std::copy_if(
+                std::transform(
                         ctx.channels.begin(),
                         ctx.channels.end(),
                         std::back_inserter(updated_channels),
-                        [&channel](const Pubnub::Channel& base_channel) {
-                            return base_channel.channel_id() != channel.channel_id();
+                        [&channel, updated_channel](const Pubnub::Channel& base_channel) {
+                            return base_channel.channel_id() == channel.channel_id() ? updated_channel : base_channel;
                     });
-
-                updated_channels.push_back(updated_channel);
 
                 ctx.channel_update_callback(updated_channels);
             }
@@ -443,14 +440,12 @@ CCoreCallbackData CallbackService::to_c_users_updates_callback(const std::vector
 
                 std::vector<Pubnub::User> updated_users;
 
-                std::copy_if(
+                std::transform(
                         ctx.users.begin(),
                         ctx.users.end(),
-                        std::back_inserter(updated_users), [&user](const Pubnub::User& base_user) {
-                            return base_user.user_id() != user.user_id();
+                        std::back_inserter(updated_users), [&user, updated_user](const Pubnub::User& base_user) {
+                            return base_user.user_id() == user.user_id() ? updated_user : base_user;
                     });
-
-                updated_users.push_back(updated_user);
 
                 ctx.user_update_callback(updated_users);
             }
@@ -590,15 +585,15 @@ CCoreCallbackData CallbackService::to_c_memberships_updates_callback(const std::
 
                     std::vector<Pubnub::Membership> updated_memberships;
 
-                    std::copy_if(
+                    std::transform(
                             ctx.memberships.begin(),
                             ctx.memberships.end(),
                             std::back_inserter(updated_memberships),
-                            [&membership_channel, &membership_user](const Pubnub::Membership& base_membership) {
-                                return base_membership.channel.channel_id() != membership_channel || base_membership.user.user_id() != membership_user;
+                            [&membership_channel, &membership_user, updated_membership](const Pubnub::Membership& base_membership) {
+                                return base_membership.channel.channel_id() == membership_channel 
+                                && base_membership.user.user_id() == membership_user 
+                                ? updated_membership : base_membership;
                         });
-
-                    updated_memberships.push_back(updated_membership);
 
                     ctx.membership_callback(updated_memberships);
                 }
@@ -686,14 +681,12 @@ CCoreCallbackData CallbackService::to_c_messages_updates_callback(const std::vec
 
                     std::vector<Pubnub::Message> updated_messages;
 
-                    std::copy_if(
+                    std::transform(
                             ctx.messages.begin(),
                             ctx.messages.end(),
-                            std::back_inserter(updated_messages), [&message_timetoken](const Pubnub::Message& base_message) {
-                                return base_message.timetoken() != message_timetoken;
+                            std::back_inserter(updated_messages), [&message_timetoken, updated_message](const Pubnub::Message& base_message) {
+                                return base_message.timetoken() == message_timetoken ? updated_message : base_message;
                         });
-
-                    updated_messages.push_back(updated_message);
 
                     ctx.message_update_callback(updated_messages);
                 }
@@ -730,15 +723,13 @@ CCoreCallbackData CallbackService::to_c_thread_messages_updates_callback(const s
 
                     std::vector<Pubnub::ThreadMessage> updated_messages;
 
-                    std::copy_if(
+                    std::transform(
                             ctx.messages.begin(),
                             ctx.messages.end(),
                             std::back_inserter(updated_messages),
-                            [&message_timetoken](const Pubnub::ThreadMessage& base_message) {
-                                return base_message.timetoken() != message_timetoken;
+                            [&message_timetoken, updated_message](const Pubnub::ThreadMessage& base_message) {
+                                return base_message.timetoken() == message_timetoken ? Pubnub::ThreadMessage(updated_message, base_message.parent_channel_id()) : base_message;
                         });
-
-                    updated_messages.push_back(Pubnub::ThreadMessage(updated_message, message->parent_channel_id()));
 
                     ctx.message_update_callback(updated_messages);
                 }
