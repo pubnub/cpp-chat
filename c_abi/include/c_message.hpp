@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_MESSAGE_H
 #define PN_CHAT_C_MESSAGE_H
 
+#include "callback_handle.hpp"
 #include "message.hpp"
 #include "chat.hpp"
 #include "helpers/export.hpp"
@@ -65,4 +66,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_quoted_message(Pubnub:
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_message_text_links(Pubnub::Message* message, char* result);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Message* pn_message_restore(Pubnub::Message* message);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_message_stream_updates(Pubnub::Message* message);
 #endif // PN_CHAT_C_MESSAGE_H

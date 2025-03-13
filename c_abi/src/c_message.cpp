@@ -1,10 +1,12 @@
 #include "c_message.hpp"
 #include "c_thread_channel.hpp"
+#include "c_response.hpp"
 #include "c_errors.hpp"
 #include "application/enum_converters.hpp"
 #include "nlohmann/json.hpp"
 #include "message.hpp"
 #include "thread_message.hpp"
+#include "user.hpp"
 
 void pn_message_delete(Pubnub::Message* message) {
     delete message;
@@ -379,4 +381,16 @@ Pubnub::Message* pn_message_restore(Pubnub::Message* message) {
     }
 }
 
+Pubnub::CallbackHandle* pn_message_stream_updates(Pubnub::Message* message) {
+    try {
+        auto chat = message->shared_chat_service();
 
+        return new Pubnub::CallbackHandle(message->stream_updates([chat](const Pubnub::Message& user) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "message_update", new Pubnub::Message(user));
+        }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}

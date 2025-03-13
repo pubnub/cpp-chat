@@ -53,11 +53,11 @@ Pubnub::Channel Pubnub::ThreadMessage::unpin_from_parent_channel() const
     return parent_channel.unpin_message();
 }
 
-CallbackStop ThreadMessage::stream_updates(std::function<void(const ThreadMessage&)> message_callback) const {
-    return CallbackStop(this->message_service->stream_updates(*this, message_callback));
+CallbackHandle ThreadMessage::stream_updates(std::function<void(const ThreadMessage&)> message_callback) const {
+    return CallbackHandle(this->message_service->stream_updates(*this, message_callback));
 }
 
-CallbackStop Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::ThreadMessage> messages, std::function<void(Pubnub::Vector<Pubnub::ThreadMessage>)> callback) const
+CallbackHandle Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::ThreadMessage> messages, std::function<void(Pubnub::Vector<Pubnub::ThreadMessage>)> callback) const
 {
     auto messages_std = messages.into_std_vector();
 
@@ -65,7 +65,7 @@ CallbackStop Pubnub::ThreadMessage::stream_updates_on(Pubnub::Vector<Pubnub::Thr
     {
         callback(std::move(vec));
     };
-    return CallbackStop(this->message_service->stream_updates_on(*this, messages_std, new_callback));
+    return CallbackHandle(this->message_service->stream_updates_on(*this, messages_std, new_callback));
 }
 
 #ifdef PN_CHAT_C_ABI

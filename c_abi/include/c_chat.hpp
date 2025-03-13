@@ -139,11 +139,6 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_delete_user(
         Pubnub::Chat* chat,
         const char* user_id);
 
-// Hacky way to get the messages
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_updates(
-        Pubnub::Chat* chat,
-        char* messages_json);
-
 PN_CHAT_EXTERN PN_CHAT_EXPORT void pn_clear_string(char* str);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_chat_is_present(
@@ -165,11 +160,10 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_get_channels(
         const char* prev,
         char* result);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_chat_listen_for_events(
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_chat_listen_for_events(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::pubnub_chat_event_type event_type,
-        char* messages_json);
+        Pubnub::pubnub_chat_event_type event_type);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pin_message_to_channel(Pubnub::Chat* chat, Pubnub::Message* message, Pubnub::Channel* channel);
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult unpin_message_from_channel(Pubnub::Chat* chat, Pubnub::Channel* channel);

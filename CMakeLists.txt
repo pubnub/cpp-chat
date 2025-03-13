@@ -49,6 +49,11 @@ include(FetchContent)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(USE_GRANT_TOKEN_API ON)
+set(USE_SYNC_API ON)
+set(USE_CALLBACK_API ON)
+set(USE_SET_DNS_SERVERS ON)
+set(USE_IPV6 ON)
+set(USE_SUBSCRIBE_EVENT_ENGINE ON)
 
 if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
@@ -57,7 +62,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG master
+  GIT_TAG feat/ee-listener-void
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
@@ -65,13 +70,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(pubnub)
 
-
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.3.1\")
 else()
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.5\")
 endif()
+target_compile_options(pubnub PUBLIC -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
 
 FetchContent_Declare(
   json
@@ -147,7 +152,8 @@ set(APP_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/user_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_dao.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/membership_dao.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_draft_dao.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/dao/message_draft_dao.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/application/subscription.cpp)
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/chat.cpp
@@ -159,6 +165,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_channel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/thread_message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/access_manager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/callback_handle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
 )
@@ -177,7 +184,9 @@ if(${ENABLE_C_ABI})
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_membership.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_serialization.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_channel.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_message.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_thread_message.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_callback_handle.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/c_abi/src/c_response.cpp)
 endif()
 
 set(SOURCES
@@ -186,26 +195,39 @@ set(SOURCES
     ${DOMAIN_SOURCES}
     ${APP_SOURCES})
 
+
 add_library(pubnub-chat SHARED ${SOURCES})
 
-target_link_libraries(pubnub-chat PRIVATE pubnub)
+target_compile_options(pubnub-chat PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+
+target_link_libraries(pubnub-chat PRIVATE -lpthread pubnub)
 
 # TODO: kept for debugging purposes - should be deleted before release
 add_executable(pubnub-chat-example example/main.cpp)
-target_link_libraries(pubnub-chat-example PUBLIC pubnub-chat)
+target_compile_options(pubnub-chat-example PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+target_link_libraries(pubnub-chat-example PUBLIC -lpthread pubnub-chat)
 
 if(${COMPILE_EXAMPLES})
     function(example name)
         add_executable(pubnub_${name} example/${name}.cpp)
+        target_compile_options(pubnub_${name} PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
         target_link_libraries(pubnub_${name} PRIVATE pubnub-chat)
     endfunction()
 
-    example(message_draft)
+    if(NOT ${ENABLE_C_ABI})
+        # It uses different mechanism systems for callbacks
+        # in C++ and C, so it's not possible to run this example
+        example(message_draft)
+    endif()
+    example(hello_world)
     example(forward_message)
     example(report_user)
     example(thread_channel)
     example(message_reactions)
     example(delete_message)
+    example(typing)
+    example(entity_update)
+    example(read_receipts)
     example(restrictions)
 endif()
 

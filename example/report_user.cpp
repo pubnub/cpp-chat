@@ -18,7 +18,7 @@ int main() {
 
     chat.listen_for_events(Pubnub::INTERNAL_MODERATION_PREFIX + channel.channel_id(), Pubnub::PCET_REPORT, [](const Pubnub::Event &event) {
         std::cout << "Received event: " << std::endl;
-        std::cout << "Event type: " << Pubnub::chat_event_type_to_string(event.type) << std::endl;
+        std::cout << "Event type: " << event.type << std::endl;
         std::cout << "Event payload: "<< event.payload << std::endl;
     });
 

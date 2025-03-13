@@ -1,8 +1,10 @@
 #ifndef PN_CHAT_INFRA_PUBNUB_HPP
 #define PN_CHAT_INFRA_PUBNUB_HPP
 
+#include "application/subscription.hpp"
 #include "string.hpp"
 #include "enums.hpp"
+#include <memory>
 #include <thread>
 #include <vector>
 #include <map>
@@ -30,10 +32,12 @@ namespace Pubnub
 class PubNub {
 public:
     PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_key, const Pubnub::String user_id, const Pubnub::String auth_key);
-    ~PubNub() = default;
+    ~PubNub();
 
     Pubnub::String publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata = "", const bool store_in_history = true, const bool send_by_post = false);
     Pubnub::String signal(const Pubnub::String channel, const Pubnub::String message);
+    std::shared_ptr<Subscription> subscribe(const Pubnub::String& channel);
+    std::shared_ptr<SubscriptionSet> subscribe_multiple(const std::vector<Pubnub::String>& channels);
     std::vector<pubnub_v2_message> subscribe_to_channel_and_get_messages(const Pubnub::String channel);
     std::vector<pubnub_v2_message> subscribe_to_multiple_channels_and_get_messages(const std::vector<Pubnub::String> channels);
     std::vector<Pubnub::String> subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel);

@@ -1,6 +1,7 @@
 #include "c_thread_message.hpp"
 #include "application/enum_converters.hpp"
 #include "c_errors.hpp"
+#include "c_response.hpp"
 #include "message.hpp"
 #include "thread_message.hpp"
 #include "nlohmann/json.hpp"
@@ -421,4 +422,17 @@ PnCResult pn_thread_message_parent_channel_id(Pubnub::ThreadMessage* thread_mess
     }
 
     return PN_C_OK;
+}
+
+Pubnub::CallbackHandle* pn_thread_message_stream_updates(Pubnub::ThreadMessage* message) {
+    try {
+        auto chat = message->shared_chat_service();
+        return new Pubnub::CallbackHandle(message->stream_updates([chat](const Pubnub::ThreadMessage& user) {
+                    pn_c_append_pointer_to_response_buffer(chat.get(), "thread_message_update", new Pubnub::ThreadMessage(user));
+            }));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
 }

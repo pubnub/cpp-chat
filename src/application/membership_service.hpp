@@ -3,6 +3,7 @@
 
 #include "application/dao/channel_dao.hpp"
 #include "application/dao/user_dao.hpp"
+#include "application/subscription.hpp"
 #include "domain/membership_entity.hpp"
 #include "infra/sync.hpp"
 #include "string.hpp"
@@ -34,8 +35,8 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> get_all_unread_messages_counts(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> mark_all_messages_as_read(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page &page = Pubnub::Page()) const;
 
-        std::function<void()> stream_updates(Pubnub::Membership calling_membership, std::function<void(Pubnub::Membership)> membership_callback) const;
-        std::function<void()> stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) const;
+        std::shared_ptr<Subscription> stream_updates(Pubnub::Membership calling_membership, std::function<void(Pubnub::Membership)> membership_callback) const;
+        std::shared_ptr<SubscriptionSet> stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) const;
 
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel) const;
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel, const MembershipEntity& membership_entity) const;

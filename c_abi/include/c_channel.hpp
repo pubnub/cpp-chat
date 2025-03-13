@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_CHANNEL_H
 #define PN_CHAT_C_CHANNEL_H
 
+#include "callback_handle.hpp"
 #include "chat.hpp"
 #include "message_draft.hpp"
 #include "channel.hpp"
@@ -29,13 +30,13 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_channel_update_dirty(
         char* channel_status,
         char* channel_type);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_connect(Pubnub::Channel* channel, char* result_messages);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_connect(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_disconnect(Pubnub::Channel* channel, char* result_messages);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_disconnect(Pubnub::Channel* channel);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_join(Pubnub::Channel* channel, const char* additional_params, char* result_messages);
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params);
 
-PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_leave(Pubnub::Channel* channel, char* result_messages);
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_leave(Pubnub::Channel* channel);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_delete_channel(Pubnub::Channel* channel);
 
@@ -144,6 +145,16 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::MessageDraft* pn_channel_create_message_dr
     bool is_typing_indicator_triggered,
     int user_limit,
     int channel_limit);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_updates(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_get_typing(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_presence(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_read_receipts(Pubnub::Channel* channel);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_stream_message_reports(Pubnub::Channel* channel);
 
 #endif // PN_CHAT_C_CHANNEL_H
 
