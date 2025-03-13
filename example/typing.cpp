@@ -1,7 +1,5 @@
 #include <cstdlib>
 #include <thread>
-#include "c_channel.hpp"
-#include "c_response.hpp"
 #include "chat.hpp"
 
 // This function makes sure that the user we want to type to exists
@@ -26,15 +24,13 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-//    channel.get_typing([](Pubnub::Vector<Pubnub::String> users) {
-//        std::cout << "Users typing: ";
-//        for (auto user : users) {
-//            std::cout << user << " ";
-//        }
-//        std::cout << std::endl;
-//    });
-
-    pn_channel_get_typing(&channel);
+    channel.get_typing([](Pubnub::Vector<Pubnub::String> users) {
+        std::cout << "Users typing: ";
+        for (auto user : users) {
+            std::cout << user << " ";
+        }
+        std::cout << std::endl;
+    });
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -43,23 +39,10 @@ int main() {
     std::cout << "User's starting typing" << std::endl;
     channel.start_typing();
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-    char buffer[4096];
-    pn_c_consume_response_buffer(&chat, buffer);
-    std::cout << buffer << std::endl;
-
-
-
     std::cout << "User's sending message" << std::endl;
     channel.send_text("Hello, world!");
     std::cout << "User's stopping typing" << std::endl;
     channel.stop_typing();
-
-    char buffer2[4096];
-    pn_c_consume_response_buffer(&chat, buffer2);
-    std::cout << buffer2 << std::endl;
-
-
 
     std::this_thread::sleep_for(std::chrono::seconds(10));
 
