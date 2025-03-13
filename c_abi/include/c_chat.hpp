@@ -188,4 +188,10 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::User* pn_chat_current_user(Pubnub::Chat* c
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_pam_can_i(Pubnub::Chat* chat, Pubnub::AccessManager::Permission permission, Pubnub::AccessManager::ResourceType resource_type, const char* resource_name);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_pam_parse_token(Pubnub::Chat* chat, const char* token, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_pam_set_auth_token(Pubnub::Chat* chat, const char* token);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_pam_set_pubnub_origin(Pubnub::Chat* chat, const char* origin);
+
 #endif // PN_CHAT_C_CHAT_HPP

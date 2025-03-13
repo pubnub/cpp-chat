@@ -1,6 +1,7 @@
 #include "message_service.hpp"
 #include "application/subscription.hpp"
 #include "chat_service.hpp"
+#include "enum_converters.hpp"
 #include "domain/message_entity.hpp"
 #include "domain/quotes.hpp"
 #include "infra/pubnub.hpp"

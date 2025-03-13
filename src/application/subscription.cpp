@@ -15,6 +15,7 @@ extern "C" {
 #include "callback_service.hpp"
 #include "enums.hpp"
 #include "string.hpp"
+#include "enum_converters.hpp"
 
 static Pubnub::String error_message(
     const Pubnub::String& message,

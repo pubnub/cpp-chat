@@ -34,6 +34,13 @@ option(RUN_TESTS "Run tests" OFF)
 
 option(COMPILE_EXAMPLES "Compile examples" OFF)
 
+#Unreal Engine on Linux uses libc++ insted of libstdc++. This is required to build it correctly for UE (requires libc++ to be installed)
+option(LINUX_FOR_UNREAL "Using Linux for Unreal Engine" OFF)
+if(${LINUX_FOR_UNREAL})
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++ -I/usr/include/c++/v1")
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/llvm-14/lib -Wl,-rpath,/usr/lib/llvm-14/lib -lc++ -lc++abi")
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/pubnub_chat)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src) # not public imports
@@ -65,9 +72,9 @@ FetchContent_MakeAvailable(pubnub)
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.1.3\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.3.1\")
 else()
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.3\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.5\")
 endif()
 target_compile_options(pubnub PUBLIC -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
 
@@ -221,6 +228,7 @@ if(${COMPILE_EXAMPLES})
     example(typing)
     example(entity_update)
     example(read_receipts)
+    example(restrictions)
 endif()
 
 if(${RUN_TESTS})
