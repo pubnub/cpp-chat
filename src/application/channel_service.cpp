@@ -286,13 +286,11 @@ std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, const
 void ChannelService::leave(const String& channel_id, const ChannelDAO& channel_data) const {
     String remove_object_string = String("[{\"channel\": {\"id\": \"") + channel_id + String("\"}}]");
 
-    {
-        auto pubnub_handle = this->pubnub->lock();
-        String user_id = pubnub_handle->get_user_id();
-        pubnub_handle->remove_memberships(user_id, remove_object_string);
-    }
-
 	this->disconnect(channel_data);
+
+    auto pubnub_handle = this->pubnub->lock();
+    String user_id = pubnub_handle->get_user_id();
+    pubnub_handle->remove_memberships(user_id, remove_object_string);
 }
 
 void ChannelService::send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String &message, const SendTextParamsInternal& text_params) const
