@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_CHANNEL_DAO_HPP
 #define PN_CHAT_CHANNEL_DAO_HPP
 
+#include "application/subscription.hpp"
 #include "channel.hpp"
 #include "domain/channel_entity.hpp"
 #include "domain/typing.hpp"
@@ -28,6 +29,8 @@ class ChannelDAO {
         void remove_typing_indicator(const Pubnub::String& user_id) const;
         bool is_typing_sent() const;
         bool contains_typing_indicator(const Pubnub::String& user_id) const;
+        void add_chat_message_listener(std::shared_ptr<Subscribable> listener) const;
+        void stop_listening_for_chat_messages() const;
     private:
         static ChannelEntity entity_from_channel_data(const Pubnub::ChatChannelData& channel_data);
 
@@ -35,6 +38,7 @@ class ChannelDAO {
         mutable Mutex<Typing> typing;
         mutable Mutex<Timer> typing_timer;
         mutable Mutex<std::map<Pubnub::String, Timer, Pubnub::StringComparer>> indicators_timers;
+        mutable Mutex<std::vector<std::shared_ptr<Subscribable>>> chat_message_listeners;
 };
 
 #endif // PN_CHAT_CHANNEL_DAO_HPP

@@ -1,4 +1,5 @@
 #include "message_service.hpp"
+#include "application/subscription.hpp"
 #include "chat_service.hpp"
 #include "enum_converters.hpp"
 #include "domain/message_entity.hpp"
@@ -15,6 +16,7 @@
 #include "chat_helpers.hpp"
 #include "dao/message_dao.hpp"
 #include "callback_service.hpp"
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -195,175 +197,80 @@ MessageDraft MessageService::create_message_draft(const Channel& channel, const 
 }
 
 
-std::function<void()> MessageService::stream_updates(Pubnub::Message calling_message, std::function<void(const Pubnub::Message)> message_callback) const
+std::shared_ptr<Subscription> MessageService::stream_updates(Pubnub::Message calling_message, std::function<void(const Pubnub::Message)> message_callback) const
 {
+    auto subscription = this->pubnub->lock()->subscribe(calling_message.message_data().channel_id);
 
-    auto pubnub_handle = this->pubnub->lock();
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_message_update_listener(
+            callback_service->to_c_message_update_callback(calling_message, this->shared_from_this(), message_callback));
 
-    auto chat = this->chat_service.lock();
-
-    std::vector<String> messages_ids;
-    std::function<void(Message)> final_message_callback = [=](Message message){
-        auto updated_message = this->update_message_with_base(message, calling_message);
-        
-        message_callback(updated_message);
-    };
-    
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
-    chat->callback_service->broadcast_messages(messages);
-    chat->callback_service->register_message_update_callback(calling_message.timetoken(), final_message_callback);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_message_update_callback(calling_message.timetoken());
-    };
-
-    return stop_streaming;
-
+    return subscription;
 }
 
 
-std::function<void()> MessageService::stream_updates(Pubnub::ThreadMessage calling_message, std::function<void(const Pubnub::ThreadMessage)> message_callback) const
+std::shared_ptr<Subscription> MessageService::stream_updates(Pubnub::ThreadMessage calling_message, std::function<void(const Pubnub::ThreadMessage)> message_callback) const
 {
-    auto pubnub_handle = this->pubnub->lock();
+    auto subscription = this->pubnub->lock()->subscribe(calling_message.message_data().channel_id);
 
-    auto chat = this->chat_service.lock();
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_thread_message_update_listener(
+            callback_service->to_c_thread_message_update_callback(calling_message, this->shared_from_this(), message_callback));
 
-    std::vector<String> messages_ids;
-    std::function<void(ThreadMessage)> final_message_callback = [=](ThreadMessage message){
-        auto updated_message = this->update_message_with_base(message, calling_message);
-        
-        message_callback(ThreadMessage(updated_message, calling_message.parent_channel_id()));
-    };
-    
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
-    chat->callback_service->broadcast_messages(messages);
-    chat->callback_service->register_thread_message_update_callback(calling_message.timetoken(), final_message_callback);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_message_update_callback(calling_message.timetoken());
-    };
-
-    return stop_streaming;
-
+    return subscription;
 }
 
-std::function<void()> MessageService::stream_updates_on(Pubnub::Message calling_message, const std::vector<Pubnub::Message>& messages, std::function<void(std::vector<Pubnub::Message>)> message_callback) const
+std::shared_ptr<SubscriptionSet> MessageService::stream_updates_on(Pubnub::Message calling_message, const std::vector<Pubnub::Message>& messages, std::function<void(std::vector<Pubnub::Message>)> message_callback) const
 {
     if(messages.empty())
     {
         throw std::invalid_argument("Cannot stream message updates on an empty list");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
+    std::vector<Pubnub::String> channels_ids;
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> messages_ids;
+    std::transform(
+            messages.begin(),
+            messages.end(),
+            std::back_inserter(channels_ids),
+            [](const Pubnub::Message& message){
+                return message.message_data().channel_id;
+            });
 
-    std::function<void(Message)> single_message_callback = [=](Message message){
-        
-        std::vector<Pubnub::Message> updated_messages; 
+    auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
-        for(int i = 0; i < messages.size(); i++)
-        {
-            //Find message that was updated and replace it in Entity stream messages
-            auto stream_message = messages[i];
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_thread_message_update_listener(
+            callback_service->to_c_messages_updates_callback(messages, shared_from_this(), message_callback));
 
-            if(stream_message.timetoken() == message.timetoken())
-            {
-                auto updated_message = this->update_message_with_base(stream_message, message);
-
-                updated_messages.push_back(updated_message);
-            }
-            else
-            {
-                updated_messages.push_back(messages[i]);
-            }
-        }
-        message_callback(updated_messages);
-
-    };
-    
-    for(auto message : messages)
-    {
-        messages_ids.push_back(message.timetoken());
-        chat->callback_service->register_message_update_callback(message.timetoken(), single_message_callback);
-    }
-
-    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
-    chat->callback_service->broadcast_messages(subscribe_messages);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=, &messages_ids](){
-        for(auto id : messages_ids)
-        {
-            chat->callback_service->remove_message_update_callback(id);
-        }
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
-// TODO: merge this one with the one above into one function
-std::function<void()> MessageService::stream_updates_on(Pubnub::ThreadMessage calling_message, const std::vector<Pubnub::ThreadMessage>& messages, std::function<void(std::vector<Pubnub::ThreadMessage>)> message_callback) const
+std::shared_ptr<SubscriptionSet> MessageService::stream_updates_on(Pubnub::ThreadMessage calling_message, const std::vector<Pubnub::ThreadMessage>& messages, std::function<void(std::vector<Pubnub::ThreadMessage>)> message_callback) const
 {
     if(messages.empty())
     {
         throw std::invalid_argument("Cannot stream message updates on an empty list");
     }
 
-    auto pubnub_handle = this->pubnub->lock();
+    std::vector<Pubnub::String> channels_ids;
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> messages_ids;
+    std::transform(
+            messages.begin(),
+            messages.end(),
+            std::back_inserter(channels_ids),
+            [](const Pubnub::ThreadMessage& message){
+                return message.message_data().channel_id;
+            });
 
-    std::function<void(ThreadMessage)> single_message_callback = [=](ThreadMessage message){
-        
-        std::vector<Pubnub::ThreadMessage> updated_messages; 
+    auto subscription = this->pubnub->lock()->subscribe_multiple(channels_ids);
 
-        for(int i = 0; i < messages.size(); i++)
-        {
-            //Find message that was updated and replace it in Entity stream messages
-            auto stream_message = messages[i];
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_thread_message_update_listener(
+            callback_service->to_c_thread_messages_updates_callback(messages, shared_from_this(), message_callback));
 
-            if(stream_message.timetoken() == message.timetoken())
-            {
-                auto updated_message = this->update_thread_message_with_base(stream_message, message);
-
-                updated_messages.push_back(Pubnub::ThreadMessage(updated_message, stream_message.parent_channel_id()));
-            }
-            else
-            {
-                updated_messages.push_back(messages[i]);
-            }
-        }
-
-        message_callback(updated_messages);
-
-    };
-    
-    for(auto message : messages)
-    {
-        messages_ids.push_back(message.timetoken());
-        chat->callback_service->register_thread_message_update_callback(message.timetoken(), single_message_callback);
-    }
-
-    auto subscribe_messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_message.message_data().channel_id});
-    chat->callback_service->broadcast_messages(subscribe_messages);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=, &messages_ids](){
-        for(auto id : messages_ids)
-        {
-            chat->callback_service->remove_thread_message_update_callback(id);
-        }
-    };
-
-    return stop_streaming;
+    return subscription;
 }
-
-
 
 Message MessageService::create_message_object(std::pair<String, MessageEntity> message_data) const {
     if (auto chat = this->chat_service.lock()) {

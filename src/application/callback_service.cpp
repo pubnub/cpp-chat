@@ -1,5 +1,7 @@
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
+#include "application/chat_service.hpp"
+#include "application/dao/membership_dao.hpp"
 #include "const_values.hpp"
 #include "enums.hpp"
 #include "infra/serialization.hpp"
@@ -7,8 +9,11 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include "message.hpp"
+#include <algorithm>
 #include <cstring>
+#include <list>
 #include <pubnub_helper.h>
+#include <pubnub_subscribe_event_listener_types.h>
 
 using json = nlohmann::json;
 
@@ -27,12 +32,12 @@ CallbackService::CallbackService(
     presence_service(presence_service)
 {
     this->callback_thread = std::thread([this, wait_interval]() {
-        while (this->thread_run_flag.load()) {
-            this->resolve_callbacks();
-            this->resolve_timers(wait_interval);
-            // TODO: should we sleep in tests?
-            std::this_thread::sleep_for(wait_interval);
-        }
+//        while (this->thread_run_flag.load()) {
+//            this->resolve_callbacks();
+//            this->resolve_timers(wait_interval);
+//            // TODO: should we sleep in tests?
+//            std::this_thread::sleep_for(wait_interval);
+//        }
     });
 }
 
@@ -296,4 +301,440 @@ void CallbackService::broadcast_callbacks_from_message(pubnub_v2_message message
     }
 }
 
+static void notify_error(const Pubnub::String& error_message) {
+    // Basically, we cannot throw exceptions in C callbacks, so we just print the error message 
+    // and let the program continue because we cannot do anything else.
+    // TODO: Logger
+    std::cout << "Callback error: " << error_message << std::endl;
+}
 
+CCoreCallbackData CallbackService::to_c_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback) {
+    struct CallbackCtx {
+        std::weak_ptr<const ChatService> chat_service;
+        std::function<void(Pubnub::Message)> message_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_message(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto parsed_message = Parsers::PubnubJson::to_message(message);
+                if (auto service = ctx.chat_service.lock()) {
+                    ctx.message_callback(service->message_service->create_message_object(parsed_message));
+                } else {
+                    notify_error("Chat service is not available to call message callback");
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{chat_service, message_callback})
+    };
+}
+
+CCoreCallbackData CallbackService::to_c_channel_update_callback(Pubnub::Channel base_channel, std::shared_ptr<const ChannelService> channel_service, std::function<void (Pubnub::Channel)> channel_update_callback) {
+    struct CallbackCtx {
+        Pubnub::Channel base_channel;
+        std::shared_ptr<const ChannelService> channel_service;
+        std::function<void (Pubnub::Channel)> channel_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_channel_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+                auto channel = ctx.channel_service->create_channel_object(Parsers::PubnubJson::to_channel(message));
+                auto updated = ctx.channel_service->update_channel_with_base(channel, ctx.base_channel);
+                ctx.channel_update_callback(updated);
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{base_channel, channel_service, channel_update_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_channels_updates_callback(const std::vector<Pubnub::Channel>& channels, std::shared_ptr<const ChannelService> channel_service, std::function<void(std::vector<Pubnub::Channel>)> channel_update_callback) {
+    struct CallbackCtx {
+        const std::vector<Pubnub::Channel> channels;
+        std::shared_ptr<const ChannelService> channel_service;
+        std::function<void(std::vector<Pubnub::Channel>)> channel_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_channel_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto channel = ctx.channel_service->create_channel_object(Parsers::PubnubJson::to_channel(message));
+                auto stream_channel = std::find_if(
+                        ctx.channels.begin(),
+                        ctx.channels.end(),
+                        [&channel](const Pubnub::Channel& base_channel) {
+                            return base_channel.channel_id() == channel.channel_id();
+                    });
+
+                ChannelEntity stream_channel_entity = ChannelDAO(stream_channel->channel_data()).to_entity();
+                ChannelEntity channel_entity = ChannelDAO(channel.channel_data()).to_entity();
+                auto pair = std::make_pair(channel.channel_id(), ChannelEntity::from_base_and_updated_channel(stream_channel_entity, channel_entity));
+                auto updated_channel = ctx.channel_service->create_channel_object(pair);
+
+                std::vector<Pubnub::Channel> updated_channels;
+
+                std::transform(
+                        ctx.channels.begin(),
+                        ctx.channels.end(),
+                        std::back_inserter(updated_channels),
+                        [&channel, updated_channel](const Pubnub::Channel& base_channel) {
+                            return base_channel.channel_id() == channel.channel_id() ? updated_channel : base_channel;
+                    });
+
+                ctx.channel_update_callback(updated_channels);
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{channels, channel_service, channel_update_callback})
+    };
+}
+
+CCoreCallbackData CallbackService::to_c_user_update_callback(Pubnub::User user_base, std::shared_ptr<const UserService> user_service, std::function<void (Pubnub::User)> user_update_callback) {
+    struct CallbackCtx {
+        Pubnub::User user_base;
+        std::shared_ptr<const UserService> user_service;
+        std::function<void (Pubnub::User)> user_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_user_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+                auto user = ctx.user_service->create_user_object(Parsers::PubnubJson::to_user(message));
+                auto updated = ctx.user_service->update_user_with_base(user, ctx.user_base);
+                ctx.user_update_callback(updated);
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{user_base, user_service, user_update_callback})
+    };
+}
+
+CCoreCallbackData CallbackService::to_c_users_updates_callback(const std::vector<Pubnub::User>& users, std::shared_ptr<const UserService> user_service, std::function<void(std::vector<Pubnub::User>)> user_update_callback) {
+    struct CallbackCtx {
+        const std::vector<Pubnub::User> users;
+        std::shared_ptr<const UserService> user_service;
+        std::function<void(std::vector<Pubnub::User>)> user_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_user_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+                auto user = ctx.user_service->create_user_object(Parsers::PubnubJson::to_user(message));
+
+                auto stream_user = std::find_if(
+                        ctx.users.begin(),
+                        ctx.users.end(),
+                        [&user](const Pubnub::User& base_user) {
+                            return base_user.user_id() == user.user_id();
+                    });
+
+                UserEntity stream_user_entity = UserDAO(stream_user->user_data()).to_entity();
+                UserEntity user_entity = UserDAO(user.user_data()).to_entity();
+                auto updated_user = ctx.user_service->create_user_object({stream_user->user_id(), UserEntity::from_base_and_updated_user(stream_user_entity, user_entity)});
+
+                std::vector<Pubnub::User> updated_users;
+
+                std::transform(
+                        ctx.users.begin(),
+                        ctx.users.end(),
+                        std::back_inserter(updated_users), [&user, updated_user](const Pubnub::User& base_user) {
+                            return base_user.user_id() == user.user_id() ? updated_user : base_user;
+                    });
+
+                ctx.user_update_callback(updated_users);
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{users, user_service, user_update_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_event_callback(Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(Pubnub::Event)> event_callback) {
+    struct CallbackCtx {
+        Pubnub::pubnub_chat_event_type chat_event_type;
+        std::function<void(Pubnub::Event)> event_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_event(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+                auto parsed_event = Parsers::PubnubJson::to_event(message);
+                if (parsed_event.type == ctx.chat_event_type) {
+                    ctx.event_callback(parsed_event);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{chat_event_type, event_callback})
+    };
+}
+
+CCoreCallbackData CallbackService::to_c_presence_callback(Pubnub::String channel_id, std::shared_ptr<const PresenceService> presence_service, std::function<void(std::vector<Pubnub::String>)> presence_callback) {
+    struct CallbackCtx {
+        Pubnub::String channel_id;
+        std::shared_ptr<const PresenceService> presence_service;
+        std::function<void(std::vector<Pubnub::String>)> presence_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_presence(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                Pubnub::String normal_channel_name = Pubnub::String(message.channel.ptr, message.channel.size);
+                auto pnpres_length = strlen("-pnpres");
+                normal_channel_name.erase(message.channel.size - pnpres_length, pnpres_length);
+
+                if (normal_channel_name == ctx.channel_id) {
+                    ctx.presence_callback(ctx.presence_service->who_is_present(ctx.channel_id));
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{channel_id, presence_service, presence_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_membership_update_callback(Pubnub::Membership membership_base, std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Membership)> membership_callback) {
+    struct CallbackCtx {
+        Pubnub::Membership membership_base;
+        std::weak_ptr<const ChatService> chat_service;
+        std::function<void(Pubnub::Membership)> membership_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_membership_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto membership_channel = Parsers::PubnubJson::membership_channel(Pubnub::String(message.payload.ptr, message.payload.size));
+                auto membership_user = Parsers::PubnubJson::membership_user(Pubnub::String(message.payload.ptr, message.payload.size));
+
+                const auto channel_id = ctx.membership_base.channel.channel_id();
+                const auto user_id = ctx.membership_base.user.user_id();
+
+                if (membership_channel == channel_id && membership_user == user_id) {
+                    auto custom_field = Parsers::PubnubJson::membership_from_string(Pubnub::String(message.payload.ptr, message.payload.size));
+                    auto chat = ctx.chat_service.lock();
+                    if (!chat) {
+                        notify_error("Chat service is not available to call membership callback");
+                        return;
+                    }
+
+                    Pubnub::Membership membership_obj = chat->membership_service->create_membership_object(
+                            chat->user_service->get_user(user_id),
+                            chat->channel_service->get_channel(channel_id),
+                            custom_field
+                    );
+                    chat->membership_service->update_membership_with_base(membership_obj, ctx.membership_base);
+
+                    ctx.membership_callback(membership_obj);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{membership_base, chat_service, membership_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_memberships_updates_callback(const std::vector<Pubnub::Membership>& memberships, std::weak_ptr<const ChatService> chat_service, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) {
+    struct CallbackCtx {
+        const std::vector<Pubnub::Membership> memberships;
+        std::weak_ptr<const ChatService> chat_service;
+        std::function<void(std::vector<Pubnub::Membership>)> membership_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_membership_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+    
+                auto chat = ctx.chat_service.lock();
+                if (!chat) {
+                    notify_error("Chat service is not available to call membership callback");
+                    return;
+                }
+
+                auto membership_channel = Parsers::PubnubJson::membership_channel(Pubnub::String(message.payload.ptr, message.payload.size));
+                auto membership_user = Parsers::PubnubJson::membership_user(Pubnub::String(message.payload.ptr, message.payload.size));
+
+                auto stream_membership = std::find_if(
+                        ctx.memberships.begin(),
+                        ctx.memberships.end(),
+                        [&membership_channel, &membership_user](const Pubnub::Membership& base_membership) {
+                            return base_membership.channel.channel_id() == membership_channel && base_membership.user.user_id() == membership_user;
+                    });
+
+                if (stream_membership != ctx.memberships.end()) {
+                    auto custom_field = Parsers::PubnubJson::membership_from_string(Pubnub::String(message.payload.ptr, message.payload.size));
+                    auto membership_obj = chat->membership_service->create_membership_object(
+                            chat->user_service->get_user(membership_user),
+                            chat->channel_service->get_channel(membership_channel),
+                            custom_field
+                    );
+
+                    MembershipEntity stream_membership_entity = MembershipDAO(stream_membership->custom_data()).to_entity();
+                    MembershipEntity membership_entity = MembershipDAO(membership_obj.custom_data()).to_entity();
+                    auto updated_membership = chat->membership_service->create_membership_object(stream_membership->user, stream_membership->channel, MembershipEntity::from_base_and_updated_membership(stream_membership_entity, membership_entity));
+
+                    std::vector<Pubnub::Membership> updated_memberships;
+
+                    std::transform(
+                            ctx.memberships.begin(),
+                            ctx.memberships.end(),
+                            std::back_inserter(updated_memberships),
+                            [&membership_channel, &membership_user, updated_membership](const Pubnub::Membership& base_membership) {
+                                return base_membership.channel.channel_id() == membership_channel 
+                                && base_membership.user.user_id() == membership_user 
+                                ? updated_membership : base_membership;
+                        });
+
+                    ctx.membership_callback(updated_memberships);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{memberships, chat_service, membership_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_message_update_callback(Pubnub::Message base_message, std::shared_ptr<const MessageService> message_service, std::function<void(Pubnub::Message)> message_update_callback) {
+    struct CallbackCtx {
+        Pubnub::Message base_message;
+        std::shared_ptr<const MessageService> message_service;
+        std::function<void(Pubnub::Message)> message_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(message.payload.ptr, message.payload.size));
+                if (message_timetoken == ctx.base_message.timetoken()) {
+                    auto parsed_message = ctx.message_service->create_message_object(Parsers::PubnubJson::to_message_update(message));
+                    auto updated_message = ctx.message_service->update_message_with_base(parsed_message, ctx.base_message);
+
+                    ctx.message_update_callback(updated_message);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{base_message, message_service, message_update_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_thread_message_update_callback(Pubnub::ThreadMessage base_message, std::shared_ptr<const MessageService> message_service, std::function<void(Pubnub::ThreadMessage)> message_update_callback) {
+    struct CallbackCtx {
+        Pubnub::ThreadMessage base_message;
+        std::shared_ptr<const MessageService> message_service;
+        std::function<void(Pubnub::ThreadMessage)> message_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(message.payload.ptr, message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(message.payload.ptr, message.payload.size));
+                if (message_timetoken == ctx.base_message.timetoken()) {
+                    auto parsed_message = ctx.message_service->create_message_object(Parsers::PubnubJson::to_message_update(message));
+                    auto updated_message = ctx.message_service->update_message_with_base(parsed_message, ctx.base_message);
+
+                    ctx.message_update_callback(Pubnub::ThreadMessage(updated_message, ctx.base_message.parent_channel_id()));
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{base_message, message_service, message_update_callback})
+    };
+}
+
+CCoreCallbackData CallbackService::to_c_messages_updates_callback(const std::vector<Pubnub::Message>& messages, std::shared_ptr<const MessageService> message_service, std::function<void(std::vector<Pubnub::Message>)> message_update_callback) {
+    struct CallbackCtx {
+        std::vector<Pubnub::Message> messages;
+        std::shared_ptr<const MessageService> message_service;
+        std::function<void(std::vector<Pubnub::Message>)> message_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message pn_message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size));
+                auto message = std::find_if(
+                        ctx.messages.begin(),
+                        ctx.messages.end(),
+                        [&message_timetoken](const Pubnub::Message& base_message) {
+                            return base_message.timetoken() == message_timetoken;
+                    });
+
+                if (message != ctx.messages.end()) {
+                    auto parsed_message = ctx.message_service->create_message_object(Parsers::PubnubJson::to_message_update(pn_message));
+                    auto updated_message = ctx.message_service->update_message_with_base(parsed_message, *message);
+
+                    std::vector<Pubnub::Message> updated_messages;
+
+                    std::transform(
+                            ctx.messages.begin(),
+                            ctx.messages.end(),
+                            std::back_inserter(updated_messages), [&message_timetoken, updated_message](const Pubnub::Message& base_message) {
+                                return base_message.timetoken() == message_timetoken ? updated_message : base_message;
+                        });
+
+                    ctx.message_update_callback(updated_messages);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{messages, message_service, message_update_callback})
+    };
+}
+
+
+CCoreCallbackData CallbackService::to_c_thread_messages_updates_callback(const std::vector<Pubnub::ThreadMessage>& messages, std::shared_ptr<const MessageService> message_service, std::function<void(std::vector<Pubnub::ThreadMessage>)> message_update_callback) {
+    struct CallbackCtx {
+        const std::vector<Pubnub::ThreadMessage> messages;
+        std::shared_ptr<const MessageService> message_service;
+        std::function<void(std::vector<Pubnub::ThreadMessage>)> message_update_callback;
+    };
+
+    return {
+        +[](const pubnub_t* pb, struct pubnub_v2_message pn_message, void* ctx_ptr) {
+            if (Parsers::PubnubJson::is_message_update(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size))) {
+                auto ctx = std::any_cast<CallbackCtx>(*reinterpret_cast<std::any*>(ctx_ptr));
+
+                auto message_timetoken = Parsers::PubnubJson::message_update_timetoken(Pubnub::String(pn_message.payload.ptr, pn_message.payload.size));
+                auto message = std::find_if(
+                        ctx.messages.begin(),
+                        ctx.messages.end(),
+                        [&message_timetoken](const Pubnub::ThreadMessage& base_message) {
+                            return base_message.timetoken() == message_timetoken;
+                    });
+
+                if (message != ctx.messages.end()) {
+                    auto parsed_message = ctx.message_service->create_message_object(Parsers::PubnubJson::to_message_update(pn_message));
+                    auto updated_message = ctx.message_service->update_message_with_base(parsed_message, *message);
+
+                    std::vector<Pubnub::ThreadMessage> updated_messages;
+
+                    std::transform(
+                            ctx.messages.begin(),
+                            ctx.messages.end(),
+                            std::back_inserter(updated_messages),
+                            [&message_timetoken, updated_message](const Pubnub::ThreadMessage& base_message) {
+                                return base_message.timetoken() == message_timetoken ? Pubnub::ThreadMessage(updated_message, base_message.parent_channel_id()) : base_message;
+                        });
+
+                    ctx.message_update_callback(updated_messages);
+                }
+            }
+        },
+        this->callback_contexts.emplace_back(CallbackCtx{messages, message_service, message_update_callback})
+    };
+}

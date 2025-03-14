@@ -3,6 +3,7 @@
 #include "application/channel_service.hpp"
 #include "application/restrictions_service.hpp"
 #include "application/dao/message_dao.hpp"
+#include "callback_handle.hpp"
 #include "thread_channel.hpp"
 
 using namespace Pubnub;
@@ -145,18 +146,18 @@ void Message::report(const Pubnub::String& reason) const {
     this->restrictions_service->report_message(*this, reason);
 }
 
-CallbackStop Message::stream_updates(std::function<void(const Message&)> message_callback) const {
-    return CallbackStop(this->message_service->stream_updates(*this, message_callback));
+CallbackHandle Message::stream_updates(std::function<void(const Message&)> message_callback) const {
+    return CallbackHandle(this->message_service->stream_updates(*this, message_callback));
 }
 
-CallbackStop Message::stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(Pubnub::Vector<Pubnub::Message>)> message_callback) const {
+CallbackHandle Message::stream_updates_on(Pubnub::Vector<Pubnub::Message> messages, std::function<void(Pubnub::Vector<Pubnub::Message>)> message_callback) const {
     auto messages_std = messages.into_std_vector();
 
     auto new_callback = [=](std::vector<Pubnub::Message> vec)
     {
         message_callback(std::move(vec));
     };
-    return CallbackStop(this->message_service->stream_updates_on(*this, messages_std, new_callback));
+    return CallbackHandle(this->message_service->stream_updates_on(*this, messages_std, new_callback));
 }
 
 ThreadChannel Message::create_thread() const
@@ -232,5 +233,10 @@ Pubnub::Vector<TextLink> Message::text_links() const
 #ifdef PN_CHAT_C_ABI
 Pubnub::Message Pubnub::Message::update_with_base(const Pubnub::Message& base_message) const {
     return this->message_service->update_message_with_base(*this, base_message);
+}
+
+
+std::shared_ptr<const ChatService> Message::shared_chat_service() const {
+    return this->chat_service;
 }
 #endif

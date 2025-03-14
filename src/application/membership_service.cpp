@@ -118,13 +118,14 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
 
     Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
 
-    if(channel.channel_data().type == String("public"))
+    //Check if user is not a member of the channel that he is invited to
+    Pubnub::String filter = Pubnub::String("uuid.id == \"") + user.user_id() + Pubnub::String("\"");
+    auto members = std::get<0>(this->get_channel_members(channel_id, channel_data, filter));
+    if(!members.empty())
     {
-        throw std::runtime_error("Channel invites are not supported in Public chats");
+        //Already a member, just return current membership
+        return members[0];
     }
-
-    //TODO:: check here if user already is on that channel. Requires C-Core filtering
-
 
     String include_string = "custom,channel,totalCount,customChannel";
     String set_memeberships_obj = create_set_memberships_object(channel_id, "");
@@ -145,7 +146,6 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
     //This channel is updated, so we need to update it in entity repository as well
     ChannelEntity channel_entity = ChannelEntity::from_json(channel_data_string);
     
-    // TODO: no custom data?
     Membership membership_object = this->create_membership_object(user, channel);
     membership_object.set_last_read_message_timetoken(get_now_timetoken());
     return membership_object;
@@ -157,39 +157,34 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
 
     Channel channel = chat_service_shared->channel_service->create_channel_object({channel_id, channel_data.to_entity()});
 
-    if(channel.channel_data().type == String("public"))
+    std::vector<String> users_ids;
+    String filter;
+
+    for(int i = 0; i < users.size(); i++)
     {
-        throw std::runtime_error("Channel invites are not supported in Public chats");
-    }
-
-    //TODO:: check here if users already are on that channel. Requires C-Core filtering
-
-
-    std::vector<String> filtered_users_ids;
-
-    for(auto &user : users)
-    {
-        filtered_users_ids.push_back(user.user_id());
+        users_ids.push_back(users[i].user_id());
+        filter += Pubnub::String("uuid.id == \"") + users[i].user_id() + Pubnub::String("\"");
+        if(i < users.size() - 1)
+        {
+            filter += Pubnub::String(" || ");
+        }
     }
 
     String include_string = "custom,channel,totalCount,customChannel";
-    String set_memebers_obj = create_set_members_object(filtered_users_ids, "");
+    String set_memebers_obj = create_set_members_object(users_ids, "");
 
-    auto set_members_response = [this, channel_id, set_memebers_obj, include_string] {
+    auto set_members_response = [this, channel_id, set_memebers_obj, include_string, filter] {
         auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->set_members(channel_id, set_memebers_obj, include_string);
+        return pubnub_handle->set_members(channel_id, set_memebers_obj, include_string, filter);
     }();
     
     std::vector<Membership> invitees_memberships;
 
     json memberships_response_json = json::parse(set_members_response);
     json memberships_data_array = memberships_response_json["data"];
-
-    String test = memberships_data_array.dump();
     
     for (json::iterator single_data_json = memberships_data_array.begin(); single_data_json != memberships_data_array.end(); ++single_data_json) 
     {
-        // TODO: @kamil - check if this assumption is correct
         auto user = std::find_if(users.begin(), users.end(), [single_data_json](const User& user) {
             return user.user_id() == String(single_data_json.value()["uuid"]["id"]);
         });
@@ -198,7 +193,6 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
             continue;
         }
 
-        // TODO: no custom data?
         Membership membership = this->create_membership_object(*user, channel);
         membership.set_last_read_message_timetoken(get_now_timetoken());
         invitees_memberships.push_back(membership);
@@ -420,88 +414,35 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 }
 
 
-std::function<void()> MembershipService::stream_updates(Pubnub::Membership calling_membership, std::function<void(Membership)> membership_callback) const
+std::shared_ptr<Subscription> MembershipService::stream_updates(Pubnub::Membership calling_membership, std::function<void(Membership)> membership_callback) const
 {
-    auto pubnub_handle = this->pubnub->lock();
+    auto subscription = this->pubnub->lock()->subscribe(calling_membership.channel.channel_id());
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> memberships_ids;
-    std::function<void(Membership)> final_membership_callback = [=](Membership membership){
-        auto updated_membership = this->update_membership_with_base(membership, calling_membership);
-        
-        membership_callback(updated_membership);
-    };
-    
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages({calling_membership.channel.channel_id()});
-    chat->callback_service->broadcast_messages(messages);
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_membership_update_listener(callback_service->to_c_membership_update_callback(calling_membership, this->chat_service, membership_callback));
 
-    chat->callback_service->register_membership_callback(calling_membership.channel.channel_id(), calling_membership.user.user_id(), final_membership_callback);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=](){
-        chat->callback_service->remove_membership_callback(calling_membership.channel.channel_id());
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
-std::function<void()> MembershipService::stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Membership>)> membership_callback) const
+std::shared_ptr<SubscriptionSet> MembershipService::stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Membership>)> membership_callback) const
 {
     if(memberships.empty())
     {
         throw std::invalid_argument("Cannot stream membership updates on an empty list");
     }
+
+    std::vector<String> memberships_ids;
+
+    std::transform(memberships.begin(), memberships.end(), std::back_inserter(memberships_ids), [](const Pubnub::Membership& membership) {
+        return membership.channel.channel_id();
+    });
     
-    auto pubnub_handle = this->pubnub->lock();
+    auto subscription = this->pubnub->lock()->subscribe_multiple(memberships_ids);
 
-    auto chat = this->chat_service.lock();
-    std::vector<String> channels_ids;
+    auto callback_service = this->chat_service.lock()->callback_service;
+    subscription->add_membership_update_listener(callback_service->to_c_memberships_updates_callback(memberships, this->chat_service, membership_callback));
 
-
-    std::function<void(Membership)> single_membership_callback = [=](Membership membership){
-        
-        std::vector<Pubnub::Membership> updated_memberships; 
-
-        for(int i = 0; i < memberships.size(); i++)
-        {
-            //Find membership that was updated and replace it in Entity stream memberships
-            auto stream_membership = memberships[i];
-
-            if(stream_membership.channel.channel_id() == membership.channel.channel_id() && stream_membership.user.user_id() == membership.user.user_id())
-            {
-                MembershipEntity stream_membership_entity = MembershipDAO(stream_membership.custom_data()).to_entity();
-                MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
-                auto updated_membership = create_membership_object(stream_membership.user, stream_membership.channel, MembershipEntity::from_base_and_updated_membership(stream_membership_entity, membership_entity));
-                updated_memberships.push_back(updated_membership);
-            }
-            else
-            {
-                updated_memberships.push_back(memberships[i]);
-            }
-        }
-        membership_callback(updated_memberships);
-
-    };
-    
-    for(auto membership : memberships)
-    {
-        channels_ids.push_back(membership.channel.channel_id());
-        chat->callback_service->register_membership_callback(membership.channel.channel_id(), membership.user.user_id(), single_membership_callback);
-    }
-    
-
-    auto messages = pubnub_handle->subscribe_to_multiple_channels_and_get_messages(channels_ids);
-    chat->callback_service->broadcast_messages(messages);
-
-    //stop streaming callback
-    std::function<void()> stop_streaming = [=, &channels_ids](){
-        for(auto id : channels_ids)
-        {
-            chat->callback_service->remove_membership_callback(id);
-        }
-    };
-
-    return stop_streaming;
+    return subscription;
 }
 
 Membership MembershipService::create_membership_object(const User& user, const Channel& channel) const {

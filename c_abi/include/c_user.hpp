@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_USER_HPP
 #define PN_CHAT_C_USER_HPP
 
+#include "callback_handle.hpp"
 #include "channel.hpp"
 #include "chat.hpp"
 #include "user.hpp"
@@ -83,6 +84,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_get_channels_restrictions(Pubnub
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_user_active(Pubnub::User* user);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_user_last_active_timestamp(Pubnub::User* user, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_user_stream_updates(Pubnub::User* user);
 
 
 #endif // PN_CHAT_C_USER_HPP

@@ -1,11 +1,14 @@
 #include "infra/pubnub.hpp"
+#include <pubnub_subscribe_event_engine.h>
+
+#include "application/subscription.hpp"
 #include "infra/serialization.hpp"
 #include "chat.hpp"
-//#include "message.hpp"
-//#include "channel.hpp"
-//#include "user.hpp"
-//#include "membership.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <ostream>
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -25,6 +28,9 @@ extern "C" {
 #include <pubnub_advanced_history.h>
 #include <pubnub_grant_token_api.h>
 #include <pubnub_crypto.h>
+#include <pubnub_ntf_enforcement.h>
+#include <pubnub_entities.h>
+#include <pubnub_subscribe_event_listener.h>
 }
 
 using json = nlohmann::json;
@@ -37,6 +43,9 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
     main_context(pubnub_alloc(), pubnub_free),
     long_poll_context(pubnub_alloc(), pubnub_free)
 {
+    pubnub_enforce_api(this->main_context.get(), PNA_SYNC);
+    pubnub_enforce_api(this->long_poll_context.get(), PNA_CALLBACK);
+
     pubnub_init(this->main_context.get(), this->publish_key.c_str(), this->subscribe_key.c_str());
     pubnub_init(this->long_poll_context.get(), this->publish_key.c_str(), this->subscribe_key.c_str());
 
@@ -50,6 +59,10 @@ PubNub::PubNub(const Pubnub::String publish_key, const Pubnub::String subscribe_
         pubnub_set_auth_token(this->main_context.get(), this->auth_key.c_str());
         pubnub_set_auth_token(this->long_poll_context.get(), this->auth_key.c_str());
     }
+}
+
+PubNub::~PubNub() {
+    pubnub_unsubscribe_all(this->long_poll_context.get());
 }
 
 Pubnub::String PubNub::publish(const Pubnub::String channel, const Pubnub::String message, const Pubnub::String metadata, const bool store_in_history, const bool send_by_post)
@@ -79,13 +92,54 @@ Pubnub::String PubNub::signal(const Pubnub::String channel, const Pubnub::String
     return Pubnub::String(&pubnub_last_publish_result(main_context.get())[8], 17);
 }
 
+std::shared_ptr<Subscription> PubNub::subscribe(const Pubnub::String& channel_id) {
+    pubnub_channel_t* channel = pubnub_channel_alloc(
+        this->long_poll_context.get(),
+        channel_id
+    );
+
+    pubnub_subscription_t* subscription =
+        pubnub_subscription_alloc((pubnub_entity_t*)channel, NULL);
+    pubnub_entity_free((void**)&channel);
+
+    return std::make_shared<Subscription>(subscription);
+}
+
+std::shared_ptr<SubscriptionSet> PubNub::subscribe_multiple(const std::vector<Pubnub::String>& channels_ids) {
+    const auto amount_of_channels = channels_ids.size();
+
+    std::vector<pubnub_entity_t*> channels;
+
+    std::transform(
+            channels_ids.begin(),
+            channels_ids.end(),
+            std::back_inserter(channels),
+            [this](const Pubnub::String& id){
+                return (pubnub_entity_t*)pubnub_channel_alloc(this->long_poll_context.get(), id.c_str());
+            });
+
+    pubnub_subscription_set_t* set =
+        pubnub_subscription_set_alloc_with_entities(channels.data(), amount_of_channels, NULL);
+
+    std::for_each(
+            channels.begin(),
+            channels.end(),
+            [](pubnub_entity_t* channel){
+                pubnub_entity_free((void**)&channel);
+            });
+
+    return std::make_shared<SubscriptionSet>(set);
+}
+
 std::vector<pubnub_v2_message> PubNub::subscribe_to_channel_and_get_messages(const Pubnub::String channel)
 {
+    return {};
     return this->subscribe_to_multiple_channels_and_get_messages({channel});
 }
 
 std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_messages(const std::vector<Pubnub::String> channels)
 {
+    return {};
     bool new_channels = false;
 
     for (const auto& channel : channels) {
@@ -115,6 +169,7 @@ std::vector<pubnub_v2_message> PubNub::subscribe_to_multiple_channels_and_get_me
 // TODO: s that even needed?
 std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_strings(const Pubnub::String channel)
 {
+    return {};
     std::vector<pubnub_v2_message> pubnub_messages = this->subscribe_to_channel_and_get_messages(channel);
 
     std::vector<Pubnub::String> messages;
@@ -128,6 +183,7 @@ std::vector<Pubnub::String> PubNub::subscribe_to_channel_and_get_messages_as_str
 
 std::vector<pubnub_v2_message> PubNub::fetch_messages()
 {
+    return {};
     if (!this->is_subscribed) {
         return {};
     }
@@ -178,6 +234,7 @@ std::vector<Pubnub::String> PubNub::fetch_messages_as_strings()
 
 std::vector<pubnub_v2_message> PubNub::pause_subscription_and_get_messages()
 {
+    return {};
     if (this->subscribed_channels.empty() || !this->is_subscribed) {
         return {};
     }
@@ -340,13 +397,16 @@ void PubNub::remove_members(const Pubnub::String channel, const Pubnub::String m
     this->await_and_handle_error(result);
 }
 
-Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include)
+Pubnub::String PubNub::set_members(const Pubnub::String channel, const Pubnub::String members_object, const Pubnub::String include, const Pubnub::String filter)
 {
-    auto result = pubnub_set_members(
-            this->main_context.get(),
-            channel,
-            include,
-            members_object
+    pubnub_members_opts opt = pubnub_members_opts();
+    opt.filter = filter;
+    opt.include = include;
+    auto result = pubnub_set_members_ex(
+        this->main_context.get(),
+        channel,
+        members_object,
+        opt
     );
 
     this->await_and_handle_error(result);
@@ -666,6 +726,7 @@ bool PubNub::is_subscribed_to_channel(const Pubnub::String channel)
 
 void PubNub::cancel_previous_subscription()
 {
+    return;
     auto cancel_result = pubnub_cancel(this->long_poll_context.get());
     if (PN_CANCEL_FINISHED != cancel_result) {
         auto await_result = pubnub_await(this->long_poll_context.get());
@@ -695,6 +756,7 @@ void PubNub::cancel_previous_subscription()
 
 void PubNub::call_subscribe()
 {
+    return;
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
     if (PNR_OK != result && PNR_STARTED != result) {
         throw std::runtime_error(
@@ -706,6 +768,7 @@ void PubNub::call_subscribe()
 
 void PubNub::call_handshake()
 {
+    return;
     auto result = pubnub_subscribe_v2(this->long_poll_context.get(), get_comma_sep_channels_to_subscribe(), pubnub_subscribe_v2_defopts());
 
     if (PNR_OK != result) {
