@@ -1,6 +1,7 @@
 #include "pubnub_chat/message.hpp"
 #include "pubnub_chat/chat.hpp"
 #include "pubnub_chat/chat_helpers.hpp"
+#include "pubnub_chat/message_draft.hpp"
 #include <chrono>
 #include <thread>
 #include <vector>
@@ -38,9 +39,15 @@ Pubnub::String get_mark_all_messages_as_read_token(Pubnub::AccessManager& token_
 Pubnub::String get_thread_send_text_token(Pubnub::AccessManager& token_access_manager, Pubnub::String thread_channel_id, Pubnub::String parent_channel_id, Pubnub::String mentioned_user_id);
 Pubnub::String get_remove_thread_token(Pubnub::AccessManager& token_access_manager, Pubnub::String thread_channel_id, Pubnub::String parent_channel_id);
 Pubnub::String get_channel_stream_receipts_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id);
+Pubnub::String get_membership_update_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
+Pubnub::String get_membership_set_last_read_message_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id);
+Pubnub::String get_message_pin_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id);
+Pubnub::String get_message_unpin_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id);
+Pubnub::String get_message_toggle_reaction_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id);
 
 
 int main() {
+
 
 
 
@@ -67,7 +74,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
     auto chat_access_manager = chat.access_manager();
 
 
@@ -80,7 +87,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -98,7 +105,7 @@ int main() {
     auto another_user = chat.create_user(another_user_id, Pubnub::ChatUserData());
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -112,7 +119,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -124,7 +131,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -138,7 +145,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -152,7 +159,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -166,7 +173,7 @@ int main() {
     
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -178,7 +185,7 @@ int main() {
         
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -190,7 +197,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -204,7 +211,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -218,22 +225,22 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 /*
+
 
     //CHANNEL JOIN
     std::cout << "Channel.Join" << std::endl;
 
     chat_access_manager.set_auth_token(get_join_channel_token(token_access_manager, public_channel_id, user_id));
     auto join_lambda = [](Pubnub::Message message){};
-    public_channel.join(join_lambda);
+    auto current_user_membership = public_channel.join(join_lambda);
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -250,7 +257,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     //CHANNEL LEAVE
@@ -261,7 +268,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -274,7 +281,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -292,7 +299,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -304,9 +311,9 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
     stop_listening();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -319,7 +326,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -330,9 +337,9 @@ int main() {
     group_channel.created_channel.disconnect();
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
-*/
+
 
     //CHANNEL SEND TEXT
 
@@ -355,7 +362,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -367,9 +374,9 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
-/*
+
 
     //CHANNEL PIN/UNPIN MESSAGE
     std::cout << "Pin message" << std::endl;
@@ -377,7 +384,7 @@ int main() {
     chat_access_manager.set_auth_token(get_update_channel_token(token_access_manager, public_channel_id));
     chat.pin_message_to_channel(history_messages[0], public_channel);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Channel get pinned message" << std::endl;
 
@@ -387,7 +394,7 @@ int main() {
     chat_access_manager.set_auth_token(get_read_channel_token(token_access_manager, public_channel_id));
     public_channel.get_pinned_message();
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Unpin message" << std::endl;
 
@@ -396,7 +403,7 @@ int main() {
 
 
     
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -408,7 +415,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -420,7 +427,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -433,7 +440,7 @@ int main() {
     ban_restriction.ban = true;
     chat.set_restrictions(user_id, public_channel_id, ban_restriction);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Get user restrictions" << std::endl;
 
@@ -454,7 +461,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -466,7 +473,7 @@ int main() {
 
     std::cout << "Invite member" << std::endl;
     chat_access_manager.set_auth_token(get_invite_token(token_access_manager, group_channel_id, invitee_user_id));
-    group_channel.created_channel.invite(invitee_user);
+    auto invitee_membership = group_channel.created_channel.invite(invitee_user);
 
     std::cout << "Invite multiple" << std::endl;
 
@@ -475,7 +482,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -488,7 +495,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -500,7 +507,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -512,7 +519,7 @@ int main() {
     auto created_thread = chat.create_thread_channel(history_messages[0]);
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     
@@ -524,7 +531,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     //GET THREAD CHANNEL
@@ -535,7 +542,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -547,7 +554,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -559,7 +566,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -575,7 +582,7 @@ int main() {
     auto typing_lambda = [](Pubnub::Vector<Pubnub::String> typing){};
     auto get_typing_stop = group_channel.created_channel.get_typing(typing_lambda);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
     get_typing_stop();
 
     std::cout << "Channel: Stop Typing" << std::endl;
@@ -583,7 +590,7 @@ int main() {
     group_channel.created_channel.stop_typing();
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -597,7 +604,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     //CHANNEL STREAM UPDATES
@@ -606,12 +613,12 @@ int main() {
     chat_access_manager.set_auth_token(get_channel_connect_token(token_access_manager, public_channel_id));
     auto stream_updates_lambda = [](Pubnub::Channel channel){};
     public_channel.stream_updates(stream_updates_lambda);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Channel: Stream updates on" << std::endl;
     auto stream_updates_on_lambda = [](Pubnub::Vector<Pubnub::Channel> channels){};
     public_channel.stream_updates_on(Pubnub::Vector<Pubnub::Channel>{public_channel}, stream_updates_on_lambda);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
     std::cout << "Channel: Stream presence" << std::endl;
@@ -619,15 +626,15 @@ int main() {
     auto stream_presence_lambda = [](Pubnub::Vector<Pubnub::String> presence){};
     public_channel.stream_presence(stream_presence_lambda);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Channel: Stream read receipts" << std::endl;
     chat_access_manager.set_auth_token(get_channel_stream_receipts_token(token_access_manager, public_channel_id));
     auto stream_receipts_lambda = [](Pubnub::Map<Pubnub::String, Pubnub::Vector<Pubnub::String>, Pubnub::StringComparer> receipts){};
     public_channel.stream_read_receipts(stream_receipts_lambda);
 
-*/
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -637,7 +644,7 @@ int main() {
     chat_access_manager.set_auth_token(get_channel_read_token(token_access_manager, "PUBNUB_INTERNAL_MODERATION_" + public_channel_id));
     public_channel.get_messsage_reports_history(Pubnub::get_now_timetoken(), "00000000000000000");
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
     std::cout << "Channel: Stream Message Reports" << std::endl;
 
@@ -647,18 +654,259 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
 
 
 
+    //UPDATE MEMBERSHIP
+    std::cout << "Update Membership" << std::endl;
+
+    chat_access_manager.set_auth_token(get_membership_update_token(token_access_manager, group_channel_id, invitee_user_id));
+    invitee_membership.update("{\"abc\": \"dca\"}");
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));;
+
+
+    //SET LAST READ MESSAGE TIMETOKEN
+    std::cout << "Set last read message timetoken" << std::endl;
+
+    chat_access_manager.set_auth_token(get_membership_set_last_read_message_token(token_access_manager, group_channel_id, invitee_user_id));
+    invitee_membership.set_last_read_message_timetoken(Pubnub::get_now_timetoken());
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+    //GET UNREAD MESSAGE COUNTS
+    std::cout << "Get unread message counts" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_read_token(token_access_manager, group_channel_id));
+    invitee_membership.get_unread_messages_count();
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));;
+
+
+    //MEMBERSHIP STREAM UPDATES
+    std::cout << "Membership: Stream Updates" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_connect_token(token_access_manager, group_channel_id));
+    auto membership_stream_lambda = [](Pubnub::Membership membership){};
+    auto membership_updates_stop_streaming = invitee_membership.stream_updates(membership_stream_lambda);
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+    //MEMBERSHIP STREAM UPDATES ON
+    std::cout << "Membership: Stream Updates On" << std::endl;
+
+    auto membership_stream_on_lambda = [](Pubnub::Vector<Pubnub::Membership> memberships){};
+    auto membership_updates_on_stop_streaming = invitee_membership.stream_updates_on(Pubnub::Vector<Pubnub::Membership>{invitee_membership}, membership_stream_on_lambda);
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    membership_updates_stop_streaming.close();
+    membership_updates_on_stop_streaming.close();
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 
 
+    auto message_to_test = history_messages[0];
+
+    //EDIT MESSAGE
+    std::cout << "Edit Message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_write_token(token_access_manager, message_to_test.message_data().channel_id));
+    message_to_test = message_to_test.edit_text("new message text" + Pubnub::get_now_timetoken());
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //DELETE MESSAGE
+    std::cout << "Delete Message" << std::endl;
+
+    message_to_test = message_to_test.delete_message();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //RESTORE MESSAGE
+    std::cout << "Restore Message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_delete_channel_token(token_access_manager, message_to_test.message_data().channel_id));
+    message_to_test.restore();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //PIN MESSAGE
+    std::cout << "Pin Message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_message_pin_token(token_access_manager, message_to_test.message_data().channel_id));
+    message_to_test.pin();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //UNPIN MESSAGE
+    std::cout << "Unpin Message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_message_unpin_token(token_access_manager, message_to_test.message_data().channel_id));
+    message_to_test.unpin();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //TOGGLE REACTION
+    std::cout << "Toggle reaction" << std::endl;
+
+    chat_access_manager.set_auth_token(get_message_toggle_reaction_token(token_access_manager, message_to_test.message_data().channel_id));
+    message_to_test = message_to_test.toggle_reaction("happy");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    message_to_test = message_to_test.toggle_reaction("happy");
 
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+    //REPORT MESSAGE
+    std::cout << "Report message" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_write_token(token_access_manager, "PUBNUB_INTERNAL_MODERATION_" + message_to_test.message_data().channel_id));
+    message_to_test.report("for cpp test");
+    
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+    //MESSAGE STREAM UPDATES
+    std::cout << "Message: Stream Updates" << std::endl;
+
+    chat_access_manager.set_auth_token(get_channel_connect_token(token_access_manager, message_to_test.message_data().channel_id));
+    auto message_stream_lambda = [](Pubnub::Message message){};
+    auto message_updates_stop_streaming = message_to_test.stream_updates(message_stream_lambda);
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+    //MESSAGE STREAM UPDATES ON
+    std::cout << "Message: Stream Updates On" << std::endl;
+
+    auto message_stream_on_lambda = [](Pubnub::Vector<Pubnub::Message> messages){};
+    auto message_updates_on_stop_streaming = message_to_test.stream_updates_on(Pubnub::Vector<Pubnub::Message>{message_to_test}, message_stream_on_lambda);
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    message_updates_stop_streaming.close();
+    message_updates_on_stop_streaming.close();
+
+*/
+
+    //MESSAGE DRAFT
+    std::cout << "Create message draft" << std::endl;
+
+    chat_access_manager.set_auth_token(get_empty_token(token_access_manager));
+    Pubnub::MessageDraftConfig draft_config;
+    draft_config.is_typing_indicator_triggered = true;
+    auto message_draft = public_channel.create_message_draft(draft_config);
+
+    std::cout << "Create message draft listeners" << std::endl;
+
+    auto add_change_lambda = [](Pubnub::Vector<Pubnub::MessageElement> elements)
+    {
+        std::cout << "Draft Change, no suggestions " << std::endl;
+        for(auto element : elements)
+        {
+            std::cout << "Element: " << element.text << std::endl;
+        }
+
+    };
+
+    auto add_change_suggestions_lambda = [&message_draft](Pubnub::Vector<Pubnub::MessageElement> elements ,Pubnub::Vector<Pubnub::SuggestedMention> suggested_mentions)
+    {
+        std::cout << "Draft Change, with suggestions " << std::endl;
+        for(auto element : elements)
+        {
+            std::cout << "Element: " << element.text << std::endl;
+        }
+
+        if(suggested_mentions.size() > 0)
+        {
+            message_draft.insert_suggested_mention(suggested_mentions[0], "inserted mention");
+        }
+
+    };
+    message_draft.add_change_listener(add_change_lambda);
+    message_draft.add_change_listener(add_change_suggestions_lambda);
+    
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT INSERT TEXT
+    std::cout << "Message draft insert text" << std::endl;
+
+    message_draft.insert_text(0, "cpp_test draft text");
+    message_draft.insert_text(5, "@cpp_test");
+    message_draft.insert_text(15, "#cpp_test");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT REMOVE TEXT
+    std::cout << "Message draft remove text" << std::endl;
+
+    message_draft.remove_text(2, 2);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT ADD MENTION
+    std::cout << "Message draft add mention" << std::endl;
+
+    Pubnub::MentionTarget mention_target;
+    mention_target.channel(group_channel_id);
+    message_draft.add_mention(9, 10, mention_target);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT UPDATE
+    std::cout << "Message draft update" << std::endl;
+
+    message_draft.update("cpp_test draft updated");
+
+    //MESSAGE DRAFT INSERT SUGGESTED MENTION
+    std::cout << "Message draft insert suggested mention" << std::endl;
+
+    Pubnub::SuggestedMention suggested_mention;
+    suggested_mention.target = mention_target;
+    suggested_mention.offset = 0;
+    suggested_mention.replace_from = "cpp_test";
+    suggested_mention.replace_to = "inserted_mention";
+
+    message_draft.insert_suggested_mention(suggested_mention, "inserted_mention");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT REMOVE MENTION
+    std::cout << "Message draft remove mention" << std::endl;
+    message_draft.remove_mention(9);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    //MESSAGE DRAFT SEND
+    std::cout << "Message draft send" << std::endl;
+
+    chat_access_manager.set_auth_token(get_send_text_token(token_access_manager, public_channel_id, user_id));
+    message_draft.send();
+
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     //DELETE USER
     std::cout << "Delete User" << std::endl;
@@ -671,7 +919,7 @@ int main() {
 
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -683,7 +931,7 @@ int main() {
     
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));;
 
 
 
@@ -1249,6 +1497,93 @@ Pubnub::String get_channel_stream_receipts_token(Pubnub::AccessManager& token_ac
     pres_channel_permissions.read = true;
     permission_object.channels.push_back(channel_id + Pubnub::String("-pnpres"));
     permission_object.channel_permissions.push_back(pres_channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_membership_update_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id)
+{
+    //ChannelID: JOIN
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.join = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //User user_id: UPDATE
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.update = true;
+    permission_object.users.push_back(user_id);
+    permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_membership_set_last_read_message_token(Pubnub::AccessManager& token_access_manager, Pubnub::String channel_id, Pubnub::String user_id)
+{
+    //ChannelID: JOIN, WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.write = true;
+    channel_permissions.join = true;
+    permission_object.channels.push_back(channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    //User user_id: UPDATE
+    Pubnub::UserPermissions user_permissions;
+    user_permissions.update = true;
+    permission_object.users.push_back(user_id);
+    permission_object.user_permissions.push_back(user_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_message_pin_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id)
+{
+    //ChannelID: GET, UPDATE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.get = true;
+    channel_permissions.update = true;
+    permission_object.channels.push_back(message_channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_message_unpin_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id)
+{
+    //ChannelID: GET, UPDATE, READ
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.get = true;
+    channel_permissions.update = true;
+    channel_permissions.read = true;
+    permission_object.channels.push_back(message_channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
+
+    return token_access_manager.grant_token(permission_object);
+}
+
+Pubnub::String get_message_toggle_reaction_token(Pubnub::AccessManager& token_access_manager, Pubnub::String message_channel_id)
+{
+    //ChannelID: DELETE, WRITE
+    Pubnub::GrantTokenPermissionObject permission_object;
+    permission_object.authorized_user = TOKEN_AUTH_USER_ID;
+    permission_object.ttl_minutes = TOKEN_TTL;
+    Pubnub::ChannelPermissions channel_permissions;
+    channel_permissions.del = true;
+    channel_permissions.write = true;
+    permission_object.channels.push_back(message_channel_id);
+    permission_object.channel_permissions.push_back(channel_permissions);
 
     return token_access_manager.grant_token(permission_object);
 }
