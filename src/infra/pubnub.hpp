@@ -75,6 +75,8 @@ public:
     Pubnub::String get_current_auth_token();
     void set_auth_token(const Pubnub::String token);
     int set_pubnub_origin(const Pubnub::String origin);
+    Pubnub::String grant_token(const Pubnub::String permission_object);
+    void set_secret_key(const Pubnub::String secret_key);
 
 private:
     void await_and_handle_error(pubnub_res result);
@@ -87,6 +89,7 @@ private:
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
+    Pubnub::String secret_key;
     Pubnub::String user_id;
     Pubnub::String auth_key;
     Pubnub::String custom_origin;

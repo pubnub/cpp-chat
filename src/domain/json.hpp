@@ -44,6 +44,7 @@ class Json {
 
         void insert_or_update(Pubnub::String key, Json value);
         void insert_or_update(Pubnub::String key, Pubnub::String value);
+        void insert_or_update(Pubnub::String key, int value);
 
         int as_int() const;
 

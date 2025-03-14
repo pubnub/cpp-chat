@@ -100,6 +100,10 @@ void Json::insert_or_update(Pubnub::String key, Pubnub::String value) {
     this->json[key] = value.c_str();
 }
 
+void Json::insert_or_update(Pubnub::String key, int value) {
+    this->json[key] = value;
+}
+
 Json::Iterator Json::begin() {
     return Json::Iterator(this->json.begin());
 }
