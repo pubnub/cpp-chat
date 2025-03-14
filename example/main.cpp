@@ -48,7 +48,9 @@ Pubnub::String get_message_toggle_reaction_token(Pubnub::AccessManager& token_ac
 
 int main() {
 
-
+    auto publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
+    auto subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
+    auto secret_key = std::getenv("PUBNUB_SECRET_KEY");
 
 
     //This token is needed to init chat
