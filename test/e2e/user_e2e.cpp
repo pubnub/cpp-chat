@@ -73,11 +73,14 @@ TEST_F(UserTests, TestUserUpdate) {
             updated = true;
         }
         });
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
     auto new_user_data = Pubnub::ChatUserData();
     new_user_data.user_name = random_name;
     test_user.update(new_user_data);
 
-    std::this_thread::sleep_for(std::chrono::seconds(4));
+    std::this_thread::sleep_for(std::chrono::seconds(8));
 
     ASSERT_TRUE(updated);
 }

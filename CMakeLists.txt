@@ -87,7 +87,7 @@ endif()
 if(${ENABLE_C_ABI})
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.1\")
 else()
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.2.5\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.0\")
 endif()
 target_compile_options(pubnub PUBLIC -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
 
@@ -278,69 +278,33 @@ if(${RUN_TESTS})
     test_suite(member-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/membership_entity_unit.cpp)
     test_suite(message-draft-entity-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/message_draft_entity_unit.cpp)
     test_suite(quotes-unit ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/quotes_unit.cpp)
-    
-    #TODO: e/e
-    #test_suite(message-draft-e2e ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp)
 endif()
 
 if(${RUN_GOOGLE_TESTS})
+    include(GoogleTest)
+
+    function(prepare_e2e_test test_file_name)
+    
+        add_executable(
+          ${test_file_name}
+          ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/${test_file_name}.cpp
+        )
+        target_link_libraries(
+          ${test_file_name}
+          GTest::gtest_main
+        )
+        target_link_libraries(${test_file_name} pubnub-chat)
+
+        gtest_discover_tests(${test_file_name})
+
+    endfunction()
+
     enable_testing()
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test/e2e)
 
-    add_executable(
-      message_draft_e2e
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_draft_e2e.cpp
-    )
-    target_link_libraries(
-      message_draft_e2e
-      GTest::gtest_main
-    )
-    target_link_libraries(message_draft_e2e pubnub-chat)
-
-    add_executable(
-      channel_e2e
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/channel_e2e.cpp
-    )
-    target_link_libraries(
-      channel_e2e
-      GTest::gtest_main
-    )
-    target_link_libraries(channel_e2e pubnub-chat)
-
-    add_executable(
-      threads_e2e
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/threads_e2e.cpp
-    )
-    target_link_libraries(
-      threads_e2e
-      GTest::gtest_main
-    )
-    target_link_libraries(threads_e2e pubnub-chat)
-
-    add_executable(
-      user_e2e
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/user_e2e.cpp
-    )
-    target_link_libraries(
-      user_e2e
-      GTest::gtest_main
-    )
-    target_link_libraries(user_e2e pubnub-chat)
-
-    add_executable(
-      message_e2e
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/e2e/message_e2e.cpp
-    )
-    target_link_libraries(
-      message_e2e
-      GTest::gtest_main
-    )
-    target_link_libraries(message_e2e pubnub-chat)
-
-    include(GoogleTest)
-    gtest_discover_tests(message_draft_e2e)
-    gtest_discover_tests(channel_e2e)
-    gtest_discover_tests(threads_e2e)
-    gtest_discover_tests(user_e2e)
-    gtest_discover_tests(message_e2e)
+    prepare_e2e_test(message_draft_e2e)
+    prepare_e2e_test(channel_e2e)
+    prepare_e2e_test(threads_e2e)
+    prepare_e2e_test(user_e2e)
+    prepare_e2e_test(message_e2e)
 endif()

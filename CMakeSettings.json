@@ -15,6 +15,11 @@
           "name": "RUN_GOOGLE_TESTS",
           "value": "True",
           "type": "BOOL"
+        },
+        {
+          "name": "ENABLE_C_ABI",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     }
