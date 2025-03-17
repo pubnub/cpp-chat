@@ -45,7 +45,7 @@ void ChannelDAO::stop_typing() const {
 
 void ChannelDAO::start_typing_indicator(const Pubnub::String& user_id, int miliseconds, std::function<void(const std::vector<Pubnub::String>&)> on_timeout) const {
     auto indicators_timers = this->indicators_timers.lock();
-    (*indicators_timers)[user_id] = Timer(5000, [this, user_id, on_timeout]() {
+    (*indicators_timers)[user_id] = Timer(miliseconds, [this, user_id, on_timeout]() {
         this->remove_typing_indicator(user_id);
         on_timeout(this->typing.lock()->get_typing_indicators());
     });
@@ -55,6 +55,7 @@ void ChannelDAO::start_typing_indicator(const Pubnub::String& user_id, int milis
 
 void ChannelDAO::stop_typing_indicator(const Pubnub::String& user_id) const {
     (*this->indicators_timers.lock())[user_id].stop();
+    this->remove_typing_indicator(user_id);
 }
 
 void ChannelDAO::remove_typing_indicator(const Pubnub::String& user_id) const {
@@ -83,4 +84,22 @@ ChannelEntity ChannelDAO::entity_from_channel_data(const Pubnub::ChatChannelData
     entity.type = channel_data.type;
 
     return entity;
+}
+
+void ChannelDAO::add_chat_message_listener(std::shared_ptr<Subscribable> listener) const {
+    this->chat_message_listeners.lock()->push_back(listener);
+}
+
+void ChannelDAO::stop_listening_for_chat_messages() const {
+    auto listeners = this->chat_message_listeners.lock();
+
+    std::for_each(
+        listeners->begin(),
+        listeners->end(),
+        [](std::shared_ptr<Subscribable> listener) {
+            listener->close();
+        }
+    );
+
+    listeners->clear();
 }

@@ -8,6 +8,7 @@
 #include "application/membership_service.hpp"
 #include "application/dao/channel_dao.hpp"
 #include "application/access_manager_service.hpp"
+#include "callback_handle.hpp"
 #include "enums.hpp"
 #include "mentions.hpp"
 #include <algorithm>
@@ -40,9 +41,7 @@ Chat::Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_ke
     restrictions_service = chat_service->restrictions_service;
     message_service = chat_service->message_service;
     membership_service = chat_service->membership_service;
-#ifndef PN_CHAT_C_ABI
     callback_service = chat_service->callback_service;
-#endif
 }
 
 Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig &config)
@@ -171,15 +170,9 @@ EventsHistoryWrapper Pubnub::Chat::get_events_history(const Pubnub::String &chan
     return EventsHistoryWrapper({Pubnub::Vector<Event>(std::move(std::get<0>(return_tuple))), std::get<1>(return_tuple)});
 }
 
-#ifndef PN_CHAT_C_ABI
-CallbackStop Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
-    return CallbackStop(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
+CallbackHandle Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type, std::function<void(const Event&)> event_callback) const {
+    return CallbackHandle(this->chat_service->listen_for_events(channel_id, chat_event_type, event_callback));
 }
-#else
-std::vector<pubnub_v2_message> Chat::listen_for_events(const String& channel_id, pubnub_chat_event_type chat_event_type) const {
-    return this->chat_service->listen_for_events(channel_id, chat_event_type);
-}
-#endif
 
 void Chat::forward_message(const Message& message, const Channel& channel) const {
     this->message_service->forward_message(message, channel.channel_id());
@@ -260,9 +253,8 @@ const ChatService* Chat::get_chat_service() const {
     return chat_service.get();
 }
 
-std::vector<pubnub_v2_message> Chat::get_chat_updates() const
-{
-    return this->chat_service->get_chat_updates();
+std::shared_ptr<const ChatService> Chat::shared_chat_service() const {
+    return chat_service;
 }
 
 #endif

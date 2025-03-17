@@ -1,4 +1,5 @@
 #include "chat_service.hpp"
+#include "enum_converters.hpp"
 #include "application/bundles.hpp"
 #include "application/channel_service.hpp"
 #include "application/user_service.hpp"
@@ -19,6 +20,7 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include <pubnub_helper.h>
+#include <memory>
 #include "mentions.hpp"
 
 #ifdef PN_CHAT_C_ABI
@@ -41,9 +43,8 @@ void ChatService::init_services(const ChatConfig& config) {
     membership_service = std::make_shared<MembershipService>(pubnub, weak_from_this());
     presence_service = std::make_shared<PresenceService>(pubnub, weak_from_this());
     restrictions_service = std::make_shared<RestrictionsService>(pubnub, weak_from_this());
-    access_manager_service = std::make_shared<AccessManagerService>(pubnub, config.auth_key);
+    access_manager_service = std::make_shared<AccessManagerService>(pubnub);
     this->chat_config = config;
-#ifndef PN_CHAT_C_ABI
     auto service_bundle = EntityServicesBundle{
         channel_service,
         user_service,
@@ -56,7 +57,6 @@ void ChatService::init_services(const ChatConfig& config) {
         presence_service,
         pubnub
     );
-#endif
 }
 
 ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, const String& subscribe_key, const String& user_id, const String& auth_key) {
@@ -216,52 +216,15 @@ std::tuple<std::vector<Pubnub::UserMentionData>, bool> ChatService::get_current_
     return std::make_tuple(enchanced_events, is_more);
 }
 
-#ifndef PN_CHAT_C_ABI
-std::function<void()> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
+std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const {
     if(channel_id.empty())
     {
         throw std::invalid_argument("Cannot listen for events - channel_id is empty");
     }
 
-    auto messages = [this, channel_id] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    }();
+    auto subscription = this->pubnub->lock()->subscribe(channel_id);
 
-    // First broadcast messages because they're not related to the new callback
-    this->callback_service->broadcast_messages(messages);
-    this->callback_service->register_event_callback(channel_id, chat_event_type, event_callback);
+    subscription->add_event_listener(this->callback_service->to_c_event_callback(chat_event_type, event_callback), chat_event_type);
 
-    std::function<void()> stop_callback = [=](){
-        this->callback_service->remove_event_callback(channel_id, chat_event_type);
-    };
-    return stop_callback;
+    return subscription;
 }
-
-#else
-
-std::vector<pubnub_v2_message> ChatService::listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type) const {
-    if(channel_id.empty())
-    {
-        throw std::invalid_argument("Cannot listen for events - channel_id is empty");
-    }
-
-    auto messages = [this, channel_id] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->subscribe_to_channel_and_get_messages(channel_id);
-    }();
-    
-    return messages;
-}
-
-std::vector<pubnub_v2_message> ChatService::get_chat_updates() const
-{
-    auto messages = [this] {
-        auto pubnub_handle = this->pubnub->lock();
-        return pubnub_handle->fetch_messages();
-    }();
-
-    return messages;
-};
-
-#endif

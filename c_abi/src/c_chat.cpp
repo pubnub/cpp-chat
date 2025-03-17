@@ -1,8 +1,12 @@
 #include "c_chat.hpp"
 #include "c_channel.hpp"
+#include "c_response.hpp"
+#include "callback_handle.hpp"
 #include "channel.hpp"
 #include "c_errors.hpp"
+#include "application/enum_converters.hpp"
 #include "chat.hpp"
+#include "event.hpp"
 #include "string.hpp"
 #include "restrictions.hpp"
 #include "nlohmann/json.hpp"
@@ -277,22 +281,6 @@ const char* move_message_to_heap(std::vector<pubnub_v2_message> messages) {
     return c_result;
 }
 
-PnCResult pn_chat_get_updates(Pubnub::Chat *chat, char* messages_json) {
-    try {
-        auto messages = chat->get_chat_updates();
-        auto jsonised = move_message_to_heap(messages);
-        strcpy(messages_json, jsonised);
-        delete[] jsonised;
-    } catch (std::exception& e) {
-        pn_c_set_error_message(e.what());
-
-        return PN_C_ERROR;
-    }
-
-    return PN_C_OK;
-}
-
-
 void pn_clear_string(char* str) {
     if (nullptr == str) {
         return;
@@ -420,23 +408,37 @@ PnCResult pn_chat_get_channels(
     return PN_C_OK;
 }
 
-PnCResult pn_chat_listen_for_events(
+Pubnub::CallbackHandle* pn_chat_listen_for_events(
         Pubnub::Chat* chat,
         const char* channel_id,
-        Pubnub::pubnub_chat_event_type event_type,
-        char* result_json) {
+        Pubnub::pubnub_chat_event_type event_type) {
     try {
-        auto messages = chat->listen_for_events(channel_id, event_type);
-        auto jsonised = move_message_to_heap(messages);
-        strcpy(result_json, jsonised);
-        delete[] jsonised;
+        auto chat_service = chat->shared_chat_service();
+
+        return new Pubnub::CallbackHandle(chat->listen_for_events(
+                channel_id,
+                event_type,
+                [chat_service](const Pubnub::Event& event) {
+                Pubnub::String event_str("{\"event\":");
+
+                    auto j = nlohmann::json{
+                            {"timetoken", event.timetoken.c_str()},
+                            {"type", event.type},
+                            {"channelId", event.channel_id.c_str()},
+                            {"userId", event.user_id.c_str()},
+                            {"payload", event.payload.c_str()}
+                    };
+
+                    event_str += j.dump().c_str();
+                    event_str += "}";
+
+                    pn_c_append_to_response_buffer(chat_service.get(), event_str.c_str());
+                }));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
-        return PN_C_ERROR;
+        return PN_C_ERROR_PTR;
     }
-        
-    return PN_C_OK;
 }
 
 Pubnub::CreatedChannelWrapper* pn_chat_create_direct_conversation_dirty(
@@ -786,6 +788,8 @@ PnCResult pn_chat_get_current_user_mentions(Pubnub::Chat *chat, const char *star
 
         return PN_C_ERROR;
     }
+
+    return PN_C_OK;
 }
 
 PnCResult pn_chat_get_user_suggestions(Pubnub::Chat* chat, char* text, int limit, char* result) {
@@ -872,6 +876,4 @@ PnCResult pn_pam_set_pubnub_origin(Pubnub::Chat* chat, const char* origin) {
 
     return PN_C_OK;
 }
-
-
 

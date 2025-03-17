@@ -1,6 +1,7 @@
 #ifndef PN_CHAT_C_THREAD_MESSAGE_H
 #define PN_CHAT_C_THREAD_MESSAGE_H
 
+#include "callback_handle.hpp"
 #include "chat.hpp"
 #include "thread_channel.hpp"
 #include "thread_message.hpp"
@@ -74,6 +75,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_thread_message_unpin_from_pare
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::Channel* pn_thread_message_pin_to_parent_channel(Pubnub::ThreadMessage* thread_message);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_thread_message_parent_channel_id(Pubnub::ThreadMessage* thread_message, char* result);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_thread_message_stream_updates(Pubnub::ThreadMessage* message);
 
 
 #endif // PN_CHAT_C_THREAD_MESSAGE_H
