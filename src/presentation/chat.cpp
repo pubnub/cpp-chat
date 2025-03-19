@@ -242,6 +242,11 @@ AccessManager Chat::access_manager() const
     return AccessManager(this->chat_service->access_manager_service);
 }
 
+void Pubnub::Chat::register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback) 
+{
+    this->chat_service->register_logger_callback(callback);
+}
+
 void Chat::store_user_activity_timestamp() const
 {
     this->user_service->store_user_activity_timestamp();

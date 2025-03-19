@@ -16,6 +16,7 @@
 #include "page.hpp"
 #include "event.hpp"
 #include "callback_stop.hpp"
+#include "logger.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -169,6 +170,9 @@ namespace Pubnub {
 
             /* PAM */
             PN_CHAT_EXPORT Pubnub::AccessManager access_manager() const;
+
+            /* LOG */
+            PN_CHAT_EXPORT void register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback);
 
         private:
             Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
