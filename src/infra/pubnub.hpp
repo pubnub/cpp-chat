@@ -4,6 +4,7 @@
 #include "application/subscription.hpp"
 #include "string.hpp"
 #include "enums.hpp"
+#include "logger.hpp"
 #include <memory>
 #include <thread>
 #include <vector>
@@ -75,6 +76,8 @@ public:
     Pubnub::String get_current_auth_token();
     void set_auth_token(const Pubnub::String token);
     int set_pubnub_origin(const Pubnub::String origin);
+
+    void set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message));
 
 private:
     void await_and_handle_error(pubnub_res result);
