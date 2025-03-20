@@ -16,21 +16,21 @@ namespace Pubnub
 String create_set_memberships_object(String channel_id, String custom_params_json)
 {
     String custom_parameter_string;
-    custom_params_json.empty() ? custom_parameter_string = "" : custom_parameter_string = String(", \"custom\": ") + custom_params_json + String("}");
-    return String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}") + custom_parameter_string + String("]");
+    custom_params_json.empty() ? custom_parameter_string = "" : custom_parameter_string = String(", \"custom\": ") + custom_params_json;
+    return String("[{\"channel\": {\"id\": \"") + channel_id +  String("\"}") + custom_parameter_string + String("}]");
 }
 
 String create_set_members_object(String user_id, String custom_params_json)
 {
     String custom_parameter_string;
-    custom_params_json.empty() ? custom_parameter_string="" : custom_parameter_string = String(", \"custom\": ") + custom_params_json + String("}");
-    return String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}") + custom_parameter_string + String("]");
+    custom_params_json.empty() ? custom_parameter_string="" : custom_parameter_string = String(", \"custom\": ") + custom_params_json;
+    return String("[{\"uuid\": {\"id\": \"") + user_id + String("\"}") + custom_parameter_string + String("}]");
 }
 
 String create_set_members_object(std::vector<String> users_ids, String custom_params_json)
 {
     String custom_parameter_string;
-    custom_params_json.empty() ? custom_parameter_string="{}" : custom_parameter_string = custom_params_json;
+    custom_params_json.empty() ? custom_parameter_string = "" : custom_parameter_string = String(", \"custom\": ") + custom_params_json;
 
     //Start json array
     String final_object = "["; 
@@ -39,7 +39,7 @@ String create_set_members_object(std::vector<String> users_ids, String custom_pa
     for(auto &user_id : users_ids)
     {
         if(user_id.empty()) {continue;}
-        String user_object = String("{\"uuid\": {\"id\": \"") + user_id + String("\"}, \"custom\": ") + custom_parameter_string + String("},");
+        String user_object = String("{\"uuid\": {\"id\": \"") + user_id + String("\"}") + custom_parameter_string + String("},");
         final_object += user_object;
     }
 
