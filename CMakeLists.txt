@@ -135,7 +135,8 @@ set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/interval_task.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/rate_limiter.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/rate_limiter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/logger.cpp)
 
 set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/chat_entity.cpp 
@@ -183,9 +184,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/access_manager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/callback_handle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/logger.cpp
-)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp)
 
 if(${ENABLE_C_ABI})
     add_compile_definitions(PN_CHAT_C_ABI)
