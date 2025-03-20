@@ -16,7 +16,6 @@
 #include "page.hpp"
 #include "event.hpp"
 #include "callback_stop.hpp"
-#include "logger.hpp"
 #include <memory>
 #include <vector>
 #include <functional>
@@ -177,6 +176,7 @@ namespace Pubnub {
         private:
             Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
             void store_user_activity_timestamp() const;
+            Pubnub::User create_user_for_init_chat(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
 
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const UserService> user_service;

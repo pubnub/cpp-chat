@@ -31,28 +31,31 @@ User UserService::get_current_user() const
     return this->get_user(user_id);
 }
 
-User UserService::create_user(const String& user_id, const UserDAO& user_data) const
+User UserService::create_user(const String& user_id, const UserDAO& user_data, bool skip_get_user) const
 {
     if(user_id.empty())
     {
         throw std::invalid_argument("Failed to create user, user_id is empty");
     }
 
-    bool user_exists = true;
-
-    try
+    if(!skip_get_user)
     {
-        get_user(user_id);
+        bool user_exists = true;
 
-    }
-    catch(...)
-    {
-        user_exists = false;
-    }
-
-    if(user_exists)
-    {
-        throw std::invalid_argument("User with this ID already exists");
+        try
+        {
+            get_user(user_id);
+    
+        }
+        catch(...)
+        {
+            user_exists = false;
+        }
+    
+        if(user_exists)
+        {
+            throw std::invalid_argument("User with this ID already exists");
+        }
     }
     
     auto new_user_entity = user_data.to_entity();
