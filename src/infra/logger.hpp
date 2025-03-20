@@ -6,6 +6,10 @@
 #include <functional>
 #include <sstream>
 
+extern "C" {
+#include <pubnub_log.h>
+}
+
 
 class Logger
 {
