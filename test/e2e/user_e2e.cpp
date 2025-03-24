@@ -55,6 +55,32 @@ protected:
     }
 };
 
+TEST_F(UserTests, TestUserActive) {
+    Pubnub::User test_user;
+    try {
+        test_user = chat->get_user("test_active_user");
+    } catch (const std::exception&) {
+        test_user = chat->create_user("test_active_user", Pubnub::ChatUserData {});
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    ASSERT_TRUE(test_user.active());
+}
+
+TEST_F(UserTests, TestLastUserActive) {
+    Pubnub::User test_user;
+    try {
+        test_user = chat->get_user("test_last_active_user");
+    } catch (const std::exception&) {
+        test_user = chat->create_user("test_last_active_user", Pubnub::ChatUserData {});
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    ASSERT_TRUE(std::stoi(test_user.last_active_timestamp().value()) > 0);
+}
+
 TEST_F(UserTests, TestUserUpdate) {
     Pubnub::User test_user;
     try
