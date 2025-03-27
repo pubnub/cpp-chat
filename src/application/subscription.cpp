@@ -42,12 +42,12 @@ Subscription::~Subscription() {
 }
 
 void Subscription::close() {
-    if(!contextes.has_value())
+    if(!context.has_value())
     {
-        throw std::runtime_error("close subscription failed, contextes are invalid");
+        throw std::runtime_error("close subscription failed, context are invalid");
     }
 
-    pubnub_subscribe_remove_subscription_listener(this->subscription, subscription_type, subscription_callback, &contextes.value().get());
+    pubnub_subscribe_remove_subscription_listener(this->subscription, subscription_type, subscription_callback, &context.value().get());
 
     auto result = pubnub_unsubscribe_with_subscription(&this->subscription);
     if (PNR_OK != result) {
@@ -113,7 +113,7 @@ void Subscription::set_callback(
 
     this->subscription_type = type;
     this->subscription_callback = callback_data.callback;
-    this->contextes = callback_data.context;
+    this->context = callback_data.context;
 
     if (PNR_OK != result) {
         throw std::runtime_error(
@@ -138,12 +138,12 @@ SubscriptionSet::~SubscriptionSet() {
 }
 
 void SubscriptionSet::close() {
-    if(!contextes.has_value())
+    if(!context.has_value())
     {
-        throw std::runtime_error("close subscription set failed, contextes are invalid");
+        throw std::runtime_error("close subscription set failed, context are invalid");
     }
 
-    pubnub_subscribe_remove_subscription_set_listener(this->subscription_set, subscription_type, subscription_callback, &contextes.value());
+    pubnub_subscribe_remove_subscription_set_listener(this->subscription_set, subscription_type, subscription_callback, &context.value());
 
     auto result = pubnub_unsubscribe_with_subscription_set(&this->subscription_set);
     if (PNR_OK != result) {
@@ -186,7 +186,7 @@ void SubscriptionSet::set_callback(
 
     this->subscription_type = type;
     this->subscription_callback = callback_data.callback;
-    this->contextes = callback_data.context;
+    this->context = callback_data.context;
 
     if (PNR_OK != result) {
         throw std::runtime_error(

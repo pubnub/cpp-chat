@@ -44,7 +44,7 @@ class Subscription: public Subscribable {
 
     private:
         pubnub_subscription_t* subscription;
-        std::optional<std::reference_wrapper<std::any>> contextes;
+        std::optional<std::reference_wrapper<std::any>> context;
         pubnub_subscribe_listener_type subscription_type;
         pubnub_subscribe_message_callback_t subscription_callback;
 
@@ -69,7 +69,7 @@ class SubscriptionSet: public Subscribable {
 
     private:
         pubnub_subscription_set_t* subscription_set;
-        std::optional<std::reference_wrapper<std::any>> contextes;
+        std::optional<std::reference_wrapper<std::any>> context;
         pubnub_subscribe_listener_type subscription_type;
         pubnub_subscribe_message_callback_t subscription_callback;
 
