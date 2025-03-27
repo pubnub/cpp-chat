@@ -42,6 +42,13 @@ Subscription::~Subscription() {
 }
 
 void Subscription::close() {
+    if(!contextes.has_value())
+    {
+        throw std::runtime_error("close subscription failed, contextes are invalid");
+    }
+
+    pubnub_subscribe_remove_subscription_listener(this->subscription, subscription_type, subscription_callback, &contextes.value().get());
+
     auto result = pubnub_unsubscribe_with_subscription(&this->subscription);
     if (PNR_OK != result) {
         throw std::runtime_error(error_message("{} close failed", "Subscription", result).c_str());
@@ -49,15 +56,15 @@ void Subscription::close() {
 }
 
 void Subscription::add_message_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "message");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE, "message");
 }
 
 void Subscription::add_channel_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channel update");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channel update");
 }
 
 void Subscription::add_user_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "user update");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "user update");
 }
 
 void Subscription::add_event_listener(
@@ -66,10 +73,10 @@ void Subscription::add_event_listener(
 ) {
     switch (Pubnub::event_method_from_event_type(event_type)) {
         case Pubnub::EventMethod::Publish:
-            this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "event");
+            this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE, "event");
             break;
         case Pubnub::EventMethod::Signal:
-            this->add_callback(callback, PBSL_LISTENER_ON_SIGNAL, "event");
+            this->set_callback(callback, PBSL_LISTENER_ON_SIGNAL, "event");
             break;
         default:
             throw std::runtime_error("Unsupported event type");
@@ -77,22 +84,22 @@ void Subscription::add_event_listener(
 }
 
 void Subscription::add_presence_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE, "presence");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE, "presence");
 }
 
 void Subscription::add_membership_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "membership update");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "membership update");
 }
 
 void Subscription::add_message_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message update");
 }
 
 void Subscription::add_thread_message_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message update");
 }
 
-void Subscription::add_callback(
+void Subscription::set_callback(
     CCoreCallbackData callback_data,
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
@@ -104,7 +111,9 @@ void Subscription::add_callback(
         &callback_data.context
     );
 
-    this->contextes.push_back(callback_data.context);
+    this->subscription_type = type;
+    this->subscription_callback = callback_data.callback;
+    this->contextes = callback_data.context;
 
     if (PNR_OK != result) {
         throw std::runtime_error(
@@ -129,6 +138,13 @@ SubscriptionSet::~SubscriptionSet() {
 }
 
 void SubscriptionSet::close() {
+    if(!contextes.has_value())
+    {
+        throw std::runtime_error("close subscription set failed, contextes are invalid");
+    }
+
+    pubnub_subscribe_remove_subscription_set_listener(this->subscription_set, subscription_type, subscription_callback, &contextes.value());
+
     auto result = pubnub_unsubscribe_with_subscription_set(&this->subscription_set);
     if (PNR_OK != result) {
         throw std::runtime_error(error_message("{} close failed", "SubscriptionSet", result).c_str()
@@ -137,26 +153,26 @@ void SubscriptionSet::close() {
 }
 
 void SubscriptionSet::add_channel_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channels updates");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "channels updates");
 }
 
 void SubscriptionSet::add_membership_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "memberships updates");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "memberships updates");
 }
 
 void SubscriptionSet::add_message_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "message updates");
 }
 
 void SubscriptionSet::add_thread_message_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
+    this->set_callback(callback, PBSL_LISTENER_ON_MESSAGE_ACTION, "thread message updates");
 }
 
 void SubscriptionSet::add_user_update_listener(CCoreCallbackData callback) {
-    this->add_callback(callback, PBSL_LISTENER_ON_OBJECTS, "users updates");
+    this->set_callback(callback, PBSL_LISTENER_ON_OBJECTS, "users updates");
 }
 
-void SubscriptionSet::add_callback(
+void SubscriptionSet::set_callback(
     CCoreCallbackData callback_data,
     pubnub_subscribe_listener_type type,
     const Pubnub::String& callback_kind
@@ -168,7 +184,9 @@ void SubscriptionSet::add_callback(
         &callback_data.context
     );
 
-    this->contextes.push_back(callback_data.context);
+    this->subscription_type = type;
+    this->subscription_callback = callback_data.callback;
+    this->contextes = callback_data.context;
 
     if (PNR_OK != result) {
         throw std::runtime_error(
