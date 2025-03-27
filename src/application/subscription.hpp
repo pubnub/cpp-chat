@@ -6,6 +6,7 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "enums.hpp"
 #include "string.hpp"
@@ -43,9 +44,11 @@ class Subscription: public Subscribable {
 
     private:
         pubnub_subscription_t* subscription;
-        std::vector<std::reference_wrapper<std::any>> contextes;
+        std::optional<std::reference_wrapper<std::any>> context;
+        pubnub_subscribe_listener_type subscription_type;
+        pubnub_subscribe_message_callback_t subscription_callback;
 
-        void add_callback(
+        void set_callback(
             CCoreCallbackData callback,
             pubnub_subscribe_listener_type type,
             const Pubnub::String& callback_kind
@@ -66,9 +69,11 @@ class SubscriptionSet: public Subscribable {
 
     private:
         pubnub_subscription_set_t* subscription_set;
-        std::vector<std::reference_wrapper<std::any>> contextes;
+        std::optional<std::reference_wrapper<std::any>> context;
+        pubnub_subscribe_listener_type subscription_type;
+        pubnub_subscribe_message_callback_t subscription_callback;
 
-        void add_callback(
+        void set_callback(
             CCoreCallbackData callback,
             pubnub_subscribe_listener_type type,
             const Pubnub::String& callback_kind
