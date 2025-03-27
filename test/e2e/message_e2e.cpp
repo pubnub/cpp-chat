@@ -22,11 +22,11 @@ protected:
     void SetUp() override {
         Pubnub::String publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
         if (publish_key.empty()) {
-            publish_key = "demo-36";
+            publish_key = "pub-c-79c582a2-d7a4-4ee7-9f28-7a6f1b7fa11c";
         }
         Pubnub::String subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
         if (subscribe_key.empty()) {
-            subscribe_key = "demo-36";
+            subscribe_key = "sub-c-ca0af928-f4f9-474c-b56e-d6be81bf8ed0";
         }
 
         chat.reset(new Pubnub::Chat(Pubnub::Chat::init(
@@ -94,6 +94,10 @@ TEST_F(MessageTests, TestGetMessage) {
     });
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    channel.send_text("message");
+
+     std::this_thread::sleep_for(std::chrono::seconds(8));
 
     auto fetched_message = channel.get_message(time_token);
     ASSERT_TRUE(fetched_message.timetoken() == Pubnub::String(time_token));
@@ -167,6 +171,7 @@ TEST_F(MessageTests, TestPinAndUnPinMessage) {
     auto unpinned = false;
     channel.join([&](Pubnub::Message message) { 
         message.pin();
+        std::this_thread::sleep_for(std::chrono::seconds(5));
         try {
             auto pinned_message = channel.get_pinned_message();
             pinned = pinned_message.text() == message.text();
@@ -174,6 +179,7 @@ TEST_F(MessageTests, TestPinAndUnPinMessage) {
             pinned = false;
         }
         message.unpin();
+        std::this_thread::sleep_for(std::chrono::seconds(5));
         try {
             auto pinned_message = channel.get_pinned_message();
         } catch (const std::exception&) {
@@ -184,7 +190,7 @@ TEST_F(MessageTests, TestPinAndUnPinMessage) {
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
     channel.send_text("message");
-    std::this_thread::sleep_for(std::chrono::seconds(12));
+    std::this_thread::sleep_for(std::chrono::seconds(25));
 
     ASSERT_TRUE(pinned);
     ASSERT_TRUE(unpinned);

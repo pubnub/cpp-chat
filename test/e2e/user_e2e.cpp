@@ -22,11 +22,11 @@ protected:
     void SetUp() override {
         Pubnub::String publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
         if (publish_key.empty()) {
-            publish_key = "demo-36";
+            publish_key = "pub-c-79c582a2-d7a4-4ee7-9f28-7a6f1b7fa11c";
         }
         Pubnub::String subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
         if (subscribe_key.empty()) {
-            subscribe_key = "demo-36";
+            subscribe_key = "sub-c-ca0af928-f4f9-474c-b56e-d6be81bf8ed0";
         }
 
         chat.reset(new Pubnub::Chat(Pubnub::Chat::init(
@@ -56,29 +56,25 @@ protected:
 };
 
 TEST_F(UserTests, TestUserActive) {
-    Pubnub::User test_user;
-    try {
-        test_user = chat->get_user("test_active_user");
-    } catch (const std::exception&) {
-        test_user = chat->create_user("test_active_user", Pubnub::ChatUserData {});
-    }
+    auto channel =
+        chat->create_public_conversation("active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
 
-    ASSERT_TRUE(test_user.active());
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(current_user.active());
 }
 
 TEST_F(UserTests, TestLastUserActive) {
-    Pubnub::User test_user;
-    try {
-        test_user = chat->get_user("test_last_active_user");
-    } catch (const std::exception&) {
-        test_user = chat->create_user("test_last_active_user", Pubnub::ChatUserData {});
-    }
+    auto channel =
+        chat->create_public_conversation("last_active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
 
-    ASSERT_TRUE(std::stoi(test_user.last_active_timestamp().value()) > 0);
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(std::stoll(current_user.last_active_timestamp().value().c_str()) > 0);
 }
 
 TEST_F(UserTests, TestUserUpdate) {
