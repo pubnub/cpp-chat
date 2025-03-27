@@ -81,7 +81,7 @@ User UserService::get_user(const String& user_id) const
         throw std::runtime_error("can't get user, response is incorrect");
     }
 
-    if (response_json["data"].is_null()) {
+    if (!response_json.contains("data") || response_json["data"].is_null()) {
         throw std::runtime_error("can't get user, response doesn't have data field");
     }
 

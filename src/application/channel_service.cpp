@@ -138,7 +138,7 @@ Channel ChannelService::get_channel(const String& channel_id) const {
         throw std::runtime_error("can't get channel, response is incorrect");
     }
 
-    if(parsed_response["data"].is_null()) {
+    if(!parsed_response.contains("data") || parsed_response["data"].is_null()) {
         throw std::runtime_error("can't get channel, response doesn't have data field");
     }
 
