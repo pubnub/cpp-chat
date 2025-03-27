@@ -57,7 +57,7 @@ Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscri
     }
     catch (...)
     {
-        chat.create_user(user_id, ChatUserData());
+        chat.create_user_for_init_chat(user_id, ChatUserData());
     }
 
     if (config.store_user_activity_timestamps) {
@@ -242,9 +242,20 @@ AccessManager Chat::access_manager() const
     return AccessManager(this->chat_service->access_manager_service);
 }
 
+void Pubnub::Chat::register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback) 
+{
+    this->chat_service->register_logger_callback(callback);
+}
+
 void Chat::store_user_activity_timestamp() const
 {
     this->user_service->store_user_activity_timestamp();
+}
+
+Pubnub::User Chat::create_user_for_init_chat(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const
+{
+    //During init we skip get_user during create_user, as we already checked that the user doesn't exist
+    return this->user_service->create_user(user_id, user_data, true);
 }
 
 #ifdef PN_CHAT_C_ABI
