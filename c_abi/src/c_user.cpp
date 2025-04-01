@@ -172,7 +172,7 @@ void pn_user_get_data_email(Pubnub::User* user, char* result) {
     strcpy(result, user_data.c_str());
 }
 
-void pn_user_get_data_custom_data_json(Pubnub::User* user, char* result) {
+void pn_user_get_data_custom_data(Pubnub::User* user, char* result) {
     auto user_data = user->user_data().custom_data_json;
     strcpy(result, user_data.c_str());
 }
