@@ -1,7 +1,7 @@
 #ifndef PN_CHAT_CHAT_SERVICE_HPP
 #define PN_CHAT_CHAT_SERVICE_HPP
 
-#define PN_MAX_LIMIT 99
+#define PN_MAX_LIMIT 100
 
 #include "application/subscription.hpp"
 #include "chat.hpp"

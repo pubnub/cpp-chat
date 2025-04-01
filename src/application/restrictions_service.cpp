@@ -123,7 +123,7 @@ std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::Stri
 {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get users restrictions, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get users restrictions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
@@ -175,7 +175,7 @@ std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::Stri
 Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get channels restrictions, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get channels restrictions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
     
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;

@@ -31,7 +31,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
 
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get members, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get members, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     String include_string = "custom,channel,totalCount,customChannel";
@@ -78,7 +78,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
 std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get memberships, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get memberships, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
@@ -286,7 +286,7 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
     
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get unread messages counts, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get unread messages counts, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
     
     auto chat_service_shared = chat_service.lock();
@@ -337,7 +337,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't mark all messages as read, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't mark all messages as read, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     auto chat_service_shared = chat_service.lock();

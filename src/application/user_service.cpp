@@ -94,7 +94,7 @@ User UserService::get_user(const String& user_id) const
 std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> UserService::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get users, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get users, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     Pubnub::String include = "custom,totalCount";
@@ -193,7 +193,7 @@ std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text
 {
     if(limit < 0 || limit > PN_MAX_LIMIT)
     {
-        throw std::invalid_argument("can't get users suggestions, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+        throw std::invalid_argument("can't get users suggestions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
     auto chat_shared = this->chat_service.lock();
