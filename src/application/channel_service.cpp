@@ -146,6 +146,11 @@ Channel ChannelService::get_channel(const String& channel_id) const {
 }
 
 std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> ChannelService::get_channels(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get channels, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+    
     Pubnub::String include = "custom,totalCount,channel";
     auto channels_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -451,6 +456,11 @@ void ChannelService::emit_user_mention(const Pubnub::String &channel_id, const P
 
 std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::String text, int limit) const
 {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get channel suggestions, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+
     auto chat_shared = this->chat_service.lock();
 
     if(!chat_shared)
@@ -475,6 +485,11 @@ std::vector<Pubnub::Channel> ChannelService::get_channel_suggestions(Pubnub::Str
 
 std::vector<Pubnub::Membership> ChannelService::get_user_suggestions_for_channel(const String& channel_id, ChannelDAO& channel_data, Pubnub::String text, int limit) const
 {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get users suggestions, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+
     auto chat_shared = this->chat_service.lock();
 
     if(!chat_shared)

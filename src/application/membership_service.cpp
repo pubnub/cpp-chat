@@ -28,6 +28,12 @@ MembershipService::MembershipService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr
 {}
 
 std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> MembershipService::get_channel_members(const String& channel_id, const ChannelDAO& channel_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get members, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+
     String include_string = "custom,channel,totalCount,customChannel";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, filter, sort, page] {
@@ -70,6 +76,11 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
 }
 
 std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> MembershipService::get_user_memberships(const String& user_id, const UserDAO& user_data, const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get memberships, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+
     String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
 
     auto get_memberships_response = [this, user_id, include_string, filter, sort,  limit, page] {
@@ -272,6 +283,12 @@ int MembershipService::get_unread_messages_count_one_channel(const Membership& m
 }
 
 std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipService::get_all_unread_messages_counts(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get unread messages counts, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+    
     auto chat_service_shared = chat_service.lock();
     std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> return_tuples;
 
@@ -318,6 +335,11 @@ std::vector<std::tuple<Pubnub::Channel, Pubnub::Membership, int>> MembershipServ
 
 std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipService::mark_all_messages_as_read(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page& page) const
 {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't mark all messages as read, limit has to be within 0 - %d range"), PN_MAX_LIMIT;
+    }
+
     auto chat_service_shared = chat_service.lock();
     std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> return_tuple;
 
