@@ -568,6 +568,10 @@ Pubnub::String PubNub::fetch_history(
 
     auto fetch_history_response = pubnub_get_fetch_history(this->main_context.get());
 
+    //Force to clear the buffer, looks like pubnub_get_fetch_history doesn't clear it properly
+    // TODO: werify if it is the real root cause. 
+    auto _message = pubnub_get(this->main_context.get());
+
     if(!fetch_history_response.ptr)
     {
         throw std::runtime_error("Fetch history response is invalid");
