@@ -26,7 +26,7 @@ class UserService : public std::enable_shared_from_this<UserService>
 
         Pubnub::User get_current_user() const;
 
-        Pubnub::User create_user(const Pubnub::String& user_id, const UserDAO& user_data) const;
+        Pubnub::User create_user(const Pubnub::String& user_id, const UserDAO& user_data, bool skip_get_user = false) const;
         Pubnub::User get_user(const Pubnub::String& user_id) const;
         std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> get_users(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
         Pubnub::User update_user(const Pubnub::String& user_id, const UserDAO& user_data) const;

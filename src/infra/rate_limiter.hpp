@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <thread>
 
 struct RateLimiterElement {
     std::function<Pubnub::String()> task;

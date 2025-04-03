@@ -30,6 +30,7 @@ extern "C" {
 #include <pubnub_ntf_enforcement.h>
 #include <pubnub_entities.h>
 #include <pubnub_subscribe_event_listener.h>
+#include <pubnub_log.h>
 }
 
 using json = nlohmann::json;
@@ -840,4 +841,9 @@ int PubNub::set_pubnub_origin(const Pubnub::String origin)
     custom_origin = origin;
     return pubnub_origin_set(this->main_context.get(), custom_origin.c_str());
     return pubnub_origin_set(this->long_poll_context.get(), custom_origin.c_str());
+}
+
+void PubNub::set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message)) 
+{
+    pubnub_set_log_callback(callback);
 }

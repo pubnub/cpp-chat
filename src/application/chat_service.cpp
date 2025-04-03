@@ -57,6 +57,8 @@ void ChatService::init_services(const ChatConfig& config) {
         presence_service,
         pubnub
     );
+
+    this->pubnub->lock()->set_logging_callback(Logger::log_ccore_message);
 }
 
 ThreadSafePtr<PubNub> ChatService::create_pubnub(const String& publish_key, const String& subscribe_key, const String& user_id, const String& auth_key) {
@@ -227,4 +229,9 @@ std::shared_ptr<Subscription> ChatService::listen_for_events(const Pubnub::Strin
     subscription->add_event_listener(this->callback_service->to_c_event_callback(chat_event_type, event_callback), chat_event_type);
 
     return subscription;
+}
+
+void ChatService::register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback) const
+{
+    logger.register_logging_callback(callback);
 }
