@@ -64,7 +64,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG feat/runtime-api-enforcement
+  GIT_TAG v5.0.0
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
