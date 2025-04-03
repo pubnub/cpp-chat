@@ -55,6 +55,7 @@ set(USE_SET_DNS_SERVERS ON)
 set(USE_IPV6 ON)
 set(USE_SUBSCRIBE_EVENT_ENGINE ON)
 set(USE_LOG_CALLBACK ON)
+set(USE_NTF_RUNTIME_SELECTION ON)
 
 if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
@@ -63,7 +64,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG feat/ee-listener-void
+  GIT_TAG feat/runtime-api-enforcement
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
@@ -86,12 +87,12 @@ endif()
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.1\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.3\")
 else()
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.0\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.3\")
 endif()
 
-set(CCORE_COMPILE_OPTIONS -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1 -DPUBNUB_USE_LOG_CALLBACK=1)
+set(CCORE_COMPILE_OPTIONS -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1 -DPUBNUB_USE_LOG_CALLBACK=1)
 target_compile_options(pubnub PUBLIC ${CCORE_COMPILE_OPTIONS})
 
 FetchContent_Declare(

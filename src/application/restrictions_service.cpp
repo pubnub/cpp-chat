@@ -121,6 +121,11 @@ Restriction RestrictionsService::get_user_restrictions(const String& user_id, co
 
 std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::String> RestrictionsService::get_users_restrictions(const Pubnub::String &channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const
 {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get users restrictions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
+    }
+
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 
     auto get_restrictions_response = [this, limit, sort, page, full_channel_id] {
@@ -132,7 +137,7 @@ std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::Stri
 
     if(response_json.is_null())
     {
-        throw std::runtime_error("can't get channel restrictions, response is incorrect");
+        throw std::runtime_error("can't get users restrictions, response is incorrect");
     }
 
     Json response_data_json = response_json["data"];
@@ -168,6 +173,11 @@ std::tuple<std::vector<Pubnub::UserRestriction>, Pubnub::Page, int, Pubnub::Stri
 }
 
 Restriction RestrictionsService::get_channel_restrictions(const String& user_id, const String& channel_id, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get channels restrictions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
+    }
+    
     String full_channel_id = INTERNAL_MODERATION_PREFIX + channel_id;
 
     auto get_restrictions_response = [this, full_channel_id, limit, sort, page] {
