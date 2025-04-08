@@ -25,7 +25,7 @@ else()
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-option(ENABLE_C_ABI "Enable C ABI" OFF)
+option(ENABLE_C_ABI "Enable C ABI" ON)
 if(${ENABLE_C_ABI})
     message(STATUS "Enabling C ABI functions")
 endif()
@@ -54,8 +54,8 @@ set(USE_CALLBACK_API ON)
 set(USE_SET_DNS_SERVERS ON)
 set(USE_IPV6 ON)
 set(USE_SUBSCRIBE_EVENT_ENGINE ON)
-set(USE_LOG_CALLBACK ON)
 set(USE_NTF_RUNTIME_SELECTION ON)
+set(LOG_LEVEL "TRACE")
 
 if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
@@ -64,7 +64,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG v5.0.0
+  GIT_TAG test/wasm
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
@@ -92,7 +92,7 @@ else()
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.3\")
 endif()
 
-set(CCORE_COMPILE_OPTIONS -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1 -DPUBNUB_USE_LOG_CALLBACK=1)
+set(CCORE_COMPILE_OPTIONS -pthread -DPUBNUB_ORIGIN_SETTABLE=1 -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
 target_compile_options(pubnub PUBLIC ${CCORE_COMPILE_OPTIONS})
 
 FetchContent_Declare(
@@ -217,12 +217,13 @@ add_library(pubnub-chat SHARED ${SOURCES})
 
 target_compile_options(pubnub-chat PRIVATE ${CCORE_COMPILE_OPTIONS})
 
-target_link_libraries(pubnub-chat PRIVATE -lpthread pubnub)
+target_link_libraries(pubnub-chat PRIVATE -lpthread  -pthread -sASYNCIFY -sPROXY_TO_PTHREAD -sSTANDALONE_WASM pubnub)
+ 
 
 # TODO: kept for debugging purposes - should be deleted before release
-add_executable(pubnub-chat-example example/main.cpp)
-target_compile_options(pubnub-chat-example PRIVATE ${CCORE_COMPILE_OPTIONS})
-target_link_libraries(pubnub-chat-example PUBLIC -lpthread pubnub-chat)
+#add_executable(pubnub-chat-example example/main.cpp)
+#target_compile_options(pubnub-chat-example PRIVATE ${CCORE_COMPILE_OPTIONS})
+#target_link_libraries(pubnub-chat-example PUBLIC  -lpthread  -pthread -sPROXY_TO_PTHREAD -sASYNCIFY pubnub-chat)
 
 if(${COMPILE_EXAMPLES})
     function(example name)
