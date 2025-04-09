@@ -579,8 +579,8 @@ CCoreCallbackData CallbackService::to_c_memberships_updates_callback(const std::
                             custom_field
                     );
 
-                    MembershipEntity stream_membership_entity = MembershipDAO(stream_membership->custom_data()).to_entity();
-                    MembershipEntity membership_entity = MembershipDAO(membership_obj.custom_data()).to_entity();
+                    MembershipEntity stream_membership_entity = MembershipDAO(stream_membership->membership_data()).to_entity();
+                    MembershipEntity membership_entity = MembershipDAO(membership_obj.membership_data()).to_entity();
                     auto updated_membership = chat->membership_service->create_membership_object(stream_membership->user, stream_membership->channel, MembershipEntity::from_base_and_updated_membership(stream_membership_entity, membership_entity));
 
                     std::vector<Pubnub::Membership> updated_memberships;
