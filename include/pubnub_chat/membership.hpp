@@ -37,11 +37,11 @@ namespace Pubnub
 
             PN_CHAT_EXPORT Pubnub::Membership& operator =(const Pubnub::Membership& other);
 
-            //TODO:: Mark as deprecated
+            [[deprecated("Replaced by membership_data() which contains more membership information")]]
             PN_CHAT_EXPORT Pubnub::String custom_data() const;
             PN_CHAT_EXPORT Pubnub::ChatMembershipData membership_data() const;
 
-            //TODO:: Mark as deprecated
+            //TODO:: Mark as deprecated??
             PN_CHAT_EXPORT Pubnub::Membership update(const Pubnub::String& custom_object_json) const;
             PN_CHAT_EXPORT Pubnub::Membership update(const Pubnub::ChatMembershipData& membership_data) const;
             PN_CHAT_EXPORT Pubnub::String last_read_message_timetoken() const;
