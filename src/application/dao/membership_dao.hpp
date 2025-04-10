@@ -6,15 +6,17 @@
 
 class MembershipDAO {
     public:
-        MembershipDAO(const Pubnub::String& custom_data);
+        MembershipDAO(const Pubnub::ChatMembershipData& membership_data);
         MembershipDAO(const MembershipEntity& entity);
         ~MembershipDAO() = default;
 
-        Pubnub::String to_custom_data() const;
+        Pubnub::ChatMembershipData to_membership_data() const;
         const MembershipEntity& get_entity() const;
         MembershipEntity to_entity() const;
 
     private:
+        static MembershipEntity entity_from_membership_data(const Pubnub::ChatMembershipData& membership_data);
+
         MembershipEntity entity;
 };
 

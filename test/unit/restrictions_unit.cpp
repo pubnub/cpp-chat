@@ -15,8 +15,8 @@ Ensure(Restriction, should_prepare_remove_member_payload) {
 }
 
 Ensure(Restriction, should_prepare_lift_restrictions_payload) {
-    auto result = trim_whitespaces(Restrictions::lift_restrictions_payload("channel1", "reason"));
-    assert_string_equal(result.c_str(), "{\"channelId\":\"PUBNUB_INTERNAL_MODERATION_channel1\",\"restrictions\":\"lifted\",\"reason\":\"reason\"}");
+    auto result = trim_whitespaces(Restrictions::lift_restrictions_payload("PUBNUB_INTERNAL_MODERATION_channel1", "reason"));
+    assert_string_equal(result.c_str(), "{\"channelId\":\"PUBNUB_INTERNAL_MODERATION_channel1\",\"restriction\":\"lifted\",\"reason\":\"reason\"}");
 }
 
 Ensure(Restriction, should_prepare_restrict_member_payload) {

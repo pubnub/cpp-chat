@@ -28,7 +28,7 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         Pubnub::Membership invite_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::User& user) const;
         std::vector<Pubnub::Membership> invite_multiple_to_channel(const Pubnub::String& channel_id, const ChannelDAO& channel_data, const std::vector<Pubnub::User>& users) const;
     
-        Pubnub::Membership update(const Pubnub::User& user, const Pubnub::Channel& channel, const Pubnub::String& custom_object_json) const;
+        Pubnub::Membership update(const Pubnub::User& user, const Pubnub::Channel& channel, MembershipDAO membership_data) const;
         Pubnub::String last_read_message_timetoken(const Pubnub::Membership& membership) const;
         Pubnub::Membership set_last_read_message_timetoken(const Pubnub::Membership& membership, const Pubnub::String& timetoken) const;
         int get_unread_messages_count_one_channel(const Pubnub::Membership& membership) const;

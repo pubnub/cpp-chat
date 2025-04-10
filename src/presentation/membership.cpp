@@ -19,7 +19,7 @@ user(other.user),
 channel(other.channel),
 chat_service(other.chat_service),
 membership_service(other.membership_service),
-data(std::make_unique<MembershipDAO>(other.data->to_custom_data()))
+data(std::make_unique<MembershipDAO>(other.data->to_membership_data()))
 {}
 
 Membership& Membership::operator =(const Membership& other)
@@ -30,7 +30,7 @@ Membership& Membership::operator =(const Membership& other)
     }
     this->user = other.user;
     this->channel = other.channel;
-    this->data = std::make_unique<::MembershipDAO>(other.data->to_custom_data());
+    this->data = std::make_unique<::MembershipDAO>(other.data->to_membership_data());
     this->chat_service = other.chat_service;
     this->membership_service = other.membership_service;
 
@@ -40,11 +40,19 @@ Membership& Membership::operator =(const Membership& other)
 Membership::~Membership() = default;
 
 String Membership::custom_data() const {
-    return this->data->to_custom_data();
+    return this->data->to_membership_data().custom_data_json;
+}
+
+ChatMembershipData Membership::membership_data() const {
+    return this->data->to_membership_data();
 }
 
 Membership Membership::update(const String& custom_object_json) const {
-    return this->membership_service->update(user, channel, custom_object_json);
+    return this->membership_service->update(user, channel, MembershipDAO(ChatMembershipData{custom_object_json, "", ""}));
+}
+
+Membership Membership::update(const Pubnub::ChatMembershipData& membership_data) const {
+    return this->membership_service->update(user, channel, MembershipDAO(membership_data));
 }
 
 String Membership::last_read_message_timetoken() const {

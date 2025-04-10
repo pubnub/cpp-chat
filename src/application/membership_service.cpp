@@ -34,7 +34,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
         throw std::invalid_argument("can't get members, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -81,7 +81,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
         throw std::invalid_argument("can't get memberships, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
-    String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
+    String include_string = "totalCount,custom,channel,channel.custom,type,channel.type,status,channel.status";
 
     auto get_memberships_response = [this, user_id, include_string, filter, sort,  limit, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -138,7 +138,7 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
         return members[0];
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
     String set_memeberships_obj = create_set_memberships_object(channel_id, "");
 
     auto user_id = user.user_id();
@@ -181,7 +181,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
         }
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
     String set_memebers_obj = create_set_members_object(users_ids, "");
 
     auto set_members_response = [this, channel_id, set_memebers_obj, include_string, filter] {
@@ -215,9 +215,11 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
     return invitees_memberships;
 }
 
-Membership MembershipService::update(const User& user, const Channel& channel, const String& custom_object_json) const {
+Membership MembershipService::update(const User& user, const Channel& channel, MembershipDAO membership_data) const {
+    auto entity = membership_data.to_entity();
+
     String custom_object_json_string;
-    custom_object_json.empty() ? custom_object_json_string = "{}" : custom_object_json_string = custom_object_json;
+    entity.custom_field.empty() ? custom_object_json_string = "{}" : custom_object_json_string = entity.custom_field;
 
     json response_json = json::parse(custom_object_json_string);
     
@@ -226,18 +228,16 @@ Membership MembershipService::update(const User& user, const Channel& channel, c
         throw std::invalid_argument("Can't update membership, custom_object_json is not valid json object");
     }
 
-	String set_memberships_string = String("[{\"channel\": {\"id\": \"") + channel.channel_id() + String("\"}, \"custom\": ") + custom_object_json_string + String("}]");
-
     {
         auto pubnub_handle = pubnub->lock();
-        pubnub_handle->set_memberships(user.user_id(), set_memberships_string);
+        pubnub_handle->set_memberships(user.user_id(), entity.get_set_memberships_json_string(channel.channel_id()));
     }
 
-    return create_membership_object(user, channel, create_domain_membership(custom_object_json_string));
+    return create_membership_object(user, channel, entity);
 }
 
 String MembershipService::last_read_message_timetoken(const Membership& membership) const {
-    String custom_data = membership.custom_data();
+    String custom_data = membership.membership_data().custom_data_json;
     if(custom_data.empty())
     {
         return String();
@@ -250,7 +250,7 @@ String MembershipService::last_read_message_timetoken(const Membership& membersh
 
 Pubnub::Membership MembershipService::set_last_read_message_timetoken(const Membership& membership, const String& timetoken) const {
     
-    String custom_data = membership.custom_data().empty() ? "{}" : membership.custom_data();
+    String custom_data = membership.membership_data().custom_data_json.empty() ? "{}" : membership.membership_data().custom_data_json;
 
     Json custom_data_json = Json::parse(custom_data);
     custom_data_json.insert_or_update("lastReadMessageTimetoken", timetoken);
@@ -360,7 +360,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
     {
         relevant_channel_ids.push_back(membership.channel.channel_id());
         
-        String custom_object_json_string = membership.custom_data().empty() ? String("{}") : membership.custom_data();
+        String custom_object_json_string = membership.membership_data().custom_data_json.empty() ? String("{}") : membership.membership_data().custom_data_json;
         json custom_object_json = json::parse(custom_object_json_string);
         custom_object_json["lastReadMessageTimetoken"] = now_timetoken.c_str();
 
@@ -380,7 +380,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 
     auto memberships_response = [this, current_user, set_memberships_string] {
         auto pubnub_handle = pubnub->lock();
-        String include_string = "custom,channel,totalCount,customChannel";
+        String include_string = "custom,channel,totalCount,custom.channel,status,type";
         return pubnub_handle->set_memberships(current_user.user_id(), set_memberships_string, include_string);
     }();
 
@@ -479,16 +479,9 @@ Membership MembershipService::create_membership_object(const User& user, const C
     throw std::runtime_error("Can't create membership, chat service pointer is invalid");
 }
 
-MembershipEntity MembershipService::create_domain_membership(const String& custom_object_json) const {
-    MembershipEntity new_membership_entity;
-    new_membership_entity.custom_field = custom_object_json;
-    return new_membership_entity;
-    
-}
-
 Pubnub::Membership MembershipService::update_membership_with_base(const Pubnub::Membership& membership, const Pubnub::Membership& base_membership) const {
-        MembershipEntity base_entity = MembershipDAO(base_membership.custom_data()).to_entity();
-        MembershipEntity membership_entity = MembershipDAO(membership.custom_data()).to_entity();
+        MembershipEntity base_entity = MembershipDAO(base_membership.membership_data()).to_entity();
+        MembershipEntity membership_entity = MembershipDAO(membership.membership_data()).to_entity();
 
         return create_membership_object(
                 base_membership.user,
