@@ -60,36 +60,25 @@ Ensure(Typings, should_return_typing_users) {
 }
 
 Ensure(Typings, should_prepare_payload_for_typing_user) {
-    auto result = trim_whitespaces(Typing::payload("user1", true));
+    auto result = trim_whitespaces(Typing::payload(true));
 
-    assert_false(result.find("\"userId\":\"user1\"") == Pubnub::String::npos);
     assert_false(result.find("\"value\":true") == Pubnub::String::npos);
 }
 
 Ensure(Typings, should_prepare_payload_for_stopped_typing_user) {
-    auto result = trim_whitespaces(Typing::payload("user1", false));
+    auto result = trim_whitespaces(Typing::payload(false));
 
-    assert_false(result.find("\"userId\":\"user1\"") == Pubnub::String::npos);
     assert_false(result.find("\"value\":false") == Pubnub::String::npos);
 }
 
-Ensure(Typings, should_parse_payload_for_user_and_its_typing_state) {
-    auto result = Typing::typing_user_from_payload(Json::parse("{\"userId\":\"user1\",\"value\":true}"));
-
-    assert_true(result.has_value());
-    assert_string_equal(result.value().first.c_str(), "user1");
-    assert_true(result.value().second);
-}
-
-Ensure(Typings, should_parse_event_for_user_and_its_typing_state) {
+Ensure(Typings, should_parse_event_for_typing_state) {
     Pubnub::Event event;
-    event.payload = "{\"userId\":\"user1\",\"value\":true}";
+    event.payload = "{\"value\":true}";
 
-    auto result = Typing::typing_user_from_event(event);
+    auto result = Typing::typing_value_from_event(event);
 
     assert_true(result.has_value());
-    assert_string_equal(result.value().first.c_str(), "user1");
-    assert_true(result.value().second);
+    assert_true(result.value());
 }
 
 

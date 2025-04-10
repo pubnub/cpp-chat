@@ -13,8 +13,8 @@ Ensure(MembershipEntities, should_be_parsed_from_json) {
     auto result = MembershipEntity::from_json(Json::parse("{\"custom\":\"data\",\"status\":\"status\",\"type\":\"type\"}"));
 
     assert_string_equal(result.custom_field.c_str(), "\"data\"");
-    assert_string_equal(sut.status.c_str(), "status");
-    assert_string_equal(sut.type.c_str(), "type");
+    assert_string_equal(result.status.c_str(), "status");
+    assert_string_equal(result.type.c_str(), "type");
 }
 
 Ensure(MembershipEntities, should_update) {
