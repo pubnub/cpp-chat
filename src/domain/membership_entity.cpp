@@ -24,7 +24,7 @@ Pubnub::String MembershipEntity::get_set_memberships_json_string(Pubnub::String 
         set_memberships_json.insert_or_update("type", type);
     }
 
-    return set_memberships_json.dump();
+    return Pubnub::String("[" + set_memberships_json.dump() + "]");
 }
 
 MembershipEntity MembershipEntity::from_json(Json membership_json) {

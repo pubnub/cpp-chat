@@ -6,9 +6,9 @@
 #include "membership.hpp"
 
 struct MembershipEntity {
-    Pubnub::String custom_field;
-    Pubnub::String status;
-    Pubnub::String type;
+    Pubnub::String custom_field = "";
+    Pubnub::String status = "";
+    Pubnub::String type = "";
 
     Pubnub::String get_set_memberships_json_string(Pubnub::String channel_id);
 
