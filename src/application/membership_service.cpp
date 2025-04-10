@@ -34,7 +34,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
         throw std::invalid_argument("can't get members, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
 
     auto get_channel_members_response = [this, channel_id, include_string, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -81,7 +81,7 @@ std::tuple<std::vector<Pubnub::Membership>, Pubnub::Page, int, Pubnub::String> M
         throw std::invalid_argument("can't get memberships, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
     }
 
-    String include_string = "totalCount,custom,channel,customChannel,channelType,status,channelStatus";
+    String include_string = "totalCount,custom,channel,channel.custom,type,channel.type,status,channel.status";
 
     auto get_memberships_response = [this, user_id, include_string, filter, sort,  limit, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -138,7 +138,7 @@ Membership MembershipService::invite_to_channel(const String& channel_id, const 
         return members[0];
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
     String set_memeberships_obj = create_set_memberships_object(channel_id, "");
 
     auto user_id = user.user_id();
@@ -181,7 +181,7 @@ std::vector<Membership> MembershipService::invite_multiple_to_channel(const Stri
         }
     }
 
-    String include_string = "custom,channel,totalCount,customChannel";
+    String include_string = "custom,channel,totalCount,channel.custom,status,type";
     String set_memebers_obj = create_set_members_object(users_ids, "");
 
     auto set_members_response = [this, channel_id, set_memebers_obj, include_string, filter] {
@@ -380,7 +380,7 @@ std::tuple<Pubnub::Page, int, int, std::vector<Pubnub::Membership>> MembershipSe
 
     auto memberships_response = [this, current_user, set_memberships_string] {
         auto pubnub_handle = pubnub->lock();
-        String include_string = "custom,channel,totalCount,customChannel";
+        String include_string = "custom,channel,totalCount,custom.channel,status,type";
         return pubnub_handle->set_memberships(current_user.user_id(), set_memberships_string, include_string);
     }();
 
