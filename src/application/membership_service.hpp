@@ -38,7 +38,6 @@ class MembershipService : public std::enable_shared_from_this<MembershipService>
         std::shared_ptr<Subscription> stream_updates(Pubnub::Membership calling_membership, std::function<void(Pubnub::Membership)> membership_callback) const;
         std::shared_ptr<SubscriptionSet> stream_updates_on(Pubnub::Membership calling_membership, const std::vector<Pubnub::Membership>& memberships, std::function<void(std::vector<Pubnub::Membership>)> membership_callback) const;
 
-        Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel) const;
         Pubnub::Membership create_membership_object(const Pubnub::User& user, const Pubnub::Channel& channel, const MembershipEntity& membership_entity) const;
 
         Pubnub::Membership update_membership_with_base(const Pubnub::Membership& membership, const Pubnub::Membership& base_membership) const;

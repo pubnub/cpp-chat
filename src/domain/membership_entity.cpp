@@ -15,7 +15,7 @@ Pubnub::String MembershipEntity::get_set_memberships_json_string(Pubnub::String 
     }
     else 
     {
-        set_memberships_json.insert_or_update("custom", "{}");
+        set_memberships_json.insert_or_update("custom", Json::object());
     }
     if(!status.empty()) {
         set_memberships_json.insert_or_update("status", status);

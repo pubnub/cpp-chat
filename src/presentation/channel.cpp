@@ -98,7 +98,11 @@ CallbackHandle Channel::connect(std::function<void(Message)> message_callback) c
 }
 
 CallbackHandle Channel::join(std::function<void(Message)> message_callback, const String& additional_params) const {
-    return CallbackHandle(this->channel_service->join(*this, *this->data, message_callback, additional_params));
+    return CallbackHandle(this->channel_service->join(*this, *this->data, message_callback, ChatMembershipData{additional_params}));
+}
+
+CallbackHandle Channel::join(std::function<void(Message)> message_callback, const ChatMembershipData& membership_data) const {
+    return CallbackHandle(this->channel_service->join(*this, *this->data, message_callback, membership_data));
 }
 
 void Channel::disconnect() const {

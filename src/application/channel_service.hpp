@@ -5,6 +5,7 @@
 #include "application/subscription.hpp"
 #include "callback_stop.hpp"
 #include "channel.hpp"
+#include "membership.hpp"
 #include "domain/channel_entity.hpp"
 #include "enums.hpp"
 #include "event.hpp"
@@ -67,8 +68,8 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         ChannelService(ThreadSafePtr<PubNub> pubnub, std::weak_ptr<ChatService> chat_service, float exponential_factor);
 
         Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
-        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
-        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::String& membership_data = "") const;
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::ChatMembershipData& membership_data = Pubnub::ChatMembershipData()) const;
+        std::tuple<Pubnub::Channel, Pubnub::Membership, std::vector<Pubnub::Membership>> create_group_conversation(const std::vector<Pubnub::User>& users, const Pubnub::String& channel_id, const ChannelDAO& channel_data, const Pubnub::ChatMembershipData& membership_data = Pubnub::ChatMembershipData()) const;
         Pubnub::Channel create_channel(const Pubnub::String& channel_id, const ChannelEntity&& channel_entity) const;
         Pubnub::Channel get_channel(const Pubnub::String& channel_id) const;
         std::tuple<std::vector<Pubnub::Channel>, Pubnub::Page, int> get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
@@ -78,7 +79,7 @@ class ChannelService : public std::enable_shared_from_this<ChannelService>
         Pubnub::Channel pin_message_to_channel(const Pubnub::Message& message, const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         Pubnub::Channel unpin_message_from_channel(const Pubnub::String& channel_id, const ChannelDAO& channel) const;
         std::shared_ptr<Subscription> connect(const Pubnub::String& channel_id, const ChannelDAO& channel_data, std::function<void(Pubnub::Message)> message_callback) const;
-        std::shared_ptr<Subscription> join(const Pubnub::Channel& channel, const ChannelDAO& channel_data, std::function<void(Pubnub::Message)> message_callback, const Pubnub::String& additional_params = "") const;
+        std::shared_ptr<Subscription> join(const Pubnub::Channel& channel, const ChannelDAO& channel_data, std::function<void(Pubnub::Message)> message_callback, const Pubnub::ChatMembershipData& membership_data = Pubnub::ChatMembershipData()) const;
         void disconnect(const ChannelDAO& channel_data) const;
         void leave(const Pubnub::String& channel_id, const ChannelDAO& channel_data) const;
         void send_text(const Pubnub::String& channel_id, const ChannelDAO& dao, const Pubnub::String& message, const SendTextParamsInternal& text_params = SendTextParamsInternal()) const;
