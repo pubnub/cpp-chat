@@ -87,7 +87,7 @@ endif()
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.3\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.4\")
 else()
     target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.3\")
 endif()

@@ -2,6 +2,7 @@
 #include "c_errors.hpp"
 #include "c_response.hpp"
 #include "membership.hpp"
+#include "nlohmann/json.hpp"
 #include <iostream>
 
 void pn_membership_delete(Pubnub::Membership* membership) {
@@ -36,9 +37,15 @@ void pn_membership_delete(Pubnub::Membership* membership) {
 
 Pubnub::Membership* pn_membership_update_dirty(
         Pubnub::Membership* membership,
-        const char* custom_object_json) {
+        const char* custom_data_json,
+        const char* type,
+        const char* status) {
     try {
-        return new Pubnub::Membership(membership->update(custom_object_json));
+        Pubnub::ChatMembershipData new_data;
+        new_data.custom_data_json = custom_data_json;
+        new_data.type = type;
+        new_data.status = status;
+        return new Pubnub::Membership(membership->update(new_data));
     } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
@@ -51,6 +58,16 @@ void pn_membership_get_user_id(
         char* result) {
     auto user_id = membership->user.user_id();
     strcpy(result, user_id.c_str());
+}
+
+void pn_membership_get_membership_data(Pubnub::Membership* membership, char* result) {
+    auto membership_data = membership->membership_data();
+    auto json = nlohmann::json {
+        {"customDataJson", membership_data.custom_data_json.c_str()},
+        {"type", membership_data.type.c_str()},
+        {"status", membership_data.status.c_str()}
+    };
+    strcpy(result, json.dump().c_str());
 }
 
 void pn_membership_get_channel_id(
