@@ -17,7 +17,7 @@
 #include "pubnub_chat/vector.hpp"
 #include "string.hpp"
 
-class ChannelTests: public ::testing::Test {
+class ChatTests: public ::testing::Test {
     protected:
         std::unique_ptr<Pubnub::Chat> chat;
         std::unique_ptr<Pubnub::Channel> channel;
@@ -51,7 +51,7 @@ class ChannelTests: public ::testing::Test {
         }
 };
 
-TEST_F(ChannelTests, TestGetCurrentUserMentions) {
+TEST_F(ChatTests, TestGetCurrentUserMentions) {
     auto send_text_params = Pubnub::SendTextParams();
     auto mentioned_user = Pubnub::MentionedUser();
     mentioned_user.id = chat->current_user().user_id();
@@ -90,12 +90,12 @@ TEST_F(ChannelTests, TestGetCurrentUserMentions) {
     ASSERT_TRUE(found_mention);
 }
 
-TEST_F(ChannelTests, TestGetCurrentUser) {
+TEST_F(ChatTests, TestGetCurrentUser) {
     auto current_user = chat->current_user();
     ASSERT_TRUE(current_user.user_id() == Pubnub::String("chat_tests_user"));
 }
 
-TEST_F(ChannelTests, TestGetEventHistory) {
+TEST_F(ChatTests, TestGetEventHistory) {
     chat->emit_chat_event(
         Pubnub::PCET_CUSTOM,
         channel->channel_id(),
@@ -122,7 +122,7 @@ TEST_F(ChannelTests, TestGetEventHistory) {
     ASSERT_TRUE(found_event);
 }
 
-TEST_F(ChannelTests, TestGetUsers) {
+TEST_F(ChatTests, TestGetUsers) {
     auto users = chat->get_users("chat_").users;
     auto found_user = false;
     for (size_t i = 0; i < users.size(); i++) {
@@ -134,7 +134,7 @@ TEST_F(ChannelTests, TestGetUsers) {
     ASSERT_TRUE(found_user);
 }
 
-TEST_F(ChannelTests, TestGetChannels) {
+TEST_F(ChatTests, TestGetChannels) {
     auto channels = chat->get_channels("chat_").channels;
     auto found_channel = false;
     for (size_t i = 0; i < channels.size(); i++) {
@@ -146,7 +146,7 @@ TEST_F(ChannelTests, TestGetChannels) {
     ASSERT_TRUE(found_channel);
 }
 
-TEST_F(ChannelTests, TestCreateDirectConversation) {
+TEST_F(ChatTests, TestCreateDirectConversation) {
     auto current_user = chat->current_user();
     Pubnub::User talk_user;
     try {
@@ -161,7 +161,7 @@ TEST_F(ChannelTests, TestCreateDirectConversation) {
     ASSERT_TRUE(direct_channel.invitees_memberships[0].user.user_id() == talk_user.user_id());
 }
 
-TEST_F(ChannelTests, TestCreateGroupConversation) {
+TEST_F(ChatTests, TestCreateGroupConversation) {
     auto current_user = chat->current_user();
 
     auto prepare_user = [&](Pubnub::User& user, int index) {
@@ -198,7 +198,7 @@ TEST_F(ChannelTests, TestCreateGroupConversation) {
     ASSERT_TRUE(group_convo.invitees_memberships[0].user.user_id() == talk_user_0.user_id());
 }
 
-TEST_F(ChannelTests, TestForwardMessage) {
+TEST_F(ChatTests, TestForwardMessage) {
     auto forwarding_channel =
         chat->create_public_conversation("chat_tests_channel", Pubnub::ChatChannelData {});
     std::promise<Pubnub::String> promise;
@@ -219,7 +219,7 @@ TEST_F(ChannelTests, TestForwardMessage) {
     ASSERT_TRUE(future.get() == Pubnub::String("forwarded_message"));
 }
 
-TEST_F(ChannelTests, TestEmitEvent) {
+TEST_F(ChatTests, TestEmitEvent) {
     
     std::promise<Pubnub::Event> promise;
     std::future<Pubnub::Event> future = promise.get_future();
@@ -245,7 +245,7 @@ TEST_F(ChannelTests, TestEmitEvent) {
     ASSERT_TRUE(received_event.payload == Pubnub::String("{\"test\":\"some_nonsense\"}"));
 }
 
-TEST_F(ChannelTests, TestGetUnreadMessagesCounts) {
+TEST_F(ChatTests, TestGetUnreadMessagesCounts) {
     std::promise<void> promise;
     std::future<void> future = promise.get_future();
     
@@ -274,7 +274,7 @@ TEST_F(ChannelTests, TestGetUnreadMessagesCounts) {
     ASSERT_TRUE(has_unread);
 }
 
-TEST_F(ChannelTests, TestMarkAllMessagesAsRead) {
+TEST_F(ChatTests, TestMarkAllMessagesAsRead) {
     std::promise<void> promise;
     std::future<void> future = promise.get_future();
 
@@ -304,5 +304,3 @@ TEST_F(ChannelTests, TestMarkAllMessagesAsRead) {
 
     ASSERT_TRUE(zero_unreads);
 }
-
-TEST_F(ChannelTests, TestReadReceipts) {}
