@@ -8,6 +8,7 @@
 #include "thread_channel.hpp"
 #include "thread_message.hpp"
 #include "application/dao/channel_dao.hpp"
+#include "application/dao/membership_dao.hpp"
 #include "chat_service.hpp"
 #include "domain/channel_entity.hpp"
 #include "domain/json.hpp"
@@ -47,7 +48,7 @@ Channel ChannelService::create_public_conversation(const String& channel_id, con
     return create_channel(channel_id, std::move(new_entity));
 }
 
-std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_direct_conversation(const User& user, const String& channel_id, const ChannelDAO& channel_data, const String& membership_data) const {
+std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_direct_conversation(const User& user, const String& channel_id, const ChannelDAO& channel_data, const Pubnub::ChatMembershipData& membership_data) const {
     //TODO: channel id should be optional and if it's not provided, we should create hashed channel id
     String final_channel_id = channel_id;
 
@@ -70,13 +71,14 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
     User current_user = chat_service_shared->user_service->get_user(user_id);
 
-    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel);
+    MembershipEntity host_membership_entity = MembershipDAO(membership_data).to_entity();
+    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel, host_membership_entity);
     Membership invitee_membership = chat_service_shared->membership_service->invite_to_channel(final_channel_id, *created_channel.data, user);
 
     return std::make_tuple(created_channel, host_membership, std::vector<Membership>{invitee_membership});
 }
 
-std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_group_conversation(const std::vector<User>& users, const String& channel_id, const ChannelDAO& channel_data, const String& membership_data) const {
+std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_group_conversation(const std::vector<User>& users, const String& channel_id, const ChannelDAO& channel_data, const Pubnub::ChatMembershipData& membership_data) const {
     //TODO: channel id should be optional and if it's not provided, we should create hashed channel id
     String final_channel_id = channel_id;
 
@@ -99,7 +101,8 @@ std::tuple<Channel, Membership, std::vector<Membership>> ChannelService::create_
     //TODO: Maybe current user should just be created in chat constructor and stored there all the time?
     User current_user = chat_service_shared->user_service->get_user(user_id);
 
-    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel);
+    MembershipEntity host_membership_entity = MembershipDAO(membership_data).to_entity();
+    Membership host_membership = chat_service_shared->membership_service->create_membership_object(current_user, created_channel, host_membership_entity);
     std::vector<Membership> invitee_memberships = chat_service_shared->membership_service->invite_multiple_to_channel(final_channel_id, *created_channel.data, users);
 
     return std::make_tuple(created_channel, host_membership, invitee_memberships);
@@ -267,8 +270,9 @@ void ChannelService::disconnect(const ChannelDAO& channel_data) const {
       channel_data.stop_listening_for_chat_messages();
 }
 
-std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, const ChannelDAO& channel_data, std::function<void(Message)> message_callback, const String& additional_params) const {
-    String set_object_string = create_set_memberships_object(channel.channel_id(), additional_params);
+std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, const ChannelDAO& channel_data, std::function<void(Message)> message_callback, const ChatMembershipData& membership_data) const {
+   MembershipEntity membership_entity = MembershipDAO(membership_data).to_entity();
+   String set_object_string = membership_entity.get_set_memberships_json_string(channel.channel_id());
 
     auto memberships_response = [this, set_object_string] {
         auto pubnub_handle = this->pubnub->lock();
@@ -278,8 +282,6 @@ std::shared_ptr<Subscription> ChannelService::join(const Channel& channel, const
     auto chat_service_shared = chat_service.lock();
 
     auto user = chat_service_shared->user_service->get_current_user();
-    MembershipEntity membership_entity;
-    membership_entity.custom_field = additional_params;
     
     auto membership = chat_service_shared->membership_service->create_membership_object(user, channel, membership_entity);
 
