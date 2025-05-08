@@ -195,7 +195,6 @@ Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* ad
 
 Pubnub::CallbackHandle* pn_channel_join_with_membership_data(
     Pubnub::Channel* channel,
-    const char* additional_params,
     char* membership_custom_json,
     char* membership_type,
     char* membership_status
