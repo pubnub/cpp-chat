@@ -61,6 +61,19 @@ TEST_F(ChannelTests, TestGetUserSuggestions) {
     ASSERT_TRUE(contains_name);
 }
 
+TEST_F(ChannelTests, TestGetMemberships) {
+    auto current_user = chat->current_user();
+    auto channel =
+        chat->create_public_conversation("memberships_channel", Pubnub::ChatChannelData {});
+    channel.join([&channel](Pubnub::Message message) {});
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    auto suggestions = channel.get_members();
+
+    ASSERT_TRUE(suggestions.memberships.size() >= 1);
+}
+
 TEST_F(ChannelTests, TestStartTyping) {
     auto current_user = chat->current_user();
     Pubnub::User talk_user;

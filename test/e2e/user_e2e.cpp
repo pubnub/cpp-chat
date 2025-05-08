@@ -55,6 +55,28 @@ protected:
     }
 };
 
+TEST_F(UserTests, TestUserActive) {
+    auto channel =
+        chat->create_public_conversation("active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
+
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(current_user.active());
+}
+
+TEST_F(UserTests, TestLastUserActive) {
+    auto channel =
+        chat->create_public_conversation("last_active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
+
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(std::stoll(current_user.last_active_timestamp().value().c_str()) > 0);
+}
+
 TEST_F(UserTests, TestUserUpdate) {
     Pubnub::User test_user;
     try
