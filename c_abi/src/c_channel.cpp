@@ -215,7 +215,6 @@ Pubnub::CallbackHandle* pn_channel_join_with_membership_data(
                     new Pubnub::Message(user)
                 );
             },
-            additional_params,
             membership_data
         ));
     } catch (std::exception& e) {
