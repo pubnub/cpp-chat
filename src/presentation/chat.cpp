@@ -72,11 +72,21 @@ Channel Chat::create_public_conversation(const String& channel_id, const ChatCha
 }
 
 CreatedChannelWrapper Chat::create_direct_conversation(const User& user, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
+    auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, ChatMembershipData{membership_data});
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
+}
+
+CreatedChannelWrapper Chat::create_direct_conversation(const User& user, const String& channel_id, const ChatChannelData& channel_data, const ChatMembershipData& membership_data) const {
     auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, membership_data);
     return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
 
 CreatedChannelWrapper Chat::create_group_conversation(Pubnub::Vector<User> users, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
+    auto return_tuple = this->channel_service->create_group_conversation(users.into_std_vector(), channel_id, channel_data, Pubnub::ChatMembershipData{membership_data});
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
+}
+
+CreatedChannelWrapper Chat::create_group_conversation(Pubnub::Vector<User> users, const String& channel_id, const ChatChannelData& channel_data, const ChatMembershipData& membership_data) const {
     auto return_tuple = this->channel_service->create_group_conversation(users.into_std_vector(), channel_id, channel_data, membership_data);
     return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
