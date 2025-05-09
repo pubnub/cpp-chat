@@ -193,6 +193,36 @@ Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* ad
     }
 }
 
+Pubnub::CallbackHandle* pn_channel_join_with_membership_data(
+    Pubnub::Channel* channel,
+    char* membership_custom_json,
+    char* membership_type,
+    char* membership_status
+) {
+    try {
+        auto chat = channel->shared_chat_service();
+        Pubnub::ChatMembershipData membership_data;
+        membership_data.custom_data_json = membership_custom_json;
+        membership_data.type = membership_type;
+        membership_data.status = membership_status;
+
+        return new Pubnub::CallbackHandle(channel->join(
+            [chat](const Pubnub::Message& user) {
+                pn_c_append_pointer_to_response_buffer(
+                    chat.get(),
+                    "message",
+                    new Pubnub::Message(user)
+                );
+            },
+            membership_data
+        ));
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 PnCResult pn_channel_leave(Pubnub::Channel* channel) {
     try {
         channel->leave();

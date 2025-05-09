@@ -36,6 +36,13 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_disconnect(Pubnub::Channel* c
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_join(Pubnub::Channel* channel, const char* additional_params);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT Pubnub::CallbackHandle* pn_channel_join_with_membership_data(
+    Pubnub::Channel* channel,
+    char* membership_custom_json,
+    char* membership_type,
+    char* membership_status
+);
+
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_leave(Pubnub::Channel* channel);
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_channel_delete_channel(Pubnub::Channel* channel);
