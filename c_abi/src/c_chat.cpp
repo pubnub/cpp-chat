@@ -470,6 +470,45 @@ Pubnub::CreatedChannelWrapper* pn_chat_create_direct_conversation_dirty(
     }
 }
 
+Pubnub::CreatedChannelWrapper*
+pn_chat_create_direct_conversation_dirty_with_membership_data(
+    Pubnub::Chat* chat,
+    Pubnub::User* user,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type,
+    char* membership_custom_json,
+    char* membership_type,
+    char* membership_status
+) {
+    Pubnub::ChatChannelData converted_data;
+    converted_data.channel_name = channel_name;
+    converted_data.description = channel_description;
+    converted_data.custom_data_json = channel_custom_data_json;
+    converted_data.updated = channel_updated;
+    converted_data.status = channel_status;
+    converted_data.type = channel_type;
+
+    Pubnub::ChatMembershipData membership_data;
+    membership_data.custom_data_json = membership_custom_json;
+    membership_data.type = membership_type;
+    membership_data.status = membership_status;
+
+    try {
+        return new Pubnub::CreatedChannelWrapper(
+            chat->create_direct_conversation(*user, channel_id, converted_data, membership_data)
+        );
+    } catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
 Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
     Pubnub::Chat* chat,
     Pubnub::User** users,
@@ -502,6 +541,55 @@ Pubnub::CreatedChannelWrapper* pn_chat_create_group_conversation_dirty(
         return new Pubnub::CreatedChannelWrapper(chat->create_group_conversation(Pubnub::Vector(std::move(users_vector)), channel_id, converted_data));
     }
     catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR_PTR;
+    }
+}
+
+Pubnub::CreatedChannelWrapper*
+pn_chat_create_group_conversation_dirty_with_membership_data(
+    Pubnub::Chat* chat,
+    Pubnub::User** users,
+    int users_length,
+    const char* channel_id,
+    char* channel_name,
+    char* channel_description,
+    char* channel_custom_data_json,
+    char* channel_updated,
+    char* channel_status,
+    char* channel_type,
+    char* membership_custom_json,
+    char* membership_type,
+    char* membership_status
+) {
+    Pubnub::ChatChannelData converted_data;
+    converted_data.channel_name = channel_name;
+    converted_data.description = channel_description;
+    converted_data.custom_data_json = channel_custom_data_json;
+    converted_data.updated = channel_updated;
+    converted_data.status = channel_status;
+    converted_data.type = channel_type;
+
+    Pubnub::ChatMembershipData membership_data;
+    membership_data.custom_data_json = membership_custom_json;
+    membership_data.type = membership_type;
+    membership_data.status = membership_status;
+
+    try {
+        std::vector<Pubnub::User> users_vector;
+        users_vector.reserve(users_length);
+        for (int i = 0; i < users_length; i++) {
+            users_vector.push_back(*users[i]);
+        }
+
+        return new Pubnub::CreatedChannelWrapper(chat->create_group_conversation(
+            Pubnub::Vector(std::move(users_vector)),
+            channel_id,
+            converted_data,
+            membership_data
+        ));
+    } catch (std::exception& e) {
         pn_c_set_error_message(e.what());
 
         return PN_C_ERROR_PTR;

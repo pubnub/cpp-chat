@@ -5,6 +5,7 @@
 #include <chrono>
 #include <future>
 #include <functional>
+#include <thread>
 
 class Timer
 {

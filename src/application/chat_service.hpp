@@ -1,12 +1,15 @@
 #ifndef PN_CHAT_CHAT_SERVICE_HPP
 #define PN_CHAT_CHAT_SERVICE_HPP
 
+#define PN_MAX_LIMIT 100
+
 #include "application/subscription.hpp"
 #include "chat.hpp"
 #include "infra/sync.hpp"
 #include "mentions.hpp"
 #include "string.hpp"
 #include "enums.hpp"
+#include "infra/logger.hpp"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -43,6 +46,8 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::tuple<std::vector<Pubnub::UserMentionData>, bool> get_current_user_mentions(const Pubnub::String& start_timetoken, const Pubnub::String& end_timetoken, int count) const;
         std::shared_ptr<Subscription> listen_for_events(const Pubnub::String& channel_id, Pubnub::pubnub_chat_event_type chat_event_type, std::function<void(const Pubnub::Event&)> event_callback) const;
 
+        void register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback) const;
+
         std::shared_ptr<const UserService> user_service;
         std::shared_ptr<const MessageService> message_service;
         std::shared_ptr<const MembershipService> membership_service;
@@ -51,6 +56,7 @@ class ChatService : public std::enable_shared_from_this<ChatService>
         std::shared_ptr<const AccessManagerService> access_manager_service;
         std::shared_ptr<const ChannelService> channel_service;
         Pubnub::ChatConfig chat_config;
+        mutable Logger logger;
 
         std::shared_ptr<CallbackService> callback_service;
 

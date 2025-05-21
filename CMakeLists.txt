@@ -17,12 +17,32 @@ if(${COMPILE_COMMANDS})
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 endif()
 
+#If debug symbols should be created (mostly related to release configuration)
+option(CREATE_DEBUG_SYMBOLS "Creating debug symbols" OFF)
 option(DEBUG "Enable debugging" OFF)
 if(${DEBUG})
     message(STATUS "Enabling debugging")
     set(CMAKE_BUILD_TYPE Debug)
 else()
     set(CMAKE_BUILD_TYPE Release)
+    if(${CREATE_DEBUG_SYMBOLS})
+        message(STATUS "Creating debug symbols enabled")
+        if(MSVC)
+            # For MSVC, use /Zi to generate PDB files
+            set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+            set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi")
+            # Enable separate PDB files
+            set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+            set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+        elseif(APPLE)
+            set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -gline-tables-only")
+            set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,-S")  # -S strips debug info
+        elseif(UNIX AND NOT APPLE)
+            set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g2 -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gsplit-dwarf")
+            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl")
+        endif()
+    endif()
 endif()
 
 option(ENABLE_C_ABI "Enable C ABI" OFF)
@@ -54,6 +74,8 @@ set(USE_CALLBACK_API ON)
 set(USE_SET_DNS_SERVERS ON)
 set(USE_IPV6 ON)
 set(USE_SUBSCRIBE_EVENT_ENGINE ON)
+set(USE_LOG_CALLBACK ON)
+set(USE_NTF_RUNTIME_SELECTION ON)
 
 if(WIN32 OR WIN64 OR MSVC)
     set(CUSTOM_BOOL_TYPE _Bool)
@@ -62,7 +84,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG feat/ee-listener-void
+  GIT_TAG v5.0.0
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
@@ -85,11 +107,13 @@ endif()
 
 # TODO: this flag is okay until we release the Cpp-Chat as an independent library
 if(${ENABLE_C_ABI})
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.1\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unity/0.4.4\")
 else()
-    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.3.0\")
+    target_compile_options(pubnub PUBLIC -DPUBNUB_SDK_VERSION_SUFFIX=\"/CA-Unreal/0.4.0\")
 endif()
-target_compile_options(pubnub PUBLIC -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+
+set(CCORE_COMPILE_OPTIONS -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1 -DPUBNUB_USE_LOG_CALLBACK=1)
+target_compile_options(pubnub PUBLIC ${CCORE_COMPILE_OPTIONS})
 
 FetchContent_Declare(
   json
@@ -132,7 +156,8 @@ set(INFRA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/timer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/pubnub.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/interval_task.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/rate_limiter.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/rate_limiter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infra/logger.cpp)
 
 set(DOMAIN_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/domain/chat_entity.cpp 
@@ -180,8 +205,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/access_manager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation/callback_handle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/chat_helpers.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp
-)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/string.cpp)
 
 if(${ENABLE_C_ABI})
     add_compile_definitions(PN_CHAT_C_ABI)
@@ -211,19 +235,19 @@ set(SOURCES
 
 add_library(pubnub-chat SHARED ${SOURCES})
 
-target_compile_options(pubnub-chat PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+target_compile_options(pubnub-chat PRIVATE ${CCORE_COMPILE_OPTIONS})
 
 target_link_libraries(pubnub-chat PRIVATE -lpthread pubnub)
 
 # TODO: kept for debugging purposes - should be deleted before release
 add_executable(pubnub-chat-example example/main.cpp)
-target_compile_options(pubnub-chat-example PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+target_compile_options(pubnub-chat-example PRIVATE ${CCORE_COMPILE_OPTIONS})
 target_link_libraries(pubnub-chat-example PUBLIC -lpthread pubnub-chat)
 
 if(${COMPILE_EXAMPLES})
     function(example name)
         add_executable(pubnub_${name} example/${name}.cpp)
-        target_compile_options(pubnub_${name} PRIVATE -DPUBNUB_NTF_RUNTIME_SELECTION -DPUBNUB_USE_SUBSCRIBE_EVENT_ENGINE=1 -DPUBNUB_USE_SUBSCRIBE_V2=1 -DPUBNUB_CALLBACK_API=1 -DPUBNUB_SYNC_API=1 -DPUBNUB_SET_DNS_SERVERS=1 -DPUBNUB_USE_IPV6=1)
+        target_compile_options(pubnub_${name} PRIVATE ${CCORE_COMPILE_OPTIONS})
         target_link_libraries(pubnub_${name} PRIVATE pubnub-chat)
     endfunction()
 

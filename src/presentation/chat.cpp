@@ -57,7 +57,7 @@ Chat Chat::init(const Pubnub::String& publish_key, const Pubnub::String& subscri
     }
     catch (...)
     {
-        chat.create_user(user_id, ChatUserData());
+        chat.create_user_for_init_chat(user_id, ChatUserData());
     }
 
     if (config.store_user_activity_timestamps) {
@@ -72,11 +72,21 @@ Channel Chat::create_public_conversation(const String& channel_id, const ChatCha
 }
 
 CreatedChannelWrapper Chat::create_direct_conversation(const User& user, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
+    auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, ChatMembershipData{membership_data});
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
+}
+
+CreatedChannelWrapper Chat::create_direct_conversation(const User& user, const String& channel_id, const ChatChannelData& channel_data, const ChatMembershipData& membership_data) const {
     auto return_tuple = this->channel_service->create_direct_conversation(user, channel_id, channel_data, membership_data);
     return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
 
 CreatedChannelWrapper Chat::create_group_conversation(Pubnub::Vector<User> users, const String& channel_id, const ChatChannelData& channel_data, const String& membership_data) const {
+    auto return_tuple = this->channel_service->create_group_conversation(users.into_std_vector(), channel_id, channel_data, Pubnub::ChatMembershipData{membership_data});
+    return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
+}
+
+CreatedChannelWrapper Chat::create_group_conversation(Pubnub::Vector<User> users, const String& channel_id, const ChatChannelData& channel_data, const ChatMembershipData& membership_data) const {
     auto return_tuple = this->channel_service->create_group_conversation(users.into_std_vector(), channel_id, channel_data, membership_data);
     return CreatedChannelWrapper(std::get<0>(return_tuple), std::get<1>(return_tuple), Pubnub::Vector<Membership>(std::move(std::get<2>(return_tuple))));
 }
@@ -242,9 +252,20 @@ AccessManager Chat::access_manager() const
     return AccessManager(this->chat_service->access_manager_service);
 }
 
+void Pubnub::Chat::register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback) 
+{
+    this->chat_service->register_logger_callback(callback);
+}
+
 void Chat::store_user_activity_timestamp() const
 {
     this->user_service->store_user_activity_timestamp();
+}
+
+Pubnub::User Chat::create_user_for_init_chat(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const
+{
+    //During init we skip get_user during create_user, as we already checked that the user doesn't exist
+    return this->user_service->create_user(user_id, user_data, true);
 }
 
 #ifdef PN_CHAT_C_ABI

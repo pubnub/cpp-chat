@@ -120,7 +120,9 @@ namespace Pubnub {
 
             PN_CHAT_EXPORT Pubnub::Channel create_public_conversation(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
+            PN_CHAT_EXPORT CreatedChannelWrapper create_direct_conversation(const Pubnub::User& user, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::ChatMembershipData& membership_data) const;
             PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(Pubnub::Vector<Pubnub::User> users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::String& membership_data = "") const;
+            PN_CHAT_EXPORT CreatedChannelWrapper create_group_conversation(Pubnub::Vector<Pubnub::User> users, const Pubnub::String& channel_id, const ChatChannelData& channel_data, const Pubnub::ChatMembershipData& membership_data) const;
             PN_CHAT_EXPORT Channel get_channel(const Pubnub::String& channel_id) const;
             PN_CHAT_EXPORT ChannelsResponseWrapper get_channels(const Pubnub::String& filter = "", const Pubnub::String& sort = "", int limit = 0, const Pubnub::Page& page = Pubnub::Page()) const;
             PN_CHAT_EXPORT Pubnub::Channel update_channel(const Pubnub::String& channel_id, const ChatChannelData& channel_data) const;
@@ -170,9 +172,13 @@ namespace Pubnub {
             /* PAM */
             PN_CHAT_EXPORT Pubnub::AccessManager access_manager() const;
 
+            /* LOG */
+            PN_CHAT_EXPORT void register_logger_callback(std::function<void(Pubnub::pn_log_level, const char*)> callback);
+
         private:
             Chat(const Pubnub::String& publish_key, const Pubnub::String& subscribe_key, const Pubnub::String& user_id, const ChatConfig& config);
             void store_user_activity_timestamp() const;
+            Pubnub::User create_user_for_init_chat(const Pubnub::String& user_id, const Pubnub::ChatUserData& user_data) const;
 
             std::shared_ptr<const ChatService> chat_service;
             std::shared_ptr<const UserService> user_service;

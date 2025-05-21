@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <memory>
+#include <cmath>
 
 #define THREADS_MAX_SPEEL_MS 1000
 #define NO_SLEEP_REQUIRED -1

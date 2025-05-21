@@ -31,28 +31,31 @@ User UserService::get_current_user() const
     return this->get_user(user_id);
 }
 
-User UserService::create_user(const String& user_id, const UserDAO& user_data) const
+User UserService::create_user(const String& user_id, const UserDAO& user_data, bool skip_get_user) const
 {
     if(user_id.empty())
     {
         throw std::invalid_argument("Failed to create user, user_id is empty");
     }
 
-    bool user_exists = true;
-
-    try
+    if(!skip_get_user)
     {
-        get_user(user_id);
+        bool user_exists = true;
 
-    }
-    catch(...)
-    {
-        user_exists = false;
-    }
-
-    if(user_exists)
-    {
-        throw std::invalid_argument("User with this ID already exists");
+        try
+        {
+            get_user(user_id);
+    
+        }
+        catch(...)
+        {
+            user_exists = false;
+        }
+    
+        if(user_exists)
+        {
+            throw std::invalid_argument("User with this ID already exists");
+        }
     }
     
     auto new_user_entity = user_data.to_entity();
@@ -92,7 +95,11 @@ User UserService::get_user(const String& user_id) const
 }
 
 std::tuple<std::vector<Pubnub::User>, Pubnub::Page, int> UserService::get_users(const Pubnub::String &filter, const Pubnub::String &sort, int limit, const Pubnub::Page &page) const {
-    
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get users, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
+    }
+
     Pubnub::String include = "custom,totalCount";
     auto users_response = [this, include, limit, filter, sort, page] {
         auto pubnub_handle = this->pubnub->lock();
@@ -187,6 +194,11 @@ std::shared_ptr<SubscriptionSet> UserService::stream_updates_on(Pubnub::User cal
 
 std::vector<Pubnub::User> UserService::get_users_suggestions(Pubnub::String text, int limit) const
 {
+    if(limit < 0 || limit > PN_MAX_LIMIT)
+    {
+        throw std::invalid_argument("can't get users suggestions, limit has to be within 0 - " + std::to_string(PN_MAX_LIMIT) + " range");
+    }
+
     auto chat_shared = this->chat_service.lock();
 
     if(!chat_shared)

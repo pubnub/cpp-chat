@@ -425,6 +425,10 @@ String operator+(const String& lhs, const String& rhs) {
 }
 
 bool operator==(const String& lhs, const String& rhs) {
+    if(lhs.c_str() == nullptr && rhs.c_str() == nullptr) {
+        return true;
+    }
+
     if(lhs.c_str() == nullptr || rhs.c_str() == nullptr) {
         return false;
     }
@@ -433,6 +437,13 @@ bool operator==(const String& lhs, const String& rhs) {
 }
 
 bool operator!=(const String& lhs, const String& rhs) {
+    if(lhs.c_str() == nullptr && rhs.c_str() == nullptr) {
+        return false;
+    }
+
+    if(lhs.c_str() == nullptr || rhs.c_str() == nullptr) {
+        return true;
+    }
     return strcmp(lhs.c_str(), rhs.c_str()) != 0;
 }
 
