@@ -30,8 +30,10 @@ protected:
             subscribe_key = PubnubTests::TESTS_DEFAULT_SUB_KEY;
         }
 
+        Pubnub::ChatConfig config;
+        config.store_user_activity_timestamps = true;
         chat.reset(new Pubnub::Chat(Pubnub::Chat::init(
-            publish_key, subscribe_key, "user_tests_user", Pubnub::ChatConfig())));
+            publish_key, subscribe_key, "user_tests_user", config)));
     }
 
     // This method will be called after each test in the test suite  

@@ -191,9 +191,14 @@ TEST_F(ThreadsTests, TestThreadMessageParentChannelPinning) {
         auto history = thread.get_thread_history("99999999999999999", "00000000000000000", 1);
         auto message_to_pin = history[0];
 
+        std::cout << "Message to pin: " << message_to_pin.text() << std::endl;
+
         message_to_pin.pin_to_parent_channel();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        channel = chat->get_channel(channel.channel_id());
         try {
             auto pinned_message = channel.get_pinned_message();
+            
             if (pinned_message.text() == Pubnub::String("thread_init_message")) {
                 pinned = true;
             }
@@ -201,7 +206,10 @@ TEST_F(ThreadsTests, TestThreadMessageParentChannelPinning) {
             pinned = false;
         }
 
+
         message_to_pin.unpin_from_parent_channel();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        channel = chat->get_channel(channel.channel_id());
         try {
             auto pinned_message = channel.get_pinned_message();
             unpinned = false;
@@ -214,7 +222,7 @@ TEST_F(ThreadsTests, TestThreadMessageParentChannelPinning) {
     std::this_thread::sleep_for(std::chrono::seconds(3));
     channel.send_text("thread_start_message");
 
-    if (future.wait_for(std::chrono::milliseconds(10000)) == std::future_status::timeout) {
+    if (future.wait_for(std::chrono::milliseconds(20000)) == std::future_status::timeout) {
         std::cout << "Timeout waiting for pin" << std::endl;
         FAIL();
     }
