@@ -155,13 +155,13 @@ TEST_F(ThreadsTests, TestThreadChannelEmitUserMention) {
 
         std::this_thread::sleep_for(std::chrono::seconds(4));
 
-        chat->listen_for_events(thread.channel_id(), Pubnub::PCET_MENTION, [&](Pubnub::Event mention_event) { 
+        chat->listen_for_events(user.user_id(), Pubnub::PCET_MENTION, [&](Pubnub::Event mention_event) { 
             mention_promise.set_value(mention_event.user_id);
             });
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
-        thread.emit_user_mention(user.user_id(), "99999999999999999", "mentioning @TestGuy");
+        thread.emit_user_mention(user.user_id(), message.timetoken(), "mentioning @TestGuy");
 
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
