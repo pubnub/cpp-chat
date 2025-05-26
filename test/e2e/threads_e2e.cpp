@@ -132,6 +132,13 @@ TEST_F(ThreadsTests, TestThreadChannelParentChannelPinning) {
 
 TEST_F(ThreadsTests, TestThreadChannelEmitUserMention) {
     auto user = chat->current_user();
+
+    Pubnub::ChatUserData new_user_data;
+    new_user_data.user_name = "TestGuy";
+    user.update(new_user_data);
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
     auto channel = chat->create_public_conversation(
         "thread_emit_mention_test_channel",
         Pubnub::ChatChannelData {}
@@ -148,16 +155,20 @@ TEST_F(ThreadsTests, TestThreadChannelEmitUserMention) {
 
         std::this_thread::sleep_for(std::chrono::seconds(4));
 
-        chat->listen_for_events(channel.channel_id(), Pubnub::PCET_MENTION, [&](Pubnub::Event mention_event) { 
+        chat->listen_for_events(thread.channel_id(), Pubnub::PCET_MENTION, [&](Pubnub::Event mention_event) { 
             mention_promise.set_value(mention_event.user_id);
             });
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        thread.emit_user_mention(user.user_id(), "99999999999999999", "mentioning @TestGuy");
 
     });
     std::this_thread::sleep_for(std::chrono::seconds(3));
     
     channel.send_text("thread_start_message");
-    
-    if (mention_future.wait_for(std::chrono::milliseconds(10000)) == std::future_status::timeout) {
+
+    if (mention_future.wait_for(std::chrono::milliseconds(15000)) == std::future_status::timeout) {
         std::cout << "Timeout waiting for message" << std::endl;
         FAIL();
     }

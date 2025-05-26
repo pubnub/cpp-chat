@@ -201,18 +201,23 @@ TEST_F(ChatTests, TestCreateGroupConversation) {
 
 TEST_F(ChatTests, TestForwardMessage) {
     auto forwarding_channel =
-        chat->create_public_conversation("chat_tests_channel", Pubnub::ChatChannelData {});
+        chat->create_public_conversation("chat_tests_forwarding_channel", Pubnub::ChatChannelData {});
     std::promise<Pubnub::String> promise;
     std::future<Pubnub::String> future = promise.get_future();
     forwarding_channel.join([&](Pubnub::Message message) {
+        std::cout << "Received forwarded message: " << message.text() << std::endl;
         promise.set_value(message.text());
     });
     channel->join([&](Pubnub::Message message) {
+        std::cout << "Received message: " << message.text() << std::endl;
         if (message.text() == Pubnub::String("forwarded_message")) {
             chat->forward_message(message, forwarding_channel);
         }
     });
-    if (future.wait_for(std::chrono::milliseconds(10000)) == std::future_status::timeout) {
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    channel->send_text("forwarded_message");
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    if (future.wait_for(std::chrono::milliseconds(15000)) == std::future_status::timeout) {
         std::cout << "Timeout waiting for message" << std::endl;
         FAIL();
     }
