@@ -147,8 +147,7 @@ TEST_F(MessageDraftTests, TestUpdate) {
     std::future<bool> future = promise.get_future();
 
     message_draft.add_change_listener(
-        [&](const Pubnub::Vector<Pubnub::MessageElement>& elements,
-            const Pubnub::Vector<Pubnub::SuggestedMention>& suggestions) {
+        [&](const Pubnub::Vector<Pubnub::MessageElement>& elements) {
             for (size_t i = 0; i < elements.size(); i++) {
                 if (elements[i].text == Pubnub::String("wololo and stuff")) {
                     promise.set_value(true);
@@ -157,6 +156,7 @@ TEST_F(MessageDraftTests, TestUpdate) {
             }
         }
     );
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     message_draft.update("wololo and stuff");
 
     if (future.wait_for(std::chrono::milliseconds(10000)) == std::future_status::timeout) {
@@ -178,6 +178,7 @@ TEST_F(MessageDraftTests, TestSend) {
             promise.set_value(true);
         }
     });
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     message_draft.update("wololo and stuff");
     message_draft.send();
 

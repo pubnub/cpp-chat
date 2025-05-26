@@ -87,7 +87,7 @@ TEST_F(MessageTests, TestGetMessage) {
     auto channel =
         chat->create_public_conversation("message_get_test_channel", Pubnub::ChatChannelData {});
 
-    auto time_token = "";
+    Pubnub::String time_token = "";
     channel.join([&](Pubnub::Message message) {
         if (message.text() == Pubnub::String("message")) {
             time_token = message.timetoken();
@@ -164,14 +164,16 @@ TEST_F(MessageTests, TestRestoreMessage) {
 }
 
 TEST_F(MessageTests, TestPinAndUnPinMessage) {
+    Pubnub::String channel_name = "message_pin_test_channel";
     auto channel = chat->create_public_conversation(
-        "message_pin_test_channel",
+        channel_name,
         Pubnub::ChatChannelData {}
     );
     auto pinned = false;
     auto unpinned = false;
     channel.join([&](Pubnub::Message message) { 
         message.pin();
+        channel = chat->get_channel(channel_name);
         std::this_thread::sleep_for(std::chrono::seconds(5));
         try {
             auto pinned_message = channel.get_pinned_message();
@@ -180,6 +182,7 @@ TEST_F(MessageTests, TestPinAndUnPinMessage) {
             pinned = false;
         }
         message.unpin();
+        channel = chat->get_channel(channel_name);
         std::this_thread::sleep_for(std::chrono::seconds(5));
         try {
             auto pinned_message = channel.get_pinned_message();
