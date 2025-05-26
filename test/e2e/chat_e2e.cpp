@@ -70,7 +70,7 @@ TEST_F(ChatTests, TestGetCurrentUserMentions) {
     
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    channel->send_text("mention_message");
+    channel->send_text("mention_message", send_text_params);
 
     if (future.wait_for(std::chrono::milliseconds(6000)) == std::future_status::timeout) {
         std::cout << "Timeout waiting for message" << std::endl;
@@ -115,7 +115,7 @@ TEST_F(ChatTests, TestGetEventHistory) {
     auto found_event = false;
     for (size_t i = 0; i < history.size(); i++) {
         if (history[i].channel_id == channel->channel_id()
-            && history[i].payload == Pubnub::String("{\"test\":\"some_nonsense\"}")) {
+            && history[i].payload == Pubnub::String("{\"test\":\"some_nonsense\",\"type\":\"custom\"}")) {
             found_event = true;
             break;
         }
@@ -243,7 +243,7 @@ TEST_F(ChatTests, TestEmitEvent) {
     }
 
     auto received_event = future.get();
-    ASSERT_TRUE(received_event.payload == Pubnub::String("{\"test\":\"some_nonsense\"}"));
+    ASSERT_TRUE(received_event.payload == Pubnub::String("{\"test\":\"some_nonsense\", \"type\": \"custom\"}"));
 }
 
 TEST_F(ChatTests, TestGetUnreadMessagesCounts) {

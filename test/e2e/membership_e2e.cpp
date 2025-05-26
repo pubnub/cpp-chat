@@ -78,10 +78,11 @@ TEST_F(MembershipTests, TestUpdateMembership) {
     std::future<bool> future = promise.get_future();
 
     test_membership.stream_updates([&](Pubnub::Membership membership) {
-        if (membership.custom_data() == Pubnub::String("{\"key\": \"value\"}")) {
+        if (membership.membership_data().custom_data_json == Pubnub::String("{\"key\":\"value\"}")) {
             promise.set_value(true);
         }
     });
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     test_membership.update("{\"key\": \"value\"}");
 
     if (future.wait_for(std::chrono::milliseconds(8000)) == std::future_status::timeout) {
