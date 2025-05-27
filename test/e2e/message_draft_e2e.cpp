@@ -117,8 +117,7 @@ TEST_F(MessageDraftTests, TestAddMention) {
     std::future<bool> future = promise.get_future();
 
     message_draft.add_change_listener(
-        [&](const Pubnub::Vector<Pubnub::MessageElement>& elements,
-            const Pubnub::Vector<Pubnub::SuggestedMention>& suggestions) {
+        [&](const Pubnub::Vector<Pubnub::MessageElement>& elements) {
             for (size_t i = 0; i < elements.size(); i++) {
                 if (elements[i].target.value().get_target() == current_user.user_id()) {
                     promise.set_value(true);

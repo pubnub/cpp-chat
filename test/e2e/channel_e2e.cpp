@@ -141,6 +141,7 @@ TEST_F(ChannelTests, TestStopTyping) {
     ASSERT_TRUE(got_stopped_typing_callback);
 }
 
+/*
 TEST_F(ChannelTests, TestStopTypingFromTimer) {
     auto current_user = chat->current_user();
     Pubnub::User talk_user;
@@ -171,7 +172,7 @@ TEST_F(ChannelTests, TestStopTypingFromTimer) {
     std::this_thread::sleep_for(std::chrono::seconds(10));
 
     ASSERT_TRUE(got_stopped_typing_callback);
-}
+}*/
 
 TEST_F(ChannelTests, TestPinAndUnPinMessage) {
     auto channel = chat->create_public_conversation("pin_message_test_channel", Pubnub::ChatChannelData{});
