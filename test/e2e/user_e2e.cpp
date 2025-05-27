@@ -8,6 +8,7 @@
 #include "pubnub_chat/chat.hpp"
 #include "pubnub_chat/vector.hpp"
 #include "pubnub_chat/enums.hpp"
+#include "e2e_tests_helpers.h"
 #include <algorithm>
 #include <thread>
 #include <vector>  
@@ -22,15 +23,17 @@ protected:
     void SetUp() override {
         Pubnub::String publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
         if (publish_key.empty()) {
-            publish_key = "demo-36";
+            publish_key = PubnubTests::TESTS_DEFAULT_PUB_KEY;
         }
         Pubnub::String subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
         if (subscribe_key.empty()) {
-            subscribe_key = "demo-36";
+            subscribe_key = PubnubTests::TESTS_DEFAULT_SUB_KEY;
         }
 
+        Pubnub::ChatConfig config;
+        config.store_user_activity_timestamps = true;
         chat.reset(new Pubnub::Chat(Pubnub::Chat::init(
-            publish_key, subscribe_key, "user_tests_user", Pubnub::ChatConfig())));
+            publish_key, subscribe_key, "user_tests_user", config)));
     }
 
     // This method will be called after each test in the test suite  
@@ -54,6 +57,28 @@ protected:
         return tmp_s;
     }
 };
+
+TEST_F(UserTests, TestUserActive) {
+    auto channel =
+        chat->create_public_conversation("active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
+
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(current_user.active());
+}
+
+TEST_F(UserTests, TestLastUserActive) {
+    auto channel =
+        chat->create_public_conversation("last_active_test_channel", Pubnub::ChatChannelData {});
+    channel.join([&](Pubnub::Message message) {});
+
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+
+    Pubnub::User current_user = chat->current_user();
+    ASSERT_TRUE(std::stoll(current_user.last_active_timestamp().value().c_str()) > 0);
+}
 
 TEST_F(UserTests, TestUserUpdate) {
     Pubnub::User test_user;

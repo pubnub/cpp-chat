@@ -9,9 +9,11 @@
 #include "pubnub_chat/chat.hpp"
 #include "pubnub_chat/vector.hpp"
 #include "pubnub_chat/enums.hpp"
+#include "e2e_tests_helpers.h"
 #include <algorithm>
 #include <thread>
 #include <vector>  
+#include <future>  
 #include <string>  
 #include <iostream>  
 
@@ -23,11 +25,11 @@ protected:
     void SetUp() override {
         Pubnub::String publish_key = std::getenv("PUBNUB_PUBLISH_KEY");
         if (publish_key.empty()) {
-            publish_key = "demo-36";
+            publish_key = PubnubTests::TESTS_DEFAULT_PUB_KEY;
         }
         Pubnub::String subscribe_key = std::getenv("PUBNUB_SUBSCRIBE_KEY");
         if (subscribe_key.empty()) {
-            subscribe_key = "demo-36";
+            subscribe_key = PubnubTests::TESTS_DEFAULT_SUB_KEY;
         }
 
         chat.reset(new Pubnub::Chat(Pubnub::Chat::init(
@@ -124,6 +126,118 @@ TEST_F(ThreadsTests, TestThreadChannelParentChannelPinning) {
     std::this_thread::sleep_for(std::chrono::seconds(3));
     channel.send_text("thread_start_message");
     std::this_thread::sleep_for(std::chrono::seconds(20));
+    ASSERT_TRUE(pinned);
+    ASSERT_TRUE(unpinned);
+}
+
+TEST_F(ThreadsTests, TestThreadChannelEmitUserMention) {
+    auto user = chat->current_user();
+
+    Pubnub::ChatUserData new_user_data;
+    new_user_data.user_name = "TestGuy";
+    user.update(new_user_data);
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    auto channel = chat->create_public_conversation(
+        "thread_emit_mention_test_channel",
+        Pubnub::ChatChannelData {}
+    );
+    std::promise<Pubnub::String> mention_promise;
+    std::future<Pubnub::String> mention_future = mention_promise.get_future();
+    channel.join([&](Pubnub::Message message) {
+        auto thread = message.create_thread();
+        thread.join([&](Pubnub::Message message) {});
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        thread.send_text("thread_init_message");
+
+        std::this_thread::sleep_for(std::chrono::seconds(4));
+
+        chat->listen_for_events(user.user_id(), Pubnub::PCET_MENTION, [&](Pubnub::Event mention_event) { 
+            mention_promise.set_value(mention_event.user_id);
+            });
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        thread.emit_user_mention(user.user_id(), message.timetoken(), "mentioning @TestGuy");
+
+    });
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    
+    channel.send_text("thread_start_message");
+
+    if (mention_future.wait_for(std::chrono::milliseconds(15000)) == std::future_status::timeout) {
+        std::cout << "Timeout waiting for message" << std::endl;
+        FAIL();
+    }
+
+    // Get the value and check it
+    auto mentioned_id = mention_future.get();
+    ASSERT_TRUE(mentioned_id == user.user_id());
+}
+
+TEST_F(ThreadsTests, TestThreadMessageParentChannelPinning) {
+    auto channel = chat->create_public_conversation(
+        "thread_parent_pinning_test_channel",
+        Pubnub::ChatChannelData {}
+    );
+
+    std::promise<void> promise;
+    std::future<void> future = promise.get_future();
+
+    auto pinned = false;
+    auto unpinned = false;
+    channel.join([&](Pubnub::Message message) {
+        auto thread = message.create_thread();
+        thread.join([&](Pubnub::Message message) {});
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+
+        thread.send_text("thread_init_message");
+
+        std::this_thread::sleep_for(std::chrono::seconds(6));
+
+        auto history = thread.get_thread_history("99999999999999999", "00000000000000000", 1);
+        auto message_to_pin = history[0];
+
+        std::cout << "Message to pin: " << message_to_pin.text() << std::endl;
+
+        message_to_pin.pin_to_parent_channel();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        channel = chat->get_channel(channel.channel_id());
+        try {
+            auto pinned_message = channel.get_pinned_message();
+            
+            if (pinned_message.text() == Pubnub::String("thread_init_message")) {
+                pinned = true;
+            }
+        } catch (const std::exception&) {
+            pinned = false;
+        }
+
+
+        message_to_pin.unpin_from_parent_channel();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        channel = chat->get_channel(channel.channel_id());
+        try {
+            auto pinned_message = channel.get_pinned_message();
+            unpinned = false;
+        } catch (const std::exception&) {
+            unpinned = true;
+        }
+
+        promise.set_value();
+    });
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    channel.send_text("thread_start_message");
+
+    if (future.wait_for(std::chrono::milliseconds(20000)) == std::future_status::timeout) {
+        std::cout << "Timeout waiting for pin" << std::endl;
+        FAIL();
+    }
+
     ASSERT_TRUE(pinned);
     ASSERT_TRUE(unpinned);
 }
