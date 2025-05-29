@@ -847,3 +847,58 @@ void PubNub::set_logging_callback(void (*callback)(enum pubnub_log_level log_lev
 {
     pubnub_set_log_callback(callback);
 }
+
+void PubNub::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener)
+{
+    this->status_listener = listener;
+    pubnub_subscribe_status_callback_t Callback = +[](const pubnub_t *pb, const pubnub_subscription_status status, const pubnub_subscription_status_data_t status_data, void* _data)
+	{
+        PubNub* PubnubObject = static_cast<PubNub*>(_data);
+        if(!PubnubObject || !PubnubObject->status_listener)
+        {
+            return;
+        }
+
+        //Don't call the listener if the subscription status is changed - this type is not supported in Chat SDK
+        if(status == PNSS_SUBSCRIPTION_STATUS_SUBSCRIPTION_CHANGED)
+        {
+            return;
+        }
+        else
+        {
+            Pubnub::ConnectionStatusData data;
+            data.Reason = pubnub_res_2_string(status_data.reason);
+            PubnubObject->status_listener(PubNub::pn_subscription_status_to_connection_status(status), data);
+        }
+	};
+    pubnub_subscribe_add_status_listener(this->long_poll_context.get(), Callback, this);
+}
+
+bool PubNub::reconnect_subscriptions()
+{
+    auto result = pubnub_reconnect(this->long_poll_context.get(), nullptr);
+    return result == PNR_OK;
+}
+
+bool PubNub::disconnect_subscriptions()
+{
+    auto result = pubnub_disconnect(this->long_poll_context.get());
+    return result == PNR_OK;
+}
+
+Pubnub::pn_connection_status PubNub::pn_subscription_status_to_connection_status(const pubnub_subscription_status subscription_status)
+{
+    switch(subscription_status)
+    {
+        case PNSS_SUBSCRIPTION_STATUS_CONNECTED:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ONLINE;
+        case PNSS_SUBSCRIPTION_STATUS_DISCONNECTED:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_OFFLINE;
+        case PNSS_SUBSCRIPTION_STATUS_CONNECTION_ERROR:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+        case PNSS_SUBSCRIPTION_STATUS_DISCONNECTED_UNEXPECTEDLY:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+        default:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+    }       
+}

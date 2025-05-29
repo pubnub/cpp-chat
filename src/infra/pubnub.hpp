@@ -23,11 +23,8 @@ extern "C" {
 
 namespace Pubnub
 {
-    // class Message;
-    // class User;
-    // class Channel;
     class Chat;
-    // class Membership;
+    struct ConnectionStatusData;
 }
 // TODO: format file
 class PubNub {
@@ -79,6 +76,10 @@ public:
 
     void set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message));
 
+    void add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener);
+    bool reconnect_subscriptions();
+    bool disconnect_subscriptions();
+
 private:
     void await_and_handle_error(pubnub_res result);
     bool is_subscribed_to_channel(const Pubnub::String channel);
@@ -87,6 +88,7 @@ private:
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
     Pubnub::String get_comma_sep_string_from_vector(std::vector<Pubnub::String> vector_of_strings);
+    static Pubnub::pn_connection_status pn_subscription_status_to_connection_status(const pubnub_subscription_status subscription_status);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
@@ -98,6 +100,7 @@ private:
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
 
     std::vector<Pubnub::String> subscribed_channels;
+    std::function<void(Pubnub::pn_connection_status, Pubnub::ConnectionStatusData)> status_listener;
 
     bool is_subscribed = false;
 };

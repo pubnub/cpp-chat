@@ -235,3 +235,18 @@ void ChatService::register_logger_callback(std::function<void(Pubnub::pn_log_lev
 {
     logger.register_logging_callback(callback);
 }
+
+void ChatService::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> connection_status_callback) const
+{
+    this->pubnub->lock()->add_connection_status_listener(connection_status_callback);
+}
+
+bool ChatService::reconnect_subscriptions() const
+{
+    return this->pubnub->lock()->reconnect_subscriptions();
+}
+
+bool ChatService::disconnect_subscriptions() const
+{
+    return this->pubnub->lock()->disconnect_subscriptions();
+}
