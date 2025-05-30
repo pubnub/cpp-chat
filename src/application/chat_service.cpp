@@ -241,6 +241,11 @@ void ChatService::add_connection_status_listener(std::function<void(Pubnub::pn_c
     this->pubnub->lock()->add_connection_status_listener(connection_status_callback);
 }
 
+void ChatService::remove_connection_status_listener() const
+{
+    this->pubnub->lock()->remove_connection_status_listener();
+}
+
 bool ChatService::reconnect_subscriptions() const
 {
     return this->pubnub->lock()->reconnect_subscriptions();

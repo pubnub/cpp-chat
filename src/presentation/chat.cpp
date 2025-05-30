@@ -278,6 +278,11 @@ bool Chat::reconnect_subscriptions() const
     return this->chat_service->reconnect_subscriptions();
 }
 
+void Chat::remove_connection_status_listener() const
+{
+    this->chat_service->remove_connection_status_listener();
+}
+
 bool Chat::disconnect_subscriptions() const
 {
     return this->chat_service->disconnect_subscriptions();

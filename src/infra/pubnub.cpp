@@ -850,8 +850,20 @@ void PubNub::set_logging_callback(void (*callback)(enum pubnub_log_level log_lev
 
 void PubNub::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener)
 {
+    if(nullptr == listener)
+    {
+        return;
+    }
+
     this->status_listener = listener;
-    pubnub_subscribe_status_callback_t Callback = +[](const pubnub_t *pb, const pubnub_subscription_status status, const pubnub_subscription_status_data_t status_data, void* _data)
+
+    //If subscription status listener was already added, we just replace status_listener variable, no need to add it again to C-Core
+    if(status_listener_added)
+    {
+        return;
+    }
+
+    pubnub_subscribe_status_callback_t callback = +[](const pubnub_t *pb, const pubnub_subscription_status status, const pubnub_subscription_status_data_t status_data, void* _data)
 	{
         PubNub* PubnubObject = static_cast<PubNub*>(_data);
         if(!PubnubObject || !PubnubObject->status_listener)
@@ -867,11 +879,21 @@ void PubNub::add_connection_status_listener(std::function<void(Pubnub::pn_connec
         else
         {
             Pubnub::ConnectionStatusData data;
-            data.Reason = pubnub_res_2_string(status_data.reason);
+            data.reason = pubnub_res_2_string(status_data.reason);
             PubnubObject->status_listener(PubNub::pn_subscription_status_to_connection_status(status), data);
         }
 	};
-    pubnub_subscribe_add_status_listener(this->long_poll_context.get(), Callback, this);
+    this->status_listener_callback = callback;
+    pubnub_subscribe_add_status_listener(this->long_poll_context.get(), callback, this);
+    this->status_listener_added = true;
+}
+
+void PubNub::remove_connection_status_listener()
+{
+    pubnub_subscribe_remove_status_listener(this->long_poll_context.get(), status_listener_callback, this);
+    this->status_listener_added = false;
+    this->status_listener = nullptr;
+    this->status_listener_callback = nullptr;
 }
 
 bool PubNub::reconnect_subscriptions()

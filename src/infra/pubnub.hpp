@@ -77,6 +77,7 @@ public:
     void set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message));
 
     void add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener);
+    void remove_connection_status_listener();
     bool reconnect_subscriptions();
     bool disconnect_subscriptions();
 
@@ -101,6 +102,8 @@ private:
 
     std::vector<Pubnub::String> subscribed_channels;
     std::function<void(Pubnub::pn_connection_status, Pubnub::ConnectionStatusData)> status_listener;
+    pubnub_subscribe_status_callback_t status_listener_callback;
+    bool status_listener_added = false;
 
     bool is_subscribed = false;
 };
