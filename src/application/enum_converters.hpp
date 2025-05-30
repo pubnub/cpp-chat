@@ -5,6 +5,10 @@
 #include "enums.hpp"
 #include <cstdint>
 
+extern "C" {
+#include <pubnub_subscribe_event_engine_types.h>
+}
+
 
 namespace Pubnub
 {
@@ -136,6 +140,22 @@ static inline pubnub_chat_event_type chat_event_type_from_string(Pubnub::String 
 	throw std::invalid_argument("can't convert chat_event_type_string to pubnub_chat_event_type");
 }
 
+static inline Pubnub::pn_connection_status pn_subscription_status_to_connection_status(const pubnub_subscription_status subscription_status)
+{
+    switch(subscription_status)
+    {
+        case PNSS_SUBSCRIPTION_STATUS_CONNECTED:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ONLINE;
+        case PNSS_SUBSCRIPTION_STATUS_DISCONNECTED:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_OFFLINE;
+        case PNSS_SUBSCRIPTION_STATUS_CONNECTION_ERROR:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+        case PNSS_SUBSCRIPTION_STATUS_DISCONNECTED_UNEXPECTEDLY:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+        default:
+            return Pubnub::pn_connection_status::PCS_CONNECTION_ERROR;
+    }       
+}
 }
 
 #endif // PN_ENUM_CONVERTERS_HPP

@@ -238,12 +238,12 @@ void ChatService::register_logger_callback(std::function<void(Pubnub::pn_log_lev
 
 void ChatService::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> connection_status_callback) const
 {
-    this->pubnub->lock()->add_connection_status_listener(connection_status_callback);
+    this->callback_service->add_connection_status_listener(connection_status_callback);
 }
 
 void ChatService::remove_connection_status_listener() const
 {
-    this->pubnub->lock()->remove_connection_status_listener();
+    this->callback_service->remove_connection_status_listener();
 }
 
 bool ChatService::reconnect_subscriptions() const

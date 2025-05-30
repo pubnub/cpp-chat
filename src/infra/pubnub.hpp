@@ -76,8 +76,8 @@ public:
 
     void set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message));
 
-    void add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener);
-    void remove_connection_status_listener();
+    void add_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data);
+    void remove_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data);
     bool reconnect_subscriptions();
     bool disconnect_subscriptions();
 
@@ -89,7 +89,6 @@ private:
     void call_subscribe();
     Pubnub::String get_comma_sep_channels_to_subscribe();
     Pubnub::String get_comma_sep_string_from_vector(std::vector<Pubnub::String> vector_of_strings);
-    static Pubnub::pn_connection_status pn_subscription_status_to_connection_status(const pubnub_subscription_status subscription_status);
 
     Pubnub::String publish_key;
     Pubnub::String subscribe_key;
@@ -101,9 +100,6 @@ private:
     std::unique_ptr<pubnub_t, int(*)(pubnub_t*)> long_poll_context;
 
     std::vector<Pubnub::String> subscribed_channels;
-    std::function<void(Pubnub::pn_connection_status, Pubnub::ConnectionStatusData)> status_listener;
-    pubnub_subscribe_status_callback_t status_listener_callback;
-    bool status_listener_added = false;
 
     bool is_subscribed = false;
 };
