@@ -60,6 +60,11 @@ class ChatService : public std::enable_shared_from_this<ChatService>
 
         std::shared_ptr<CallbackService> callback_service;
 
+        void add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> connection_status_callback) const;
+        void remove_connection_status_listener() const;
+        bool reconnect_subscriptions() const;
+        bool disconnect_subscriptions() const;
+
    
     private:
         ThreadSafePtr<PubNub> pubnub;

@@ -847,3 +847,26 @@ void PubNub::set_logging_callback(void (*callback)(enum pubnub_log_level log_lev
 {
     pubnub_set_log_callback(callback);
 }
+
+void PubNub::add_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data)
+{
+    pubnub_subscribe_add_status_listener(this->long_poll_context.get(), callback, user_data);
+}
+
+void PubNub::remove_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data)
+{
+    pubnub_subscribe_remove_status_listener(this->long_poll_context.get(), callback, user_data);
+}
+
+bool PubNub::reconnect_subscriptions()
+{
+    auto result = pubnub_reconnect(this->long_poll_context.get(), nullptr);
+    return result == PNR_OK;
+}
+
+bool PubNub::disconnect_subscriptions()
+{
+    auto result = pubnub_disconnect(this->long_poll_context.get());
+    return result == PNR_OK;
+}
+

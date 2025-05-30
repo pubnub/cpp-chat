@@ -268,6 +268,26 @@ Pubnub::User Chat::create_user_for_init_chat(const Pubnub::String& user_id, cons
     return this->user_service->create_user(user_id, user_data, true);
 }
 
+void Chat::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> connection_status_callback) const
+{
+    this->chat_service->add_connection_status_listener(connection_status_callback);
+}
+
+bool Chat::reconnect_subscriptions() const
+{
+    return this->chat_service->reconnect_subscriptions();
+}
+
+void Chat::remove_connection_status_listener() const
+{
+    this->chat_service->remove_connection_status_listener();
+}
+
+bool Chat::disconnect_subscriptions() const
+{
+    return this->chat_service->disconnect_subscriptions();
+}
+
 #ifdef PN_CHAT_C_ABI
 
 const ChatService* Chat::get_chat_service() const {

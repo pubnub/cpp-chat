@@ -227,4 +227,8 @@ PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_pam_set_auth_token(Pubnub::Chat* chat
 
 PN_CHAT_EXTERN PN_CHAT_EXPORT PnCResult pn_pam_set_pubnub_origin(Pubnub::Chat* chat, const char* origin);
 
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_chat_reconnect_subscriptions(Pubnub::Chat* chat);
+
+PN_CHAT_EXTERN PN_CHAT_EXPORT PnCTribool pn_chat_disconnect_subscriptions(Pubnub::Chat* chat);
+
 #endif // PN_CHAT_C_CHAT_HPP

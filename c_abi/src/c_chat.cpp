@@ -965,3 +965,27 @@ PnCResult pn_pam_set_pubnub_origin(Pubnub::Chat* chat, const char* origin) {
     return PN_C_OK;
 }
 
+
+PnCTribool pn_chat_reconnect_subscriptions(Pubnub::Chat* chat)
+{
+    try {
+        return chat->reconnect_subscriptions();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
+
+PnCTribool pn_chat_disconnect_subscriptions(Pubnub::Chat* chat)
+{
+    try {
+        return chat->disconnect_subscriptions();
+    }
+    catch (std::exception& e) {
+        pn_c_set_error_message(e.what());
+
+        return PN_C_ERROR;
+    }
+}
