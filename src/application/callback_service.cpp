@@ -759,7 +759,7 @@ void CallbackService::add_connection_status_listener(std::function<void(Pubnub::
     }
 
     pubnub_subscribe_status_callback_t callback = +[](const pubnub_t *pb, const pubnub_subscription_status status, const pubnub_subscription_status_data_t status_data, void* _data)
-	{
+    {
         CallbackService* CallbackServicebject = static_cast<CallbackService*>(_data);
         if(!CallbackServicebject || !CallbackServicebject->status_listener)
         {
@@ -777,7 +777,7 @@ void CallbackService::add_connection_status_listener(std::function<void(Pubnub::
             data.reason = pubnub_res_2_string(status_data.reason);
             CallbackServicebject->status_listener(Pubnub::pn_subscription_status_to_connection_status(status), data);
         }
-	};
+    };
     this->status_listener_callback = callback;
     auto guard = this->pubnub->lock();
     guard->add_subscription_status_listener(status_listener_callback, this);
