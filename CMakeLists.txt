@@ -84,7 +84,7 @@ endif()
 FetchContent_Declare(
   pubnub
   GIT_REPOSITORY https://github.com/pubnub/c-core.git
-  GIT_TAG v5.0.0
+  GIT_TAG v5.0.2
   GIT_SHALLOW TRUE
   GIT_PROGRESS ON
   SYSTEM
