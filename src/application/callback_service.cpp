@@ -9,11 +9,14 @@
 #include "nlohmann/json.hpp"
 #include "domain/parsers.hpp"
 #include "message.hpp"
+#include "enum_converters.hpp"
 #include <algorithm>
 #include <cstring>
 #include <list>
 #include <pubnub_helper.h>
 #include <pubnub_subscribe_event_listener_types.h>
+#include <pubnub_subscribe_event_listener.h>
+
 
 using json = nlohmann::json;
 
@@ -737,4 +740,55 @@ CCoreCallbackData CallbackService::to_c_thread_messages_updates_callback(const s
         },
         this->callback_contexts.emplace_back(CallbackCtx{messages, message_service, message_update_callback})
     };
+}
+
+
+void CallbackService::add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener)
+{
+    if(nullptr == listener)
+    {
+        return;
+    }
+
+    this->status_listener = listener;
+
+    //If subscription status listener was already added, we just replace status_listener variable, no need to add it again to C-Core
+    if(status_listener_added)
+    {
+        return;
+    }
+
+    pubnub_subscribe_status_callback_t callback = +[](const pubnub_t *pb, const pubnub_subscription_status status, const pubnub_subscription_status_data_t status_data, void* _data)
+    {
+        CallbackService* CallbackServicebject = static_cast<CallbackService*>(_data);
+        if(!CallbackServicebject || !CallbackServicebject->status_listener)
+        {
+            return;
+        }
+
+        //Don't call the listener if the subscription status is changed - this type is not supported in Chat SDK
+        if(status == PNSS_SUBSCRIPTION_STATUS_SUBSCRIPTION_CHANGED)
+        {
+            return;
+        }
+        else
+        {
+            Pubnub::ConnectionStatusData data;
+            data.reason = pubnub_res_2_string(status_data.reason);
+            CallbackServicebject->status_listener(Pubnub::pn_subscription_status_to_connection_status(status), data);
+        }
+    };
+    this->status_listener_callback = callback;
+    auto guard = this->pubnub->lock();
+    guard->add_subscription_status_listener(status_listener_callback, this);
+    this->status_listener_added = true;
+}
+
+void CallbackService::remove_connection_status_listener()
+{
+    auto guard = this->pubnub->lock();
+    guard->remove_subscription_status_listener(status_listener_callback, this);
+    this->status_listener_added = false;
+    this->status_listener = nullptr;
+    this->status_listener_callback = nullptr;
 }

@@ -86,6 +86,9 @@ class CallbackService {
 
         void broadcast_messages(std::vector<pubnub_v2_message> messages);
 
+        void add_connection_status_listener(std::function<void(Pubnub::pn_connection_status status, Pubnub::ConnectionStatusData status_data)> listener);
+        void remove_connection_status_listener();
+
         CCoreCallbackData to_c_message_callback(std::weak_ptr<const ChatService> chat_service, std::function<void(Pubnub::Message)> message_callback);
         CCoreCallbackData to_c_channel_update_callback(Pubnub::Channel channel, std::shared_ptr<const ChannelService> chat_service, std::function<void(Pubnub::Channel)> channel_update_callback);
         CCoreCallbackData to_c_channels_updates_callback(const std::vector<Pubnub::Channel>& channels, std::shared_ptr<const ChannelService> chat_service, std::function<void(std::vector<Pubnub::Channel>)> channel_update_callback);
@@ -115,6 +118,10 @@ class CallbackService {
         std::thread callback_thread;
         std::atomic<bool> thread_run_flag;
         std::list<std::any> callback_contexts;
+
+        std::function<void(Pubnub::pn_connection_status, Pubnub::ConnectionStatusData)> status_listener;
+        pubnub_subscribe_status_callback_t status_listener_callback;
+        bool status_listener_added = false;
 };
 
 #endif // PN_CHAT_CALLBACK_SERVICE_HPP

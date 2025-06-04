@@ -23,11 +23,8 @@ extern "C" {
 
 namespace Pubnub
 {
-    // class Message;
-    // class User;
-    // class Channel;
     class Chat;
-    // class Membership;
+    struct ConnectionStatusData;
 }
 // TODO: format file
 class PubNub {
@@ -78,6 +75,11 @@ public:
     int set_pubnub_origin(const Pubnub::String origin);
 
     void set_logging_callback(void (*callback)(enum pubnub_log_level log_level, const char* message));
+
+    void add_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data);
+    void remove_subscription_status_listener(pubnub_subscribe_status_callback_t callback, void* user_data);
+    bool reconnect_subscriptions();
+    bool disconnect_subscriptions();
 
 private:
     void await_and_handle_error(pubnub_res result);

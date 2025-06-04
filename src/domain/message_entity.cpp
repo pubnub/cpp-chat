@@ -98,7 +98,6 @@ std::vector<std::pair<MessageEntity::MessageTimetoken, MessageEntity>> MessageEn
 
 MessageEntity MessageEntity::edit_text(const Pubnub::String& text, const Pubnub::String& timetoken) const {
     MessageEntity new_message_entity = *this;
-    new_message_entity.text = text;
 
     Pubnub::MessageAction message_action;
     message_action.type = Pubnub::pubnub_message_action_type::PMAT_Edited;
