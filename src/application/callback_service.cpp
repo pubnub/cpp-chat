@@ -1,3 +1,9 @@
+extern "C" {
+#include <pubnub_helper.h>
+#include <pubnub_subscribe_event_listener_types.h>
+#include <pubnub_subscribe_event_listener.h>
+}
+
 #include "callback_service.hpp"
 #include "application/bundles.hpp"
 #include "application/chat_service.hpp"
@@ -13,10 +19,6 @@
 #include <algorithm>
 #include <cstring>
 #include <list>
-#include <pubnub_helper.h>
-#include <pubnub_subscribe_event_listener_types.h>
-#include <pubnub_subscribe_event_listener.h>
-
 
 using json = nlohmann::json;
 
