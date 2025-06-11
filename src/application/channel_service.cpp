@@ -596,14 +596,15 @@ std::shared_ptr<Subscription> ChannelService::stream_read_receipts(const Pubnub:
         
     }
 
+    auto channel_dao_ptr = std::make_shared<ChannelDAO>(channel_data.to_channel_data());
     read_receipts_callback(generate_receipts(timetoken_per_user));
 
-    auto receipt_event_callback = [=, &channel_data](const Pubnub::Event& event){
+    auto receipt_event_callback = [=](const Pubnub::Event& event){
 
         std::map<String, String, StringComparer> timetoken_per_user_in;
 
-        auto members_tuple2 = chat_service_shared->membership_service->get_channel_members(channel_id, channel_data);
-        auto channel_members2 = std::get<0>(members_tuple);
+        auto members_tuple2 = chat_service_shared->membership_service->get_channel_members(channel_id, *channel_dao_ptr);
+        auto channel_members2 = std::get<0>(members_tuple2);
         for(auto membership : channel_members2)
         {
             String last_read_timetoken = membership.last_read_message_timetoken();
