@@ -135,6 +135,13 @@ MessageDraftEntity MessageDraftEntity::remove_mention(std::size_t start) const {
 
 
 MessageDraftEntity MessageDraftEntity::update(const Pubnub::String& text) const {
+    
+    //If update text is empty, just clear the whole draft
+    if(text.empty())
+    {
+        return MessageDraftEntity();
+    }
+
     diff_match_patch<std::string> matcher;
 
     auto diffs = matcher.diff_main(this->value, text);
